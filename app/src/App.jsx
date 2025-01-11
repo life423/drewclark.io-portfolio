@@ -1,24 +1,35 @@
-import React, { Component } from 'react'
+// app/src/App.jsx
 
+import React from 'react'
+import NavBar from './components/navbar/Navbar'
+import ProgressBar from './components/progress/ProgressBar'
+import sprout from './assets/sprout.jpg'
 
+export default function App() {
+    return (
+        <div
+            className='min-h-screen bg-cover'
+            style={{ backgroundImage: `url(${sprout})` }}
+        >
+            <NavBar />
+            <ProgressBar />
 
-class App extends Component {
-    render() {
-        return (
-            <div>
-                <h1 className='text-4xl font-bold text-blue-500'>
-                    Hello from React + Tailwind!
-                </h1>
-                <p className='mt-4 text-gray-600'>
-                    This is a simple example of a React component with Tailwind
-                    CSS.
-                </p>
-                <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4'>
-                    Click me!
-                </button>
-            </div>
-        )
-    }
+            <main className='pt-16'>
+                <section className='p-8'>
+                    <h1 className='text-3xl text-brandGreen-700 mb-4'>
+                        Welcome to My Site
+                    </h1>
+                    <p className='text-brandGray-700'>
+                        Scroll down to see the nav blur and the progress bar
+                        fill up.
+                    </p>
+
+                    {/* Fake big content to enable scrolling */}
+                    <div className='h-[200vh] bg-brandGray-50 mt-6'>
+                        <p className='text-center pt-6'>Big content area…</p>
+                    </div>
+                </section>
+            </main>
+        </div>
+    )
 }
-
-export default App
