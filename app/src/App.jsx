@@ -3,10 +3,14 @@
 import React from 'react'
 import NavBar from './components/navbar/Navbar'
 import ProgressBar from './components/progress/ProgressBar'
+import sprout from './assets/sprout.jpg'
 
 export default function App() {
     return (
-        <div className='min-h-screen bg-brandGray-50'>
+        <div
+            className='min-h-screen bg-cover'
+            style={{ backgroundImage: `url(${sprout})` }}
+        >
             <NavBar />
             <ProgressBar />
 
