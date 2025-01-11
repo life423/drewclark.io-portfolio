@@ -22,7 +22,7 @@ export default function NavBar() {
             <div className='text-xl font-bold text-white'>MyBrand</div>
 
             <button
-                className='text-white md:hidden'
+                className='white md:hidden text-white'
                 onClick={() => setMenuOpen(!menuOpen)}
             >
                 {/* Use Bars3Icon instead of MenuIcon */}
