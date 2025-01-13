@@ -1,13 +1,14 @@
 // src/components/ProgressBar.jsx
-import React from 'react'
+// import React from 'react'
+import { useState, useEffect } from 'react'
 import useScrollPosition from '../../hooks/useScrollPosition'
 
 export default function ProgressBar() {
     const scrollY = useScrollPosition()
-    const [docHeight, setDocHeight] = React.useState(0)
-    const [winHeight, setWinHeight] = React.useState(0)
+    const [docHeight, setDocHeight] = useState(0)
+    const [winHeight, setWinHeight] = useState(0)
 
-    React.useEffect(() => {
+    useEffect(() => {
         // total doc height minus window height = total scrollable area
         function measure() {
             setDocHeight(document.body.scrollHeight)
@@ -26,7 +27,7 @@ export default function ProgressBar() {
 
     return (
         <div
-            className='fixed top-16 left-0 h-1 bg-brandGreen-500 transition-all z-50'
+            className='fixed top-16 left-0 h-1 bg-brandGreen-500 transition-all duration-200 z-50'
             style={{ width: `${progress}%` }}
         />
     )
