@@ -25,8 +25,8 @@ export default function App() {
                     </p>
 
                     {/* Fake big content to enable scrolling */}
-                    <div className='h-[200vh] bg-brandGray-50 mt-6'>
-                        <p className='text-center pt-6'>Big content area…</p>
+                    <div className='h-[200vh] bg-transparent mt-6'>
+                        <p className='text-center pt-6'></p>
                     </div>
                 </section>
             </main>

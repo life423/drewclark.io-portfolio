@@ -1,22 +1,59 @@
+// // src/hooks/useScrollPosition.js
+// import { useState, useEffect } from 'react'
+
+// export default function useScrollPosition() {
+//     const [scrollY, setScrollY] = useState(0)
+
+//     useEffect(() => {
+//         function handleScroll() {
+//             setScrollY(window.scrollY)
+//         }
+
+//         // Listen for scroll events
+//         window.addEventListener('scroll', handleScroll)
+//         // Initialize scroll position in case user is already scrolled
+//         handleScroll()
+
+//         // Cleanup event on unmount
+//         return () => window.removeEventListener('scroll', handleScroll)
+//     }, [])
+
+//     return scrollY
+// }
+
+
 // src/hooks/useScrollPosition.js
 import { useState, useEffect } from 'react'
 
 export default function useScrollPosition() {
-    const [scrollY, setScrollY] = useState(0)
+  const [scrollY, setScrollY] = useState(0)
 
-    useEffect(() => {
-        function handleScroll() {
-            setScrollY(window.scrollY)
-        }
+  useEffect(() => {
+    let frame = null
 
-        // Listen for scroll events
-        window.addEventListener('scroll', handleScroll)
-        // Initialize scroll position in case user is already scrolled
-        handleScroll()
+    function handleScroll() {
+      // If there's no pending animation frame request, schedule one.
+      if (!frame) {
+        frame = requestAnimationFrame(() => {
+          setScrollY(window.scrollY)
+          frame = null // reset for the next scroll event
+        })
+      }
+    }
 
-        // Cleanup event on unmount
-        return () => window.removeEventListener('scroll', handleScroll)
-    }, [])
+    // Attach the scroll listener once on mount
+    window.addEventListener('scroll', handleScroll)
+    // Initialize scroll position in case user is already scrolled
+    handleScroll()
 
-    return scrollY
+    // Cleanup on unmount
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      if (frame) {
+        cancelAnimationFrame(frame)
+      }
+    }
+  }, [])
+
+  return scrollY
 }
