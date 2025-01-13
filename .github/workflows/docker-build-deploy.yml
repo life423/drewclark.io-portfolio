@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+env:
+  # Define environment variables that can be reused
+  DOCKER_IMAGE: aiandrew631/portfolio:latest
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -28,6 +32,8 @@ jobs:
           file: Dockerfile
           push: true
           tags: aiandrew631/portfolio:latest
+          build-args: 
+            VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
   deploy:
     needs: build-and-push
@@ -46,6 +52,7 @@ jobs:
             ADMIN_ACCESS_TOKEN=${{ secrets.ADMIN_ACCESS_TOKEN }}
             DOCKER_CONTAINER=true
             PORT=3000
+            VITE_API_URL=${{ secrets.VITE_API_URL }}
             # add more environment variables as needed
             EOF
             echo "Pulling the latest image from Docker Hub..."

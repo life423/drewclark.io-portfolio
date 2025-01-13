@@ -1,6 +1,10 @@
 # ─── Stage 1: Install, patch & build dependencies ───────────────────
 FROM node:18-alpine AS builder
 
+# Accept build arguments for environment variables
+ARG VITE_API_URL
+ENV VITE_API_URL=${VITE_API_URL}
+
 # system tools only needed at build time
 RUN apk add --no-cache git openssh python3 make g++
 
@@ -26,7 +30,7 @@ RUN npm install --legacy-peer-deps \
 
 # copy source & build frontend
 COPY . .
-RUN cd app && npm run build
+RUN cd app && VITE_API_URL=${VITE_API_URL} npm run build
 
 # ─── Stage 2: Create minimal prod image ───────────────────────────
 FROM node:18-alpine AS runner
