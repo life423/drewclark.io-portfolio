@@ -1,3 +1,5 @@
+import backgroundsPlugin from './src/styles/tailwind-plugins/backgrounds.js'
+
 export default {
     content: ['./src/index.html', './src/**/*.{js,jsx,ts,tsx}'],
     theme: {
@@ -54,5 +56,5 @@ export default {
             },
         },
     },
-    plugins: [],
+    plugins: [backgroundsPlugin],
 }
