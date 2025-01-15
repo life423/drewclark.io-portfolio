@@ -1,4 +1,5 @@
 import backgroundsPlugin from './src/styles/tailwind-plugins/backgrounds.js'
+import backgroundPositionsPlugin from './src/styles/tailwind-plugins/backgroundPositions.js'
 
 export default {
     content: ['./src/index.html', './src/**/*.{js,jsx,ts,tsx}'],
@@ -56,5 +57,5 @@ export default {
             },
         },
     },
-    plugins: [backgroundsPlugin],
+    plugins: [backgroundsPlugin, backgroundPositionsPlugin],
 }
