@@ -1,4 +1,4 @@
-// src/components/navbar/Navbar.jsx
+// app/src/components/navbar/Navbar.jsx
 import React from 'react'
 import useScrollPosition from '../../hooks/useScrollPosition'
 import { Bars3Icon } from '@heroicons/react/24/outline'

@@ -7,8 +7,6 @@ import sprout from './assets/sprout-mobile.jpg'
 export default function App() {
     const [drawerOpen, setDrawerOpen] = useState(false)
 
-    // OPTIONAL: If you want to globally toggle .drawer-open on <html>
-    // so that our layoutPlugin can handle the transform:
     useEffect(() => {
         if (drawerOpen) {
             document.documentElement.classList.add('drawer-open')
@@ -27,15 +25,19 @@ export default function App() {
             <ProgressBar />
 
             {/* 
-        If you're letting layoutPlugin do the push/tilt, 
-        you can remove the translate-x and rotate classes here. 
-        But if you want to keep it local, here's how:
+        1) This <div> has the 3D perspective. 
+        2) We can also add your optional translate/scale if you want the main content to slightly move
       */}
             <div
                 className={`
+          relative 
           transition-transform duration-300
-          ${drawerOpen ? 'translate-x-[70%] scale-[0.95] rotate-y-3' : ''}
+          ${drawerOpen ? 'scale-[0.95] rotate-y-3 translate-x-4' : ''}
         `}
+                style={{
+                    perspective: '1200px',
+                    transformStyle: 'preserve-3d',
+                }}
             >
                 <main className='pt-16'>
                     <section className='p-8'>
