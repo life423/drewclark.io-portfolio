@@ -3,12 +3,13 @@
 import React from 'react'
 import NavBar from './components/navbar/Navbar'
 import ProgressBar from './components/progress/ProgressBar'
-import sprout from './assets/sprout.jpg'
+import sprout from './assets/sprout-mobile.jpg'
 
 export default function App() {
     return (
         <div
-            className='min-h-screen bg-cover'
+            // className='min-h-screen bg-cover'
+            className='min-h-screen bg-cover bg-pos-75 bg-no-repeat'
             style={{ backgroundImage: `url(${sprout})` }}
         >
             <NavBar />
@@ -25,9 +26,9 @@ export default function App() {
                     </p>
 
                     {/* Fake big content to enable scrolling */}
-                    <div className='h-[200vh] bg-transparent mt-6'>
+                    {/* <div className='h-[200vh] bg-transparent mt-6'>
                         <p className='text-center pt-6'></p>
-                    </div>
+                    </div> */}
                 </section>
             </main>
         </div>
