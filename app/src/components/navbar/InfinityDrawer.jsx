@@ -4,9 +4,8 @@ import { XMarkIcon } from '@heroicons/react/24/outline'
 
 export default function InfinityDrawer({ isOpen, onClose, children }) {
     const drawerRef = useRef(null)
-    const lastFocusedElementRef = useRef(null)
+    const lastFocusedRef = useRef(null)
 
-    // Handle ESC key to close
     useEffect(() => {
         function handleKeyDown(e) {
             if (e.key === 'Escape') {
@@ -15,30 +14,25 @@ export default function InfinityDrawer({ isOpen, onClose, children }) {
         }
 
         if (isOpen) {
-            // Focus trap: store last focused element
-            lastFocusedElementRef.current = document.activeElement
-
-            // Lock body scroll
+            // Lock scroll, listen for ESC
+            lastFocusedRef.current = document.activeElement
             document.body.style.overflow = 'hidden'
-            // Listen for ESC
             document.addEventListener('keydown', handleKeyDown)
 
-            // Auto-focus the drawer
-            if (drawerRef.current) {
-                drawerRef.current.focus()
-            }
+            // Focus the drawer container
+            drawerRef.current?.focus()
         } else {
-            // Cleanup
+            // Unlock scroll, remove ESC
             document.body.style.overflow = ''
             document.removeEventListener('keydown', handleKeyDown)
-            // Return focus to last element
-            if (lastFocusedElementRef.current) {
-                lastFocusedElementRef.current.focus()
+
+            // Restore focus
+            if (lastFocusedRef.current) {
+                lastFocusedRef.current.focus()
             }
         }
-
         return () => {
-            // Cleanup if unmount
+            // Cleanup on unmount or re-run
             document.body.style.overflow = ''
             document.removeEventListener('keydown', handleKeyDown)
         }
@@ -49,7 +43,8 @@ export default function InfinityDrawer({ isOpen, onClose, children }) {
             {/* Overlay */}
             <div
                 className={`
-          fixed inset-0 z-40 bg-black/50
+          fixed inset-0 z-60
+          bg-black/30
           transition-opacity duration-300
           ${
               isOpen
@@ -57,8 +52,8 @@ export default function InfinityDrawer({ isOpen, onClose, children }) {
                   : 'opacity-0 pointer-events-none'
           }
         `}
-                aria-hidden='true'
                 onClick={onClose}
+                aria-hidden='true'
             />
 
             {/* Drawer Panel */}
@@ -66,28 +61,25 @@ export default function InfinityDrawer({ isOpen, onClose, children }) {
                 role='dialog'
                 aria-modal='true'
                 aria-hidden={!isOpen}
-                tabIndex={-1}
                 ref={drawerRef}
+                tabIndex={-1}
                 className={`
-          fixed top-0 left-0 h-full z-50
+          fixed top-0 left-0 h-full
+          w-[70%] max-w-sm
           bg-brandGray-800 text-white shadow-lg
-          w-[80%] max-w-sm  /* 80% wide, or go w-full if you want 100% */
           transition-transform duration-300
-          flex flex-col
-          outline-none
+          z-70 flex flex-col
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
             >
-                {/* Close Button w/ an X Icon */}
                 <button
                     onClick={onClose}
                     aria-label='Close Menu'
-                    className='ml-auto mt-4 mr-4 text-white hover:text-gray-200 transition'
+                    className='ml-auto mt-4 mr-4 text-white hover:text-gray-300'
                 >
                     <XMarkIcon className='h-6 w-6' />
                 </button>
 
-                {/* Drawer Content */}
                 <div className='p-6 overflow-y-auto flex-1'>{children}</div>
             </div>
         </>

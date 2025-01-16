@@ -1,7 +1,6 @@
 import backgroundsPlugin from './src/styles/tailwind-plugins/backgrounds.js'
 import backgroundPositionsPlugin from './src/styles/tailwind-plugins/backgroundPositions.js'
-import layoutPlugin from './src/styles/tailwind-plugins/layoutPlugin.js'
-import flipDrawerPlugin from './src/styles/tailwind-plugins/flipDrawerPlugin.js'
+
 
 export default {
     content: ['./src/index.html', './src/**/*.{js,jsx,ts,tsx}'],
@@ -62,7 +61,6 @@ export default {
     plugins: [
         backgroundsPlugin,
         backgroundPositionsPlugin,
-        layoutPlugin,
-        flipDrawerPlugin,
+    
     ],
 }

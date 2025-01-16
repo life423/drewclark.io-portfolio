@@ -5,28 +5,19 @@ import ProgressBar from './components/progress/ProgressBar'
 import sprout from './assets/sprout-mobile.jpg'
 
 export default function App() {
-    // For the InfinityDrawer
     const [drawerOpen, setDrawerOpen] = useState(false)
 
     return (
         <div className='relative min-h-screen'>
-            {/* 
-        1) BACKGROUND LAYER (Fixed)
-           - This is pinned behind everything. 
-           - Doesn’t move when scrolling.
-      */}
+            {/* Fixed background behind everything */}
             <div
                 className='fixed inset-0 -z-10 bg-cover bg-no-repeat bg-center'
                 style={{ backgroundImage: `url(${sprout})` }}
             />
 
-            {/* 
-        2) FOREGROUND LAYER 
-           - This is where scrolling & content happen.
-           - Window scroll events will still fire for the progress bar.
-      */}
+            {/* NavBar & ProgressBar (hide progress bar if drawer is open) */}
             <NavBar drawerOpen={drawerOpen} setDrawerOpen={setDrawerOpen} />
-            <ProgressBar />
+            {!drawerOpen && <ProgressBar />}
 
             <main className='pt-16'>
                 <section className='p-8'>
@@ -41,40 +32,11 @@ export default function App() {
                 <section className='p-8'>
                     <h2>Contact</h2>
                     <p>
-                        More placeholder text...lorLorem ipsum dolor sit amet,
+                        More placeholder text..Lorem ipsum dolor sit amet,
                         consectetur adipiscing elit, sed do eiusmod tempor
-                        incididunt ut labore et dolore magna aliqua. Ut enim ad
-                        minim veniam, quis nostrud exercitation ullamco laboris
-                        nisi ut aliquip ex ea commodo consequat. Duis aute irure
-                        dolor in reprehenderit in voluptate velit esse cillum
-                        dolore eu fugiat nulla pariatur. Excepteur sint occaecat
-                        cupidatat non proident, sunt in culpa qui officia
-                        deserunt mollit anim id est laborum. Lorem ipsum dolor
-                        sit amet, consectetur adipiscing elit, sed do eiusmod
-                        tempor incididunt ut labore et dolore magna aliqua. Ut
-                        enim ad minim veniam, quis nostrud exercitation ullamco
-                        laboris nisi ut aliquip ex ea commodo consequat. Duis
-                        aute irure dolor in reprehenderit in voluptate velit
-                        esse cillum dolore eu fugiat nulla pariatur. Excepteur
-                        sint occaecat cupidatat non proident, sunt in culpa qui
-                        officia deserunt mollit anim id est laborum. Lorem ipsum
-                        dolor sit amet, consectetur adipiscing elit, sed do
-                        eiusmod tempor incididunt ut labore et dolore magna
-                        aliqua. Ut enim ad minim veniam, quis nostrud
-                        exercitation ullamco laboris nisi ut aliquip ex ea
-                        commodo consequat. Duis aute irure dolor in
-                        reprehenderit in voluptate velit esse cillum dolore eu
-                        fugiat nulla pariatur. Excepteur sint occaecat cupidatat
-                        non proident, sunt in culpa qui officia deserunt mollit
-                        anim id est laborum. Lorem ipsum dolor sit amet,
-                        consectetur adipiscing elit, sed do eiusmod tempor
-                        incididunt ut labore et dolore magna aliqua. Ut enim ad
-                        minim veniam, quis nostrud exercitation ullamco laboris
-                        nisi ut aliquip ex ea commodo consequat. Duis aute irure
-                        dolor in reprehenderit in voluptate velit esse cillum
-                        dolore eu fugiat nulla pariatur. Excepteur sint occaecat
-                        cupidatat non proident, sunt in culpa qui officia
-                        deserunt mollit anim id est laborum.
+                        incididunt ut labore et dolore magna aliqua. ...
+                        <br />
+                        (enough text to let the user scroll)
                     </p>
                 </section>
             </main>
