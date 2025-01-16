@@ -13,7 +13,9 @@ export default function App() {
         } else {
             document.documentElement.classList.remove('drawer-open')
         }
-        return () => document.documentElement.classList.remove('drawer-open')
+        return () => {
+            document.documentElement.classList.remove('drawer-open')
+        }
     }, [drawerOpen])
 
     return (
@@ -25,14 +27,15 @@ export default function App() {
             <ProgressBar />
 
             {/* 
-        1) This <div> has the 3D perspective. 
-        2) We can also add your optional translate/scale if you want the main content to slightly move
+         Optional subtle tilt: 
+         'rotate-y-3 scale-[0.95]' just for a slight 3D effect
+         WITHOUT translating it horizontally (which caused that white gap).
       */}
             <div
                 className={`
-          relative 
+          relative
           transition-transform duration-300
-          ${drawerOpen ? 'scale-[0.95] rotate-y-3 translate-x-4' : ''}
+          ${drawerOpen ? 'rotate-y-3 scale-95' : ''}
         `}
                 style={{
                     perspective: '1200px',
