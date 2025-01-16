@@ -15,8 +15,9 @@ export default function NavBar({ drawerOpen, setDrawerOpen }) {
     return (
         <nav
             className={`
-        fixed top-0 w-full h-16 px-4 flex items-center justify-between z-50
+        fixed top-0 w-full h-16 px-4 flex items-center justify-between
         transition-colors duration-300
+        z-50
         ${
             isScrolled
                 ? 'bg-brandGray-800/70 backdrop-blur-md'
