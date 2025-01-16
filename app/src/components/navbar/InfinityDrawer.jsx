@@ -1,3 +1,4 @@
+// app/src/components/navbar/InfinityDrawer.jsx
 import React, { useRef, useEffect, useCallback, useState } from 'react'
 
 export default function InfinityDrawer({ isOpen, onClose, children }) {
@@ -17,7 +18,7 @@ export default function InfinityDrawer({ isOpen, onClose, children }) {
 
     useEffect(() => {
         if (isOpen) {
-            // If we're OPENING the drawer, set animation to flipOpen
+            // If we’re OPENING the drawer, set animation to flipOpen
             setAnimState('flipOpen')
 
             lastFocusedElementRef.current = document.activeElement
@@ -25,7 +26,7 @@ export default function InfinityDrawer({ isOpen, onClose, children }) {
             document.addEventListener('keydown', handleKeyDown)
             document.body.style.overflow = 'hidden'
         } else {
-            // If we're CLOSING the drawer, run flipClose. After animation ends, remove from DOM flow if you want.
+            // If we’re CLOSING the drawer, run flipClose
             setAnimState('flipClose')
             document.removeEventListener('keydown', handleKeyDown)
             if (lastFocusedElementRef.current) {
@@ -33,19 +34,15 @@ export default function InfinityDrawer({ isOpen, onClose, children }) {
             }
             document.body.style.overflow = ''
         }
-        // Cleanup
+
         return () => {
             document.removeEventListener('keydown', handleKeyDown)
             document.body.style.overflow = ''
         }
     }, [isOpen, handleKeyDown])
 
-    // On animation end, if we just closed, we could do something else,
-    // but typically we just rely on the overlay toggling pointer events.
-    function handleAnimationEnd(e) {
-        if (animState === 'flipClose') {
-            // e.g. you could set a local state, if you want to fully unmount the drawer or something
-        }
+    function handleAnimationEnd() {
+        // If animState === 'flipClose', you could unmount or do more logic if needed
     }
 
     return (
@@ -53,7 +50,7 @@ export default function InfinityDrawer({ isOpen, onClose, children }) {
             {/* Overlay */}
             <div
                 className={`
-          fixed inset-0 z-40 bg-black/40 
+          fixed inset-0 z-40 bg-black/50
           transition-opacity duration-300
           ${
               isOpen
@@ -78,12 +75,10 @@ export default function InfinityDrawer({ isOpen, onClose, children }) {
           bg-brandGray-800 text-white
           shadow-lg
           outline-none
-          w-[80%]  /* covers most of the screen, no wasted space */
+          w-full  /* Covers entire screen: no leftover white space */
           flex flex-col
           ${animState === 'flipOpen' ? 'animate-flipOpen' : ''}
           ${animState === 'flipClose' ? 'animate-flipClose' : ''}
-
-          /* Start out invisible if not open */
           ${!isOpen && animState !== 'flipClose' ? 'hidden' : ''}
         `}
                 style={{
