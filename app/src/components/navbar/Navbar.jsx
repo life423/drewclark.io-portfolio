@@ -3,14 +3,12 @@ import React from 'react'
 import { Bars3Icon } from '@heroicons/react/24/outline'
 import useScrollPosition from '../../hooks/useScrollPosition'
 import InfinityDrawer from './InfinityDrawer'
-import useSwipeToOpen from './useSwipeToOpen'
 
 export default function NavBar({ drawerOpen, setDrawerOpen }) {
     const scrollY = useScrollPosition()
     const isScrolled = scrollY > 50
 
-    // Optional: swipe to open
-    useSwipeToOpen(() => setDrawerOpen(true))
+
 
     return (
         <nav
