@@ -1,7 +1,7 @@
 // app/src/components/navbar/Navbar.jsx
 import React from 'react'
-import useScrollPosition from '../../hooks/useScrollPosition'
 import { Bars3Icon } from '@heroicons/react/24/outline'
+import useScrollPosition from '../../hooks/useScrollPosition'
 import InfinityDrawer from './InfinityDrawer'
 import useSwipeToOpen from './useSwipeToOpen'
 
@@ -9,9 +9,8 @@ export default function NavBar({ drawerOpen, setDrawerOpen }) {
     const scrollY = useScrollPosition()
     const isScrolled = scrollY > 50
 
-    useSwipeToOpen(() => {
-        setDrawerOpen(true)
-    })
+    // Optional: swipe to open
+    useSwipeToOpen(() => setDrawerOpen(true))
 
     return (
         <nav
@@ -27,20 +26,23 @@ export default function NavBar({ drawerOpen, setDrawerOpen }) {
         >
             <div className='text-xl font-bold text-white'>MyBrand</div>
 
+            {/* Hamburger button to open the drawer */}
             <button
-                className='md:hidden text-white'
-                onClick={() => setDrawerOpen(true)}
+                className='md:hidden text-white hover:text-gray-200 transition'
                 aria-label='Open Menu'
+                onClick={() => setDrawerOpen(true)}
             >
                 <Bars3Icon className='h-6 w-6' />
             </button>
 
+            {/* Desktop Nav (hidden on mobile) */}
             <ul className='hidden md:flex space-x-6 text-white'>
                 <li>Home</li>
                 <li>Projects</li>
                 <li>Contact</li>
             </ul>
 
+            {/* InfinityDrawer for mobile */}
             <InfinityDrawer
                 isOpen={drawerOpen}
                 onClose={() => setDrawerOpen(false)}
