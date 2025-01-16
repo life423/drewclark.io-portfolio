@@ -5,29 +5,76 @@ import ProgressBar from './components/progress/ProgressBar'
 import sprout from './assets/sprout-mobile.jpg'
 
 export default function App() {
-    // Local state for drawer
+    // For the InfinityDrawer
     const [drawerOpen, setDrawerOpen] = useState(false)
 
     return (
-        <div
-            className='min-h-screen bg-cover bg-pos-75 bg-no-repeat'
-            style={{ backgroundImage: `url(${sprout})` }}
-        >
-            {/* Nav bar with hamburger => toggles drawer */}
-            <NavBar drawerOpen={drawerOpen} setDrawerOpen={setDrawerOpen} />
+        <div className='relative min-h-screen'>
+            {/* 
+        1) BACKGROUND LAYER (Fixed)
+           - This is pinned behind everything. 
+           - Doesn’t move when scrolling.
+      */}
+            <div
+                className='fixed inset-0 -z-10 bg-cover bg-no-repeat bg-center'
+                style={{ backgroundImage: `url(${sprout})` }}
+            />
 
-            {/* Scroll progress bar */}
+            {/* 
+        2) FOREGROUND LAYER 
+           - This is where scrolling & content happen.
+           - Window scroll events will still fire for the progress bar.
+      */}
+            <NavBar drawerOpen={drawerOpen} setDrawerOpen={setDrawerOpen} />
             <ProgressBar />
 
-            {/* Main content */}
             <main className='pt-16'>
                 <section className='p-8'>
-                    <h1 className='text-3xl text-brandGreen-700 mb-4'>
-                        Welcome to My Site
-                    </h1>
-                    <p className='text-brandGray-700'>
-                        Scroll down to see the nav blur and the progress bar
-                        fill up.
+                    <h1>Welcome</h1>
+                </section>
+
+                <section className='p-8'>
+                    <h2>Projects</h2>
+                    <p>Placeholder text...</p>
+                </section>
+
+                <section className='p-8'>
+                    <h2>Contact</h2>
+                    <p>
+                        More placeholder text...lorLorem ipsum dolor sit amet,
+                        consectetur adipiscing elit, sed do eiusmod tempor
+                        incididunt ut labore et dolore magna aliqua. Ut enim ad
+                        minim veniam, quis nostrud exercitation ullamco laboris
+                        nisi ut aliquip ex ea commodo consequat. Duis aute irure
+                        dolor in reprehenderit in voluptate velit esse cillum
+                        dolore eu fugiat nulla pariatur. Excepteur sint occaecat
+                        cupidatat non proident, sunt in culpa qui officia
+                        deserunt mollit anim id est laborum. Lorem ipsum dolor
+                        sit amet, consectetur adipiscing elit, sed do eiusmod
+                        tempor incididunt ut labore et dolore magna aliqua. Ut
+                        enim ad minim veniam, quis nostrud exercitation ullamco
+                        laboris nisi ut aliquip ex ea commodo consequat. Duis
+                        aute irure dolor in reprehenderit in voluptate velit
+                        esse cillum dolore eu fugiat nulla pariatur. Excepteur
+                        sint occaecat cupidatat non proident, sunt in culpa qui
+                        officia deserunt mollit anim id est laborum. Lorem ipsum
+                        dolor sit amet, consectetur adipiscing elit, sed do
+                        eiusmod tempor incididunt ut labore et dolore magna
+                        aliqua. Ut enim ad minim veniam, quis nostrud
+                        exercitation ullamco laboris nisi ut aliquip ex ea
+                        commodo consequat. Duis aute irure dolor in
+                        reprehenderit in voluptate velit esse cillum dolore eu
+                        fugiat nulla pariatur. Excepteur sint occaecat cupidatat
+                        non proident, sunt in culpa qui officia deserunt mollit
+                        anim id est laborum. Lorem ipsum dolor sit amet,
+                        consectetur adipiscing elit, sed do eiusmod tempor
+                        incididunt ut labore et dolore magna aliqua. Ut enim ad
+                        minim veniam, quis nostrud exercitation ullamco laboris
+                        nisi ut aliquip ex ea commodo consequat. Duis aute irure
+                        dolor in reprehenderit in voluptate velit esse cillum
+                        dolore eu fugiat nulla pariatur. Excepteur sint occaecat
+                        cupidatat non proident, sunt in culpa qui officia
+                        deserunt mollit anim id est laborum.
                     </p>
                 </section>
             </main>
