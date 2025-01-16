@@ -1,15 +1,15 @@
-// src/components/navbar/useSwipeToOpen.js (skeleton)
+// src/components/navbar/useSwipeToOpen.js
 import { useEffect } from 'react'
 
 export default function useSwipeToOpen(onOpenDrawer) {
     useEffect(() => {
         let startX = 0
         let currentX = 0
-        const threshold = 50 // how far the user must swipe to trigger
+        const threshold = 50
+        const edgeZone = 20
 
         function onTouchStart(e) {
-            // Only start if user touches near left edge, e.g. < 20px from screen edge
-            if (e.touches[0].clientX < 20) {
+            if (e.touches[0].clientX < edgeZone) {
                 startX = e.touches[0].clientX
             }
         }
@@ -19,11 +19,9 @@ export default function useSwipeToOpen(onOpenDrawer) {
         }
 
         function onTouchEnd() {
-            // If user swiped right enough distance, open the drawer
             if (currentX - startX > threshold) {
                 onOpenDrawer()
             }
-            // reset
             startX = 0
             currentX = 0
         }

@@ -1,5 +1,5 @@
-// src/App.jsx
-import React, { useState } from 'react'
+// app/src/App.jsx
+import React, { useState, useEffect } from 'react'
 import NavBar from './components/navbar/Navbar'
 import ProgressBar from './components/progress/ProgressBar'
 import sprout from './assets/sprout-mobile.jpg'
@@ -7,28 +7,34 @@ import sprout from './assets/sprout-mobile.jpg'
 export default function App() {
     const [drawerOpen, setDrawerOpen] = useState(false)
 
+    // OPTIONAL: If you want to globally toggle .drawer-open on <html>
+    // so that our layoutPlugin can handle the transform:
+    useEffect(() => {
+        if (drawerOpen) {
+            document.documentElement.classList.add('drawer-open')
+        } else {
+            document.documentElement.classList.remove('drawer-open')
+        }
+        return () => document.documentElement.classList.remove('drawer-open')
+    }, [drawerOpen])
+
     return (
         <div
             className='min-h-screen bg-cover bg-pos-75 bg-no-repeat'
             style={{ backgroundImage: `url(${sprout})` }}
         >
-            {/* Pass a setter function to NavBar so it knows when the drawer is open */}
-            <NavBar onDrawerToggle={setDrawerOpen} />
-
+            <NavBar drawerOpen={drawerOpen} setDrawerOpen={setDrawerOpen} />
             <ProgressBar />
 
             {/* 
-        The outer wrapper can apply transform based on whether the drawer is open.
-        This is optional if you want the "main" to tilt/scale.
+        If you're letting layoutPlugin do the push/tilt, 
+        you can remove the translate-x and rotate classes here. 
+        But if you want to keep it local, here's how:
       */}
             <div
                 className={`
-          transition-transform duration-300 
-          ${
-              drawerOpen
-                  ? 'transform scale-[0.95] md:scale-[0.98] md:-translate-x-16'
-                  : ''
-          }
+          transition-transform duration-300
+          ${drawerOpen ? 'translate-x-[70%] scale-[0.95] rotate-y-3' : ''}
         `}
             >
                 <main className='pt-16'>
