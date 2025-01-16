@@ -19,64 +19,55 @@ export default function App() {
             <NavBar drawerOpen={drawerOpen} setDrawerOpen={setDrawerOpen} />
             {!drawerOpen && <ProgressBar />}
 
-            <main className='pt-16'>
+            <main className='pt-16 text-white'>
+                {/* Intro Section */}
                 <section className='p-8'>
-                    <h1>Welcome</h1>
-                </section>
-
-                <section className='p-8'>
-                    <h2>Projects</h2>
-                    <p>Placeholder text...</p>
-                </section>
-
-                <section className='p-8'>
-                    <h2>Contact</h2>
-                    <p>
-                        More placeholder text.. Enough text so the user can
-                        scroll down. (Repeat Lorem ipsum or similar so we have
-                        aLorem ipsum dolor sit amet, consectetur adipiscing
-                        elit, sed do eiusmod tempor incididunt ut labore et
-                        dolore magna aliqua. Ut enim ad minim veniam, quis
-                        nostrud exercitation ullamco laboris nisi ut aliquip ex
-                        ea commodo consequat. Duis aute irure dolor in
-                        reprehenderit in voluptate velit esse cillum dolore eu
-                        fugiat nulla pariatur. Excepteur sint occaecat cupidatat
-                        non proident, sunt in culpa qui officia deserunt mollit
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit,
-                        sed do eiusmod tempor incididunt ut labore et dolore
-                        magna aliqua. Ut enim ad minim veniam, quis nostrud
-                        exercitation ullamco laboris nisi ut aliquip ex ea
-                        commodo consequat. Duis aute irure dolor in
-                        reprehenderit in voluptate velit esse cillum dolore eu
-                        fugiat nulla pariatur. Excepteur sint occaecat cupidatat
-                        non proident, sunt in culpa qui officia deserunt mollit
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit,
-                        sed do eiusmod tempor incididunt ut labore et dolore
-                        magna aliqua. Ut enim ad minim veniam, quis nostrud
-                        exercitation ullamco laboris nisi ut aliquip ex ea
-                        commodo consequat. Duis aute irure dolor in
-                        reprehenderit in voluptate velit esse cillum dolore eu
-                        fugiat nulla pariatur. Excepteur sint occaecat cupidatat
-                        non proident, sunt in culpa qui officia deserunt mollit
-                        anim id est laborum. Lorem ipsum dolor sit amet,
-                        consectetur adipiscing elit, sed do eiusmod tempor
-                        incididunt ut labore et dolore magna aliqua. Ut enim ad
-                        minim veniam, quis nostrud exercitation ullamco laboris
-                        nisi ut aliquip ex ea commodo consequat. Duis aute irure
-                        dolor in reprehenderit in voluptate velit esse cillum
-                        dolore eu fugiat nulla pariatur. Excepteur sint occaecat
-                        cupidatat non proident, sunt in culpa qui officia
-                        deserunt mollit anim id est laborum. Lorem ipsum dolor
-                        sit amet, consectetur adipiscing elit, sed do eiusmod
-                        tempor incididunt ut labore et dolore magna aliqua. Ut
-                        enim ad minim veniam, quis nostrud exercitation ullamco
-                        laboris nisi ut aliquip ex ea commodo consequat. Duis
-                        aute irure dolor in reprehenderit in voluptate velit
-                        esse cillum dolore eu fugiat nulla pariatur. Excepteur
-                        sint occaecat cupidatat non proident, sunt in culpa qui
-                        officia deserunt mollit anim id est laborum. anim id est
-                        laborum. anim id est laborum. tall page.)
+                    <h1 className='text-4xl font-bold mb-4'>
+                        Welcome to MyBrand
+                    </h1>
+                    <p className='leading-relaxed mb-6'>
+                        This is a preview of our site in development mode. Enjoy
+                        scrolling through some placeholder content!
                     </p>
+                </section>
+
+                {/* Projects Section */}
+                <section className='p-8 bg-brandGray-800/60 rounded-md shadow-md mx-4 mb-8'>
+                    <h2 className='text-3xl font-semibold mb-2'>
+                        Latest Projects
+                    </h2>
+                    <p className='mb-4'>
+                        Here’s where we’ll showcase some awesome work. For now,
+                        enjoy this stylish placeholder text, ensuring we have a
+                        nice scrolling experience. Lorem ipsum dolor sit amet,
+                        consectetur adipiscing elit, sed do eiusmod tempor
+                        incididunt ut labore et dolore magna aliqua. Nulla
+                        facilisi morbi tempus iaculis urna id volutpat lacus
+                        laoreet.
+                    </p>
+                    <p>
+                        Ultrices neque ornare aenean euismod elementum nisi quis
+                        eleifend. Dui nunc mattis enim ut tellus elementum
+                        sagittis vitae. Tempor orci dapibus ultrices in iaculis
+                        nunc. Neque laoreet suspendisse interdum consectetur
+                        libero id faucibus nisl tincidunt.
+                    </p>
+                </section>
+
+                {/* Contact Section */}
+                <section className='p-8'>
+                    <h2 className='text-3xl font-semibold mb-2'>Contact Me</h2>
+                    <p className='mb-6'>
+                        Want to reach out? This is a perfect place for a form or
+                        email link. Lorem ipsum dolor sit amet, consectetur
+                        adipiscing elit, sed do eiusmod tempor incididunt ut
+                        labore et dolore magna aliqua. Viverra nam libero justo
+                        laoreet sit amet cursus. Tincidunt lobortis feugiat
+                        vivamus at augue eget arcu dictum.
+                    </p>
+
+                    {/* Extra Large Spacer for Scrolling */}
+                   
                 </section>
             </main>
         </div>
