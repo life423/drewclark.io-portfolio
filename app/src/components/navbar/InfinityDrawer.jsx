@@ -16,7 +16,7 @@ export default function InfinityDrawer({ isOpen, onClose, children }) {
         if (isOpen) {
             // Lock scroll, listen for ESC
             lastFocusedRef.current = document.activeElement
-            document.body.style.overflow = 'hidden'
+            // document.body.style.overflow = 'hidden'
             document.addEventListener('keydown', handleKeyDown)
 
             // Focus the drawer container
@@ -32,7 +32,6 @@ export default function InfinityDrawer({ isOpen, onClose, children }) {
             }
         }
         return () => {
-            // Cleanup on unmount or re-run
             document.body.style.overflow = ''
             document.removeEventListener('keydown', handleKeyDown)
         }
@@ -64,7 +63,7 @@ export default function InfinityDrawer({ isOpen, onClose, children }) {
                 ref={drawerRef}
                 tabIndex={-1}
                 className={`
-          fixed top-0 left-0 h-full
+          fixed top-0 left-0 h-screen
           w-[70%] max-w-sm
           bg-brandGray-800 text-white shadow-lg
           transition-transform duration-300
