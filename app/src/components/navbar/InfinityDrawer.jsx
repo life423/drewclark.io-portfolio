@@ -43,8 +43,9 @@ export default function InfinityDrawer({ isOpen, onClose, children }) {
             <div
                 className={`
           fixed inset-0 z-60
-          bg-black/30
+          bg-black/10
           transition-opacity duration-300
+          backdrop-blur-md
           ${
               isOpen
                   ? 'opacity-100 pointer-events-auto'

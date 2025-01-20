@@ -7,8 +7,18 @@ import InfinityDrawer from './InfinityDrawer'
 export default function NavBar({ drawerOpen, setDrawerOpen }) {
     const scrollY = useScrollPosition()
     const isScrolled = scrollY > 50
-
-
+    const bgClasses = (() => {
+        if (isScrolled && !drawerOpen) {
+            // Scrolled & Drawer closed -> dark + strong blur
+            return 'bg-brandGray-800/70 backdrop-blur-md'
+        } else if (isScrolled && drawerOpen) {
+            // Scrolled & Drawer open -> maybe fully transparent so the overlay is visible
+            return 'bg-transparent'
+        } else {
+            // Not scrolled (drawerOpen or not)
+            return 'bg-transparent'
+        }
+    })()
 
     return (
         <nav
@@ -16,11 +26,7 @@ export default function NavBar({ drawerOpen, setDrawerOpen }) {
         fixed top-0 w-full h-16 px-4 flex items-center justify-between
         transition-colors duration-300
         z-50
-        ${
-            isScrolled
-                ? 'bg-brandGray-800/70 backdrop-blur-md'
-                : 'bg-transparent'
-        }
+        ${bgClasses}
       `}
         >
             <div className='text-xl font-bold text-white'>MyBrand</div>
