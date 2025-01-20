@@ -1,31 +1,39 @@
-# Drew Clark - Web Developer
+# Drew Clark Portfolio (Under Construction)
 
-👋 Hello! I'm Drew Clark, a passionate web developer with a knack for crafting engaging and user-friendly digital experiences. This repository showcases my portfolio website, built with a focus on clean code, modern technologies, and intuitive design.
+A modern React + Vite + Tailwind CSS portfolio showcasing best practices in UI/UX, accessibility, and enterprise‐level code structure. Although this site is still in development, the foundation already demonstrates impressive features such as a custom mobile drawer, scroll‐based progress bar, and a well‐organized architecture.
 
-## About Me
+---
 
-I'm a driven and results-oriented developer with a strong foundation in front-end technologies like HTML, CSS, and JavaScript. I'm always eager to learn and explore new tools and frameworks to enhance my skills and deliver cutting-edge solutions.
+## Key Highlights
 
-## Portfolio Highlights
+### 1. **React + Vite + Tailwind Stack**
+- **Vite** for fast development and optimized builds.
+- **Tailwind CSS** for a utility‐first approach to styling, extended with custom color palettes and background plugins.
+- **React** hooks and components for a modular, maintainable codebase.
 
-* **drewclark.io:** My personal portfolio website (currently under maintenance) featuring examples of my work, skills, and experience.
-* **:**
-* **:**
-* **:**
+### 2. **Custom InfinityDrawer**
+- **Smooth Entrance & Exit Animations**: A left‐to‐right sliding panel for mobile navigation.
+- **Backdrop Blur & Gradient**: Applies a frosted overlay with a subtle green gradient over the page content when open.
+- **Accessibility**: Locks the background scroll, supports escape‐key closing, and restores focus to the previously active element.
 
-## Technical Skills
+### 3. **Scroll‐Based Progress Bar**
+- Dynamically updates the width of a thin bar at the top of the page to indicate scroll progress.
+- Uses a **requestAnimationFrame** approach (via a custom hook) for better performance and smooth updates.
 
-* **Languages:** HTML, CSS, JavaScript
-* **Frameworks/Libraries:**
-* **Tools:**
-* **Other:** [List any other relevant skills, e.g., responsive design, accessibility, UI/UX principles]
+### 4. **Custom Hook Architecture**
+- **`useNavigationState`** centralizes drawer open/close logic for a cleaner “enterprise” approach.
+- **`useScrollPosition`** provides efficient scroll state management for multiple components, enabling minimal re‐renders.
 
-## Get in Touch
+### 5. **Enterprise‐Ready Patterns**
+- **Focus Management** in the drawer for better accessibility.
+- **Conditional Rendering** of the navbar background based on scroll position.
+- **Tailwind Config** extended with brand color palettes and custom background utilities.
 
-* **Website:** drewclark.io (coming soon)
-* **Email:**
-* **LinkedIn:**
+---
 
-## Let's Connect!
+## Getting Started
 
-I'm always open to collaborating on exciting projects and connecting with fellow developers. Feel free to reach out!
+1. **Install Dependencies**  
+   ```bash
+   cd app
+   npm install
