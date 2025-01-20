@@ -16,7 +16,7 @@ export default function InfinityDrawer({ isOpen, onClose, children }) {
         if (isOpen) {
             // Lock scroll, listen for ESC
             lastFocusedRef.current = document.activeElement
-            // document.body.style.overflow = 'hidden'
+            document.body.style.overflow = 'hidden'
             document.addEventListener('keydown', handleKeyDown)
 
             // Focus the drawer container
