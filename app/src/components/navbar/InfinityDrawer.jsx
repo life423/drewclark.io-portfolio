@@ -43,7 +43,7 @@ export default function InfinityDrawer({ isOpen, onClose, children }) {
             <div
                 className={`
           fixed inset-0 z-60
-          bg-black/10
+          bg-gradient-to-br from-brandGreen-700/30 to-brandGreen-400/30
           transition-opacity duration-300
           backdrop-blur-md
           ${
