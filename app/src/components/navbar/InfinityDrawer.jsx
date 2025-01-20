@@ -2,7 +2,11 @@
 import React, { useEffect, useRef } from 'react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 
-export default function InfinityDrawer({ isOpen, onClose, children }) {
+export default function InfinityDrawer({
+    isOpen,
+    onClose,
+    children,
+}) {
     const drawerRef = useRef(null)
     const lastFocusedRef = useRef(null)
 
@@ -31,6 +35,7 @@ export default function InfinityDrawer({ isOpen, onClose, children }) {
                 lastFocusedRef.current.focus()
             }
         }
+
         return () => {
             document.body.style.overflow = ''
             document.removeEventListener('keydown', handleKeyDown)

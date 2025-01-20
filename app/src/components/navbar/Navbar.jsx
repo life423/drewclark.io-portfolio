@@ -1,12 +1,13 @@
-// app/src/components/navbar/Navbar.jsx
+// app/src/components/navbar/NavBar.jsx
 import React from 'react'
 import { Bars3Icon } from '@heroicons/react/24/outline'
 import useScrollPosition from '../../hooks/useScrollPosition'
 import InfinityDrawer from './InfinityDrawer'
 
-export default function NavBar({ drawerOpen, setDrawerOpen }) {
+export default function NavBar({ drawerOpen, setDrawerOpen, closeDrawer }) {
     const scrollY = useScrollPosition()
     const isScrolled = scrollY > 50
+
     const bgClasses = (() => {
         if (isScrolled && !drawerOpen) {
             // Scrolled & Drawer closed -> dark + strong blur
@@ -48,10 +49,7 @@ export default function NavBar({ drawerOpen, setDrawerOpen }) {
             </ul>
 
             {/* InfinityDrawer for mobile */}
-            <InfinityDrawer
-                isOpen={drawerOpen}
-                onClose={() => setDrawerOpen(false)}
-            >
+            <InfinityDrawer isOpen={drawerOpen} onClose={closeDrawer}>
                 <ul className='space-y-2'>
                     <li>
                         <a href='#home' onClick={() => setDrawerOpen(false)}>
