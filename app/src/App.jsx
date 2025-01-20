@@ -1,11 +1,13 @@
 // app/src/App.jsx
-import React, { useState } from 'react'
+import React from 'react'
+import useNavigationState from './hooks/useNavigationState'
 import NavBar from './components/navbar/Navbar'
 import ProgressBar from './components/progress/ProgressBar'
 import sprout from './assets/sprout-mobile.jpg'
 
 export default function App() {
-    const [drawerOpen, setDrawerOpen] = useState(false)
+    // Pull state + actions from your custom hook
+    const { drawerOpen, openDrawer, closeDrawer } = useNavigationState()
 
     return (
         <div className='relative min-h-screen'>
@@ -16,7 +18,12 @@ export default function App() {
             />
 
             {/* NavBar & ProgressBar (hide progress bar if drawer is open) */}
-            <NavBar drawerOpen={drawerOpen} setDrawerOpen={setDrawerOpen} />
+            <NavBar
+                drawerOpen={drawerOpen}
+                // We'll pass the hook methods as props
+                setDrawerOpen={openDrawer}
+                closeDrawer={closeDrawer}
+            />
             {!drawerOpen && <ProgressBar />}
 
             <main className='pt-16 text-white'>
@@ -67,7 +74,6 @@ export default function App() {
                     </p>
 
                     {/* Extra Large Spacer for Scrolling */}
-                   
                 </section>
             </main>
         </div>
