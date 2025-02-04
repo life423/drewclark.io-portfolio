@@ -1,4 +1,5 @@
 // app/src/components/navbar/NavBar.jsx
+
 import React from 'react'
 import { Bars3Icon } from '@heroicons/react/24/outline'
 import useScrollPosition from '../../hooks/useScrollPosition'
@@ -12,26 +13,27 @@ export default function NavBar({ drawerOpen, setDrawerOpen, closeDrawer }) {
     const bgClasses = (() => {
         if (isScrolled && !drawerOpen) {
             // Scrolled & Drawer closed -> dark + slight blur
-            return 'bg-brandGray-800/70 backdrop-blur-md'
+            return 'bg-brandGray-800/60 backdrop-blur-md'
         } else if (isScrolled && drawerOpen) {
-            // Scrolled & Drawer open -> transparent so overlay is visible
-            return 'bg-transparent'
+            // Scrolled & Drawer open -> brandGray-700/50
+            return 'bg-brandGray-800/70'
         } else {
             // Not scrolled
-            return 'bg-transparent'
+            return 'bg-brandGray-800/30'
         }
     })()
 
     return (
         <nav
             className={`
-                fixed top-0 w-full h-16 px-4 flex items-center justify-between
+                fixed top-0 w-full h-16 px-4
+                flex items-center justify-between
                 transition-colors duration-300
                 z-50
                 ${bgClasses}
             `}
         >
-            {/* DC Logo: Thinner + Subtle Analogous Gradient */}
+            {/* DC Logo: Thinner + Subtle Gradient */}
             <div
                 className='
                     text-2xl 
@@ -48,13 +50,20 @@ export default function NavBar({ drawerOpen, setDrawerOpen, closeDrawer }) {
                 DC
             </div>
 
-            {/* Larger Hamburger Icon for Mobile */}
+            {/* Vibrant Neon Orange Hamburger Icon */}
             <button
-                className='md:hidden text-white hover:text-gray-200 transition'
+                className='md:hidden hover:text-gray-200 transition'
                 aria-label='Open Menu'
                 onClick={() => setDrawerOpen(true)}
             >
-                <Bars3Icon className='h-8 w-8' />
+                <Bars3Icon
+                    className='
+                        h-8 w-8
+                        text-brandGreen-300
+                        stroke-current
+                    '
+                    strokeWidth={1.5}
+                />
             </button>
 
             {/* Desktop Nav (hidden on mobile) */}
