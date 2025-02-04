@@ -50,7 +50,7 @@ export default function NavBar({ drawerOpen, setDrawerOpen, closeDrawer }) {
                 DC
             </div>
 
-            {/* Vibrant Neon Orange Hamburger Icon */}
+           
             <button
                 className='md:hidden hover:text-gray-200 transition'
                 aria-label='Open Menu'

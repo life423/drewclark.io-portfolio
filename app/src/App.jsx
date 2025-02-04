@@ -1,3 +1,4 @@
+// app/src/App.jsx
 import React from 'react'
 import useNavigationState from './hooks/useNavigationState'
 import NavBar from './components/navbar/Navbar'
@@ -11,7 +12,7 @@ import sprout from './assets/sprout-mobile.jpg'
  * 1. Hero Background + Gradient Overlay
  * 2. Top NavBar & ProgressBar
  * 3. Shiftable Main Content (pushes right when drawer is open)
- * 4. Example placeholder sections for an under-construction site
+ * 4. Placeholder sections for an under-construction site
  */
 export default function App() {
     // Drawer state from custom hook

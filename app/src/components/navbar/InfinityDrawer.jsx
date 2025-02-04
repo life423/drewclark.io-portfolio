@@ -44,31 +44,36 @@ export default function InfinityDrawer({ isOpen, onClose, children }) {
 
     return (
         <>
-            {/* ---------------------------------------------
-                 Overlay (dim + blur) 
-                 - fades in/out based on isOpen
-               --------------------------------------------- */}
+            {/*
+        --------------------------------------------------------
+        Overlay: Now more opaque so the rest of the screen
+        isn't see-through. No brand gradient; just a solid
+        brandGray overlay to keep it simple & dark.
+      --------------------------------------------------------
+      */}
             <div
                 className={`
-                    fixed inset-0 z-60
-                    bg-gradient-to-br from-brandGreen-700/20 to-brandGreen-500/20
-                    backdrop-blur-md
-                    transition-opacity duration-300
-                    ${
-                        isOpen
-                            ? 'opacity-100 pointer-events-auto'
-                            : 'opacity-0 pointer-events-none'
-                    }
-                `}
+          fixed inset-0 z-60
+          bg-brandGray-900/80
+          transition-opacity duration-300
+          ${
+              isOpen
+                  ? 'opacity-100 pointer-events-auto'
+                  : 'opacity-0 pointer-events-none'
+          }
+        `}
                 onClick={onClose}
                 aria-hidden='true'
                 tabIndex={-1}
                 role='presentation'
             />
 
-            {/* ---------------------------------------------
-                 Drawer Panel
-               --------------------------------------------- */}
+            {/*
+        --------------------------------------------------------
+        Drawer Panel: Semi-transparent brandGray + frosted blur
+        Has a gradient border-l for subtle brand synergy.
+      --------------------------------------------------------
+      */}
             <div
                 role='dialog'
                 aria-modal='true'
@@ -76,71 +81,69 @@ export default function InfinityDrawer({ isOpen, onClose, children }) {
                 ref={drawerRef}
                 tabIndex={-1}
                 className={`
-                    fixed top-0 left-0 h-screen
-                    w-[70%] max-w-sm
-                    bg-brandGray-800 text-white shadow-lg
-                    z-70 flex flex-col
-                    outline-none focus:outline-none ring-0 focus:ring-0
-
-                    /* Transition + transform for micro-animations */
-                    transition-all duration-300 transform-gpu
-                    ${
-                        isOpen
-                            ? 'translate-x-0 scale-100 opacity-100'
-                            : '-translate-x-full scale-95 opacity-0'
-                    }
-                `}
+          fixed top-0 left-0 h-screen
+          w-[70%] max-w-sm
+          z-70 flex flex-col
+          transition-transform duration-300
+          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+          backdrop-blur-md bg-brandGray-800/60
+          border-l-[3px] border-gradient-to-b from-brandGreen-400 to-brandBlue-400
+          outline-none focus:outline-none
+        `}
             >
                 {/* Close Button */}
                 <button
                     onClick={onClose}
                     aria-label='Close Menu'
-                    className='ml-auto mt-4 mr-4 text-white hover:text-gray-300
-                               outline-none focus:outline-none'
+                    className='ml-auto mt-4 mr-4 outline-none focus:outline-none'
                 >
-                    <XMarkIcon className='h-6 w-6' />
+                    <XMarkIcon className='h-10 w-10  text-brandGreen-300 hover:text-brandGreen-300 transition-colors' />
                 </button>
 
-                {/* 
-                  Main Content 
-                  We wrap each child in a small fade/slide-in 
-                  with staggered delays
-                */}
-                <div
-                    className='
-                        flex-1
-                        flex
-                        flex-col
-                        justify-center
-                        items-center
-                        gap-6 /* space out the drawer items */
-                        px-6 /* horizontal padding */
-                        py-4 /* vertical padding */
-                        overflow-y-auto
-                        outline-none focus:outline-none
-                    '
-                >
-                    {Children.map(children, (child, index) => (
-                        <div
-                            // Transition each child in
+                {/*
+          Main Drawer Content
+          Centered vertically with space between items
+          for a clean layout.
+        */}
+                <ul className='flex flex-col items-center justify-center flex-1 space-y-6 text-brandGray-50'>
+                    {['Home', 'Projects', 'Contact'].map((item, idx) => (
+                        <li
+                            key={item}
                             className={`
-                                transition-all duration-300 transform-gpu
-                                ${
-                                    isOpen
-                                        ? 'opacity-100 translate-y-0'
-                                        : 'opacity-0 translate-y-2'
-                                }
-                            `}
-                            style={{
-                                transitionDelay: isOpen
-                                    ? `${index * 50}ms`
-                                    : '0ms',
-                            }}
+                opacity-0
+                translate-y-4
+                transition-all
+                duration-300
+                delay-[${idx * 75}ms]
+                ${isOpen ? 'opacity-100 translate-y-0' : ''}
+              `}
                         >
-                            {child}
-                        </div>
+                            {item}
+                        </li>
                     ))}
-                </div>
+                </ul>
+
+                {/*
+          If you pass children to the drawer,
+          they get animated in a similar fade/slide style.
+        */}
+                {Children.map(children, (child, index) => (
+                    <div
+                        className={`
+              transition-all duration-300 transform-gpu
+              ${
+                  isOpen
+                      ? 'opacity-100 translate-y-0'
+                      : 'opacity-0 translate-y-2'
+              }
+            `}
+                        style={{
+                            transitionDelay: isOpen ? `${index * 50}ms` : '0ms',
+                        }}
+                    >
+                        {child}
+                    </div>
+                ))}
             </div>
         </>
     )
