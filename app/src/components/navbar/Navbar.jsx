@@ -75,7 +75,7 @@ export default function NavBar({ drawerOpen, setDrawerOpen, closeDrawer }) {
 
             {/* InfinityDrawer for mobile */}
             <InfinityDrawer isOpen={drawerOpen} onClose={closeDrawer}>
-                <ul className='space-y-2'>
+                <ul className='text-center text-lg'>
                     <li>
                         <a href='#home' onClick={() => setDrawerOpen(false)}>
                             Home
