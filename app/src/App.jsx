@@ -12,7 +12,7 @@ export default function App() {
     const { drawerOpen, openDrawer, closeDrawer } = useNavigationState()
     const scrollY = useScrollPosition()
 
-    // Keep more of the gradient on scroll: from 80% to 60%
+    // Retain the overlay but never fully fade it
     const overlayOpacity = scrollY === 0 ? 'opacity-80' : 'opacity-60'
 
     return (
@@ -23,7 +23,7 @@ export default function App() {
                 style={{ backgroundImage: `url(${sprout})` }}
             />
 
-            {/* HERO GRADIENT OVERLAY */}
+            {/* HERO GRADIENT OVERLAY (keeps site cohesive) */}
             <div
                 className={`
                     pointer-events-none 
@@ -38,39 +38,6 @@ export default function App() {
                 `}
             />
 
-            {/* 
-              OPTIONAL MINIMAL WAVE BACKDROP 
-              - Sits behind NavBar, in front of overlay 
-              - If you dislike the wave, remove this entire <div>.
-            */}
-            <div
-                className='
-                    pointer-events-none 
-                    absolute top-0 w-full h-[120px]
-                    -z-4 overflow-hidden
-                '
-                aria-hidden='true'
-            >
-                <svg
-                    className='relative block w-full h-full'
-                    viewBox='0 0 1440 320'
-                    preserveAspectRatio='none'
-                >
-                    {/* A very subtle curve, mostly near the top */}
-                    <path
-                        fill='#0F172A' // brandGray-900
-                        fillOpacity='0.4'
-                        d='
-                            M0,64L48,74.7C96,85,192,107,288,128C384,149,480,171,576,181.3C672,192,768,192,864,186.7
-                            C960,181,1056,171,1152,138.7C1248,107,1344,53,1392,26.7L1440,0L1440,320L1392,320
-                            C1344,320,1248,320,1152,320C1056,320,960,320,864,320
-                            C768,320,672,320,576,320C480,320,384,320,288,320
-                            C192,320,96,320,48,320L0,320Z
-                        '
-                    />
-                </svg>
-            </div>
-
             {/* NavBar & ProgressBar */}
             <NavBar
                 drawerOpen={drawerOpen}
@@ -79,7 +46,10 @@ export default function App() {
             />
             {!drawerOpen && <ProgressBar />}
 
-            <main className='pt-16 text-white'>
+            <main
+                // Increased top padding so "Welcome" no longer collides with the nav
+                className='pt-24 md:pt-20 text-white transition-colors duration-300'
+            >
                 {/* Intro Section */}
                 <section className='p-8'>
                     <h1 className='text-4xl font-bold mb-4'>
