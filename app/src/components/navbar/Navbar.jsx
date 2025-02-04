@@ -15,10 +15,10 @@ export default function NavBar({ drawerOpen, setDrawerOpen, closeDrawer }) {
             return 'bg-brandGray-800/70 backdrop-blur-md'
         } else if (isScrolled && drawerOpen) {
             // Scrolled & Drawer open -> transparent so overlay is visible
-            return 'bg-transparent'
+            return 'bg-brandGray-700/50'
         } else {
             // Not scrolled
-            return 'bg-transparent'
+            return 'bg-brandGray-700/50'
         }
     })()
 
