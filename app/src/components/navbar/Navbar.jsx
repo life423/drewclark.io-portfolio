@@ -8,15 +8,16 @@ export default function NavBar({ drawerOpen, setDrawerOpen, closeDrawer }) {
     const scrollY = useScrollPosition()
     const isScrolled = scrollY > 50
 
+    // Background logic on scroll/drawer
     const bgClasses = (() => {
         if (isScrolled && !drawerOpen) {
-            // Scrolled & Drawer closed -> dark + strong blur
+            // Scrolled & Drawer closed -> dark + slight blur
             return 'bg-brandGray-800/70 backdrop-blur-md'
         } else if (isScrolled && drawerOpen) {
-            // Scrolled & Drawer open -> maybe fully transparent so the overlay is visible
+            // Scrolled & Drawer open -> transparent so overlay is visible
             return 'bg-transparent'
         } else {
-            // Not scrolled (drawerOpen or not)
+            // Not scrolled
             return 'bg-transparent'
         }
     })()
@@ -24,21 +25,36 @@ export default function NavBar({ drawerOpen, setDrawerOpen, closeDrawer }) {
     return (
         <nav
             className={`
-        fixed top-0 w-full h-16 px-4 flex items-center justify-between
-        transition-colors duration-300
-        z-50
-        ${bgClasses}
-      `}
+                fixed top-0 w-full h-16 px-4 flex items-center justify-between
+                transition-colors duration-300
+                z-50
+                ${bgClasses}
+            `}
         >
-            <div className='text-xl font-bold text-white'>MyBrand</div>
+            {/* DC Logo: Thinner + Subtle Analogous Gradient */}
+            <div
+                className='
+                    text-2xl 
+                    font-extralight
+                    uppercase
+                    tracking-wide
+                    bg-clip-text 
+                    text-transparent
+                    bg-gradient-to-r
+                    from-brandGreen-300
+                    to-brandBlue-400
+                '
+            >
+                DC
+            </div>
 
-            {/* Hamburger button to open the drawer */}
+            {/* Larger Hamburger Icon for Mobile */}
             <button
                 className='md:hidden text-white hover:text-gray-200 transition'
                 aria-label='Open Menu'
                 onClick={() => setDrawerOpen(true)}
             >
-                <Bars3Icon className='h-6 w-6' />
+                <Bars3Icon className='h-8 w-8' />
             </button>
 
             {/* Desktop Nav (hidden on mobile) */}
