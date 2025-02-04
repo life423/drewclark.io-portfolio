@@ -75,26 +75,15 @@ export default function NavBar({ drawerOpen, setDrawerOpen, closeDrawer }) {
 
             {/* InfinityDrawer for mobile */}
             <InfinityDrawer isOpen={drawerOpen} onClose={closeDrawer}>
-                <ul className='text-center text-lg'>
-                    <li>
-                        <a href='#home' onClick={() => setDrawerOpen(false)}>
-                            Home
-                        </a>
-                    </li>
-                    <li>
-                        <a
-                            href='#projects'
-                            onClick={() => setDrawerOpen(false)}
-                        >
-                            Projects
-                        </a>
-                    </li>
-                    <li>
-                        <a href='#contact' onClick={() => setDrawerOpen(false)}>
-                            Contact
-                        </a>
-                    </li>
-                </ul>
+                <a href='#home' onClick={() => setDrawerOpen(false)}>
+                    Home
+                </a>
+                <a href='#projects' onClick={() => setDrawerOpen(false)}>
+                    Projects
+                </a>
+                <a href='#contact' onClick={() => setDrawerOpen(false)}>
+                    Contact
+                </a>
             </InfinityDrawer>
         </nav>
     )
