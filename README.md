@@ -38,7 +38,7 @@ This is the source code for **Drew Clark's** portfolio website, built to showcas
 - **Frontend:** React, TypeScript, Tailwind CSS
 - **Build Tool:** Vite
 - **Version Control:** Git & GitHub
-- **Deployment:** [drewclark.io](https://www.drewclark.io/) (GitHub Pages, Vercel, or Netlify)
+- **Deployment:** [drewclark.io](https://www.drewclark.io/) (Azure)
 
 ## 🏗️ Installation & Development
 
