@@ -1,5 +1,5 @@
 // app/src/components/navbar/InfinityDrawer.jsx
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, Children } from 'react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 
 export default function InfinityDrawer({ isOpen, onClose, children }) {
@@ -16,15 +16,20 @@ export default function InfinityDrawer({ isOpen, onClose, children }) {
         if (isOpen) {
             // Save the last focused element
             lastFocusedRef.current = document.activeElement
+
             // Prevent background scroll
             document.body.style.overflow = 'hidden'
+
             // Listen for ESC
             document.addEventListener('keydown', handleKeyDown)
+
             // Focus the drawer for accessibility
             drawerRef.current?.focus()
         } else {
+            // Restore background scroll
             document.body.style.overflow = ''
             document.removeEventListener('keydown', handleKeyDown)
+
             // Restore focus
             if (lastFocusedRef.current) {
                 lastFocusedRef.current.focus()
@@ -39,7 +44,10 @@ export default function InfinityDrawer({ isOpen, onClose, children }) {
 
     return (
         <>
-            {/* Overlay */}
+            {/* ---------------------------------------------
+                 Overlay (dim + blur) 
+                 - fades in/out based on isOpen
+               --------------------------------------------- */}
             <div
                 className={`
                     fixed inset-0 z-60
@@ -58,7 +66,9 @@ export default function InfinityDrawer({ isOpen, onClose, children }) {
                 role='presentation'
             />
 
-            {/* Drawer Panel */}
+            {/* ---------------------------------------------
+                 Drawer Panel
+               --------------------------------------------- */}
             <div
                 role='dialog'
                 aria-modal='true'
@@ -69,30 +79,39 @@ export default function InfinityDrawer({ isOpen, onClose, children }) {
                     fixed top-0 left-0 h-screen
                     w-[70%] max-w-sm
                     bg-brandGray-800 text-white shadow-lg
-                    transition-transform duration-300
-                    z-70
+                    z-70 flex flex-col
                     outline-none focus:outline-none ring-0 focus:ring-0
-                    ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-                    /* We use flex-col to lay items out vertically */
-                    flex flex-col
+
+                    /* Transition + transform for micro-animations */
+                    transition-all duration-300 transform-gpu
+                    ${
+                        isOpen
+                            ? 'translate-x-0 scale-100 opacity-100'
+                            : '-translate-x-full scale-95 opacity-0'
+                    }
                 `}
             >
                 {/* Close Button */}
                 <button
                     onClick={onClose}
                     aria-label='Close Menu'
-                    className='ml-auto mt-4 mr-4 text-white hover:text-gray-300 outline-none focus:outline-none'
+                    className='ml-auto mt-4 mr-4 text-white hover:text-gray-300
+                               outline-none focus:outline-none'
                 >
                     <XMarkIcon className='h-6 w-6' />
                 </button>
 
-                {/* Main Content */}
+                {/* 
+                  Main Content 
+                  We wrap each child in a small fade/slide-in 
+                  with staggered delays
+                */}
                 <div
                     className='
                         flex-1
                         flex
                         flex-col
-                        justify-center 
+                        justify-center
                         items-center
                         gap-6 /* space out the drawer items */
                         px-6 /* horizontal padding */
@@ -101,7 +120,26 @@ export default function InfinityDrawer({ isOpen, onClose, children }) {
                         outline-none focus:outline-none
                     '
                 >
-                    {children}
+                    {Children.map(children, (child, index) => (
+                        <div
+                            // Transition each child in
+                            className={`
+                                transition-all duration-300 transform-gpu
+                                ${
+                                    isOpen
+                                        ? 'opacity-100 translate-y-0'
+                                        : 'opacity-0 translate-y-2'
+                                }
+                            `}
+                            style={{
+                                transitionDelay: isOpen
+                                    ? `${index * 50}ms`
+                                    : '0ms',
+                            }}
+                        >
+                            {child}
+                        </div>
+                    ))}
                 </div>
             </div>
         </>
