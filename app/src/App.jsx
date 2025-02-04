@@ -1,4 +1,4 @@
-// app/src/App.jsx
+// app/src/App.jsx (excerpt)
 import React from 'react'
 import useNavigationState from './hooks/useNavigationState'
 import NavBar from './components/navbar/Navbar'
@@ -8,14 +8,11 @@ import useScrollPosition from './hooks/useScrollPosition'
 import sprout from './assets/sprout-mobile.jpg'
 
 export default function App() {
-    // Drawer state from your custom navigation hook
     const { drawerOpen, openDrawer, closeDrawer } = useNavigationState()
-
-    // Track scroll to adjust overlay opacity
     const scrollY = useScrollPosition()
 
-    // Decide how strong the overlay is based on scroll
-    // (Feel free to tweak these opacity classes for your desired effect)
+    // Adjust how strong the overlay is based on scroll
+    // If at top, more opaque; if scrolled, less opaque
     const overlayOpacity = scrollY === 0 ? 'opacity-80' : 'opacity-40'
 
     return (
@@ -26,15 +23,16 @@ export default function App() {
                 style={{ backgroundImage: `url(${sprout})` }}
             />
 
-            {/* Gradient overlay (between background & content) */}
+            {/* HERO GRADIENT OVERLAY */}
             <div
                 className={`
                     pointer-events-none 
                     fixed inset-0 
                     -z-5
-                    bg-gradient-to-br 
-                    from-brandGreen-700/50
-                    to-brandGray-900/50
+                    bg-gradient-to-br
+                    from-brandGray-900/60 
+                    via-brandGreen-700/30 
+                    to-brandGray-800/60
                     transition-opacity duration-300
                     ${overlayOpacity}
                 `}
@@ -48,7 +46,6 @@ export default function App() {
             />
             {!drawerOpen && <ProgressBar />}
 
-            {/* Main content */}
             <main className='pt-16 text-white'>
                 {/* Intro Section */}
                 <section className='p-8'>
