@@ -1,39 +1,76 @@
-# Drew Clark Portfolio (Under Construction)
+# 🌱 Drew Clark's Portfolio
 
-A modern React + Vite + Tailwind CSS portfolio showcasing best practices in UI/UX, accessibility, and enterprise‐level code structure. Although this site is still in development, the foundation already demonstrates impressive features such as a custom mobile drawer, scroll‐based progress bar, and a well‐organized architecture.
+[![Website](https://img.shields.io/badge/Website-Live-brightgreen?style=flat-square)](https://www.drewclark.io/)
+[![License](https://img.shields.io/github/license/life423/drewclark.io-portfolio?style=flat-square)](LICENSE)
 
----
+This is the source code for **Drew Clark's** portfolio website, built to showcase projects, technical expertise, and professional achievements. The site is designed with **performance, accessibility, and elegant UI/UX** in mind.
 
-## Key Highlights
+## 🚀 Features
 
-### 1. **React + Vite + Tailwind Stack**
-- **Vite** for fast development and optimized builds.
-- **Tailwind CSS** for a utility‐first approach to styling, extended with custom color palettes and background plugins.
-- **React** hooks and components for a modular, maintainable codebase.
+- **⚡ Built with Vite** – Lightning-fast development and optimized builds.
+- **💎 React & Tailwind CSS** – Modern component-based structure with a utility-first styling approach.
+- **📱 Responsive & Accessible** – Designed for all screen sizes with smooth animations and keyboard accessibility.
+- **🎨 Custom InfinityDrawer** – A mobile-friendly sliding panel with frosted backdrop effects.
+- **📜 Scroll-Based Progress Bar** – A dynamic visual indicator tracking the user's position on the page.
 
-### 2. **Custom InfinityDrawer**
-- **Smooth Entrance & Exit Animations**: A left‐to‐right sliding panel for mobile navigation.
-- **Backdrop Blur & Gradient**: Applies a frosted overlay with a subtle green gradient over the page content when open.
-- **Accessibility**: Locks the background scroll, supports escape‐key closing, and restores focus to the previously active element.
+## 📂 Project Structure
 
-### 3. **Scroll‐Based Progress Bar**
-- Dynamically updates the width of a thin bar at the top of the page to indicate scroll progress.
-- Uses a **requestAnimationFrame** approach (via a custom hook) for better performance and smooth updates.
+```
+├── src/
+│   ├── components/      # Reusable UI components
+│   ├── pages/           # Main website pages
+│   ├── assets/          # Images, icons, and static files
+│   ├── styles/          # Tailwind and custom styles
+│   ├── hooks/           # Custom React hooks
+│   ├── utils/           # Helper functions
+│   ├── App.tsx          # Root component
+│   ├── main.tsx         # Entry point
+│
+├── public/              # Static public assets
+├── package.json         # Project dependencies
+├── tailwind.config.js   # Tailwind CSS configuration
+├── vite.config.ts       # Vite configuration
+└── README.md            # You are here 🚀
+```
 
-### 4. **Custom Hook Architecture**
-- **`useNavigationState`** centralizes drawer open/close logic for a cleaner “enterprise” approach.
-- **`useScrollPosition`** provides efficient scroll state management for multiple components, enabling minimal re‐renders.
+## 🛠️ Tech Stack
 
-### 5. **Enterprise‐Ready Patterns**
-- **Focus Management** in the drawer for better accessibility.
-- **Conditional Rendering** of the navbar background based on scroll position.
-- **Tailwind Config** extended with brand color palettes and custom background utilities.
+- **Frontend:** React, TypeScript, Tailwind CSS
+- **Build Tool:** Vite
+- **Version Control:** Git & GitHub
+- **Deployment:** [drewclark.io](https://www.drewclark.io/) (GitHub Pages, Vercel, or Netlify)
 
----
+## 🏗️ Installation & Development
 
-## Getting Started
-
-1. **Install Dependencies**  
+1. **Clone the Repository**
    ```bash
-   cd app
+   git clone https://github.com/life423/drewclark.io-portfolio.git
+   cd drewclark.io-portfolio
+   ```
+
+2. **Install Dependencies**
+   ```bash
    npm install
+   ```
+
+3. **Run the Development Server**
+   ```bash
+   npm run dev
+   ```
+
+4. **Build for Production**
+   ```bash
+   npm run build
+   ```
+
+## 🎨 Design Philosophy
+
+The portfolio is built around the concept of **growth and adaptability**, inspired by the motto: _"Life finds a way."_ The design incorporates **subtle plant elements**, a fresh color palette, and smooth micro-interactions to create a polished user experience.
+
+## 📜 License
+
+This project is open-source under the [MIT License](LICENSE).
+
+---
+
+_Developed & Maintained by Drew Clark 🌱_

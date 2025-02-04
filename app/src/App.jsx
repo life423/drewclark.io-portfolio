@@ -3,29 +3,52 @@ import React from 'react'
 import useNavigationState from './hooks/useNavigationState'
 import NavBar from './components/navbar/Navbar'
 import ProgressBar from './components/progress/ProgressBar'
+import useScrollPosition from './hooks/useScrollPosition'
+
 import sprout from './assets/sprout-mobile.jpg'
 
 export default function App() {
-    // Pull state + actions from your custom hook
+    // Drawer state from your custom navigation hook
     const { drawerOpen, openDrawer, closeDrawer } = useNavigationState()
+
+    // Track scroll to adjust overlay opacity
+    const scrollY = useScrollPosition()
+
+    // Decide how strong the overlay is based on scroll
+    // (Feel free to tweak these opacity classes for your desired effect)
+    const overlayOpacity = scrollY === 0 ? 'opacity-80' : 'opacity-40'
 
     return (
         <div className='relative min-h-screen'>
-            {/* Fixed background behind everything */}
+            {/* Fixed background image */}
             <div
                 className='fixed inset-0 -z-10 bg-cover bg-no-repeat bg-center'
                 style={{ backgroundImage: `url(${sprout})` }}
             />
 
-            {/* NavBar & ProgressBar (hide progress bar if drawer is open) */}
+            {/* Gradient overlay (between background & content) */}
+            <div
+                className={`
+                    pointer-events-none 
+                    fixed inset-0 
+                    -z-5
+                    bg-gradient-to-br 
+                    from-brandGreen-700/50
+                    to-brandGray-900/50
+                    transition-opacity duration-300
+                    ${overlayOpacity}
+                `}
+            />
+
+            {/* NavBar & ProgressBar */}
             <NavBar
                 drawerOpen={drawerOpen}
-                // We'll pass the hook methods as props
                 setDrawerOpen={openDrawer}
                 closeDrawer={closeDrawer}
             />
             {!drawerOpen && <ProgressBar />}
 
+            {/* Main content */}
             <main className='pt-16 text-white'>
                 {/* Intro Section */}
                 <section className='p-8'>
@@ -44,21 +67,9 @@ export default function App() {
                         Latest Projects
                     </h2>
                     <p className='mb-4'>
-                        Here’s where we’ll showcase some awesome work. For now,
-                        enjoy this stylish placeholder text, ensuring we have a
-                        nice scrolling experience. Lorem ipsum dolor sit amet,
-                        consectetur adipiscing elit, sed do eiusmod tempor
-                        incididunt ut labore et dolore magna aliqua. Nulla
-                        facilisi morbi tempus iaculis urna id volutpat lacus
-                        laoreet.
+                        Here’s where we’ll showcase some awesome work...
                     </p>
-                    <p>
-                        Ultrices neque ornare aenean euismod elementum nisi quis
-                        eleifend. Dui nunc mattis enim ut tellus elementum
-                        sagittis vitae. Tempor orci dapibus ultrices in iaculis
-                        nunc. Neque laoreet suspendisse interdum consectetur
-                        libero id faucibus nisl tincidunt.
-                    </p>
+                    <p>Ultrices neque ornare aenean euismod elementum...</p>
                 </section>
 
                 {/* Contact Section */}
@@ -66,14 +77,8 @@ export default function App() {
                     <h2 className='text-3xl font-semibold mb-2'>Contact Me</h2>
                     <p className='mb-6'>
                         Want to reach out? This is a perfect place for a form or
-                        email link. Lorem ipsum dolor sit amet, consectetur
-                        adipiscing elit, sed do eiusmod tempor incididunt ut
-                        labore et dolore magna aliqua. Viverra nam libero justo
-                        laoreet sit amet cursus. Tincidunt lobortis feugiat
-                        vivamus at augue eget arcu dictum.
+                        email link...
                     </p>
-
-                    {/* Extra Large Spacer for Scrolling */}
                 </section>
             </main>
         </div>
