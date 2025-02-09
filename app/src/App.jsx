@@ -3,6 +3,7 @@ import useNavigationState from './hooks/useNavigationState'
 import NavBar from './components/navbar/Navbar'
 import ProgressBar from './components/progress/ProgressBar'
 import useScrollPosition from './hooks/useScrollPosition'
+import Footer from './components/footer/Footer'
 
 import sprout from './assets/sprout-mobile.jpg'
 
@@ -183,6 +184,7 @@ export default function App() {
                     {}
                     <div className='h-24' />
                 </main>
+                <Footer />
             </div>
         </div>
     )
