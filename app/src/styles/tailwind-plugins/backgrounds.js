@@ -1,4 +1,3 @@
-// backgrounds.js
 export default function ({ addUtilities }) {
     const newUtilities = {
         '.bg-scale-80': {
@@ -11,9 +10,7 @@ export default function ({ addUtilities }) {
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
         },
-        // Add more if needed
     }
 
-    // By default, utilities are generated for all variants (responsive, hover, etc.)
     addUtilities(newUtilities, ['responsive'])
 }
