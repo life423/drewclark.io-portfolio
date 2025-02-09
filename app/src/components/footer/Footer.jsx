@@ -7,7 +7,7 @@ export default function Footer() {
             {/* Pulse Accent Bar */}
             <div
                 className='
-          h-2 w-full
+          h-1 w-full
           bg-pulse-gradient
           animate-colorPulse
         '
