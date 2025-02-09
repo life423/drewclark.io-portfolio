@@ -69,7 +69,7 @@ export default function InfinityDrawer({ isOpen, onClose, children }) {
           transition-transform duration-300
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
           backdrop-blur-md bg-brandGray-800/60
-          border-l-[3px] border-gradient-to-b from-brandGreen-400 to-brandBlue-400
+           border-gradient-to-b from-brandGreen-400 to-brandBlue-400
           outline-none focus:outline-none
         `}
             >
