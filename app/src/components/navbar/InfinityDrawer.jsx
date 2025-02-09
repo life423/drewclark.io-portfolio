@@ -1,4 +1,3 @@
-// app/src/components/navbar/InfinityDrawer.jsx
 import React, { useEffect, useRef, Children } from 'react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 
@@ -14,23 +13,17 @@ export default function InfinityDrawer({ isOpen, onClose, children }) {
         }
 
         if (isOpen) {
-            // Save the last focused element
             lastFocusedRef.current = document.activeElement
 
-            // Prevent background scroll
             document.body.style.overflow = 'hidden'
 
-            // Listen for ESC
             document.addEventListener('keydown', handleKeyDown)
 
-            // Focus the drawer for accessibility
             drawerRef.current?.focus()
         } else {
-            // Restore background scroll
             document.body.style.overflow = ''
             document.removeEventListener('keydown', handleKeyDown)
 
-            // Restore focus
             if (lastFocusedRef.current) {
                 lastFocusedRef.current.focus()
             }
@@ -44,13 +37,7 @@ export default function InfinityDrawer({ isOpen, onClose, children }) {
 
     return (
         <>
-            {/*
-        --------------------------------------------------------
-        Overlay: Now more opaque so the rest of the screen
-        isn't see-through. No brand gradient; just a solid
-        brandGray overlay to keep it simple & dark.
-      --------------------------------------------------------
-      */}
+            {}
             <div
                 className={`
           fixed inset-0 z-60
@@ -68,12 +55,7 @@ export default function InfinityDrawer({ isOpen, onClose, children }) {
                 role='presentation'
             />
 
-            {/*
-        --------------------------------------------------------
-        Drawer Panel: Semi-transparent brandGray + frosted blur
-        Has a gradient border-l for subtle brand synergy.
-      --------------------------------------------------------
-      */}
+            {}
             <div
                 role='dialog'
                 aria-modal='true'
@@ -91,7 +73,7 @@ export default function InfinityDrawer({ isOpen, onClose, children }) {
           outline-none focus:outline-none
         `}
             >
-                {/* Close Button */}
+                {}
                 <button
                     onClick={onClose}
                     aria-label='Close Menu'
@@ -100,11 +82,7 @@ export default function InfinityDrawer({ isOpen, onClose, children }) {
                     <XMarkIcon className='h-10 w-10  text-brandGreen-300 hover:text-brandGreen-300 transition-colors' />
                 </button>
 
-                {/*
-          Main Drawer Content
-          Centered vertically with space between items
-          for a clean layout.
-        */}
+                {}
                 <ul className='flex flex-col items-center justify-center flex-1 space-y-6 text-brandGray-50'>
                     {['Home', 'Projects', 'Contact'].map((item, idx) => (
                         <li
@@ -123,10 +101,7 @@ export default function InfinityDrawer({ isOpen, onClose, children }) {
                     ))}
                 </ul>
 
-                {/*
-          If you pass children to the drawer,
-          they get animated in a similar fade/slide style.
-        */}
+                {}
                 {Children.map(children, (child, index) => (
                     <div
                         className={`
