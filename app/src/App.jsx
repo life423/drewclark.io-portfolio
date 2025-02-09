@@ -7,13 +7,6 @@ import useScrollPosition from './hooks/useScrollPosition'
 
 import sprout from './assets/sprout-mobile.jpg'
 
-/**
- * App - Core application layout
- * 1. Hero Background + Gradient Overlay
- * 2. Top NavBar & ProgressBar
- * 3. Shiftable Main Content (pushes right when drawer is open)
- * 4. Placeholder sections for an under-construction site
- */
 export default function App() {
     // Drawer state from custom hook
     const { drawerOpen, openDrawer, closeDrawer } = useNavigationState()
