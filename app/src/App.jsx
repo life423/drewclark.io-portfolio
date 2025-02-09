@@ -1,4 +1,3 @@
-// app/src/App.jsx
 import React from 'react'
 import useNavigationState from './hooks/useNavigationState'
 import NavBar from './components/navbar/Navbar'
@@ -8,26 +7,20 @@ import useScrollPosition from './hooks/useScrollPosition'
 import sprout from './assets/sprout-mobile.jpg'
 
 export default function App() {
-    // Drawer state from custom hook
     const { drawerOpen, openDrawer, closeDrawer } = useNavigationState()
 
-    // Track scroll to adjust overlay opacity
     const scrollY = useScrollPosition()
     const overlayOpacity = scrollY === 0 ? 'opacity-80' : 'opacity-60'
 
     return (
         <div className='relative min-h-screen overflow-x-hidden'>
-            {/* --------------------------------------------------------
-                1) Fixed Background Image
-            -------------------------------------------------------- */}
+            {}
             <div
                 className='fixed inset-0 -z-10 bg-cover bg-no-repeat bg-center'
                 style={{ backgroundImage: `url(${sprout})` }}
             />
 
-            {/* --------------------------------------------------------
-                2) Gradient Overlay
-            -------------------------------------------------------- */}
+            {}
             <div
                 className={`
                     pointer-events-none
@@ -42,9 +35,7 @@ export default function App() {
                 `}
             />
 
-            {/* --------------------------------------------------------
-                3) NavBar + ProgressBar
-            -------------------------------------------------------- */}
+            {}
             <NavBar
                 drawerOpen={drawerOpen}
                 setDrawerOpen={openDrawer}
@@ -52,10 +43,7 @@ export default function App() {
             />
             {!drawerOpen && <ProgressBar />}
 
-            {/* --------------------------------------------------------
-                4) Shiftable Content Wrapper
-                - Moves right when the drawer is open
-            -------------------------------------------------------- */}
+            {}
             <div
                 id='content'
                 className={`
@@ -64,9 +52,7 @@ export default function App() {
                 `}
             >
                 <main className='pt-24 md:pt-20 text-white transition-colors duration-300'>
-                    {/* ------------------------------------------
-                        Intro / Hero Section
-                    ------------------------------------------ */}
+                    {}
                     <section className='p-8'>
                         <h1 className='text-4xl font-bold mb-4'>
                             Welcome to MyBrand
@@ -80,9 +66,7 @@ export default function App() {
                         </p>
                     </section>
 
-                    {/* ------------------------------------------
-                        Latest Projects
-                    ------------------------------------------ */}
+                    {}
                     <section className='p-8 bg-brandGray-800/60 rounded-md shadow-md mx-4 mb-8'>
                         <h2 className='text-3xl font-semibold mb-2'>
                             Latest Projects
@@ -108,9 +92,7 @@ export default function App() {
                         </ul>
                     </section>
 
-                    {/* ------------------------------------------
-                        About Teaser
-                    ------------------------------------------ */}
+                    {}
                     <section className='p-8 bg-brandGray-800/30 rounded-md shadow-md mx-4 mb-8'>
                         <h2 className='text-3xl font-semibold mb-2'>
                             About Us
@@ -125,9 +107,7 @@ export default function App() {
                         </p>
                     </section>
 
-                    {/* ------------------------------------------
-                        Services Placeholder
-                    ------------------------------------------ */}
+                    {}
                     <section className='p-8 bg-brandGray-800/60 rounded-md shadow-md mx-4 mb-8'>
                         <h2 className='text-3xl font-semibold mb-4'>
                             Services
@@ -163,9 +143,7 @@ export default function App() {
                         </div>
                     </section>
 
-                    {/* ------------------------------------------
-                        Testimonials Placeholder
-                    ------------------------------------------ */}
+                    {}
                     <section className='p-8 bg-brandGray-800/30 rounded-md shadow-md mx-4 mb-8'>
                         <h2 className='text-3xl font-semibold mb-4'>
                             Testimonials
@@ -190,9 +168,7 @@ export default function App() {
                         </div>
                     </section>
 
-                    {/* ------------------------------------------
-                        Contact Section
-                    ------------------------------------------ */}
+                    {}
                     <section className='p-8'>
                         <h2 className='text-3xl font-semibold mb-2'>
                             Contact Me
@@ -204,7 +180,7 @@ export default function App() {
                         </p>
                     </section>
 
-                    {/* Extra Bottom Space for comfort scrolling */}
+                    {}
                     <div className='h-24' />
                 </main>
             </div>
