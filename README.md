@@ -10,7 +10,7 @@ This is the source code for **Drew Clark's** portfolio website, built to showcas
 - **⚡ Built with Vite** – Lightning-fast development and optimized builds.
 - **💎 React & Tailwind CSS** – Modern component-based structure with a utility-first styling approach.
 - **📱 Responsive & Accessible** – Designed for all screen sizes with smooth animations and keyboard accessibility.
-- **🎨 Custom InfinityDrawer** – A mobile-friendly sliding panel with frosted backdrop effects.
+- **🎨 Custom Drawer** – A mobile-friendly sliding panel with frosted backdrop effects.
 - **📜 Scroll-Based Progress Bar** – A dynamic visual indicator tracking the user's position on the page.
 
 ## 📂 Project Structure

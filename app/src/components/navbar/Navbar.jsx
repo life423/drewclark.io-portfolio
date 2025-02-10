@@ -2,7 +2,7 @@ import React from 'react'
 import { LuMenu} from 'react-icons/lu'
 // import { Bars3Icon } from '@heroicons/react/24/outline'
 import useScrollPosition from '../../hooks/useScrollPosition'
-import InfinityDrawer from './InfinityDrawer'
+import Drawer from '../drawer/Drawer'
 
 export default function NavBar({ drawerOpen, setDrawerOpen, closeDrawer }) {
     const scrollY = useScrollPosition()
@@ -68,7 +68,7 @@ export default function NavBar({ drawerOpen, setDrawerOpen, closeDrawer }) {
             </ul>
 
             {}
-            <InfinityDrawer isOpen={drawerOpen} onClose={closeDrawer} />
+            <Drawer isOpen={drawerOpen} onClose={closeDrawer} />
         </nav>
     )
 }
