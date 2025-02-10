@@ -1,5 +1,6 @@
 import React from 'react'
-import { Bars3Icon } from '@heroicons/react/24/outline'
+import { LuMenu} from 'react-icons/lu'
+// import { Bars3Icon } from '@heroicons/react/24/outline'
 import useScrollPosition from '../../hooks/useScrollPosition'
 import InfinityDrawer from './InfinityDrawer'
 
@@ -49,13 +50,13 @@ export default function NavBar({ drawerOpen, setDrawerOpen, closeDrawer }) {
                 aria-label='Open Menu'
                 onClick={() => setDrawerOpen(true)}
             >
-                <Bars3Icon
+                <LuMenu
                     className='
-                        h-8 w-8
+                        h-10 w-10
                         text-brandGreen-300
                         stroke-current
                     '
-                    strokeWidth={1.5}
+                   
                 />
             </button>
 
