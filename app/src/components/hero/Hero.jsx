@@ -33,3 +33,10 @@ export default function Hero() {
         </section>
     )
 }
+
+;<div
+    class='relative bg-center bg-cover bg-no-repeat'
+    style="background-image: url('/path/to/sprout.jpg')"
+>
+    <div class='absolute inset-0 bg-[linear-gradient(135deg,_theme(colors.brandGreen.200)/40_0%,_theme(colors.brandBlue.200)/40_100%)]'></div>
+</div>
