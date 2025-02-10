@@ -74,7 +74,7 @@ function ShapePulseIcon({ children }) {
             {React.cloneElement(children, {
                 className: `
           h-6 w-6 
-          text-neonOrange-400/80 
+          text-neonOrange-300
           animate-iconPulse 
           origin-center 
         `,
