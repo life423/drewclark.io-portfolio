@@ -10,7 +10,7 @@ export default function Footer() {
             <div className='h-1 w-full bg-pulse-gradient animate-colorPulse' />
 
             {/* 2. Main footer area */}
-            <div className='bg-brandGray-900 py-4 px-4'>
+            <div className='bg-brandGray-900 py-6 px-6'>
                 <div className='flex justify-between items-center'>
                     {/* Icons on the left */}
                     <div className='flex space-x-6'>
@@ -35,7 +35,7 @@ export default function Footer() {
                     {/* Company info on the right */}
                     <div className='flex items-center space-x-2'>
                         <span>Clark Company Limited</span>
-                        <LuCopyright className='h-5 w-5' />
+                        <span><LuCopyright className='h-3 w-3' /></span>
                         <span>{new Date().getFullYear()}</span>
                     </div>
                 </div>
