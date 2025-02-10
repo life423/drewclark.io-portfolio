@@ -2,7 +2,7 @@
 import React from 'react'
 import useNavigationState from './hooks/useNavigationState'
 import useScrollPosition from './hooks/useScrollPosition'
-import ProgressBar from './components/progress/ProgressBar'
+// import ProgressBar from './components/progress/ProgressBar'
 import Layout from './components/layout/Layout'
 
 
@@ -12,7 +12,7 @@ export default function App() {
 
     return (
         <>
-            {!drawerOpen && <ProgressBar />}
+            {/* {!drawerOpen && <ProgressBar />} */}
             <Layout
                 drawerOpen={drawerOpen}
                 openDrawer={openDrawer}
