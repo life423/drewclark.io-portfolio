@@ -7,7 +7,7 @@ import colorPulsePlugin from './src/styles/tailwind-plugins/colorPulsePlugin.js'
 import iconPulsePlugin from './src/styles/tailwind-plugins/iconPulsePlugin.js'
 import staggeredPulsePlugin from './src/styles/tailwind-plugins/staggeredPulsePlugin.js'
 import combinedPulsePlugin from './src/styles/tailwind-plugins/combinedPulsePlugin'
-
+import gradientOverlay from './src/styles/tailwind-plugins/gradientOverlay.js' 
 export default {
     content: ['./src/index.html', './src/**/*.{js,jsx,ts,tsx}'],
     theme: {
@@ -76,5 +76,6 @@ export default {
         iconPulsePlugin,
         staggeredPulsePlugin,
         combinedPulsePlugin,
+        gradientOverlay,
     ],
 }
