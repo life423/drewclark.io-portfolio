@@ -14,12 +14,9 @@ export default function Footer() {
           3. A relative container for the icons, with an 
              absolute, pulsing gradient behind them only.
         */}
-                <div className='flex flex-row items-center space-x-6 relative mb-2'>
+                <div className='flex flex-row items-center justify-center gap-4 relative mb-2'>
                     {/* Pulsing overlay behind icons, using mix-blend-mode to colorize them */}
-                    <div
-                       
-            
-                    />
+                    <div />
                     {/* Icons on top, receiving the gradient effect */}
                     <a
                         href='https://twitter.com/your_profile'
@@ -42,7 +39,7 @@ export default function Footer() {
                 </div>
 
                 {/* 4. Company info below the icon row */}
-                <div className='flex items-center space-x-2'>
+                <div className='flex items-center justify-center space-x-2'>
                     <span>Clark Company Limited</span>
                     <LuCopyright className='h-5 w-5' />
                     <span>{new Date().getFullYear()}</span>
