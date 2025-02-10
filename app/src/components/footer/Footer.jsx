@@ -20,7 +20,7 @@ export default function Footer() {
                             rel='noopener noreferrer'
                             aria-label='Twitter'
                         >
-                            <LuTwitter className='h-6 w-6 text-neonOrange-300' />
+                            <LuTwitter className='h-6 w-6 text-brandGreen-300' />
                         </a>
                         <a
                             href='https://github.com/life423'
