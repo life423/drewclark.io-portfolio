@@ -6,11 +6,11 @@ export default function Hero() {
     return (
         <section
             className='relative flex items-center justify-center h-screen bg-cover bg-center'
-            style={{
-                
-                backgroundImage: `url(${sprout})`,
-            }}
+            style={{ backgroundImage: `url(${sprout})` }}
         >
+            {/* Gradient overlay */}
+            <div className='absolute inset-0 bg-gradient-to-b from-neonOrange-500/30 to-neonOrange-200/10 z-0' />
+
             {/* Content container */}
             <div className='relative z-10 max-w-4xl text-center px-4'>
                 <h1 className='text-4xl sm:text-5xl md:text-6xl font-bold text-white'>
@@ -23,15 +23,13 @@ export default function Hero() {
                 <div className='mt-8'>
                     <a
                         href='#contact'
-                        className='inline-block px-8 py-4 bg-brandGreen-500 text-white font-semibold rounded-md shadow-lg hover:bg-brandGreen-600 transition-colors duration-300'
+                        className='inline-block px-8 py-4 bg-brandGreen-500 text-white font-semibold rounded-md shadow-lg
+                                   hover:bg-brandGreen-600 transition-colors duration-300'
                     >
                         Get in Touch
                     </a>
                 </div>
             </div>
-
-            {/* Optional decorative overlay (if needed) */}
-            <div className='absolute inset-0 z-0'></div>
         </section>
     )
 }
