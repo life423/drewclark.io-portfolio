@@ -12,7 +12,7 @@ export default function NavBar({ drawerOpen, setDrawerOpen, closeDrawer }) {
         if (isScrolled && !drawerOpen) {
             return 'bg-brandGray-800/60 backdrop-blur-md'
         } else if (isScrolled && drawerOpen) {
-            return 'bg-brandGray-800/70'
+            return 'bg-brandGray-800/60 backdrop-blur-md'
         } else {
             return 'bg-brandGray-800/30'
         }
