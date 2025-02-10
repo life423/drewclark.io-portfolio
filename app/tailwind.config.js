@@ -1,4 +1,5 @@
-// tailwind.config.js
+// FILE: app/tailwind.config.js
+
 import backgroundsPlugin from './src/styles/tailwind-plugins/backgrounds.js'
 import backgroundPositionsPlugin from './src/styles/tailwind-plugins/backgroundPositions.js'
 import colorPulsePlugin from './src/styles/tailwind-plugins/colorPulsePlugin.js'
@@ -56,6 +57,27 @@ export default {
                     800: '#27272A',
                     900: '#18181B',
                 },
+            },
+            keyframes: {
+                // Expanding & fading neon orange halo
+                haloPulse: {
+                    '0%': {
+                        transform: 'scale(1)',
+                        opacity: '0.2',
+                    },
+                    '50%': {
+                        transform: 'scale(1.4)',
+                        opacity: '0',
+                    },
+                    '100%': {
+                        transform: 'scale(1.6)',
+                        opacity: '0',
+                    },
+                },
+            },
+            animation: {
+                // 8-second infinite loop for a subtle pulse
+                haloPulse: 'haloPulse 8s ease-in-out infinite',
             },
         },
     },
