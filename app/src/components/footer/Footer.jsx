@@ -2,8 +2,9 @@
 import React, { useRef } from 'react'
 import { LuTwitter, LuGithub } from 'react-icons/lu'
 import useIntersection from '../../hooks/useIntersection'
-import useStaggeredTwoIcons from '../../hooks/useStaggeredTwoIcons'
 import clsx from 'clsx'
+import useStaggeredTwoIcons from '../../hooks/useStaggeredTwoIcons'
+import {IconPair} from '../utils/IconPair'
 
 export default function Footer() {
     const containerRef = useRef(null)
@@ -41,6 +42,7 @@ export default function Footer() {
                     {/* Footer text */}
                     <div className='flex items-center space-x-2'>
                         <span>Clark Company Limited</span>
+                        <span>&copy;</span>
                         <span>{new Date().getFullYear()}</span>
                     </div>
                 </div>
@@ -57,25 +59,25 @@ export default function Footer() {
  * - onAnimEnd and onUserStop allow the hook to know when to switch or stop the effect.
  * - The url prop determines the destination when the icon is clicked.
  */
-function IconPair({ Icon, iconAnimationClass, onAnimEnd, onUserStop, url }) {
-    return (
-        <a
-            href={url}
-            target='_blank'
-            rel='noopener noreferrer'
-            className='relative inline-block'
-        >
-            {/* Animated icon layer */}
-            <Icon
-                className={clsx(
-                    'h-6 w-6 origin-center',
-                    iconAnimationClass
-                        ? iconAnimationClass
-                        : 'animate-none icon-default'
-                )}
-                onAnimationEnd={onAnimEnd}
-                onClick={onUserStop}
-            />
-        </a>
-    )
-}
+// function IconPair({ Icon, iconAnimationClass, onAnimEnd, onUserStop, url }) {
+//     return (
+//         <a
+//             href={url}
+//             target='_blank'
+//             rel='noopener noreferrer'
+//             className='relative inline-block'
+//         >
+//             {/* Animated icon layer */}
+//             <Icon
+//                 className={clsx(
+//                     'h-6 w-6 origin-center',
+//                     iconAnimationClass
+//                         ? iconAnimationClass
+//                         : 'animate-none icon-default'
+//                 )}
+//                 onAnimationEnd={onAnimEnd}
+//                 onClick={onUserStop}
+//             />
+//         </a>
+//     )
+// }
