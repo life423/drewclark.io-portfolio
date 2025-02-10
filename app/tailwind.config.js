@@ -5,6 +5,7 @@ import backgroundPositionsPlugin from './src/styles/tailwind-plugins/backgroundP
 import colorPulsePlugin from './src/styles/tailwind-plugins/colorPulsePlugin.js'
 import fontFlashPlugin from './src/styles/tailwind-plugins/fontFlashPlugin.js'
 import iconPulsePlugin from './src/styles/tailwind-plugins/iconPulsePlugin.js'
+import staggeredPulsePlugin from './src/styles/tailwind-plugins/staggeredPulsePlugin.js'
 
 export default {
     content: ['./src/index.html', './src/**/*.{js,jsx,ts,tsx}'],
@@ -70,5 +71,6 @@ export default {
         colorPulsePlugin,
         fontFlashPlugin,
         iconPulsePlugin,
+        staggeredPulsePlugin,
     ],
 }
