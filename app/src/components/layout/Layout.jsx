@@ -2,6 +2,7 @@
 import React from 'react'
 import clsx from 'clsx'
 import NavBar from '../navbar/Navbar'
+import ProgressBar from '../progress/ProgressBar'
 import Hero from '../hero/Hero'
 import Footer from '../footer/Footer'
 
@@ -20,6 +21,9 @@ export default function Layout({
                     setDrawerOpen={openDrawer}
                     closeDrawer={closeDrawer}
                 />
+                {/* <ProgressBar /> */}
+                 {!drawerOpen && <ProgressBar />}
+               
             </header>
 
             {/* Hero Section */}
