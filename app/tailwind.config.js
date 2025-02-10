@@ -58,26 +58,63 @@ export default {
                     900: '#18181B',
                 },
             },
+
+            // Replace "haloPulse" with an iconPulse effect
             keyframes: {
-                // Expanding & fading neon orange halo
-                haloPulse: {
+                iconPulse: {
                     '0%': {
                         transform: 'scale(1)',
-                        opacity: '0.0',
+                        opacity: '0.7',
+                    },
+                    '10%': {
+                        transform: 'scale(1.1)',
+                        opacity: '0.65',
+                    },
+                    '20%': {
+                        transform: 'scale(1.2)',
+                        opacity: '0.6',
+                    },
+                    '30%': {
+                        transform: 'scale(1.3)',
+                        opacity: '0.55',
+                    },
+                    '40%': {
+                        transform: 'scale(1.45)',
+                        opacity: '0.5',
                     },
                     '50%': {
-                        transform: 'scale(1.4)',
-                        opacity: '.7',
+                        transform: 'scale(1.6)',
+                        opacity: '0.4',
+                    },
+                    '60%': {
+                        transform: 'scale(1.75)',
+                        opacity: '0.3',
+                    },
+                    '70%': {
+                        transform: 'scale(1.9)',
+                        opacity: '0.2',
+                    },
+                    '80%': {
+                        transform: 'scale(2.05)',
+                        opacity: '0.12',
+                    },
+                    '90%': {
+                        transform: 'scale(2.2)',
+                        opacity: '0.06',
+                    },
+                    '95%': {
+                        transform: 'scale(2.3)',
+                        opacity: '0.03',
                     },
                     '100%': {
-                        transform: 'scale(1.6)',
-                        opacity: '1',
+                        transform: 'scale(2.4)',
+                        opacity: '0',
                     },
                 },
             },
+
             animation: {
-                // 8-second infinite loop for a subtle pulse
-                haloPulse: 'haloPulse 8s ease-in-out infinite',
+                iconPulse: 'iconPulse 8s ease-in-out infinite',
             },
         },
     },
