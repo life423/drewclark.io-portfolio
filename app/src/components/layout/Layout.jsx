@@ -1,5 +1,6 @@
 // FILE: app/src/components/layout/Layout.jsx
 import React from 'react'
+import clsx from 'clsx'
 import NavBar from '../navbar/Navbar'
 import Hero from '../hero/Hero'
 import Footer from '../footer/Footer'
