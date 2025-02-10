@@ -15,7 +15,7 @@ export default function Footer() {
                     {/* Icons on the left */}
                     <div className='flex space-x-6'>
                         <a
-                            href='https://twitter.com/your_profile'
+                            href='https://x.com/andrewgenai'
                             target='_blank'
                             rel='noopener noreferrer'
                             aria-label='Twitter'
@@ -23,7 +23,7 @@ export default function Footer() {
                             <LuTwitter className='h-6 w-6' />
                         </a>
                         <a
-                            href='https://github.com/your_profile'
+                            href='https://github.com/life423'
                             target='_blank'
                             rel='noopener noreferrer'
                             aria-label='GitHub'
