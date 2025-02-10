@@ -17,15 +17,8 @@ export default function Footer() {
                 <div className='flex flex-row items-center space-x-6 relative mb-2'>
                     {/* Pulsing overlay behind icons, using mix-blend-mode to colorize them */}
                     <div
-                        className='
-              pointer-events-none
-              absolute inset-0
-              bg-pulse-gradient
-              animate-colorPulse
-              mix-blend-screen
-              opacity-100
-              z-0
-            '
+                       
+            
                     />
                     {/* Icons on top, receiving the gradient effect */}
                     <a
