@@ -20,7 +20,7 @@ export default function Footer() {
                             rel='noopener noreferrer'
                             aria-label='Twitter'
                         >
-                            <LuTwitter className='h-6 w-6' />
+                            <LuTwitter className='h-6 w-6 text-neonOrange-300' />
                         </a>
                         <a
                             href='https://github.com/life423'
@@ -28,14 +28,16 @@ export default function Footer() {
                             rel='noopener noreferrer'
                             aria-label='GitHub'
                         >
-                            <LuGithub className='h-6 w-6' />
+                            <LuGithub className='h-6 w-6 text-brandGreen-300' />
                         </a>
                     </div>
 
                     {/* Company info on the right */}
                     <div className='flex items-center space-x-2'>
                         <span>Clark Company Limited</span>
-                        <span><LuCopyright className='h-3 w-3' /></span>
+                        <span>
+                            <LuCopyright className='h-3 w-3' />
+                        </span>
                         <span>{new Date().getFullYear()}</span>
                     </div>
                 </div>
