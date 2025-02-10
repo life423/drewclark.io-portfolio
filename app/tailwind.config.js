@@ -63,15 +63,15 @@ export default {
                 haloPulse: {
                     '0%': {
                         transform: 'scale(1)',
-                        opacity: '0.2',
+                        opacity: '0.0',
                     },
                     '50%': {
                         transform: 'scale(1.4)',
-                        opacity: '0',
+                        opacity: '.7',
                     },
                     '100%': {
                         transform: 'scale(1.6)',
-                        opacity: '0',
+                        opacity: '1',
                     },
                 },
             },
