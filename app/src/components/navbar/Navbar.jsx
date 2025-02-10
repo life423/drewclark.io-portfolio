@@ -10,11 +10,11 @@ export default function NavBar({ drawerOpen, setDrawerOpen, closeDrawer }) {
 
     const bgClasses = (() => {
         if (isScrolled && !drawerOpen) {
-            return 'bg-brandGray-800/60 backdrop-blur-md'
+            return 'bg-brandGray-800/60 '
         } else if (isScrolled && drawerOpen) {
-            return 'bg-brandGray-800/70'
+            return 'bg-brandGray-800/60 '
         } else {
-            return 'bg-brandGray-800/30'
+            return 'bg-brandGray-800/90 backdrop-blur-md'
         }
     })()
 
@@ -37,7 +37,7 @@ export default function NavBar({ drawerOpen, setDrawerOpen, closeDrawer }) {
           bg-clip-text 
           text-transparent
           bg-gradient-to-r
-          from-brandGreen-300
+           from-brandGreen-300
           to-brandBlue-400
         '
             >
