@@ -1,6 +1,6 @@
+// FILE: app/src/components/navbar/Navbar.jsx
 import React from 'react'
-import { LuMenu} from 'react-icons/lu'
-// import { Bars3Icon } from '@heroicons/react/24/outline'
+import { LuMenu } from 'react-icons/lu'
 import useScrollPosition from '../../hooks/useScrollPosition'
 import Drawer from '../drawer/Drawer'
 
@@ -21,26 +21,25 @@ export default function NavBar({ drawerOpen, setDrawerOpen, closeDrawer }) {
     return (
         <nav
             className={`
-                fixed top-0 w-full h-16 px-4
-                flex items-center justify-between
-                transition-colors duration-300
-                z-50
-                ${bgClasses}
-            `}
+        fixed top-0 w-full h-16 px-4
+        flex items-center justify-between
+        transition-colors duration-300
+        z-50
+        ${bgClasses}
+      `}
         >
-            {}
             <div
                 className='
-                    text-2xl 
-                    font-extralight
-                    uppercase
-                    tracking-wide
-                    bg-clip-text 
-                    text-transparent
-                    bg-gradient-to-r
-                    from-brandGreen-300
-                    to-brandBlue-400
-                '
+          text-2xl 
+          font-extralight
+          uppercase
+          tracking-wide
+          bg-clip-text 
+          text-transparent
+          bg-gradient-to-r
+          from-brandGreen-300
+          to-brandBlue-400
+        '
             >
                 DC
             </div>
@@ -50,24 +49,15 @@ export default function NavBar({ drawerOpen, setDrawerOpen, closeDrawer }) {
                 aria-label='Open Menu'
                 onClick={() => setDrawerOpen(true)}
             >
-                <LuMenu
-                    className='
-                        h-10 w-10
-                        text-brandGreen-300
-                        stroke-current
-                    '
-                   
-                />
+                <LuMenu className='h-10 w-10 text-brandGreen-300 stroke-current' />
             </button>
 
-            {}
             <ul className='hidden md:flex space-x-6 text-white'>
                 <li>Home</li>
                 <li>Projects</li>
                 <li>Contact</li>
             </ul>
 
-            {}
             <Drawer isOpen={drawerOpen} onClose={closeDrawer} />
         </nav>
     )
