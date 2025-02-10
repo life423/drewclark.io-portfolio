@@ -3,17 +3,15 @@
 import React from 'react'
 import { LuTwitter, LuGithub, LuCopyright } from 'react-icons/lu'
 
-// 1) The main Footer
 export default function Footer() {
     return (
         <footer className='mt-16 text-white'>
-            {/* Pulsing accent bar on top */}
+            {/* Pulsing accent bar on top (unchanged) */}
             <div className='h-1 w-full bg-pulse-gradient animate-colorPulse' />
 
-            {/* Footer content */}
             <div className='bg-brandGray-900 py-6 px-6'>
                 <div className='flex justify-between items-center'>
-                    {/* Left: icons */}
+                    {/* Left icons */}
                     <div className='flex space-x-6'>
                         <a
                             href='https://x.com/andrewgenai'
@@ -21,7 +19,13 @@ export default function Footer() {
                             rel='noopener noreferrer'
                         >
                             <IconWithShapePulse>
-                                <LuTwitter className='h-6 w-6 text-brandGreen-300' />
+                                <LuTwitter
+                                    className='
+                    h-6 w-6
+                    text-brandGreen-500
+                    animate-fontFlash
+                  '
+                                />
                             </IconWithShapePulse>
                         </a>
                         <a
@@ -30,7 +34,13 @@ export default function Footer() {
                             rel='noopener noreferrer'
                         >
                             <IconWithShapePulse>
-                                <LuGithub className='h-6 w-6 text-brandGreen-300' />
+                                <LuGithub
+                                    className='
+                    h-6 w-6
+                    text-brandGreen-500
+                    animate-fontFlash
+                  '
+                                />
                             </IconWithShapePulse>
                         </a>
                     </div>
@@ -47,36 +57,35 @@ export default function Footer() {
     )
 }
 
-// 2) The shape-based pulse wrapper
+/**
+ * IconWithShapePulse
+ * - Renders a second icon behind the main one, scaling out with 'iconPulse'.
+ * - The front icon uses 'frontFlash' to color-shift green->orange->green at cycle start.
+ */
 function IconWithShapePulse({ children }) {
-    // 'children' is your main icon, e.g. <LuTwitter ... >
     return (
         <div className='relative inline-block'>
-            {/* This is the second icon behind, which expands/fades out */}
+            {/* The behind icon, always neon orange, scaling up */}
             <div className='absolute inset-0 flex items-center justify-center pointer-events-none z-0'>
-                {/* We clone the shape: same icon, neon orange, animates behind */}
                 <ShapePulseIcon>{children}</ShapePulseIcon>
             </div>
 
-            {/* The main icon, in front */}
+            {/* The front icon, w/ a color flash at cycle start */}
             <div className='relative z-10'>{children}</div>
         </div>
     )
 }
 
-// 3) The “pulse” version of the same icon
-//    We re-render the exact same icon as neon orange, then animate it.
+// The cloned “pulse” version behind
 function ShapePulseIcon({ children }) {
-    // We assume 'children' is an icon component—like <LuTwitter className="..." />
-    // We'll clone it with new props.
     return (
         <>
             {React.cloneElement(children, {
                 className: `
-          h-6 w-6 
-          text-neonOrange-300
-          animate-iconPulse 
-          origin-center 
+          h-6 w-6
+          text-neonOrange-500
+          animate-iconPulse
+          origin-center
         `,
             })}
         </>
