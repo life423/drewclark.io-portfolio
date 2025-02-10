@@ -13,7 +13,7 @@ export default function Footer() {
     // useStaggeredTwoIcons manages which icon should animate,
     // and stops the effect after 3 iterations or on user touch.
     const { leftClass, rightClass, onLeftEnd, onRightEnd, stopNow } =
-        useStaggeredTwoIcons({ inView, maxIterations: 3 })
+        useStaggeredTwoIcons({ inView, maxIterations: 1 })
 
     return (
         <footer className='mt-16 text-white' ref={containerRef}>
