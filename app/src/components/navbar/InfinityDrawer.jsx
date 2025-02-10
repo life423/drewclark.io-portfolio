@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, Children } from 'react'
-// import { XMarkIcon } from '@heroicons/react/24/outline'
+
 import { LuX } from 'react-icons/lu'
 
 export default function InfinityDrawer({ isOpen, onClose, children }) {
