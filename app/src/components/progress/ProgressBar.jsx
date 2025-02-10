@@ -1,21 +1,11 @@
 // FILE: app/src/components/progress/ProgressBar.jsx
 import React, { useState, useEffect, useMemo } from 'react'
 import useScrollPosition from '../../hooks/useScrollPosition'
-import useEdgeSwipe from '../../hooks/useEdgeSwipe'
-
-// 1) Import your color utility
-// import { getInterpolatedColor } from '../../utils/colorInterpolate'
-import    {getInterpolatedColor} from '../utils/colorInterpolate'
+import { getInterpolatedColor } from '../utils/colorInterpolate'
 
 export default function ProgressBar() {
     // A) Existing logic
     const scrollY = useScrollPosition()
-    useEdgeSwipe({
-        edgeWidth: 20,
-        onSwipeRight: () => {
-            console.log('Swipe!')
-        },
-    })
 
     const [docHeight, setDocHeight] = useState(0)
     const [winHeight, setWinHeight] = useState(0)
