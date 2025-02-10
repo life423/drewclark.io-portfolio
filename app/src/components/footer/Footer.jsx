@@ -1,54 +1,42 @@
-// FILE: app/src/components/footer/Footer.jsx
-
-import React from 'react'
-import { LuTwitter, LuGithub, LuCopyright } from 'react-icons/lu'
+import React, { useRef } from 'react'
+import { LuTwitter, LuGithub } from 'react-icons/lu'
+import useIntersection from '../../hooks/useIntersection'
+import useStaggeredTwoIcons from '../../hooks/useStaggeredTwoIcons'
+import clsx from 'clsx'
 
 export default function Footer() {
+    const containerRef = useRef(null)
+    const inView = useIntersection(containerRef)
+
+    const { leftClass, rightClass, onLeftEnd, onRightEnd, stopNow } =
+        useStaggeredTwoIcons({ inView, maxIterations: 3 })
+
     return (
-        <footer className='mt-16 text-white'>
-            {/* Pulsing accent bar on top (unchanged) */}
+        <footer className='mt-16 text-white' ref={containerRef}>
+            {}
             <div className='h-1 w-full bg-pulse-gradient animate-colorPulse' />
 
             <div className='bg-brandGray-900 py-6 px-6'>
                 <div className='flex justify-between items-center'>
-                    {/* Left icons */}
+                    {}
                     <div className='flex space-x-6'>
-                        <a
-                            href='https://x.com/andrewgenai'
-                            target='_blank'
-                            rel='noopener noreferrer'
-                        >
-                            <IconWithShapePulse>
-                                <LuTwitter
-                                    className='
-                    h-6 w-6
-                    text-brandGreen-500
-                    animate-fontFlash
-                  '
-                                />
-                            </IconWithShapePulse>
-                        </a>
-                        <a
-                            href='https://github.com/life423'
-                            target='_blank'
-                            rel='noopener noreferrer'
-                        >
-                            <IconWithShapePulse>
-                                <LuGithub
-                                    className='
-                    h-6 w-6
-                    text-brandGreen-500
-                    animate-fontFlash
-                  '
-                                />
-                            </IconWithShapePulse>
-                        </a>
+                        <IconPair
+                            Icon={LuTwitter}
+                            iconClass={leftClass}
+                            onAnimEnd={onLeftEnd}
+                            onUserStop={stopNow}
+                        />
+                        <IconPair
+                            Icon={LuGithub}
+                            iconClass={rightClass}
+                            onAnimEnd={onRightEnd}
+                            onUserStop={stopNow}
+                        />
                     </div>
 
-                    {/* Right: company info */}
+                    {}
                     <div className='flex items-center space-x-2'>
                         <span>Clark Company Limited</span>
-                        <LuCopyright className='h-3 w-3' />
                         <span>{new Date().getFullYear()}</span>
                     </div>
                 </div>
@@ -57,37 +45,25 @@ export default function Footer() {
     )
 }
 
-/**
- * IconWithShapePulse
- * - Renders a second icon behind the main one, scaling out with 'iconPulse'.
- * - The front icon uses 'frontFlash' to color-shift green->orange->green at cycle start.
- */
-function IconWithShapePulse({ children }) {
+function IconPair({ Icon, iconClass = '', onAnimEnd, onUserStop }) {
+    const sanitizedIconClass = iconClass.replace(/text-\S+/g, '')
+
     return (
         <div className='relative inline-block'>
-            {/* The behind icon, always neon orange, scaling up */}
-            <div className='absolute inset-0 flex items-center justify-center pointer-events-none z-0'>
-                <ShapePulseIcon>{children}</ShapePulseIcon>
+            {}
+            <Icon
+                className={clsx(
+                    'h-6 w-6 origin-center animate-fontFlash',
+                    'text-brandGreen-300',
+                    sanitizedIconClass
+                )}
+                onAnimationEnd={onAnimEnd}
+                onClick={onUserStop}
+            />
+            {}
+            <div className='absolute inset-0 flex items-center justify-center pointer-events-none'>
+                <Icon className='h-6 w-6 text-brandGreen-300' />
             </div>
-
-            {/* The front icon, w/ a color flash at cycle start */}
-            <div className='relative z-10'>{children}</div>
         </div>
-    )
-}
-
-// The cloned “pulse” version behind
-function ShapePulseIcon({ children }) {
-    return (
-        <>
-            {React.cloneElement(children, {
-                className: `
-          h-6 w-6
-          text-neonOrange-500
-          animate-iconPulse
-          origin-center
-        `,
-            })}
-        </>
     )
 }
