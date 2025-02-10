@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, Children } from 'react'
-import { XMarkIcon } from '@heroicons/react/24/outline'
+// import { XMarkIcon } from '@heroicons/react/24/outline'
+import { LuX } from 'react-icons/lu'
 
 export default function InfinityDrawer({ isOpen, onClose, children }) {
     const drawerRef = useRef(null)
@@ -79,7 +80,7 @@ export default function InfinityDrawer({ isOpen, onClose, children }) {
                     aria-label='Close Menu'
                     className='ml-auto mt-4 mr-4 outline-none focus:outline-none'
                 >
-                    <XMarkIcon className='h-10 w-10  text-brandGreen-300 hover:text-brandGreen-300 transition-colors' />
+                    <LuX className='h-10 w-10  text-brandGreen-300 hover:text-brandGreen-300 transition-colors' />
                 </button>
 
                 {}
