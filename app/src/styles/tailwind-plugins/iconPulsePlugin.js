@@ -24,7 +24,7 @@ export default plugin(function ({ addBase, addUtilities }) {
     // Add the utility class for applying the icon pulse animation.
     addUtilities({
         '.animate-iconPulse': {
-            animation: 'iconPulse 8s ease-in-out 1 forwards',
+            animation: 'iconPulse 2.7s ease-in-out 1 forwards',
         },
     })
 })

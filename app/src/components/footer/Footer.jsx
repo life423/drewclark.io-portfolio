@@ -28,12 +28,14 @@ export default function Footer() {
                             iconAnimationClass={leftClass} // provided by the hook
                             onAnimEnd={onLeftEnd}
                             onUserStop={stopNow}
+                            url='https://twitter.com/andrewgenai'
                         />
                         <IconPair
                             Icon={LuGithub}
                             iconAnimationClass={rightClass} // provided by the hook
                             onAnimEnd={onRightEnd}
                             onUserStop={stopNow}
+                            url='https://github.com/life423'
                         />
                     </div>
                     {/* Footer text */}
@@ -53,13 +55,18 @@ export default function Footer() {
  * - The active icon will receive the combined animation class (which makes it neon orange and pulses).
  * - When inactive, it falls back to .icon-default (which shows the icon in brand green).
  * - onAnimEnd and onUserStop allow the hook to know when to switch or stop the effect.
+ * - The url prop determines the destination when the icon is clicked.
  */
-function IconPair({ Icon, iconAnimationClass, onAnimEnd, onUserStop }) {
+function IconPair({ Icon, iconAnimationClass, onAnimEnd, onUserStop, url }) {
     return (
-        <div className='relative inline-block'>
+        <a
+            href={url}
+            target='_blank'
+            rel='noopener noreferrer'
+            className='relative inline-block'
+        >
             {/* Animated icon layer */}
             <Icon
-                // When animation is active, use the provided class; otherwise, use the default green.
                 className={clsx(
                     'h-6 w-6 origin-center',
                     iconAnimationClass
@@ -69,6 +76,6 @@ function IconPair({ Icon, iconAnimationClass, onAnimEnd, onUserStop }) {
                 onAnimationEnd={onAnimEnd}
                 onClick={onUserStop}
             />
-        </div>
+        </a>
     )
 }

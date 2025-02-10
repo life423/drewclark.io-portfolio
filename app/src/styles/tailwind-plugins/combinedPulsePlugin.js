@@ -69,7 +69,7 @@ export default plugin(function ({ addBase, addUtilities }) {
         // Combined class: applies both fontFlash (for neon orange) and iconPulse (for the pulse effect)
         '.animate-iconCombined': {
             animation:
-                'fontFlash 8s ease-in-out infinite, iconPulse 6s ease-in-out 3 forwards',
+                'iconPulse 2s ease-in-out 3 forwards',
         },
         // Optionally, add a default state class for non-animated state (brand green)
         '.icon-default': {
