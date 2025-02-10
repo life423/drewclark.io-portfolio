@@ -29,7 +29,7 @@ export default function ProgressBar() {
 
     return (
         <div
-            className='fixed top-16 left-0 h-1 transition-all duration-200 z-51'
+            className='fixed top-16 left-0 h-1 transition-all duration-200 z-[51]'
             style={{
                 width: `${progress}%`,
                 backgroundColor: barColor,
