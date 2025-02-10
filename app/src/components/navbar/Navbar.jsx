@@ -37,7 +37,7 @@ export default function NavBar({ drawerOpen, setDrawerOpen, closeDrawer }) {
           bg-clip-text 
           text-transparent
           bg-gradient-to-r
-          from-brandGreen-300
+           from-brandGreen-300
           to-brandBlue-400
         '
             >
