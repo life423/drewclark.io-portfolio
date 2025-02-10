@@ -3,45 +3,42 @@
 import React from 'react'
 import { LuTwitter, LuGithub, LuCopyright } from 'react-icons/lu'
 
+// 1) The main Footer
 export default function Footer() {
     return (
         <footer className='mt-16 text-white'>
-            {/* 1. Thin pulsing accent bar across the top */}
+            {/* Pulsing accent bar on top */}
             <div className='h-1 w-full bg-pulse-gradient animate-colorPulse' />
 
-            {/* 2. Main footer area */}
+            {/* Footer content */}
             <div className='bg-brandGray-900 py-6 px-6'>
                 <div className='flex justify-between items-center'>
-                    {/* Icons on the left */}
+                    {/* Left: icons */}
                     <div className='flex space-x-6'>
                         <a
                             href='https://x.com/andrewgenai'
                             target='_blank'
                             rel='noopener noreferrer'
-                            aria-label='Twitter'
                         >
-                            <IconWithHalo>
+                            <IconWithShapePulse>
                                 <LuTwitter className='h-6 w-6 text-brandGreen-300' />
-                            </IconWithHalo>
+                            </IconWithShapePulse>
                         </a>
                         <a
                             href='https://github.com/life423'
                             target='_blank'
                             rel='noopener noreferrer'
-                            aria-label='GitHub'
                         >
-                            <IconWithHalo>
+                            <IconWithShapePulse>
                                 <LuGithub className='h-6 w-6 text-brandGreen-300' />
-                            </IconWithHalo>
+                            </IconWithShapePulse>
                         </a>
                     </div>
 
-                    {/* Company info on the right */}
+                    {/* Right: company info */}
                     <div className='flex items-center space-x-2'>
                         <span>Clark Company Limited</span>
-                        <span>
-                            <LuCopyright className='h-3 w-3' />
-                        </span>
+                        <LuCopyright className='h-3 w-3' />
                         <span>{new Date().getFullYear()}</span>
                     </div>
                 </div>
@@ -50,27 +47,38 @@ export default function Footer() {
     )
 }
 
-/**
- * IconWithHalo - Wraps an icon in a relative container,
- * placing a neonOrange circle behind it that pulses via haloPulse.
- */
-function IconWithHalo({ children }) {
+// 2) The shape-based pulse wrapper
+function IconWithShapePulse({ children }) {
+    // 'children' is your main icon, e.g. <LuTwitter ... >
     return (
         <div className='relative inline-block'>
-            {/* The pulsing halo */}
-            <div
-                className='
-          absolute
-          inset-0
-          rounded-full
-          bg-neonOrange-500
-          animate-haloPulse
-          pointer-events-none
-          z-0
-        '
-            />
-            {/* The actual icon, on top */}
+            {/* This is the second icon behind, which expands/fades out */}
+            <div className='absolute inset-0 flex items-center justify-center pointer-events-none z-0'>
+                {/* We clone the shape: same icon, neon orange, animates behind */}
+                <ShapePulseIcon>{children}</ShapePulseIcon>
+            </div>
+
+            {/* The main icon, in front */}
             <div className='relative z-10'>{children}</div>
         </div>
+    )
+}
+
+// 3) The “pulse” version of the same icon
+//    We re-render the exact same icon as neon orange, then animate it.
+function ShapePulseIcon({ children }) {
+    // We assume 'children' is an icon component—like <LuTwitter className="..." />
+    // We'll clone it with new props.
+    return (
+        <>
+            {React.cloneElement(children, {
+                className: `
+          h-6 w-6 
+          text-neonOrange-400/80 
+          animate-iconPulse 
+          origin-center 
+        `,
+            })}
+        </>
     )
 }
