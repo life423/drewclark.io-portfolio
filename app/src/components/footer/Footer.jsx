@@ -20,7 +20,9 @@ export default function Footer() {
                             rel='noopener noreferrer'
                             aria-label='Twitter'
                         >
-                            <LuTwitter className='h-6 w-6 text-brandGreen-300' />
+                            <IconWithHalo>
+                                <LuTwitter className='h-6 w-6 text-brandGreen-300' />
+                            </IconWithHalo>
                         </a>
                         <a
                             href='https://github.com/life423'
@@ -28,7 +30,9 @@ export default function Footer() {
                             rel='noopener noreferrer'
                             aria-label='GitHub'
                         >
-                            <LuGithub className='h-6 w-6 text-brandGreen-300' />
+                            <IconWithHalo>
+                                <LuGithub className='h-6 w-6 text-brandGreen-300' />
+                            </IconWithHalo>
                         </a>
                     </div>
 
@@ -43,5 +47,30 @@ export default function Footer() {
                 </div>
             </div>
         </footer>
+    )
+}
+
+/**
+ * IconWithHalo - Wraps an icon in a relative container,
+ * placing a neonOrange circle behind it that pulses via haloPulse.
+ */
+function IconWithHalo({ children }) {
+    return (
+        <div className='relative inline-block'>
+            {/* The pulsing halo */}
+            <div
+                className='
+          absolute
+          inset-0
+          rounded-full
+          bg-neonOrange-500
+          animate-haloPulse
+          pointer-events-none
+          z-0
+        '
+            />
+            {/* The actual icon, on top */}
+            <div className='relative z-10'>{children}</div>
+        </div>
     )
 }
