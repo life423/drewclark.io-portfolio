@@ -7,8 +7,8 @@ export default function Hero() {
         <section
             className='relative flex items-center justify-center h-screen bg-cover bg-center'
             style={{
-                // The background image with a gradient overlay. Here the gradient goes from a darker green to a brighter green.
-                backgroundImage: `linear-gradient(to bottom right, rgba(4,120,87,0.7), rgba(52,211,153,0.7)), url(${sprout})`,
+                
+                backgroundImage: `url(${sprout})`,
             }}
         >
             {/* Content container */}

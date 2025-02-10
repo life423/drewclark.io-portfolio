@@ -1,6 +1,7 @@
 // FILE: app/src/components/navbar/Navbar.jsx
 import React from 'react'
 import { LuMenu } from 'react-icons/lu'
+import clsx from 'clsx'
 import useScrollPosition from '../../hooks/useScrollPosition'
 import Drawer from '../drawer/Drawer'
 
@@ -8,15 +9,29 @@ export default function NavBar({ drawerOpen, setDrawerOpen, closeDrawer }) {
     const scrollY = useScrollPosition()
     const isScrolled = scrollY > 50
 
-    const bgClasses = (() => {
-        if (isScrolled && !drawerOpen) {
-            return 'bg-brandGray-800/60 '
-        } else if (isScrolled && drawerOpen) {
-            return 'bg-brandGray-800/60 '
-        } else {
-            return 'bg-brandGray-800/90 backdrop-blur-md'
-        }
-    })()
+    // const bgClasses = (() => {
+    //     if (isScrolled && !drawerOpen) {
+    //         return 'bg-brandGray-800/60 '
+    //     } else if (isScrolled && drawerOpen) {
+    //         return 'bg-brandGray-800/60 backdrop-blur-md'
+    //     } else {
+    //         return 'bg-brandGray-800/90 backdrop-blur-md'
+    //     }
+    // })()
+    // const bgClasses = clsx({
+    //     'bg-brandGray-800/60': isScrolled,
+    //     'bg-brandGray-800/90 backdrop-blur-md': !isScrolled,
+    // })
+    // const bgClasses = (() =>
+    //     clsx({
+    //         'bg-brandGray-800/60': isScrolled,
+    //         'bg-brandGray-800/90 backdrop-blur-md': !isScrolled,
+    //     }))()
+const bgClasses = clsx({
+    'bg-brandGray-800/60': isScrolled,
+    'bg-brandGray-800/90 backdrop-blur-md': !isScrolled,
+})
+
 
     return (
         <nav
