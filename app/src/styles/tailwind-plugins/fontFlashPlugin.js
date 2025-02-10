@@ -15,7 +15,7 @@ export default plugin(function ({ addBase, addUtilities }) {
     // Add the utility class for applying the font flash animation.
     addUtilities({
         '.animate-fontFlash': {
-            animation: 'fontFlash 8s ease-in-out infinite',
+            animation: 'fontFlash 8s ease-in-out 3',
         },
     })
 })
