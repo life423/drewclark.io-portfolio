@@ -2,8 +2,6 @@
 import React from 'react'
 import clsx from 'clsx'
 import NavBar from '../navbar/Navbar'
-import ProgressBar from '../progress/ProgressBar'
-import Hero from '../hero/Hero'
 import Footer from '../footer/Footer'
 
 export default function Layout({
@@ -18,22 +16,18 @@ export default function Layout({
             <header>
                 <NavBar
                     drawerOpen={drawerOpen}
-                    setDrawerOpen={openDrawer}
+                    openDrawer={openDrawer}
                     closeDrawer={closeDrawer}
                 />
-                {/* <ProgressBar /> */}
-                 {!drawerOpen && <ProgressBar />}
-               
             </header>
-
-            {/* Hero Section */}
-            <Hero />
 
             {/* Main Content */}
             <main
                 id='content'
-                className='flex-grow transition-transform duration-300 '
+                className='flex-grow transition-transform duration-300'
             >
+                {children}
+                
                 {/* About Section */}
                 <section className='p-8'>
                     <h2 className='text-3xl font-bold mb-4 text-white'>About Us</h2>
