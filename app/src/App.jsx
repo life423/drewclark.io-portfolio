@@ -1,13 +1,14 @@
 import React from 'react'
 import useNavigationState from './hooks/useNavigationState'
-import useScrollPosition from './hooks/useScrollPosition'
-import ProgressBar from './components/progress/ProgressBar'
 import Layout from './components/layout/Layout'
 import Hero from './components/hero/Hero'
+import About from './components/sections/About'
+import Projects from './components/sections/Projects'
+import Contact from './components/sections/Contact'
+import ProgressBar from './components/progress/ProgressBar'
 
 export default function App() {
     const { drawerOpen, openDrawer, closeDrawer } = useNavigationState()
-    const scrollY = useScrollPosition()
 
     return (
         <>
@@ -17,7 +18,12 @@ export default function App() {
                 openDrawer={openDrawer}
                 closeDrawer={closeDrawer}
             >
-                <Hero />
+                <main className="flex flex-col min-h-screen">
+                    <Hero />
+                    <About />
+                    <Projects />
+                    <Contact />
+                </main>
             </Layout>
         </>
     )
