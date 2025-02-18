@@ -1,13 +1,7 @@
 // FILE: app/tailwind.config.js
 
-import backgroundsPlugin from './src/styles/tailwind-plugins/backgrounds.js'
-import backgroundPositionsPlugin from './src/styles/tailwind-plugins/backgroundPositions.js'
-import colorPulsePlugin from './src/styles/tailwind-plugins/colorPulsePlugin.js'
-// import fontFlashPlugin from './src/styles/tailwind-plugins/fontFlashPlugin.js'
-import iconPulsePlugin from './src/styles/tailwind-plugins/iconPulsePlugin.js'
-import staggeredPulsePlugin from './src/styles/tailwind-plugins/staggeredPulsePlugin.js'
-import combinedPulsePlugin from './src/styles/tailwind-plugins/combinedPulsePlugin'
-import gradientOverlay from './src/styles/tailwind-plugins/gradientOverlay.js' 
+import backgroundsPlugin from './src/styles/plugins/backgrounds.js'
+
 export default {
     content: ['./src/index.html', './src/**/*.{js,jsx,ts,tsx}'],
     theme: {
@@ -64,18 +58,9 @@ export default {
                     900: '#18181B',
                 },
             },
-            // Remove the keyframes and animation definitions from here
-            // since they have been moved to separate plugins.
         },
     },
     plugins: [
         backgroundsPlugin,
-        backgroundPositionsPlugin,
-        colorPulsePlugin,
-        // fontFlashPlugin,
-        iconPulsePlugin,
-        staggeredPulsePlugin,
-        combinedPulsePlugin,
-        gradientOverlay,
     ],
 }
