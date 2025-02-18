@@ -1,7 +1,7 @@
 // FILE: app/src/components/progress/ProgressBar.jsx
 import React, { useState, useEffect, useMemo } from 'react'
 import useScrollPosition from '../../hooks/useScrollPosition'
-import { getInterpolatedColor } from '../utils/colorInterpolate'
+import { getInterpolatedColor } from '../../utils/colorInterpolate'
 
 export default function ProgressBar() {
     // A) Existing logic
