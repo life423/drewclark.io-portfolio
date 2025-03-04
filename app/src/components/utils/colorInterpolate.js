@@ -1,25 +1,45 @@
 /**
  * Interpolates between colors based on a progress value (0-100)
  * @param {number} progress - Progress value between 0 and 100
- * @returns {string} - RGB color string
+ * @returns {string} - RGBA color string
  */
-export const getInterpolatedColor = (progress) => {
+export const getInterpolatedColor = progress => {
     // Ensure progress is between 0 and 100
     const clampedProgress = Math.max(0, Math.min(100, progress))
-    
-    // Define color stops
+
+    // Define color stops using Tailwind colors. These values come from tailwind.config.js
     const colors = [
-        { r: 59, g: 130, b: 246 }, // Blue (tailwind blue-500)
-        { r: 16, g: 185, b: 129 }, // Green (tailwind green-500)
+        { r: 16, g: 185, b: 129, a: 0.8 }, // brandGreen-500 (#10B981)
+        { r: 14, g: 165, b: 233, a: 0.8 }, // brandBlue-500 (#0EA5E9)
+        { r: 255, g: 107, b: 0, a: 0.8 }, // neonOrange-500 (#FF6B00)
     ]
-    
-    // Calculate interpolation factor
-    const factor = clampedProgress / 100
-    
-    // Interpolate between colors
-    const r = Math.round(colors[0].r + (colors[1].r - colors[0].r) * factor)
-    const g = Math.round(colors[0].g + (colors[1].g - colors[0].g) * factor)
-    const b = Math.round(colors[0].b + (colors[1].b - colors[0].b) * factor)
-    
-    return `rgb(${r}, ${g}, ${b})`
+
+    // Determine which segment the progress falls into
+    let startColor, endColor, segmentFactor
+
+    if (clampedProgress <= 50) {
+        // First segment: Green to Blue
+        startColor = colors[0]
+        endColor = colors[1]
+        segmentFactor = clampedProgress / 50 // 0-1 within this segment
+    } else {
+        // Second segment: Blue to Orange
+        startColor = colors[1]
+        endColor = colors[2]
+        segmentFactor = (clampedProgress - 50) / 50 // 0-1 within this segment
+    }
+
+    // Interpolate between the appropriate colors
+    const r = Math.round(
+        startColor.r + (endColor.r - startColor.r) * segmentFactor
+    )
+    const g = Math.round(
+        startColor.g + (endColor.g - startColor.g) * segmentFactor
+    )
+    const b = Math.round(
+        startColor.b + (endColor.b - startColor.b) * segmentFactor
+    )
+    const a = startColor.a + (endColor.a - startColor.a) * segmentFactor
+
+    return `rgba(${r}, ${g}, ${b}, ${a})`
 }
