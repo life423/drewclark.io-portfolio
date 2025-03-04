@@ -1,115 +1,80 @@
-// FILE: app/src/components/infinityDrawer.jsx
-import React, { useEffect, useRef, Children } from 'react'
+// FILE: app/src/components/drawer/Drawer.jsx
+import React, { useEffect, useRef } from 'react'
 import { LuX } from 'react-icons/lu'
+import clsx from 'clsx'
 
-export default function InfinityDrawer({ isOpen, onClose, children }) {
-    const drawerRef = useRef(null)
-    const lastFocusedRef = useRef(null)
+export default function Drawer({ isOpen, onClose }) {
+  const drawerRef = useRef(null)
 
-    useEffect(() => {
-        function handleKeyDown(e) {
-            if (e.key === 'Escape') {
-                onClose()
-            }
-        }
+  useEffect(() => {
+    function onKey(e) {
+      if (e.key === 'Escape') onClose()
+    }
+    if (isOpen) {
+      document.addEventListener('keydown', onKey)
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = ''
+    }
+  }, [isOpen, onClose])
 
-        if (isOpen) {
-            lastFocusedRef.current = document.activeElement
-            document.body.style.overflow = 'hidden'
-            document.addEventListener('keydown', handleKeyDown)
-            drawerRef.current?.focus()
-        } else {
-            document.body.style.overflow = ''
-            document.removeEventListener('keydown', handleKeyDown)
-            if (lastFocusedRef.current) {
-                lastFocusedRef.current.focus()
-            }
-        }
+  return (
+    <>
+      {/* Dark overlay */}
+      <div
+        className={clsx(
+          'fixed inset-0 z-60 bg-black/40 backdrop-blur-sm transition-opacity duration-300',
+          isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        )}
+        onClick={onClose}
+        aria-hidden="true"
+      />
 
-        return () => {
-            document.body.style.overflow = ''
-            document.removeEventListener('keydown', handleKeyDown)
-        }
-    }, [isOpen, onClose])
+      {/* Sliding Drawer */}
+      <div
+        ref={drawerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-hidden={!isOpen}
+        tabIndex={-1}
+        className={clsx(
+          'fixed top-0 left-0 h-screen w-[75%] max-w-sm z-70 flex flex-col',
+          'bg-brandGray-800/80 backdrop-blur-md border-l border-brandGreen-700/50',
+          'transition-transform duration-300',
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        )}
+      >
+        <button
+          onClick={onClose}
+          aria-label="Close Menu"
+          className="ml-auto mt-4 mr-4 p-2 outline-none focus:outline-none"
+        >
+          <LuX className="h-8 w-8 text-brandGreen-300 transition-colors hover:text-brandGreen-200" />
+        </button>
 
-    return (
-        <>
-            <div
-                className={`
-          fixed inset-0 z-60
-          bg-brandGray-900/80
-          transition-opacity duration-300
-          ${
-              isOpen
-                  ? 'opacity-100 pointer-events-auto'
-                  : 'opacity-0 pointer-events-none'
-          }
-        `}
-                onClick={onClose}
-                aria-hidden='true'
-                tabIndex={-1}
-                role='presentation'
-            />
-
-            <div
-                role='dialog'
-                aria-modal='true'
-                aria-hidden={!isOpen}
-                ref={drawerRef}
-                tabIndex={-1}
-                className={`
-          fixed top-0 left-0 h-screen
-          w-[70%] max-w-sm
-          z-70 flex flex-col
-          transition-transform duration-300
-          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-          backdrop-blur-md bg-brandGray-800/60
-          border-gradient-to-b from-brandGreen-400 to-brandBlue-400
-          outline-none focus:outline-none
-        `}
+        <ul className="flex flex-col items-center justify-center flex-1 space-y-6 text-white font-medium">
+          {['Home', 'Projects', 'Contact'].map((item, index) => (
+            <li 
+              key={item} 
+              className={clsx(
+                'cursor-pointer hover:text-brandGreen-300 transition-all duration-300',
+                'opacity-0 translate-y-4',
+                isOpen && 'opacity-100 translate-y-0'
+              )}
+              style={{ 
+                transitionDelay: isOpen ? `${index * 75}ms` : '0ms' 
+              }}
             >
-                <button
-                    onClick={onClose}
-                    aria-label='Close Menu'
-                    className='ml-auto mt-4 mr-4 outline-none focus:outline-none'
-                >
-                    <LuX className='h-10 w-10 text-brandGreen-300 hover:text-brandGreen-300 transition-colors' />
-                </button>
-
-                <ul className='flex flex-col items-center justify-center flex-1 space-y-6 text-brandGray-50'>
-                    {['Home', 'Projects', 'Contact'].map((item, idx) => (
-                        <li
-                            key={item}
-                            className={`
-                opacity-0 translate-y-4 transition-all duration-300
-                delay-[${idx * 75}ms]
-                ${isOpen ? 'opacity-100 translate-y-0' : ''}
-              `}
-                        >
-                            {item}
-                        </li>
-                    ))}
-                </ul>
-
-                {Children.map(children, (child, index) => (
-                    <div
-                        key={index}
-                        className={`
-              transition-all duration-300 transform-gpu
-              ${
-                  isOpen
-                      ? 'opacity-100 translate-y-0'
-                      : 'opacity-0 translate-y-2'
-              }
-            `}
-                        style={{
-                            transitionDelay: isOpen ? `${index * 50}ms` : '0ms',
-                        }}
-                    >
-                        {child}
-                    </div>
-                ))}
-            </div>
-        </>
-    )
+              {item}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </>
+  )
 }
