@@ -35,7 +35,7 @@ window.onload = () => {
 setTimeout(() => {
   clearInterval(incrementInterval)
   NProgress.done()
-}, 2000)
+}, 2000) // Reasonable timeout for fallback
 
 ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
