@@ -1,60 +1,58 @@
-import React, { useRef, useState } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import { LuTwitter, LuGithub } from 'react-icons/lu'
-import useIntersection from '../../hooks/useIntersection'
 import clsx from 'clsx'
-import useStaggeredTwoIcons from '../../hooks/useStaggeredTwoIcons'
+import useIntersection from '../../hooks/useIntersection'
 import { IconPair } from '../utils/IconPair'
 
 export default function Footer() {
     const containerRef = useRef(null)
-    const inView = useIntersection(containerRef)
+    // 'inView' is true whenever the containerRef enters the viewport
+    const inView = useIntersection(containerRef, { threshold: 0.1 })
 
-    const { leftClass, rightClass, onLeftEnd, onRightEnd, stopNow } =
-        useStaggeredTwoIcons({ inView, maxIterations: 1 })
-        
-    // Track whether each icon has been clicked
-    const [twitterClicked, setTwitterClicked] = useState(false)
-    const [githubClicked, setGithubClicked] = useState(false)
-    
-    // Choose one of the five micro-animations for each icon
-    const twitterAnimation = 'animate-soft-glow'
-    const githubAnimation = 'animate-soft-glow'
+    // So the icons only change color once
+    const [colorTriggered, setColorTriggered] = useState(false)
+
+    // Once the container is in view, set colorTriggered = true and never revert
+    useEffect(() => {
+        if (inView && !colorTriggered) {
+            setColorTriggered(true)
+        }
+    }, [inView, colorTriggered])
+
+    // If colorTriggered is false, icons are green; if true, they are orange
+    const iconColorClass = colorTriggered
+        ? 'text-neonOrange-500'
+        : 'text-brandGreen-500'
 
     return (
         <footer className='mt-16 text-white' ref={containerRef}>
-            {}
-            {/* <div className='h-1 w-full bg-pulse-gradient animate-colorPulse' /> */}
-
             <div className='bg-brandGray-900 py-6 px-6'>
                 <div className='flex justify-between items-center'>
-                    {}
+                    {/* ICONS */}
                     <div className='flex space-x-6'>
                         <IconPair
                             Icon={LuTwitter}
+                            // Tailwind's transition-colors + a short duration for smooth fade
                             iconAnimationClass={clsx(
-                                leftClass,
-                                'text-neonOrange-500 fill-current stroke-current',
-                                !twitterClicked ? twitterAnimation : ''
+                                'fill-current stroke-current',
+                                'transition-colors duration-500 ease-in-out',
+                                iconColorClass
                             )}
-                            onAnimEnd={onLeftEnd}
-                            onUserStop={stopNow}
                             url='https://twitter.com/andrewgenai'
-                            onClick={() => setTwitterClicked(true)}
                         />
+
                         <IconPair
                             Icon={LuGithub}
                             iconAnimationClass={clsx(
-                                rightClass,
-                                'text-neonOrange-500 fill-current stroke-current',
-                                !githubClicked ? githubAnimation : ''
+                                'fill-current stroke-current',
+                                'transition-colors duration-500 ease-in-out',
+                                iconColorClass
                             )}
-                            onAnimEnd={onRightEnd}
-                            onUserStop={stopNow}
                             url='https://github.com/life423'
-                            onClick={() => setGithubClicked(true)}
                         />
                     </div>
-                    {}
+
+                    {/* COPYRIGHT */}
                     <div className='flex items-center space-x-2'>
                         <span>Clark Company Limited</span>
                         <span>&copy;</span>
