@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react'
+// FILE: ProgressBar.jsx
+
+import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import useScrollPosition from '../../hooks/useScrollPosition'
-import { getInterpolatedColor } from '../../components/utils/colorInterpolate'
 
 export default function ProgressBar({ topOffset = '4rem' }) {
     const scrollY = useScrollPosition()
@@ -22,21 +23,26 @@ export default function ProgressBar({ topOffset = '4rem' }) {
     const scrollable = docHeight - winHeight
     const progress = scrollable > 0 ? (scrollY / scrollable) * 100 : 0
 
-    // Get interpolated color based on scroll progress
-    const barColor = useMemo(() => getInterpolatedColor(progress), [progress])
-
     return (
         <div
-            className="fixed left-0 h-1 transition-all duration-200 z-[60]"
+            className='
+        fixed
+        left-0
+        h-1
+        z-[60]
+        bg-pulse-gradient
+        animate-colorPulse
+        transition-all
+        duration-200
+      '
             style={{
                 width: `${progress}%`,
-                backgroundColor: barColor,
-                top: topOffset
+                top: topOffset,
             }}
         />
     )
 }
 
 ProgressBar.propTypes = {
-    topOffset: PropTypes.string
+    topOffset: PropTypes.string,
 }

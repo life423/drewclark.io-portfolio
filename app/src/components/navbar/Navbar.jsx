@@ -16,7 +16,7 @@ export default function NavBar({ drawerOpen, openDrawer, closeDrawer }) {
 
     return (
         <nav
-            className={clsx(
+        className={clsx(
                 'fixed top-0 w-full h-16 px-4',
                 'flex items-center justify-between',
                 'transition-colors duration-300',
