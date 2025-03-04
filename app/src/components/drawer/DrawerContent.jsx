@@ -12,7 +12,7 @@ function DrawerContent({ isOpen, onClose, children, drawerRef }) {
             ref={drawerRef}
             tabIndex={-1}
             className={clsx(
-                'fixed top-0 left-0 h-screen w-[70%] max-w-sm z-70 flex flex-col transition-transform duration-300 backdrop-blur-md bg-brandGray-800/60 border-gradient-to-b from-brandGreen-400 to-brandBlue-400 outline-none',
+                'fixed top-0 left-0 h-screen w-[70%] max-w-sm z-70 flex flex-col transition-transform duration-300 backdrop-blur-md bg-gradient-to-br from-brandBlue-900/95 to-brandGray-900/95 border-gradient-to-r from-neonOrange-500 to-brandBlue-500 outline-none',
                 { 'translate-x-0': isOpen, '-translate-x-full': !isOpen }
             )}
         >
@@ -25,10 +25,10 @@ function DrawerContent({ isOpen, onClose, children, drawerRef }) {
                 aria-label='Close Menu'
                 className='ml-auto mt-4 mr-4 outline-none focus:outline-none'
             >
-                <LuX className='h-10 w-10 text-brandGreen-300 hover:text-brandGreen-300 transition-colors' />
+                <LuX className='h-10 w-10 text-neonOrange-400 hover:text-neonOrange-300 transition-colors' />
             </button>
 
-            <ul className='flex flex-col items-center justify-center flex-1 space-y-6 text-brandGray-50'>
+            <ul className='flex flex-col items-center justify-center flex-1 space-y-6 text-brandBlue-100'>
                 {['Home', 'Projects', 'Contact'].map((item, idx) => (
                     <li
                         key={item}
