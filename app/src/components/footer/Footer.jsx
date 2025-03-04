@@ -17,7 +17,7 @@ export default function Footer() {
     const [githubClicked, setGithubClicked] = useState(false)
     
     // Choose one of the five micro-animations for each icon
-    const twitterAnimation = 'animate-gentle-bounce'
+    const twitterAnimation = 'animate-soft-glow'
     const githubAnimation = 'animate-soft-glow'
 
     return (
