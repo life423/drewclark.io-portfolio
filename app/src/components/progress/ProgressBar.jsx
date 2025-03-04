@@ -1,4 +1,4 @@
-// FILE: ProgressBar.jsx
+// FILE: app\src\components\progress\ProgressBar.jsx
 
 import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
@@ -30,8 +30,8 @@ export default function ProgressBar({ topOffset = '4rem' }) {
         left-0
         h-1
         z-[60]
-        bg-pulse-gradient
-        animate-colorPulse
+        bg-pulse-gradient     /* from backgrounds plugin (the gradient) */
+        animate-color-pulse   /* from animations plugin (the keyframe) */
         transition-all
         duration-200
       '
