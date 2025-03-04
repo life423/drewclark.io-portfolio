@@ -43,6 +43,28 @@ export default plugin(function ({ addBase, addUtilities }) {
             '50%':  { filter: 'drop-shadow(0 0 6px #FF6B00)' },
             '100%': { filter: 'drop-shadow(0 0 0px #FF6B00)' },
         },
+        // Triple pulse animation with transition to orange then back to green
+        '@keyframes triplePulseToOrange': {
+            // First pulse - orange
+            '0%':   { filter: 'drop-shadow(0 0 0px #FF6B00)', color: '#FF6B00' },
+            '5%':   { filter: 'drop-shadow(0 0 8px #FF6B00)', color: '#FF6B00' },
+            '10%':  { filter: 'drop-shadow(0 0 0px #FF6B00)', color: '#FF6B00' },
+            // Small pause
+            '15%':  { filter: 'drop-shadow(0 0 0px #FF6B00)', color: '#FF6B00' },
+            // Second pulse - orange
+            '20%':  { filter: 'drop-shadow(0 0 0px #FF6B00)', color: '#FF6B00' },
+            '25%':  { filter: 'drop-shadow(0 0 8px #FF6B00)', color: '#FF6B00' },
+            '30%':  { filter: 'drop-shadow(0 0 0px #FF6B00)', color: '#FF6B00' },
+            // Small pause
+            '35%':  { filter: 'drop-shadow(0 0 0px #FF6B00)', color: '#FF6B00' },
+            // Third pulse - orange
+            '40%':  { filter: 'drop-shadow(0 0 0px #FF6B00)', color: '#FF6B00' },
+            '45%':  { filter: 'drop-shadow(0 0 8px #FF6B00)', color: '#FF6B00' },
+            '50%':  { filter: 'drop-shadow(0 0 0px #FF6B00)', color: '#FF6B00' },
+            // Transition back to green with outline
+            '80%':  { filter: 'drop-shadow(0 0 0px #10B981)', color: '#10B981' },
+            '100%': { filter: 'drop-shadow(0 0 2px #10B981)', color: '#10B981' },
+        },
     })
 
     // 2. Animation utility classes
@@ -74,6 +96,9 @@ export default plugin(function ({ addBase, addUtilities }) {
         },
         '.animate-soft-glow': {
             animation: 'softGlow 1.5s ease-in-out infinite',
+        },
+        '.animate-triple-pulse-to-orange': {
+            animation: 'triplePulseToOrange 4s ease-in-out 1 forwards',
         },
         // Optional: Delay classes
         '.animation-delay-0': { 'animation-delay': '0s' },
