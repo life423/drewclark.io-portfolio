@@ -25,7 +25,7 @@ export default function Hero() {
                     <div className='mt-8'>
                         <a
                             href='#contact'
-                            className='inline-block px-8 py-4 bg-brandGreen-500 text-white font-semibold rounded-md shadow-lg hover:bg-brandGreen-600 transition-colors duration-300'
+                            className='inline-block px-8 py-4 bg-brandGreen-600 text-white font-semibold rounded-md shadow-lg hover:bg-brandGreen-800 transition-colors duration-300'
                         >
                             Get in Touch
                         </a>

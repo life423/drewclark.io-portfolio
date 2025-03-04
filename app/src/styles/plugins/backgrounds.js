@@ -4,7 +4,10 @@ import plugin from 'tailwindcss/plugin'
 function hexToRgb(hex) {
     hex = hex.replace('#', '')
     if (hex.length === 3) {
-        hex = hex.split('').map(x => x + x).join('')
+        hex = hex
+            .split('')
+            .map(x => x + x)
+            .join('')
     }
     const bigint = parseInt(hex, 16)
     const r = (bigint >> 16) & 255
@@ -18,7 +21,7 @@ export default plugin(function ({ addUtilities, theme }) {
     const green = theme('colors.brandGreen.200')
     const blue = theme('colors.brandBlue.200')
     const orange = theme('colors.neonOrange.500')
-    
+
     // Convert colors to RGB for overlay
     const greenRgb = hexToRgb(green)
     const blueRgb = hexToRgb(blue)
@@ -40,8 +43,8 @@ export default plugin(function ({ addUtilities, theme }) {
             const percent = (i + 1) * 5 // 5%, 10%, 15%, ..., 100%
             return {
                 [`.bg-pos-v-${percent}`]: {
-                    backgroundPosition: `50% ${percent}%`
-                }
+                    backgroundPosition: `50% ${percent}%`,
+                },
             }
         }).reduce((acc, curr) => ({ ...acc, ...curr }), {}),
 
@@ -58,15 +61,18 @@ export default plugin(function ({ addUtilities, theme }) {
         },
 
         // Gradient Overlays
-        '.gradient-overlay': {
-            backgroundImage: `linear-gradient(135deg, rgba(${greenRgb}, 0.4) 40%, rgba(${blueRgb}, 1) 100%)`,
-            mixBlendMode: 'overlay',
+        '.gradient-overlay-2': {
+            backgroundImage: `
+        linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+    linear-gradient(135deg, rgba(${greenRgb}, 0.4) 0%, rgba(${blueRgb}, 0.4) 100%)
+  `,
+            backgroundBlendMode: 'multiply, overlay',
         },
         '.bg-pulse-gradient': {
             backgroundImage: `linear-gradient(90deg, ${orange} 0%, ${green} 50%, ${blue} 100%)`,
             backgroundSize: '200% 200%',
             backgroundRepeat: 'repeat',
-        }
+        },
     }
 
     addUtilities(backgroundUtilities, ['responsive'])
