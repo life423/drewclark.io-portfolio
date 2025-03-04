@@ -36,6 +36,7 @@ export default function Footer() {
                             iconAnimationClass={clsx(
                                 'fill-current stroke-current',
                                 'transition-colors duration-500 ease-in-out',
+                                'animate-soft-glow', // Add back the soft glow animation
                                 iconColorClass
                             )}
                             url='https://twitter.com/andrewgenai'
@@ -46,6 +47,7 @@ export default function Footer() {
                             iconAnimationClass={clsx(
                                 'fill-current stroke-current',
                                 'transition-colors duration-500 ease-in-out',
+                                'animate-soft-glow', // Add back the soft glow animation
                                 iconColorClass
                             )}
                             url='https://github.com/life423'
