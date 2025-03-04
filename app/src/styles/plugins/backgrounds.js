@@ -69,8 +69,8 @@ export default plugin(function ({ addUtilities, theme }) {
             backgroundBlendMode: 'multiply, overlay',
         },
         '.bg-pulse-gradient': {
-            backgroundImage: `linear-gradient(90deg, ${orange} 0%, ${green} 50%, ${blue} 100%)`,
-            backgroundSize: '200% 200%',
+            backgroundImage: `linear-gradient(90deg, ${green} 0%, ${blue} 50%, ${orange} 100%)`,
+            backgroundSize: '300% 100%',
             backgroundRepeat: 'repeat',
         },
     }

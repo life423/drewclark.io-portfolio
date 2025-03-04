@@ -25,7 +25,7 @@ export default function ProgressBar({ topOffset = '4rem' }) {
 
     return (
         <div
-            className='
+        className='
         fixed
         left-0
         h-1
@@ -33,7 +33,7 @@ export default function ProgressBar({ topOffset = '4rem' }) {
         bg-pulse-gradient     /* from backgrounds plugin (the gradient) */
         animate-color-pulse   /* from animations plugin (the keyframe) */
         transition-all
-        duration-200
+        duration-300
       '
             style={{
                 width: `${progress}%`,

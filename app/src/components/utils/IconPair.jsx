@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 
-export function IconPair({ Icon, iconAnimationClass, onAnimEnd, onUserStop, url }) {
+export function IconPair({ Icon, iconAnimationClass, onAnimEnd, onUserStop, url, onClick }) {
     return (
         <a
             href={url}
@@ -17,7 +17,11 @@ export function IconPair({ Icon, iconAnimationClass, onAnimEnd, onUserStop, url 
                         : 'animate-none icon-default'
                 )}
                 onAnimationEnd={onAnimEnd}
-                onClick={onUserStop}
+                onClick={(e) => {
+                    // Call both the onUserStop and onClick handlers if provided
+                    if (onUserStop) onUserStop(e);
+                    if (onClick) onClick(e);
+                }}
             />
         </a>
     )

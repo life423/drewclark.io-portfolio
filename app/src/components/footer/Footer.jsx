@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import { LuTwitter, LuGithub } from 'react-icons/lu'
 import useIntersection from '../../hooks/useIntersection'
 import clsx from 'clsx'
@@ -11,6 +11,14 @@ export default function Footer() {
 
     const { leftClass, rightClass, onLeftEnd, onRightEnd, stopNow } =
         useStaggeredTwoIcons({ inView, maxIterations: 1 })
+        
+    // Track whether each icon has been clicked
+    const [twitterClicked, setTwitterClicked] = useState(false)
+    const [githubClicked, setGithubClicked] = useState(false)
+    
+    // Choose one of the five micro-animations for each icon
+    const twitterAnimation = 'animate-gentle-bounce'
+    const githubAnimation = 'animate-soft-glow'
 
     return (
         <footer className='mt-16 text-white' ref={containerRef}>
@@ -23,17 +31,27 @@ export default function Footer() {
                     <div className='flex space-x-6'>
                         <IconPair
                             Icon={LuTwitter}
-                            iconAnimationClass={leftClass}
+                            iconAnimationClass={clsx(
+                                leftClass,
+                                'text-neonOrange-500 fill-current stroke-current',
+                                !twitterClicked ? twitterAnimation : ''
+                            )}
                             onAnimEnd={onLeftEnd}
                             onUserStop={stopNow}
                             url='https://twitter.com/andrewgenai'
+                            onClick={() => setTwitterClicked(true)}
                         />
                         <IconPair
                             Icon={LuGithub}
-                            iconAnimationClass={rightClass}
+                            iconAnimationClass={clsx(
+                                rightClass,
+                                'text-neonOrange-500 fill-current stroke-current',
+                                !githubClicked ? githubAnimation : ''
+                            )}
                             onAnimEnd={onRightEnd}
                             onUserStop={stopNow}
                             url='https://github.com/life423'
+                            onClick={() => setGithubClicked(true)}
                         />
                     </div>
                     {}
