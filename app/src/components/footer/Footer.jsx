@@ -15,7 +15,7 @@ export default function Footer() {
     return (
         <footer className='mt-16 text-white' ref={containerRef}>
             {}
-            <div className='h-1 w-full bg-pulse-gradient animate-colorPulse' />
+            {/* <div className='h-1 w-full bg-pulse-gradient animate-colorPulse' /> */}
 
             <div className='bg-brandGray-900 py-6 px-6'>
                 <div className='flex justify-between items-center'>
