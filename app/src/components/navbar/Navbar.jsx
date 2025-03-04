@@ -1,60 +1,50 @@
 // FILE: app/src/components/navbar/Navbar.jsx
 import React from 'react'
-import { LuMenu } from 'react-icons/lu'
 import clsx from 'clsx'
+import { LuMenu } from 'react-icons/lu'
 import useScrollPosition from '../../hooks/useScrollPosition'
 import Drawer from '../drawer/Drawer'
 
 export default function NavBar({ drawerOpen, openDrawer, closeDrawer }) {
-    const scrollY = useScrollPosition()
-    const isScrolled = scrollY > 50
+  const scrollY = useScrollPosition()
+  const isScrolled = scrollY > 50
 
-    const bgClasses = clsx({
-        'bg-brandGray-800/60': isScrolled,
-        'bg-brandGray-800/90 backdrop-blur-md': !isScrolled,
-    })
+  return (
+    <nav
+      className={clsx(
+        'fixed top-0 w-full h-16 px-4 flex items-center justify-between z-50',
+        'transition-colors duration-300',
+        isScrolled
+          ? 'bg-brandGray-800/80 backdrop-blur-md'
+          : 'bg-brandGray-900/60 backdrop-blur'
+      )}
+    >
+      {/* LOGO */}
+      <div className="text-2xl font-extralight uppercase tracking-wider">
+        {/* Gradient text for brand accent */}
+        <span className="bg-clip-text text-transparent bg-gradient-to-r from-brandGreen-300 to-brandBlue-400">
+          DC
+        </span>
+      </div>
 
-    return (
-        <nav
-        className={clsx(
-                'fixed top-0 w-full h-16 px-4',
-                'flex items-center justify-between',
-                'transition-colors duration-300',
-                'z-50',
-                bgClasses
-            )}
-        >
-            <div
-                className={clsx(
-                    'text-2xl',
-                    'font-extralight',
-                    'uppercase',
-                    'tracking-wide',
-                    'bg-clip-text',
-                    'text-transparent',
-                    'bg-gradient-to-r',
-                    'from-brandGreen-300',
-                    'to-brandBlue-400'
-                )}
-            >
-                DC
-            </div>
+      {/* Hamburger for mobile */}
+      <button
+        className="md:hidden hover:text-gray-200 transition-colors"
+        aria-label="Open Menu"
+        onClick={openDrawer}
+      >
+        <LuMenu className="h-8 w-8 text-brandGreen-300" />
+      </button>
 
-            <button
-                className='md:hidden hover:text-gray-200 transition'
-                aria-label='Open Menu'
-                onClick={openDrawer}
-            >
-                <LuMenu className='h-10 w-10 text-brandGreen-300 stroke-current' />
-            </button>
+      {/* Desktop Nav */}
+      <ul className="hidden md:flex space-x-8 text-white font-medium">
+        <li className="cursor-pointer hover:text-brandGreen-300 transition-colors">Home</li>
+        <li className="cursor-pointer hover:text-brandGreen-300 transition-colors">Projects</li>
+        <li className="cursor-pointer hover:text-brandGreen-300 transition-colors">Contact</li>
+      </ul>
 
-            <ul className='hidden md:flex space-x-6 text-white'>
-                <li>Home</li>
-                <li>Projects</li>
-                <li>Contact</li>
-            </ul>
-
-            <Drawer isOpen={drawerOpen} onClose={closeDrawer} />
-        </nav>
-    )
+      {/* Drawer for mobile */}
+      <Drawer isOpen={drawerOpen} onClose={closeDrawer} />
+    </nav>
+  )
 }
