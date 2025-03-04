@@ -1,6 +1,7 @@
 // FILE: app/tailwind.config.js
 
 import backgroundsPlugin from './src/styles/plugins/backgrounds.js'
+import animationsPlugin from './src/styles/plugins/animations.js'
 
 export default {
     content: ['./src/index.html', './src/**/*.{js,jsx,ts,tsx}'],
@@ -62,5 +63,6 @@ export default {
     },
     plugins: [
         backgroundsPlugin,
+        animationsPlugin,
     ],
 }
