@@ -7,10 +7,12 @@ export default function useNavigationState() {
     // Toggle logic
     const openDrawer = useCallback(() => setDrawerOpen(true), [])
     const closeDrawer = useCallback(() => setDrawerOpen(false), [])
+    const toggleDrawer = useCallback(() => setDrawerOpen(prev => !prev), [])
 
     return {
         drawerOpen,
         openDrawer,
         closeDrawer,
+        toggleDrawer,
     }
 }

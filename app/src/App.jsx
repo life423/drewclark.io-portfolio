@@ -8,7 +8,7 @@ import Contact from './components/sections/Contact'
 import ProgressBar from './components/progress/ProgressBar'
 
 export default function App() {
-    const { drawerOpen, openDrawer, closeDrawer } = useNavigationState()
+    const { drawerOpen, openDrawer, closeDrawer, toggleDrawer } = useNavigationState()
 
     return (
         <>
@@ -17,6 +17,7 @@ export default function App() {
                 drawerOpen={drawerOpen}
                 openDrawer={openDrawer}
                 closeDrawer={closeDrawer}
+                toggleDrawer={toggleDrawer}
             >
                 <main className="flex flex-col min-h-screen">
                     <Hero />

@@ -5,7 +5,7 @@ import { LuMenu } from 'react-icons/lu'
 import useScrollPosition from '../../hooks/useScrollPosition'
 import Drawer from '../drawer/Drawer'
 
-export default function NavBar({ drawerOpen, openDrawer, closeDrawer }) {
+export default function NavBar({ drawerOpen, openDrawer, closeDrawer, toggleDrawer }) {
   const scrollY = useScrollPosition()
   const isScrolled = scrollY > 50
 
@@ -31,7 +31,7 @@ export default function NavBar({ drawerOpen, openDrawer, closeDrawer }) {
       <button
         className="md:hidden hover:text-gray-200 transition-colors"
         aria-label="Open Menu"
-        onClick={openDrawer}
+        onClick={() => toggleDrawer()}
       >
         <LuMenu className="h-8 w-8 text-brandGreen-300" />
       </button>
