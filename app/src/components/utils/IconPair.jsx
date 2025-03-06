@@ -34,4 +34,4 @@ export function IconPair({
     )
 }
 
-// export default IconPair;
+export default IconPair;

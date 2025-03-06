@@ -1,47 +1,31 @@
+/* 
+ * Simple NProgress CSS file with minimal styling
+ */
+
 /* Make clicks pass-through */
 #nprogress {
   pointer-events: none;
 }
 
-/* 
-==============================================
-PULSING GRADIENT PROGRESS BAR WITH BRAND COLORS
-==============================================
-*/
+/* The main progress bar */
 #nprogress .bar {
-  background: linear-gradient(90deg, #10B981, #0EA5E9, #FF6B00);
-  background-size: 200% 200%;
-  animation: gradient-pulse 1.5s ease infinite;
+  background: #FF6B00; /* Brand orange color */
+  height: 3px;
   position: fixed;
-  z-index: 70;
-  top: 4rem; /* Match the ProgressBar's topOffset */
+  z-index: 9999;
+  top: 0;
   left: 0;
-  height: 4px;
+  width: 100%;
 }
 
-/* Animation for the gradient pulse effect */
-@keyframes gradient-pulse {
-  0% {
-    background-position: 0% 50%;
-    opacity: 0.8;
-  }
-  50% {
-    background-position: 100% 50%;
-    opacity: 1;
-  }
-  100% {
-    background-position: 0% 50%;
-    opacity: 0.8;
-  }
-}
-
-/* Fancy effect at the end of the bar */
+/* Optional: Style for the peg that causes the bar to move faster near the end */
 #nprogress .peg {
   display: block;
   position: absolute;
   right: 0px;
   width: 100px;
   height: 100%;
+  box-shadow: 0 0 10px #FF6B00, 0 0 5px #FF6B00;
   opacity: 1.0;
   transform: rotate(3deg) translate(0px, -4px);
 }
@@ -49,13 +33,4 @@ PULSING GRADIENT PROGRESS BAR WITH BRAND COLORS
 /* Hide spinner */
 #nprogress .spinner {
   display: none;
-}
-
-.nprogress-custom-parent {
-  overflow: hidden;
-  position: relative;
-}
-
-.nprogress-custom-parent #nprogress .bar {
-  position: absolute;
 }

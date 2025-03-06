@@ -1,64 +1,21 @@
-// FILE: app/src/components/hero/Hero.jsx
-import React, { useState, useEffect, memo } from 'react';
-import { motion } from 'framer-motion';
-import PropTypes from 'prop-types';
-import sproutMobile from '../../assets/sprout-mobile.jpg';
-import sproutOriginal from '../../assets/sprout-original.jpg';
-import sproutXs from '../../assets/sprout-xs.jpg';
-import ProjectGrid from './ProjectGrid';
-import { gradients, transitions } from '../../styles/utils';
+import React from 'react'
 
-/**
- * Hero section with integrated asymmetric project grid
- * Creates an immersive showcase with variable card sizes
- */
-const Hero = memo(() => {
-  const [loaded, setLoaded] = useState(false);
-
-  // Animate in on load
-  useEffect(() => {
-    const timer = setTimeout(() => setLoaded(true), 100);
-    return () => clearTimeout(timer);
-  }, []);
-
+export default function Hero() {
   return (
-    <section id="hero" className="relative w-full h-screen overflow-hidden">
-      {/* Small mobile background image */}
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat sm:hidden z-0"
-        style={{ 
-          backgroundImage: `url(${sproutXs})`
-        }}
-      />
-      
-      {/* Mobile background image */}
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat hidden sm:block md:hidden z-0"
-        style={{ 
-          backgroundImage: `url(${sproutMobile})`
-        }}
-      />
-      
-      {/* Desktop background image */}
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat hidden md:block z-0"
-        style={{ 
-          backgroundImage: `url(${sproutOriginal})`
-        }}
-      />
-      
-      {/* Very subtle gradient overlay with green and blue tones */}
-      <div className="
-        absolute inset-0 backdrop-blur-[1px] z-0 
-        bg-gradient-to-b from-brandGreen-500/10 via-brandBlue-500/10 to-transparent
-      " />
-
-      {/* Projects grid (containing the hero text at the top) */}
-      {/* <ProjectGrid /> */}
+    <section className="relative min-h-screen flex items-center justify-center px-4 py-32 text-white">
+      <div className="container mx-auto">
+        <h1 className="text-4xl md:text-6xl font-bold mb-4">
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-brandGreen-300 to-brandBlue-400">
+            Drew Clark
+          </span>
+        </h1>
+        <h2 className="text-2xl md:text-3xl mb-8 text-brandGray-100">
+          Software Engineer
+        </h2>
+        <p className="max-w-2xl mb-8 text-lg">
+          Creating elegant solutions to complex problems with a focus on user experience and performance.
+        </p>
+      </div>
     </section>
-  );
-});
-
-Hero.displayName = 'Hero';
-
-export default Hero;
+  )
+}

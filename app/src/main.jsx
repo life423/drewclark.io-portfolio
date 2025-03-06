@@ -5,40 +5,22 @@ import NProgress from 'nprogress'
 import './styles/nprogress.css'
 import App from './App'
 
-// Configure NProgress
+// Configure NProgress with minimal settings
 NProgress.configure({
-  minimum: 0.3,
-  easing: 'ease',
-  speed: 800,
   showSpinner: false,
-  trickleSpeed: 100
+  speed: 400
 })
 
-// Start the progress bar
+// Start NProgress as soon as you begin to load
 NProgress.start()
 
-// Simulate a loading process
-const incrementLoader = () => {
-  NProgress.inc(0.2) // Increment by 20%
-}
-
-// Set up intervals to increment the progress
-const incrementInterval = setInterval(incrementLoader, 300)
-
-// Complete the progress bar after the app is loaded
-window.onload = () => {
-  clearInterval(incrementInterval)
-  NProgress.done()
-}
-
-// Fallback to ensure NProgress completes even if onload doesn't fire
+// Complete the progress after a reasonable timeout
 setTimeout(() => {
-  clearInterval(incrementInterval)
   NProgress.done()
-}, 2000) // Reasonable timeout for fallback
+}, 1500)
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-    <React.StrictMode>
-        <App />
-    </React.StrictMode>
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
 )

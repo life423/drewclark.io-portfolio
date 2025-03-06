@@ -1,55 +1,51 @@
-// FILE: app\src\components\progress\ProgressBar.jsx
-
-import React, { useState, useEffect } from 'react'
-import PropTypes from 'prop-types'
-import useScrollPosition from '../../hooks/useScrollPosition'
-import { getInterpolatedColor } from '../utils/colorInterpolate'
-
 /**
- * Scroll-based progress bar that indicates scroll position on the page
- * Uses consistent color interpolation for visual appeal
+ * Optimized scroll-based progress bar that indicates scroll position on the page
+ * Uses React.memo and useMemo to minimize re-renders and improve performance
+ * Updated to use enhanced scrollInfo from the useScrollPosition hook
  * 
  * @param {Object} props - Component props
  * @param {string} props.topOffset - Distance from top of screen (default: 4rem)
  * @param {boolean} props.visible - Whether the bar is visible (default: true)
  */
-export default function ProgressBar({ topOffset = '4rem', visible = true }) {
-    const scrollY = useScrollPosition()
-    const [docHeight, setDocHeight] = useState(0)
-    const [winHeight, setWinHeight] = useState(0)
+import React, { useMemo, useCallback } from 'react'
+import PropTypes from 'prop-types'
+import useScrollPosition from '../../hooks/useScrollPosition'
+import { getInterpolatedColor } from '../utils/colorInterpolate'
 
-    useEffect(() => {
-        function measure() {
-            setDocHeight(document.documentElement.scrollHeight)
-            setWinHeight(window.innerHeight)
-        }
-        measure()
-        window.addEventListener('resize', measure)
-        return () => window.removeEventListener('resize', measure)
-    }, [])
-
-    // Calculate scroll progress
-    const scrollable = docHeight - winHeight
-    const progress = scrollable > 0 ? (scrollY / scrollable) * 100 : 0
+const ProgressBar = React.memo(function ProgressBar({ topOffset = '4rem', visible = true }) {
+    // Get enhanced scroll info that includes percent directly
+    const scrollInfo = useScrollPosition()
     
-    // Styling with direct color interpolation
-    const styles = {
+    // Get progress directly from the hook - no need to recalculate
+    const progress = scrollInfo.percent
+    
+    // Calculate color based on the progress
+    const progressColor = useMemo(() => 
+        getInterpolatedColor(progress), 
+    [progress])
+    
+    // Memoize styles object to minimize object creation
+    const styles = useMemo(() => ({
         width: `${progress}%`,
         top: topOffset,
-        '--progress-color': getInterpolatedColor(progress),
-        opacity: visible ? 1 : 0,
-        transition: 'opacity 0.3s ease-in-out, width 0.3s ease-out'
-    }
-
+        '--progress-color': progressColor
+    }), [progress, topOffset, progressColor])
+    
+    // Only render when visible is true
+    if (!visible) return null
+    
     return (
         <div
-            className="progress-bar-base progress-bar-interpolated"
+            className="scroll-progress-bar progress-visible"
             style={styles}
+            aria-hidden="true"
         />
     )
-}
+})
 
 ProgressBar.propTypes = {
     topOffset: PropTypes.string,
     visible: PropTypes.bool
 }
+
+export default ProgressBar
