@@ -48,4 +48,4 @@ ProgressBar.propTypes = {
     visible: PropTypes.bool
 }
 
-export default ProgressBar
+// export default ProgressBar

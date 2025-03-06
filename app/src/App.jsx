@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, memo } from 'react'
 import useNavigationState from './hooks/useNavigationState'
 import Layout from './components/layout/Layout'
 import Hero from './components/hero/Hero'
-import ProgressBar from './components/progress/ProgressBar'
+// import ProgressBar from './components/progress/ProgressBar'
 import HorizontalProgressBar from './components/progress/HorizontalProgressBar'
 
 const MainContent = memo(function MainContent() {
@@ -34,12 +34,7 @@ export default function App() {
 
     return (
         <>
-            {}
-            <ProgressBar visible={progressBarVisible} />
-
-            {}
             <HorizontalProgressBar visible={progressBarVisible} />
-
             <Layout {...navigationState}>
                 <MainContent />
             </Layout>
