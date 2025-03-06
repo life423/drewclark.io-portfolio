@@ -3,7 +3,7 @@ import React from 'react'
 import clsx from 'clsx'
 import { LuMenu } from 'react-icons/lu'
 import useScrollPosition from '../../hooks/useScrollPosition'
-import Drawer from '../drawer/Drawer'
+import TopTierDrawer from '../drawer/TopTierDrawer'
 
 export default function NavBar({ drawerOpen, openDrawer, closeDrawer }) {
   const scrollY = useScrollPosition()
@@ -43,8 +43,8 @@ export default function NavBar({ drawerOpen, openDrawer, closeDrawer }) {
         <li className="cursor-pointer hover:text-brandGreen-300 transition-colors">Contact</li>
       </ul>
 
-      {/* Drawer for mobile */}
-      <Drawer isOpen={drawerOpen} onClose={closeDrawer} />
+      {/* Top-tier drawer for mobile navigation */}
+      <TopTierDrawer isOpen={drawerOpen} onClose={closeDrawer} />
     </nav>
   )
 }
