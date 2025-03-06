@@ -71,7 +71,7 @@ export default plugin(function ({ addUtilities, theme }) {
         '.bg-pulse-gradient': {
             backgroundImage: `linear-gradient(90deg, ${green} 0%, ${blue} 50%, ${orange} 100%)`,
             backgroundSize: '300% 100%',
-            backgroundRepeat: 'repeat',
+            backgroundRepeat: 'no-repeat',
         },
     }
 
