@@ -1,6 +1,6 @@
 // FILE: app/src/components/drawer/TopTierDrawer.jsx
-import React, { useRef, useEffect } from 'react';
-import { LuX } from 'react-icons/lu';
+import React, { useRef, useEffect, useState } from 'react';
+import { LuX, LuChevronRight } from 'react-icons/lu';
 import clsx from 'clsx';
 
 /**
@@ -9,6 +9,30 @@ import clsx from 'clsx';
  */
 export default function TopTierDrawer({ isOpen, onClose }) {
   const drawerRef = useRef(null);
+  const [isClosing, setIsClosing] = useState(false);
+  
+  // Controlled close with animation
+  const handleClose = () => {
+    console.log('Close drawer triggered from TopTierDrawer');
+    if (!isOpen || isClosing) return;
+    
+    setIsClosing(true);
+    // Immediate feedback
+    console.log('Closing animation started, drawer will close in 300ms');
+    
+    // Provide immediate visual feedback that close was triggered
+    const closeButton = drawerRef.current?.querySelector('button[aria-label="Close menu"]');
+    if (closeButton) {
+      closeButton.classList.add('animate-pulse');
+      setTimeout(() => closeButton.classList.remove('animate-pulse'), 300);
+    }
+    
+    setTimeout(() => {
+      onClose();
+      setIsClosing(false);
+      console.log('Drawer closed callback executed');
+    }, 300); // Match transition duration
+  };
   
   // Focus trap implementation
   useEffect(() => {
@@ -51,10 +75,11 @@ export default function TopTierDrawer({ isOpen, onClose }) {
   // Handle escape key and body scroll lock
   useEffect(() => {
     const handleEscape = (e) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') handleClose();
     };
     
     if (isOpen) {
+      console.log('Drawer opened - adding event listeners');
       document.addEventListener('keydown', handleEscape);
       document.body.style.overflow = 'hidden'; // prevent background scrolling
     } else {
@@ -66,17 +91,22 @@ export default function TopTierDrawer({ isOpen, onClose }) {
       document.removeEventListener('keydown', handleEscape);
       document.body.style.overflow = '';
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
+
+  // Reset closing state if drawer is reopened
+  useEffect(() => {
+    if (isOpen) setIsClosing(false);
+  }, [isOpen]);
 
   return (
     <>
       {/* Overlay with fade transition */}
       <div
         className={clsx(
-          'fixed inset-0 z-40 bg-black transition-opacity duration-300',
-          isOpen ? 'opacity-60 pointer-events-auto' : 'opacity-0 pointer-events-none'
+          'fixed inset-0 bg-black transition-opacity duration-300',
+          (isOpen && !isClosing) ? 'opacity-60 z-40 pointer-events-auto' : 'opacity-0 -z-10 pointer-events-none'
         )}
-        onClick={onClose}
+        onClick={handleClose}
         aria-hidden="true"
       />
 
@@ -88,45 +118,63 @@ export default function TopTierDrawer({ isOpen, onClose }) {
         aria-labelledby="drawer-title"
         aria-hidden={!isOpen}
         className={clsx(
-          'fixed top-0 left-0 z-50 h-full w-64 shadow-xl',
+          'fixed top-0 left-0 h-full w-72 shadow-2xl',
           'bg-brandGray-900 text-white',
           'transform transition-transform duration-300 ease-out',
-          isOpen ? 'translate-x-0' : '-translate-x-full'
+          'overflow-y-auto',
+          // Ensure z-index is always high enough when open
+          (isOpen && !isClosing) ? 'translate-x-0 z-[100]' : '-translate-x-full -z-10'
         )}
+        style={{
+          boxShadow: '0 0 25px rgba(0, 0, 0, 0.5)'
+        }}
       >
-        {/* Header with close button */}
-        <div className="flex justify-end p-4">
+        {/* Header section */}
+        <div className="sticky top-0 z-10 bg-brandGray-900 pt-4 px-6 flex justify-between items-center">
+          {/* Logo/Name */}
+          <h2 
+            id="drawer-title" 
+            className="text-lg font-semibold text-transparent bg-clip-text bg-gradient-to-r from-brandGreen-300 to-brandBlue-400"
+          >
+            <span className="sr-only">DC Portfolio</span>
+            <span aria-hidden="true">DC</span>
+          </h2>
+          
+          {/* Close button */}
           <button
-            onClick={onClose}
-            className="text-brandGreen-400 hover:text-brandGreen-300 transition-colors p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-brandGreen-500 focus:ring-opacity-50"
+            onClick={handleClose}
+            className="text-white hover:text-brandGreen-300 p-2 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-brandGreen-500 focus:ring-opacity-50 hover:bg-brandGray-800"
             aria-label="Close menu"
           >
-            <LuX className="h-6 w-6" />
+            <LuX className="h-6 w-6" data-testid="drawer-close-button" />
           </button>
         </div>
         
         {/* Navigation links with staggered entrance animations */}
-        <nav className="flex flex-col justify-center flex-grow h-full -mt-16">
-          <ul className="space-y-6 px-6">
+        <nav className="flex flex-col flex-grow pt-12 pb-6">
+          <ul className="space-y-4 px-6">
             {['Home', 'Projects', 'Contact'].map((item, index) => (
               <li 
                 key={item}
                 className={clsx(
-                  'transform transition-all duration-300',
-                  isOpen ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'
+                  'transform transition-all duration-300 pb-4 border-b border-brandGray-800',
+                  (isOpen && !isClosing) ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'
                 )}
-                style={{ transitionDelay: isOpen ? `${150 + index * 75}ms` : '0ms' }}
+                style={{ transitionDelay: (isOpen && !isClosing) ? `${150 + index * 75}ms` : '0ms' }}
               >
                 <a 
                   href={`#${item.toLowerCase()}`}
-                  className="text-xl font-medium text-white hover:text-brandGreen-300 transition-colors focus:outline-none focus:text-brandGreen-300"
+                  className="group flex items-center py-2 text-xl font-medium text-white hover:text-brandGreen-300 transition-colors focus:outline-none focus:text-brandGreen-300"
                   onClick={(e) => {
                     e.preventDefault();
                     // Navigate to section then close drawer
-                    onClose();
+                    e.preventDefault();
+                    console.log("Nav link clicked, closing drawer");
+                    handleClose();
                   }}
                 >
-                  {item}
+                  <span className="flex-grow">{item}</span>
+                  <LuChevronRight className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200 h-5 w-5" />
                 </a>
               </li>
             ))}
@@ -134,7 +182,16 @@ export default function TopTierDrawer({ isOpen, onClose }) {
         </nav>
         
         {/* Footer content */}
-        <div className="p-6 mt-auto border-t border-brandGray-700">
+        <div 
+          className={clsx(
+            "px-6 py-4 mt-auto border-t border-brandGray-800 bg-brandGray-900/30",
+            (isOpen && !isClosing) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          )}
+          style={{ 
+            transitionDelay: (isOpen && !isClosing) ? '400ms' : '0ms',
+            transition: 'opacity 300ms ease, transform 300ms ease'
+          }}
+        >
           <p className="text-sm text-brandGray-400">
             Clark Company Limited
             <span className="ml-2">© {new Date().getFullYear()}</span>

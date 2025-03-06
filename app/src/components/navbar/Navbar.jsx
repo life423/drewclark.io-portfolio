@@ -1,11 +1,11 @@
 // FILE: app/src/components/navbar/Navbar.jsx
-import React from 'react'
+import React, { useEffect } from 'react'
 import clsx from 'clsx'
 import { LuMenu } from 'react-icons/lu'
 import useScrollPosition from '../../hooks/useScrollPosition'
 import TopTierDrawer from '../drawer/TopTierDrawer'
 
-export default function NavBar({ drawerOpen, openDrawer, closeDrawer }) {
+export default function NavBar({ drawerOpen, openDrawer, closeDrawer, toggleDrawer }) {
   const scrollY = useScrollPosition()
   const isScrolled = scrollY > 50
 
@@ -29,9 +29,15 @@ export default function NavBar({ drawerOpen, openDrawer, closeDrawer }) {
 
       {/* Hamburger for mobile */}
       <button
-        className="md:hidden hover:text-gray-200 transition-colors"
-        aria-label="Open Menu"
-        onClick={openDrawer}
+        className="md:hidden hover:text-gray-200 transition-colors p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-brandGreen-500 focus:ring-opacity-50"
+        aria-label={drawerOpen ? "Close Menu" : "Open Menu"}
+        aria-expanded={drawerOpen}
+        aria-controls="drawer-menu"
+        data-testid="menu-button"
+        onClick={() => {
+          console.log('Menu button clicked, toggling drawer');
+          toggleDrawer();
+        }}
       >
         <LuMenu className="h-8 w-8 text-brandGreen-300" />
       </button>
@@ -44,7 +50,13 @@ export default function NavBar({ drawerOpen, openDrawer, closeDrawer }) {
       </ul>
 
       {/* Top-tier drawer for mobile navigation */}
-      <TopTierDrawer isOpen={drawerOpen} onClose={closeDrawer} />
+      <TopTierDrawer 
+        isOpen={drawerOpen} 
+        onClose={() => {
+          console.log('Drawer onClose callback triggered from Navbar');
+          closeDrawer();
+        }} 
+      />
     </nav>
   )
 }

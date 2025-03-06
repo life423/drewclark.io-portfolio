@@ -57,12 +57,10 @@ export default {
                     700: '#3F3F46',
                     800: '#27272A',
                     900: '#18181B',
+                    950: '#101014', // Extra dark gray for drawer background
                 },
             },
         },
     },
-    plugins: [
-        backgroundsPlugin,
-        animationsPlugin,
-    ],
+    plugins: [backgroundsPlugin, animationsPlugin],
 }
