@@ -1,44 +1,52 @@
-import React, { useState } from 'react'
+/**
+ * Main App component optimized for performance
+ * Uses React.memo for key components and useMemo for values
+ * Separates navigation state to prevent unnecessary re-renders
+ */
+import React, { useState, useEffect, useMemo, memo } from 'react'
 import useNavigationState from './hooks/useNavigationState'
 import Layout from './components/layout/Layout'
 import Hero from './components/hero/Hero'
 import ProgressBar from './components/progress/ProgressBar'
-import NProgressBar from './components/progress/NProgressBar'
+
+// Memoize the main content to prevent re-renders when only navigation state changes
+const MainContent = memo(function MainContent() {
+    return (
+        <main className="flex flex-col min-h-screen">
+            <Hero />
+        </main>
+    )
+})
 
 export default function App() {
-    const { drawerOpen, openDrawer, closeDrawer, toggleDrawer } = useNavigationState()
+    // Navigation state
+    const navigationState = useNavigationState()
+    const { drawerOpen } = navigationState
     
     // State for tracking initial page load
     const [initialLoading, setInitialLoading] = useState(true)
     
-    // When initial load completes, set loading to false
-    const handleLoadComplete = () => {
-        setInitialLoading(false)
-    }
-
+    // Set loading to false after a short delay to match NProgress timing
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setInitialLoading(false)
+        }, 1600) // slightly longer than the NProgress timer in main.jsx
+        
+        return () => clearTimeout(timer)
+    }, [])
+    
+    // Compute the visibility of the progress bar once
+    const progressBarVisible = useMemo(() => 
+        !initialLoading && !drawerOpen,
+    [initialLoading, drawerOpen])
+    
     return (
         <>
-            {/* Rainbow gradient progress bar for initial load */}
-            {initialLoading && (
-                <NProgressBar 
-                    onLoadComplete={handleLoadComplete}
-                    simulatedLoadTime={700} // Faster, more responsive loading
-                    completeDelay={150}    // Brief delay before transition
-                />
-            )}
-            
             {/* Scroll progress bar that appears after initial load */}
-            <ProgressBar visible={!initialLoading && !drawerOpen} />
+            <ProgressBar visible={progressBarVisible} />
             
-            <Layout
-                drawerOpen={drawerOpen}
-                openDrawer={openDrawer}
-                closeDrawer={closeDrawer}
-                toggleDrawer={toggleDrawer}
-            >
-                <main className="flex flex-col min-h-screen">
-                    <Hero />
-                </main>
+            <Layout {...navigationState}>
+                <MainContent />
             </Layout>
         </>
     )

@@ -12,34 +12,22 @@ export default function Footer() {
   const [animateTwitter, setAnimateTwitter] = useState(false);
   const [animateGithub, setAnimateGithub] = useState(false);
   
-  // Debug when animations are triggered
+  // Handle animations based on visibility
   useEffect(() => {
     if (inView) {
-      console.log('Footer in view');
       // Start Twitter animation immediately
       setAnimateTwitter(true);
       
       // Start GitHub animation after a delay
       setTimeout(() => {
-        console.log('Starting GitHub animation');
         setAnimateGithub(true);
       }, 800);
     } else {
       // Reset animations when out of view
-      console.log('Footer out of view - resetting animations');
       setAnimateTwitter(false);
       setAnimateGithub(false);
     }
   }, [inView]);
-  
-  // Log when animations change for debugging
-  useEffect(() => {
-    console.log('Twitter animation state:', animateTwitter);
-  }, [animateTwitter]);
-  
-  useEffect(() => {
-    console.log('GitHub animation state:', animateGithub);
-  }, [animateGithub]);
 
   return (
     <footer className=" text-white" ref={containerRef}>
@@ -52,14 +40,14 @@ export default function Footer() {
               target="_blank"
               rel="noopener noreferrer"
               className="relative inline-block"
-              onClick={() => console.log('Twitter icon clicked')}
+              onClick={() => {}}
             >
               <LuTwitter 
                 className={clsx(
                   'h-6 w-6 fill-current text-brandGreen-500',
                   animateTwitter && 'animate-icon-gentle-pulse'
                 )}
-                onAnimationEnd={() => console.log('Twitter animation ended')}
+                onAnimationEnd={() => {}}
               />
             </a>
 
@@ -69,14 +57,14 @@ export default function Footer() {
               target="_blank"
               rel="noopener noreferrer"
               className="relative inline-block"
-              onClick={() => console.log('GitHub icon clicked')}
+              onClick={() => {}}
             >
               <LuGithub 
                 className={clsx(
                   'h-6 w-6 fill-current text-brandGreen-500',
                   animateGithub && 'animate-icon-gentle-pulse'
                 )}
-                onAnimationEnd={() => console.log('GitHub animation ended')}
+                onAnimationEnd={() => {}}
               />
             </a>
           </div>

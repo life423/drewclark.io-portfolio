@@ -4,7 +4,7 @@ import clsx from 'clsx'
 import { LuMenu } from 'react-icons/lu'
 import useScrollPosition from '../../hooks/useScrollPosition'
 
-export default function NavBar({ drawerOpen, toggleDrawer }) {
+export default function Navbar({ drawerOpen, toggleDrawer }) {
   const scrollY = useScrollPosition()
   const isScrolled = scrollY > 50
   

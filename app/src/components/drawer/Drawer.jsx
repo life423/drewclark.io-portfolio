@@ -1,31 +1,65 @@
-// FILE: app/src/components/drawer/Drawer.jsx
-import React, { useEffect, useRef } from 'react'
+/**
+ * Optimized mobile navigation drawer component
+ * Improved with React.memo, proper focus management, and animation optimizations
+ * Follows accessibility best practices for modal dialogs
+ */
+import React, { useEffect, useRef, useCallback, memo } from 'react'
 import { LuX } from 'react-icons/lu'
 import clsx from 'clsx'
 
-export default function Drawer({ isOpen, onClose }) {
+const navigationLinks = [
+    { id: 'home', label: 'Home', href: '#' },
+    { id: 'projects', label: 'Projects', href: '#projects' },
+    { id: 'contact', label: 'Contact', href: '#contact' }
+]
+
+// Memoize the Drawer for performance
+const Drawer = memo(function Drawer({ isOpen, onClose }) {
     const drawerRef = useRef(null)
-
+    const closeButtonRef = useRef(null)
+    
+    // Handle escape key press to close drawer
+    const handleKeyDown = useCallback((e) => {
+        if (e.key === 'Escape') onClose()
+    }, [onClose])
+    
+    // Manage body scroll and keyboard events
     useEffect(() => {
-        function onKey(e) {
-            if (e.key === 'Escape') onClose()
-        }
         if (isOpen) {
-            document.addEventListener('keydown', onKey)
+            // Lock scroll when drawer is open
             document.body.style.overflow = 'hidden'
+            
+            // Add keyboard listener
+            document.addEventListener('keydown', handleKeyDown)
+            
+            // Focus the close button when drawer opens (for accessibility)
+            if (closeButtonRef.current) {
+                setTimeout(() => {
+                    closeButtonRef.current.focus()
+                }, 100)
+            }
         } else {
-            document.removeEventListener('keydown', onKey)
+            // Restore scroll when drawer is closed
             document.body.style.overflow = ''
+            
+            // Remove keyboard listener
+            document.removeEventListener('keydown', handleKeyDown)
         }
+        
+        // Cleanup function
         return () => {
-            document.removeEventListener('keydown', onKey)
+            document.removeEventListener('keydown', handleKeyDown)
             document.body.style.overflow = ''
         }
-    }, [isOpen, onClose])
-
+    }, [isOpen, handleKeyDown])
+    
+    // Performance optimization - don't render anything if drawer state is closed and was never opened
+    // This helps with initial page load performance
+    if (!isOpen && !drawerRef.current) return null
+    
     return (
         <>
-            {/* Dark overlay */}
+            {/* Dark overlay with accessibility attributes */}
             <div
                 className={clsx(
                     'fixed inset-0 z-[998] bg-black/40 backdrop-blur-sm transition-opacity duration-300',
@@ -37,11 +71,12 @@ export default function Drawer({ isOpen, onClose }) {
                 aria-hidden='true'
             />
 
-            {/* Sliding Drawer */}
+            {/* Sliding Drawer with improved accessibility */}
             <div
                 ref={drawerRef}
                 role='dialog'
                 aria-modal='true'
+                aria-labelledby="drawer-title"
                 aria-hidden={!isOpen}
                 tabIndex={-1}
                 className={clsx(
@@ -53,34 +88,48 @@ export default function Drawer({ isOpen, onClose }) {
                         : '-translate-x-full delay-0'
                 )}
             >
+                {/* Hidden title for screen readers */}
+                <h2 id="drawer-title" className="sr-only">Navigation Menu</h2>
+                
                 <button
+                    ref={closeButtonRef}
                     onClick={onClose}
                     aria-label='Close Menu'
-                    className='ml-auto mt-4 mr-4 p-2 outline-none focus:outline-none'
+                    className='ml-auto mt-4 mr-4 p-2 outline-none focus:outline-none focus:ring-2 focus:ring-brandGreen-400'
                 >
                     <LuX className='h-8 w-8 text-brandGreen-300 transition-colors hover:text-brandGreen-200' />
                 </button>
 
-                <ul className='flex flex-col items-center justify-center flex-1 space-y-6 text-white font-medium'>
-                    {['Home', 'Projects', 'Contact'].map((item, index) => (
-                        <li
-                            key={item}
-                            className={clsx(
-                                'cursor-pointer hover:text-brandGreen-300 transition-all duration-300',
-                                !isOpen && 'opacity-0 pointer-events-none', // if closed, hide link
-                                isOpen && 'animate-drawer-link-pop' // apply custom animation
-                            )}
-                            style={{
-                                animationDelay: isOpen
-                                    ? `${index * 120}ms`
-                                    : '0ms',
-                            }}
-                        >
-                            {item}
-                        </li>
-                    ))}
-                </ul>
+                <nav aria-label="Mobile navigation">
+                    <ul className='flex flex-col items-center justify-center flex-1 space-y-6 text-white font-medium'>
+                        {navigationLinks.map((item, index) => (
+                            <li
+                                key={item.id}
+                                className={clsx(
+                                    'cursor-pointer hover:text-brandGreen-300 transition-all duration-300',
+                                    !isOpen && 'opacity-0 pointer-events-none', // if closed, hide link 
+                                    isOpen && 'animate-drawer-link-pop' // apply custom animation
+                                )}
+                                style={{
+                                    animationDelay: isOpen
+                                        ? `${index * 120}ms`
+                                        : '0ms',
+                                }}
+                            >
+                                <a 
+                                    href={item.href}
+                                    onClick={onClose}
+                                    className="px-3 py-2 block w-full text-center"
+                                >
+                                    {item.label}
+                                </a>
+                            </li>
+                        ))}
+                    </ul>
+                </nav>
             </div>
         </>
     )
-}
+})
+
+export default Drawer
