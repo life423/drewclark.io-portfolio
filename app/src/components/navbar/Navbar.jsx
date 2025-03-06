@@ -48,7 +48,7 @@ export default function NavBar({ drawerOpen, toggleDrawer }) {
       </ul>
 
       {/* Drawer for mobile */}
-      <Drawer isOpen={drawerOpen} onClose={() => toggleDrawer()} />
+      <Drawer isOpen={drawerOpen} onClose={toggleDrawer} />
     </nav>
   )
 }
