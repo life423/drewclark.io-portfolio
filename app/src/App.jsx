@@ -8,6 +8,8 @@ import useNavigationState from './hooks/useNavigationState'
 import Layout from './components/layout/Layout'
 import Hero from './components/hero/Hero'
 import ProgressBar from './components/progress/ProgressBar'
+import HorizontalProgressBar from './components/progress/HorizontalProgressBar'
+
 
 // Memoize the main content to prevent re-renders when only navigation state changes
 const MainContent = memo(function MainContent() {
@@ -42,8 +44,11 @@ export default function App() {
     
     return (
         <>
-            {/* Scroll progress bar that appears after initial load */}
+            {/* Original progress bar */}
             <ProgressBar visible={progressBarVisible} />
+            
+            {/* New horizontal progress bar with dynamic colors */}
+            <HorizontalProgressBar visible={progressBarVisible} />
             
             <Layout {...navigationState}>
                 <MainContent />
