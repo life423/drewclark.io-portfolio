@@ -1,14 +1,21 @@
 // FILE: app/src/components/hero/Hero.jsx
 import React from 'react'
-import sprout from '../../assets/sprout-mobile.jpg'
+import sproutMobile from '../../assets/sprout-mobile.jpg'
+import sproutOriginal from '../../assets/sprout-original.jpg'
 
 export default function Hero() {
   return (
     <section className="relative w-full h-[calc(100vh-4rem)] overflow-hidden">
-      {/* Background image */}
+      {/* Mobile background image - visible only on mobile */}
       <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${sprout})` }}
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat md:hidden"
+        style={{ backgroundImage: `url(${sproutMobile})` }}
+      />
+      
+      {/* Desktop background image - hidden on mobile, visible on md screens and up */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat hidden md:block"
+        style={{ backgroundImage: `url(${sproutOriginal})` }}
       />
       
       {/* Overlay with subtle blur */}
