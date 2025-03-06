@@ -1,71 +1,84 @@
 // FILE: app/src/components/footer/Footer.jsx
-import React, { useRef, useState, useEffect } from 'react'
-import { LuTwitter, LuGithub } from 'react-icons/lu'
-import useIntersection from '../../hooks/useIntersection'
-import { IconPair } from '../utils/IconPair'
-import clsx from 'clsx'
-import useScrollPosition from '../../hooks/useScrollPosition'
+import React, { useRef, useState, useEffect } from 'react';
+import { LuTwitter, LuGithub } from 'react-icons/lu';
+import useIntersection from '../../hooks/useIntersection';
+import clsx from 'clsx';
 
 export default function Footer() {
-  const containerRef = useRef(null)
-  const inView = useIntersection(containerRef, { threshold: 0.1 })
-  const scrollY = useScrollPosition()
+  const containerRef = useRef(null);
+  const inView = useIntersection(containerRef, { threshold: 0.1 });
   
-  // Track animation states
-  const [hasBeenSeen, setHasBeenSeen] = useState(false)
-  const [animationTriggered, setAnimationTriggered] = useState(false)
-  const [wasOutOfView, setWasOutOfView] = useState(false)
+  // Animation state
+  const [animateTwitter, setAnimateTwitter] = useState(false);
+  const [animateGithub, setAnimateGithub] = useState(false);
   
-  // First time footer comes into view
+  // Debug when animations are triggered
   useEffect(() => {
-    if (inView && !hasBeenSeen) {
-      setHasBeenSeen(true);
+    if (inView) {
+      console.log('Footer in view');
+      // Start Twitter animation immediately
+      setAnimateTwitter(true);
+      
+      // Start GitHub animation after a delay
+      setTimeout(() => {
+        console.log('Starting GitHub animation');
+        setAnimateGithub(true);
+      }, 800);
+    } else {
+      // Reset animations when out of view
+      console.log('Footer out of view - resetting animations');
+      setAnimateTwitter(false);
+      setAnimateGithub(false);
     }
-  }, [inView, hasBeenSeen]);
+  }, [inView]);
   
-  // If footer was previously seen but is now out of view
+  // Log when animations change for debugging
   useEffect(() => {
-    if (hasBeenSeen && !inView) {
-      setWasOutOfView(true);
-    }
-  }, [hasBeenSeen, inView]);
+    console.log('Twitter animation state:', animateTwitter);
+  }, [animateTwitter]);
   
-  // When user scrolls back down and footer comes into view again
   useEffect(() => {
-    if (inView && wasOutOfView && !animationTriggered) {
-      setAnimationTriggered(true);
-    }
-  }, [inView, wasOutOfView, animationTriggered]);
-
-  // Determine which animation to use
-  const animationClass = animationTriggered 
-    ? 'animate-triple-pulse-to-orange' 
-    : '';
+    console.log('GitHub animation state:', animateGithub);
+  }, [animateGithub]);
 
   return (
     <footer className="mt-16 text-white" ref={containerRef}>
       <div className="bg-brandGray-900 py-6 px-6">
         <div className="flex justify-between items-center">
-          <div className="flex space-x-6">
-            <IconPair
-              Icon={LuTwitter}
-              iconAnimationClass={clsx(
-                'fill-current stroke-current', 
-                'text-brandGreen-500',
-                animationClass
-              )}
-              url="https://twitter.com/andrewgenai"
-            />
+          <div className="flex space-x-8">
+            {/* Twitter Icon - Apply animation class directly */}
+            <a
+              href="https://twitter.com/andrewgenai"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="relative inline-block"
+              onClick={() => console.log('Twitter icon clicked')}
+            >
+              <LuTwitter 
+                className={clsx(
+                  'h-6 w-6 fill-current text-brandGreen-500',
+                  animateTwitter && 'animate-icon-gentle-pulse'
+                )}
+                onAnimationEnd={() => console.log('Twitter animation ended')}
+              />
+            </a>
 
-            <IconPair
-              Icon={LuGithub}
-              iconAnimationClass={clsx(
-                'fill-current stroke-current',
-                'text-brandGreen-500',
-                animationClass
-              )}
-              url="https://github.com/life423"
-            />
+            {/* GitHub Icon - Apply animation class directly */}
+            <a
+              href="https://github.com/life423"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="relative inline-block"
+              onClick={() => console.log('GitHub icon clicked')}
+            >
+              <LuGithub 
+                className={clsx(
+                  'h-6 w-6 fill-current text-brandGreen-500',
+                  animateGithub && 'animate-icon-gentle-pulse'
+                )}
+                onAnimationEnd={() => console.log('GitHub animation ended')}
+              />
+            </a>
           </div>
 
           <div className="flex items-center space-x-2">
@@ -76,5 +89,5 @@ export default function Footer() {
         </div>
       </div>
     </footer>
-  )
+  );
 }

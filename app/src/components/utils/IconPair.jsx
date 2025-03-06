@@ -18,10 +18,10 @@ export function IconPair({
             {/* Animated icon layer */}
             <Icon
                 className={clsx(
-                    'h-6 w-6 origin-center',
+                    'origin-center',
                     iconAnimationClass
                         ? iconAnimationClass
-                        : 'animate-none icon-default'
+                        : 'h-6 w-6 animate-none icon-default'
                 )}
                 onAnimationEnd={onAnimEnd}
                 onClick={e => {
