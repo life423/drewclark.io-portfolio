@@ -7,6 +7,7 @@ export default function Layout({
     drawerOpen,
     openDrawer,
     closeDrawer,
+    toggleDrawer,
     children,
 }) {
     return (
@@ -16,6 +17,7 @@ export default function Layout({
                     drawerOpen={drawerOpen}
                     openDrawer={openDrawer}
                     closeDrawer={closeDrawer}
+                    toggleDrawer={toggleDrawer}
                 />
             </header>
 
