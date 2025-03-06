@@ -14,8 +14,23 @@ export default plugin(function ({ addBase, addUtilities }) {
             '100%': { backgroundPosition: '0% 50%' },
         },
         '@keyframes iconPulse': {
-            '0%': { transform: 'scale(1)', opacity: '0.7' },
-            '100%': { transform: 'scale(2.4)', opacity: '0' },
+            '0%': { transform: 'scale(1)', opacity: '1', color: '#10B981' },
+            '25%': { transform: 'scale(1.2)', opacity: '1', color: '#FF6B00' },
+            '75%': { transform: 'scale(1.2)', opacity: '1', color: '#FF6B00' },
+            '100%': { transform: 'scale(1)', opacity: '1', color: '#10B981' },
+        },
+        '@keyframes iconTap': {
+            '0%': { transform: 'scale(1)', color: '#10B981' },
+            '30%': { transform: 'scale(0.9)', color: '#FF6B00' },
+            '60%': { transform: 'scale(1.15)', color: '#FF6B00' },
+            '100%': { transform: 'scale(1)', color: '#10B981' },
+        },
+        '@keyframes iconGentlePulse': {
+            '0%':   { transform: 'scale(1)', color: '#10B981' },
+            '20%':  { transform: 'scale(1.15)', color: '#FF6B00' },
+            '50%':  { transform: 'scale(1.2)', color: '#FF6B00', filter: 'drop-shadow(0 0 5px rgba(255,107,0,0.7))' },
+            '80%':  { transform: 'scale(1.15)', color: '#FF6B00' },
+            '100%': { transform: 'scale(1)', color: '#10B981' },
         },
         // Micro animations for interactive icons
         '@keyframes subtleWobble': {
@@ -67,19 +82,30 @@ export default plugin(function ({ addBase, addUtilities }) {
         },
     })
 
-    // 2. Animation utility classes
-    const animationUtilities = {
+    // 2. Animation utility classes - using direct definition
+    addUtilities({
         '.animate-pulse-once': {
-            // Runs the "pulse" keyframes once, then stops
             animation: 'pulse 1s ease-out 1 forwards',
         },
         '.animate-color-pulse': {
-            // Repeatedly changes background-position
             animation: 'colorPulse 6s ease-in-out infinite',
         },
         '.animate-icon-pulse': {
-            // Pulses icons once
-            animation: 'iconPulse 2.7s ease-in-out 1 forwards',
+            animation: 'iconPulse 2.5s cubic-bezier(0.4, 0, 0.2, 1) 1 forwards',
+            filter: 'drop-shadow(0 0 4px currentColor)',
+        },
+        '.animate-icon-tap': {
+            animation: 'iconTap 0.8s cubic-bezier(0.4, 0, 0.2, 1) 1 forwards',
+            filter: 'drop-shadow(0 0 4px currentColor)',
+        },
+        '.animate-icon-gentle-pulse': {
+            animation: 'iconGentlePulse 2s cubic-bezier(0.4, 0, 0.2, 1) 1 forwards',
+            willChange: 'transform, color, filter',
+        },
+        '.animate-icon-gentle-pulse': {
+            // More professional, subtle animation for icons
+            animation: 'iconGentlePulse 2s cubic-bezier(0.4, 0, 0.2, 1) 1 forwards',
+            willChange: 'transform, color, filter',
         },
         // Micro animation utility classes
         '.animate-subtle-wobble': {
@@ -95,7 +121,9 @@ export default plugin(function ({ addBase, addUtilities }) {
             animation: 'faintPulse 1.5s ease-in-out infinite',
         },
         '.animate-soft-glow': {
-            animation: 'softGlow 1.5s ease-in-out infinite',
+            animation: 'softGlow 1.2s ease-in-out infinite',
+            transition: 'all 0.3s ease',
+            transform: 'scale(1.05)',
         },
         '.animate-triple-pulse-to-orange': {
             animation: 'triplePulseToOrange 4s ease-in-out 1 forwards',
