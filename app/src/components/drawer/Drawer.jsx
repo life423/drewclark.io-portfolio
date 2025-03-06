@@ -44,7 +44,7 @@ export default function Drawer({ isOpen, onClose }) {
         tabIndex={-1}
         className={clsx(
           'fixed top-0 left-0 h-screen w-[75%] max-w-sm z-70 flex flex-col',
-          'bg-brandGray-800/80 backdrop-blur-md border-l border-brandGreen-700/50',
+          'bg-brandGray-800/80 backdrop-blur-md',
           'transition-transform duration-300',
           isOpen ? 'translate-x-0' : '-translate-x-full'
         )}
