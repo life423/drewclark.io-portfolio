@@ -21,7 +21,7 @@ export default function useScrollPosition() {
     
     // We use this ref to track if we should update state
     // This avoids unnecessary re-renders if scroll position didn't change enough
-    const minScrollChange = 5 // Only update if scroll changed by at least this many pixels
+    const minScrollChange = 0 // Only update if scroll changed by at least this many pixels
     
     useEffect(() => {
         if (typeof window === 'undefined') return
