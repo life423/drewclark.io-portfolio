@@ -15,8 +15,6 @@ export default function Layout({
             <header>
                 <Navbar
                     drawerOpen={drawerOpen}
-                    openDrawer={openDrawer}
-                    closeDrawer={closeDrawer}
                     toggleDrawer={toggleDrawer}
                 />
             </header>
