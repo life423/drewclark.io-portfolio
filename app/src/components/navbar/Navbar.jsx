@@ -3,7 +3,6 @@ import React from 'react'
 import clsx from 'clsx'
 import { LuMenu } from 'react-icons/lu'
 import useScrollPosition from '../../hooks/useScrollPosition'
-import Drawer from '../drawer/Drawer'
 
 export default function NavBar({ drawerOpen, toggleDrawer }) {
   const scrollY = useScrollPosition()
@@ -17,10 +16,11 @@ export default function NavBar({ drawerOpen, toggleDrawer }) {
     <nav
       className={clsx(
         'fixed top-0 w-full h-16 px-4 flex items-center justify-between z-50',
-        'transition-colors duration-300',
+        'transition-all duration-300 ease-in-out',
         isScrolled
           ? 'bg-brandGray-800/80 backdrop-blur-md'
-          : 'bg-brandGray-900/60 backdrop-blur'
+          : 'bg-brandGray-900/60 backdrop-blur',
+        drawerOpen ? '-translate-y-[64px]' : 'translate-y-0'
       )}
     >
       {/* LOGO */}
@@ -47,8 +47,6 @@ export default function NavBar({ drawerOpen, toggleDrawer }) {
         <li className="cursor-pointer hover:text-brandGreen-300 transition-colors">Contact</li>
       </ul>
 
-      {/* Drawer for mobile */}
-      <Drawer isOpen={drawerOpen} onClose={toggleDrawer} />
     </nav>
   )
 }
