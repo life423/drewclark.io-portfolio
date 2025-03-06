@@ -2,6 +2,7 @@
 import React from 'react'
 import Navbar from '../navbar/Navbar'
 import Footer from '../footer/Footer'
+import Drawer from '../drawer/Drawer'
 
 export default function Layout({
     drawerOpen,
@@ -18,6 +19,9 @@ export default function Layout({
                     toggleDrawer={toggleDrawer}
                 />
             </header>
+
+            {/* The Drawer component is now a sibling, not nested in Navbar */}
+            <Drawer isOpen={drawerOpen} onClose={toggleDrawer} />
 
             <main
                 id='content'
