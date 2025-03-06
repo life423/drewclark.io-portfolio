@@ -188,8 +188,10 @@ export default function TopTierDrawer({ isOpen, onClose }) {
             (isOpen && !isClosing) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           )}
           style={{ 
-            transitionDelay: (isOpen && !isClosing) ? '400ms' : '0ms',
-            transition: 'opacity 300ms ease, transform 300ms ease'
+            transitionProperty: 'opacity, transform',
+            transitionDuration: '300ms',
+            transitionTimingFunction: 'ease',
+            transitionDelay: (isOpen && !isClosing) ? '400ms' : '0ms'
           }}
         >
           <p className="text-sm text-brandGray-400">

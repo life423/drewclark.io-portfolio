@@ -6,6 +6,7 @@ import About from './components/sections/About'
 import Projects from './components/sections/Projects'
 import Contact from './components/sections/Contact'
 import ProgressBar from './components/progress/ProgressBar'
+import DrawerTester from './components/drawer/DrawerTester'
 
 export default function App() {
     // Get drawer state and handlers from our enhanced hook
@@ -32,6 +33,9 @@ export default function App() {
                     <Contact />
                 </main>
             </Layout>
+            
+            {/* Test component for verifying drawer functionality */}
+            <DrawerTester />
         </>
     )
 }

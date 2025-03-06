@@ -26,11 +26,11 @@ export default plugin(function ({ addBase, addUtilities }) {
             '100%': { transform: 'scale(1)', color: '#10B981' },
         },
         '@keyframes iconGentlePulse': {
-            '0%':   { transform: 'scale(1)', color: '#10B981' },
-            '20%':  { transform: 'scale(1.15)', color: '#FF6B00' },
-            '50%':  { transform: 'scale(1.2)', color: '#FF6B00', filter: 'drop-shadow(0 0 5px rgba(255,107,0,0.7))' },
-            '80%':  { transform: 'scale(1.15)', color: '#FF6B00' },
-            '100%': { transform: 'scale(1)', color: '#10B981' },
+            '0%':   { transform: 'scale(1) rotate(0deg)', fill: '#10B981', color: '#10B981' },
+            '20%':  { transform: 'scale(1.15) rotate(2deg)', fill: '#FF6B00', color: '#FF6B00' },
+            '50%':  { transform: 'scale(1.25) rotate(0deg)', fill: '#FF6B00', color: '#FF6B00', filter: 'drop-shadow(0 0 8px rgba(255,107,0,0.8))' },
+            '80%':  { transform: 'scale(1.15) rotate(-2deg)', fill: '#FF6B00', color: '#FF6B00' },
+            '100%': { transform: 'scale(1) rotate(0deg)', fill: '#10B981', color: '#10B981' },
         },
         '@keyframes subtleWobble': {
             '0%':   { transform: 'scale(1)' },
@@ -92,7 +92,11 @@ export default plugin(function ({ addBase, addUtilities }) {
         },
         '.animate-icon-gentle-pulse': {
             animation: 'iconGentlePulse 2s cubic-bezier(0.4, 0, 0.2, 1) 1 forwards',
-            willChange: 'transform, color, filter',
+            willChange: 'transform, color, fill, filter',
+            transform: 'scale(1)',
+            transition: 'all 0.2s ease-out',
+            color: '#10B981',
+            fill: 'currentColor',
         },
         '.animate-subtle-wobble': {
             animation: 'subtleWobble 1s ease-in-out infinite',

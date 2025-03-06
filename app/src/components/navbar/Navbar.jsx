@@ -1,5 +1,5 @@
 // FILE: app/src/components/navbar/Navbar.jsx
-import React, { useEffect } from 'react'
+import React, { useEffect, useCallback } from 'react'
 import clsx from 'clsx'
 import { LuMenu } from 'react-icons/lu'
 import useScrollPosition from '../../hooks/useScrollPosition'
@@ -8,6 +8,22 @@ import TopTierDrawer from '../drawer/TopTierDrawer'
 export default function NavBar({ drawerOpen, openDrawer, closeDrawer, toggleDrawer }) {
   const scrollY = useScrollPosition()
   const isScrolled = scrollY > 50
+  
+  // Use a direct callback to ensure proper click handling
+  const handleMenuClick = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Menu button click handler executed');
+    
+    // Use the appropriate function based on the current drawer state
+    if (drawerOpen) {
+      console.log('Drawer is open, closing it');
+      closeDrawer();
+    } else {
+      console.log('Drawer is closed, opening it');
+      openDrawer();
+    }
+  }, [drawerOpen, openDrawer, closeDrawer]);
 
   return (
     <nav
@@ -29,17 +45,15 @@ export default function NavBar({ drawerOpen, openDrawer, closeDrawer, toggleDraw
 
       {/* Hamburger for mobile */}
       <button
-        className="md:hidden hover:text-gray-200 transition-colors p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-brandGreen-500 focus:ring-opacity-50"
+        className="md:hidden text-brandGreen-300 hover:text-brandGreen-200 transition-colors p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-brandGreen-500 focus:ring-opacity-50 active:bg-brandGray-800"
         aria-label={drawerOpen ? "Close Menu" : "Open Menu"}
         aria-expanded={drawerOpen}
         aria-controls="drawer-menu"
         data-testid="menu-button"
-        onClick={() => {
-          console.log('Menu button clicked, toggling drawer');
-          toggleDrawer();
-        }}
+        onClick={handleMenuClick}
+        type="button"
       >
-        <LuMenu className="h-8 w-8 text-brandGreen-300" />
+        <LuMenu className="h-8 w-8" />
       </button>
 
       {/* Desktop Nav */}
