@@ -72,6 +72,12 @@ export default plugin(function ({ addBase, addUtilities }) {
             '80%':  { filter: 'drop-shadow(0 0 0px #10B981)', color: '#10B981' },
             '100%': { filter: 'drop-shadow(0 0 2px #10B981)', color: '#10B981' },
         },
+        '@keyframes drawerLinkPop': {
+            '0%': { transform: 'translateY(20px) scale(0.9) rotateX(25deg)', opacity: '0' },
+            '40%': { transform: 'translateY(0) scale(1.05) rotateX(0deg)', opacity: '0.8' },
+            '80%': { transform: 'translateY(0) scale(1)', opacity: '1' },
+            '100%': { transform: 'translateY(0) scale(1)', opacity: '1' },
+        },
     });
 
     // 2. Add the animation utilities
@@ -113,6 +119,10 @@ export default plugin(function ({ addBase, addUtilities }) {
         },
         '.animate-triple-pulse-to-orange': {
             animation: 'triplePulseToOrange 4s ease-in-out 1 forwards',
+        },
+        '.animate-drawer-link-pop': {
+            animation: 'drawerLinkPop 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) forwards',
+            'will-change': 'transform, opacity',
         },
         '.animation-delay-0': { 'animation-delay': '0s' },
         '.animation-delay-1': { 'animation-delay': '0.2s' },
