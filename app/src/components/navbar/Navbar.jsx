@@ -33,18 +33,21 @@ export default function NavBar({ drawerOpen, toggleDrawer }) {
 
       {/* Hamburger for mobile */}
       <button
-        className="md:hidden hover:text-gray-200 transition-colors"
+        className="md:hidden nav-link-hover"
         aria-label="Open Menu"
         onClick={handleMenuClick}
       >
-        <LuMenu className="h-8 w-8 text-brandGreen-300" />
+        <LuMenu className="h-8 w-8 text-brandGreen-500" />
       </button>
 
       {/* Desktop Nav */}
-      <ul className="hidden md:flex space-x-8 text-white font-medium">
-        <li className="cursor-pointer hover:text-brandGreen-300 transition-colors">Home</li>
-        <li className="cursor-pointer hover:text-brandGreen-300 transition-colors">Projects</li>
-        <li className="cursor-pointer hover:text-brandGreen-300 transition-colors">Contact</li>
+      <ul className="hidden md:flex space-x-8 font-medium">
+        <li className="cursor-pointer text-brandGreen-500 nav-link-hover">
+          <a href="#" className="hover:text-brandGreen-400 transition-colors">Home</a>
+        </li>
+        <li className="cursor-pointer text-brandGreen-500 nav-link-hover">
+          <a href="https://github.com/life423" target="_blank" rel="noopener noreferrer" className="hover:text-brandGreen-400 transition-colors">GitHub</a>
+        </li>
       </ul>
 
     </nav>

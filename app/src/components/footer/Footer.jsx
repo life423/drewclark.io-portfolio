@@ -42,7 +42,7 @@ export default function Footer() {
   }, [animateGithub]);
 
   return (
-    <footer className="mt-16 text-white" ref={containerRef}>
+    <footer className=" text-white" ref={containerRef}>
       <div className="bg-brandGray-900 py-6 px-6">
         <div className="flex justify-between items-center">
           <div className="flex space-x-8">
