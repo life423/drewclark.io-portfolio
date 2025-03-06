@@ -54,7 +54,7 @@ const Hero = memo(() => {
       " />
 
       {/* Projects grid (containing the hero text at the top) */}
-      <ProjectGrid />
+      {/* <ProjectGrid /> */}
     </section>
   );
 });
