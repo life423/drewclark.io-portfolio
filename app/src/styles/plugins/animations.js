@@ -78,6 +78,14 @@ export default plugin(function ({ addBase, addUtilities }) {
             '80%': { transform: 'translateY(0) scale(1)', opacity: '1' },
             '100%': { transform: 'translateY(0) scale(1)', opacity: '1' },
         },
+        '@keyframes navLinkUnderline': {
+            '0%': { transform: 'scaleX(0)', opacity: '0' },
+            '100%': { transform: 'scaleX(1)', opacity: '1' },
+        },
+        '@keyframes navLinkGlow': {
+            '0%': { textShadow: '0 0 0 rgba(255, 107, 0, 0)' },
+            '100%': { textShadow: '0 0 5px rgba(255, 107, 0, 0.3)' },
+        },
     });
 
     // 2. Add the animation utilities
@@ -127,5 +135,32 @@ export default plugin(function ({ addBase, addUtilities }) {
         '.animation-delay-0': { 'animation-delay': '0s' },
         '.animation-delay-1': { 'animation-delay': '0.2s' },
         '.animation-delay-2': { 'animation-delay': '0.4s' },
+        '.nav-link-hover': {
+            position: 'relative',
+            transition: 'color 0.3s ease, transform 0.3s ease',
+        },
+        '.nav-link-hover:hover': {
+            color: '#FF6B00', /* neonOrange-500 */
+            transform: 'scale(1.03)',
+            textShadow: '0 0 5px rgba(255, 107, 0, 0.3)',
+        },
+        '.nav-link-hover::after': {
+            content: '""',
+            position: 'absolute',
+            bottom: '-4px',
+            left: '50%',
+            width: '0%',
+            height: '2px',
+            backgroundColor: '#FF6B00', /* neonOrange-500 */
+            transform: 'translateX(-50%) scaleX(0)',
+            transformOrigin: 'center',
+            transition: 'transform 0.3s ease, width 0.3s ease',
+            opacity: '0',
+        },
+        '.nav-link-hover:hover::after': {
+            width: '80%',
+            transform: 'translateX(-50%) scaleX(1)',
+            opacity: '1',
+        },
     });
 })
