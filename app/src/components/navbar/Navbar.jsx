@@ -42,9 +42,12 @@ export default function NavBar({ drawerOpen, toggleDrawer }) {
 
       {/* Desktop Nav */}
       <ul className="hidden md:flex space-x-8 font-medium">
-        <li className="cursor-pointer text-brandGreen-500 nav-link-hover">Home</li>
-        <li className="cursor-pointer text-brandGreen-500 nav-link-hover">Projects</li>
-        <li className="cursor-pointer text-brandGreen-500 nav-link-hover">Contact</li>
+        <li className="cursor-pointer text-brandGreen-500 nav-link-hover">
+          <a href="#" className="hover:text-brandGreen-400 transition-colors">Home</a>
+        </li>
+        <li className="cursor-pointer text-brandGreen-500 nav-link-hover">
+          <a href="https://github.com/life423" target="_blank" rel="noopener noreferrer" className="hover:text-brandGreen-400 transition-colors">GitHub</a>
+        </li>
       </ul>
 
     </nav>

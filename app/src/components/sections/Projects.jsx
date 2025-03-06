@@ -1,91 +1,148 @@
 // FILE: app/src/components/sections/Projects.jsx
-import React from 'react';
+import React, { memo, useEffect } from 'react';
+import { motion, useAnimation } from 'framer-motion';
+import { useInView } from 'react-intersection-observer';
 import ProjectCard from '../cards/ProjectCard';
+import ProjectCardFallback from '../cards/ProjectCardFallback';
+import { getAllProjects } from '../../data/projectsData';
+import { typography, layout, gradients } from '../../styles/utils';
 
-// Project data array - This could be moved to a separate data file in a real project
-const projectsData = [
-  {
-    title: 'Project Alpha',
-    description: 'A responsive dashboard application with real-time data visualization and interactive charts.',
-    tags: ['React', 'Tailwind', 'JavaScript', 'Firebase'],
-    imageUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&h=400&fit=crop',
-    repoUrl: 'https://github.com/yourusername/project-alpha',
-    demoUrl: 'https://project-alpha-demo.netlify.app'
-  },
-  {
-    title: 'Project Beta',
-    description: 'A mobile-first e-commerce platform with advanced filtering and seamless checkout experience.',
-    tags: ['React', 'TypeScript', 'Node', 'MongoDB'],
-    imageUrl: 'https://images.unsplash.com/photo-1560472355-536de3962603?w=600&h=400&fit=crop',
-    repoUrl: 'https://github.com/yourusername/project-beta',
-    demoUrl: 'https://project-beta-demo.netlify.app'
-  },
-  {
-    title: 'Project Gamma',
-    description: 'A progressive web app for task management with offline capabilities and cross-device synchronization.',
-    tags: ['React', 'Redux', 'PWA', 'GraphQL'],
-    imageUrl: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&h=400&fit=crop',
-    repoUrl: 'https://github.com/yourusername/project-gamma',
-    demoUrl: 'https://project-gamma-demo.netlify.app'
-  },
-  {
-    title: 'Project Delta',
-    description: 'An AI-powered content generator with customizable templates and export options.',
-    tags: ['Vue', 'JavaScript', 'Node', 'Express'],
-    imageUrl: 'https://images.unsplash.com/photo-1581276879432-15e50529f34b?w=600&h=400&fit=crop',
-    repoUrl: 'https://github.com/yourusername/project-delta',
-    demoUrl: 'https://project-delta-demo.netlify.app'
-  },
-  {
-    title: 'Project Epsilon',
-    description: 'A social platform for connecting creative professionals with immersive profiles.',
-    tags: ['React', 'NextJS', 'MongoDB', 'Tailwind'],
-    imageUrl: 'https://images.unsplash.com/photo-1551434678-e076c223a692?w=600&h=400&fit=crop',
-    repoUrl: 'https://github.com/yourusername/project-epsilon',
-    demoUrl: 'https://project-epsilon-demo.netlify.app'
-  },
-  {
-    title: 'Project Zeta',
-    description: 'A multimedia content management system with advanced search and categorization.',
-    tags: ['Angular', 'TypeScript', 'Firebase', 'SCSS'],
-    imageUrl: 'https://images.unsplash.com/photo-1547658719-da2b51169166?w=600&h=400&fit=crop',
-    repoUrl: 'https://github.com/yourusername/project-zeta',
-    demoUrl: 'https://project-zeta-demo.netlify.app'
-  }
-];
+/**
+ * SectionHeader - Animated header for the projects section
+ */
+const SectionHeader = memo(() => {
+  const controls = useAnimation();
+  const [ref, inView] = useInView({
+    triggerOnce: true,
+    threshold: 0.3,
+  });
 
-export default function Projects() {
+  useEffect(() => {
+    if (inView) {
+      controls.start('visible');
+    }
+  }, [controls, inView]);
+
   return (
-    <section id="projects" className="py-20 bg-brandGray-800">
-      <div className="container mx-auto px-4 max-w-7xl">
-        {/* Section header */}
-        <div className="max-w-3xl mx-auto text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-6 relative inline-block">
-            My Projects
-            <span className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-brandGreen-500 to-neonOrange-500"></span>
-          </h2>
-          <p className="text-brandGray-300 text-lg md:text-xl leading-relaxed">
-            Explore my portfolio of projects showcasing expertise in modern web development,
-            responsive design, and interactive user experiences.
-          </p>
-        </div>
+    <motion.div
+      ref={ref}
+      initial="hidden"
+      animate={controls}
+      variants={{
+        hidden: { opacity: 0 },
+        visible: {
+          opacity: 1,
+          transition: {
+            staggerChildren: 0.2,
+          },
+        },
+      }}
+      className="max-w-3xl mx-auto text-center mb-16 pt-6"
+    >
+      <motion.h2 
+        variants={{
+          hidden: { opacity: 0, y: 20 },
+          visible: {
+            opacity: 1,
+            y: 0,
+            transition: {
+              duration: 0.6,
+              ease: [0.4, 0, 0.2, 1],
+            },
+          },
+        }}
+        className={`${typography.heading.h2} text-white mb-6 relative inline-block`}
+      >
+        My Projects
+        <motion.span 
+          className={`absolute -bottom-2 left-0 w-full h-1 ${gradients.heading}`}
+          initial={{ width: 0 }}
+          animate={inView ? { width: '100%' } : { width: 0 }}
+          transition={{ duration: 0.8, delay: 0.6 }}
+        ></motion.span>
+      </motion.h2>
+      <motion.p 
+        variants={{
+          hidden: { opacity: 0, y: 20 },
+          visible: {
+            opacity: 1,
+            y: 0,
+            transition: {
+              duration: 0.6,
+              ease: [0.4, 0, 0.2, 1],
+            },
+          },
+        }}
+        className="text-brandGray-300 text-lg md:text-xl leading-relaxed"
+      >
+        Explore my portfolio of projects showcasing expertise in modern web development,
+        responsive design, and interactive user experiences.
+      </motion.p>
+    </motion.div>
+  );
+});
+
+SectionHeader.displayName = 'SectionHeader';
+
+/**
+ * Projects section - Displays all projects in a responsive grid 
+ * with visual continuity from the hero section
+ */
+const Projects = memo(() => {
+  // Get projects data from centralized data file
+  const projectsData = getAllProjects();
+  const [isLoading, setIsLoading] = React.useState(true);
+  
+  // Simulate loading delay for demonstration
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <section 
+      id="projects" 
+      className="relative py-24 pt-32 bg-brandGray-800 z-10"
+    >
+      {/* Subtle background effects */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-gradient-to-br from-brandGreen-500/5 to-brandGreen-700/5 blur-2xl"></div>
+        <div className="absolute top-1/4 -right-20 w-60 h-60 rounded-full bg-gradient-to-br from-neonOrange-500/5 to-neonOrange-700/5 blur-3xl"></div>
+        <div className="absolute bottom-10 left-1/3 w-40 h-40 rounded-full bg-gradient-to-br from-brandBlue-500/5 to-brandBlue-700/5 blur-2xl"></div>
+      </div>
+      
+      <div className={layout.container}>
+        {/* Section header with animations */}
+        <SectionHeader />
         
-        {/* Projects grid - responsive for all devices */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {projectsData.map((project, index) => (
-            <ProjectCard
-              key={index}
-              index={index}
-              title={project.title}
-              description={project.description}
-              imageUrl={project.imageUrl}
-              tags={project.tags}
-              repoUrl={project.repoUrl}
-              demoUrl={project.demoUrl}
-            />
-          ))}
+        {/* Projects grid with loading states */}
+        <div className={layout.cardGrid}>
+          {isLoading ? (
+            // Show loading placeholders
+            Array.from({ length: 6 }).map((_, index) => (
+              <ProjectCardFallback key={index} />
+            ))
+          ) : (
+            // Show actual project cards
+            projectsData.map((project, index) => (
+              <ProjectCard
+                key={project.id}
+                index={index}
+                title={project.title}
+                description={project.description}
+                imageUrl={project.imageUrl}
+                tags={project.tags}
+                repoUrl={project.repoUrl}
+                demoUrl={project.demoUrl}
+              />
+            ))
+          )}
         </div>
       </div>
     </section>
   );
-}
+});
+
+Projects.displayName = 'Projects';
+
+export default Projects;
