@@ -16,7 +16,6 @@ export default plugin(function ({ addComponents, theme }) {
     // that will be set by the component
     '.progress-bar-interpolated': {
       backgroundColor: 'var(--progress-color)',
-      boxShadow: '0 0 8px var(--progress-color), 0 0 2px var(--progress-color)',
       borderRadius: '1px',
     }
   }

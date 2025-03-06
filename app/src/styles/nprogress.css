@@ -5,7 +5,7 @@
 
 /* 
 ==============================================
-PULSING GRADIENT WITH BRAND COLORS
+PULSING GRADIENT PROGRESS BAR WITH BRAND COLORS
 ==============================================
 */
 #nprogress .bar {
@@ -13,14 +13,13 @@ PULSING GRADIENT WITH BRAND COLORS
   background-size: 200% 200%;
   animation: gradient-pulse 1.5s ease infinite;
   position: fixed;
-  z-index: 70; /* Just above the ProgressBar's z-index of 60 */
+  z-index: 70;
   top: 4rem; /* Match the ProgressBar's topOffset */
   left: 0;
-  width: 100%;
-  height: 4px; /* Match the ProgressBar's height */
-  box-shadow: 0 0 10px rgba(16, 185, 129, 0.5); /* Subtle glow effect */
+  height: 4px;
 }
 
+/* Animation for the gradient pulse effect */
 @keyframes gradient-pulse {
   0% {
     background-position: 0% 50%;
@@ -36,36 +35,20 @@ PULSING GRADIENT WITH BRAND COLORS
   }
 }
 
-/* Fancy blur effect at the end of the bar */
+/* Fancy effect at the end of the bar */
 #nprogress .peg {
   display: block;
   position: absolute;
   right: 0px;
   width: 100px;
   height: 100%;
-  box-shadow: 0 0 15px rgba(16, 185, 129, 0.7), 0 0 8px rgba(16, 185, 129, 0.5);
   opacity: 1.0;
   transform: rotate(3deg) translate(0px, -4px);
 }
 
-/* Remove these to get rid of the spinner */
+/* Hide spinner */
 #nprogress .spinner {
-  display: none; /* Hide spinner as configured */
-  position: fixed;
-  z-index: 1031;
-  top: 15px;
-  right: 15px;
-}
-
-#nprogress .spinner-icon {
-  width: 18px;
-  height: 18px;
-  box-sizing: border-box;
-  border: solid 2px transparent;
-  border-top-color: #10B981;
-  border-left-color: #10B981;
-  border-radius: 50%;
-  animation: nprogress-spinner 400ms linear infinite;
+  display: none;
 }
 
 .nprogress-custom-parent {
@@ -73,12 +56,6 @@ PULSING GRADIENT WITH BRAND COLORS
   position: relative;
 }
 
-.nprogress-custom-parent #nprogress .spinner,
 .nprogress-custom-parent #nprogress .bar {
   position: absolute;
-}
-
-@keyframes nprogress-spinner {
-  0%   { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
 }

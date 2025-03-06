@@ -5,7 +5,15 @@ import PropTypes from 'prop-types'
 import useScrollPosition from '../../hooks/useScrollPosition'
 import { getInterpolatedColor } from '../utils/colorInterpolate'
 
-export default function ProgressBar({ topOffset = '4rem' }) {
+/**
+ * Scroll-based progress bar that indicates scroll position on the page
+ * Uses consistent color interpolation for visual appeal
+ * 
+ * @param {Object} props - Component props
+ * @param {string} props.topOffset - Distance from top of screen (default: 4rem)
+ * @param {boolean} props.visible - Whether the bar is visible (default: true)
+ */
+export default function ProgressBar({ topOffset = '4rem', visible = true }) {
     const scrollY = useScrollPosition()
     const [docHeight, setDocHeight] = useState(0)
     const [winHeight, setWinHeight] = useState(0)
@@ -23,19 +31,25 @@ export default function ProgressBar({ topOffset = '4rem' }) {
     // Calculate scroll progress
     const scrollable = docHeight - winHeight
     const progress = scrollable > 0 ? (scrollY / scrollable) * 100 : 0
+    
+    // Styling with direct color interpolation
+    const styles = {
+        width: `${progress}%`,
+        top: topOffset,
+        '--progress-color': getInterpolatedColor(progress),
+        opacity: visible ? 1 : 0,
+        transition: 'opacity 0.3s ease-in-out, width 0.3s ease-out'
+    }
 
     return (
         <div
             className="progress-bar-base progress-bar-interpolated"
-            style={{
-                width: `${progress}%`,
-                top: topOffset,
-                '--progress-color': getInterpolatedColor(progress)
-            }}
+            style={styles}
         />
     )
 }
 
 ProgressBar.propTypes = {
     topOffset: PropTypes.string,
+    visible: PropTypes.bool
 }
