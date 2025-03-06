@@ -14,7 +14,7 @@ import { getInterpolatedColor } from '../utils/colorInterpolate';
 
 const HorizontalProgressBar = React.memo(function HorizontalProgressBar({
   topOffset = '4rem', // Adjust to match your nav height
-  height = '2px',
+  height = '3px',
   visible = true,
 }) {
   const scrollInfo = useScrollPosition();
