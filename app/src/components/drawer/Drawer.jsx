@@ -63,11 +63,11 @@ export default function Drawer({ isOpen, onClose }) {
               key={item} 
               className={clsx(
                 'cursor-pointer hover:text-brandGreen-300 transition-all duration-300',
-                'opacity-0 translate-y-4',
-                isOpen && 'opacity-100 translate-y-0'
+                !isOpen && 'opacity-0 pointer-events-none',  // if closed, hide link
+                isOpen && 'animate-drawer-link-pop'         // apply custom animation
               )}
               style={{ 
-                transitionDelay: isOpen ? `${index * 75}ms` : '0ms' 
+                animationDelay: isOpen ? `${index * 120}ms` : '0ms' 
               }}
             >
               {item}
