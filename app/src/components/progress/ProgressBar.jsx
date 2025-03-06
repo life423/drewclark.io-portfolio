@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import useScrollPosition from '../../hooks/useScrollPosition'
+import { getInterpolatedColor } from '../utils/colorInterpolate'
 
 export default function ProgressBar({ topOffset = '4rem' }) {
     const scrollY = useScrollPosition()
@@ -25,19 +26,11 @@ export default function ProgressBar({ topOffset = '4rem' }) {
 
     return (
         <div
-        className='
-        fixed
-        left-0
-        h-1
-        z-[60]
-        bg-pulse-gradient     /* from backgrounds plugin (the gradient) */
-        animate-color-pulse   /* from animations plugin (the keyframe) */
-        transition-all
-        duration-300
-      '
+            className="progress-bar-base progress-bar-interpolated"
             style={{
                 width: `${progress}%`,
                 top: topOffset,
+                '--progress-color': getInterpolatedColor(progress)
             }}
         />
     )
