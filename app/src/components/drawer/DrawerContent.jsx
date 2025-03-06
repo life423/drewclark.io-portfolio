@@ -28,15 +28,19 @@ function DrawerContent({ isOpen, onClose, children, drawerRef }) {
                 <LuX className='h-10 w-10 text-neonOrange-400 hover:text-neonOrange-300 transition-colors' />
             </button>
 
-            <ul className='flex flex-col items-center justify-center flex-1 space-y-6 text-brandBlue-100'>
+            <ul className='flex flex-col items-center justify-center flex-1 space-y-6'>
                 {['Home', 'Projects', 'Contact'].map((item, idx) => (
                     <li
                         key={item}
                         className={clsx(
-                            'opacity-0 translate-y-4 transition-all duration-300',
+                            'opacity-0 translate-y-4 transition-all duration-300 text-brandGreen-500 cursor-pointer nav-link-hover text-lg font-medium',
                             { 'opacity-100 translate-y-0': isOpen },
-                            `delay-[${idx * 75}ms]`
+                            `delay-[${idx * 75}ms]`,
+                            isOpen && 'animate-drawer-link-pop'
                         )}
+                        style={{
+                            animationDelay: `${300 + idx * 100}ms`
+                        }}
                     >
                         {item}
                     </li>
