@@ -1,9 +1,14 @@
-import React from 'react';
+import React, { memo } from 'react';
+import PropTypes from 'prop-types';
+import { gradients, cards } from '../../styles/utils';
 
-const ProjectCardFallback = () => {
+/**
+ * ProjectCardFallback - Loading state placeholder for project cards
+ */
+const ProjectCardFallback = memo(() => {
   return (
-    <div className="group relative overflow-hidden rounded-lg bg-gradient-to-br from-brandGray-900 to-brandGray-800 p-0.5 animate-pulse">
-      <div className="absolute inset-0 bg-gradient-to-br from-brandGreen-500/10 to-neonOrange-500/10 opacity-50"></div>
+    <div className={`${cards.base} p-0.5 animate-pulse bg-gradient-to-br from-brandGray-900 to-brandGray-800`}>
+      <div className={`absolute inset-0 ${gradients.cardBorder} opacity-50`}></div>
       
       <div className="relative z-10 h-full bg-brandGray-900 p-5 rounded-[7px] flex flex-col">
         {/* Image placeholder */}
@@ -34,6 +39,8 @@ const ProjectCardFallback = () => {
       </div>
     </div>
   );
-};
+});
+
+ProjectCardFallback.displayName = 'ProjectCardFallback';
 
 export default ProjectCardFallback;

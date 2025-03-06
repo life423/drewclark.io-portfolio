@@ -2,9 +2,6 @@ import React from 'react'
 import useNavigationState from './hooks/useNavigationState'
 import Layout from './components/layout/Layout'
 import Hero from './components/hero/Hero'
-import About from './components/sections/About'
-import Projects from './components/sections/Projects'
-import Contact from './components/sections/Contact'
 import ProgressBar from './components/progress/ProgressBar'
 
 export default function App() {
@@ -21,9 +18,6 @@ export default function App() {
             >
                 <main className="flex flex-col min-h-screen">
                     <Hero />
-                    <About />
-                    <Projects />
-                    <Contact />
                 </main>
             </Layout>
         </>
