@@ -57,9 +57,6 @@ const Drawer = memo(function Drawer({ isOpen, onClose }) {
         }
     }, [isOpen, handleKeyDown])
 
-    // Performance optimization - don't render anything if drawer state is closed and was never opened
-    if (!isOpen && !drawerRef.current) return null
-
     return (
         <>
             {/* Dark overlay with accessibility attributes */}
@@ -83,13 +80,19 @@ const Drawer = memo(function Drawer({ isOpen, onClose }) {
                 aria-hidden={!isOpen}
                 tabIndex={-1}
                 className={clsx(
-                    'fixed top-0 left-0 h-screen w-[75%] max-w-sm z-[999] flex flex-col',
-                    'bg-gradient-to-b from-brandGray-900 to-brandGray-800 backdrop-blur-md',
-                    'transition-transform duration-300 ease-in-out border-r border-brandGray-700/50',
-                    isOpen
-                        ? 'translate-x-0 delay-75'
-                        : '-translate-x-full delay-0'
+                    'fixed top-0 left-0 w-full md:w-[75%] md:max-w-sm z-[999]',
+                    'flex flex-col overflow-y-auto',
+                    'bg-gradient-to-b from-brandGray-900 to-brandGray-800',
+                    'transform transition-transform duration-300 ease-in-out',
+                    'border-r border-brandGray-700/50',
+                    'h-[100dvh]' /* Modern dynamic viewport height */,
+                    'h-screen' /* Fallback */,
+                    isOpen ? 'translate-x-0' : '-translate-x-full'
                 )}
+                style={{
+                    willChange: 'transform',
+                    boxShadow: isOpen ? '0 0 15px rgba(0, 0, 0, 0.3)' : 'none',
+                }}
             >
                 {/* Hidden title for screen readers */}
                 <h2 id='drawer-title' className='sr-only'>
@@ -136,13 +139,12 @@ const Drawer = memo(function Drawer({ isOpen, onClose }) {
                                 key={item.id}
                                 className={clsx(
                                     'transition-all duration-300 rounded-md overflow-hidden',
-                                    !isOpen && 'opacity-0 pointer-events-none',
-                                    isOpen && 'animate-drawer-link-pop' // Using your existing animation
+                                    'opacity-0',
+                                    isOpen &&
+                                        'animate-drawer-link-fade-in opacity-100'
                                 )}
                                 style={{
-                                    animationDelay: isOpen
-                                        ? `${index * 120}ms`
-                                        : '0ms',
+                                    animationDelay: `${index * 100}ms`,
                                 }}
                             >
                                 <a
@@ -159,12 +161,16 @@ const Drawer = memo(function Drawer({ isOpen, onClose }) {
                 </nav>
 
                 {/* Footer - Call to action */}
-                <div className='mt-auto px-4 py-6 border-t border-brandGray-700/30'>
+                <div className='sticky bottom-0 px-4 py-6 border-t border-brandGray-700/30 bg-brandGray-800'>
                     <a
                         href='#contact'
                         onClick={onClose}
                         className='block w-full py-2 px-4 bg-brandGreen-500 hover:bg-brandGreen-600 
                                  text-white text-center rounded-md transition-colors'
+                        style={{
+                            paddingBottom:
+                                'calc(0.5rem + env(safe-area-inset-bottom, 0px))',
+                        }}
                     >
                         Get in touch
                     </a>
