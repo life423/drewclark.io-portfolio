@@ -6,6 +6,7 @@
  * @returns {Object} Scroll information including y position, direction, and percent
  */
 import { useState, useEffect, useRef } from 'react'
+import { scrollLockState } from './useLockBodyScroll'
 
 export default function useScrollPosition() {
     const [scrollInfo, setScrollInfo] = useState({
@@ -34,13 +35,17 @@ export default function useScrollPosition() {
         }
         
         function handleScroll() {
-            if (frameRef.current) return
+            // Skip if we're already processing a frame or if body scroll is locked
+            if (frameRef.current || scrollLockState.isLocked) return
             
             frameRef.current = requestAnimationFrame(() => {
                 const currentScrollY = window.scrollY
                 
                 // Only update if scroll position changed significantly
-                if (Math.abs(currentScrollY - prevScrollY.current) >= minScrollChange) {
+                // AND body scroll is not locked
+                if (!scrollLockState.isLocked && 
+                    Math.abs(currentScrollY - prevScrollY.current) >= minScrollChange) {
+                    
                     // Determine scroll direction
                     const direction = currentScrollY > prevScrollY.current ? 'down' : 
                                      currentScrollY < prevScrollY.current ? 'up' : 'none'
@@ -65,6 +70,9 @@ export default function useScrollPosition() {
         
         // Throttled scroll handler to improve performance
         function throttledScrollHandler() {
+            // Skip handling scroll events entirely if body is locked
+            if (scrollLockState.isLocked) return
+            
             if (throttleTimeoutRef.current === null) {
                 throttleTimeoutRef.current = setTimeout(() => {
                     handleScroll()
@@ -76,8 +84,10 @@ export default function useScrollPosition() {
         // Add event listener with passive option for performance
         window.addEventListener('scroll', throttledScrollHandler, { passive: true })
         
-        // Initial call to set initial position
-        handleScroll()
+        // Initial call to set initial position - but only if not locked
+        if (!scrollLockState.isLocked) {
+            handleScroll()
+        }
         
         return () => {
             window.removeEventListener('scroll', throttledScrollHandler)
