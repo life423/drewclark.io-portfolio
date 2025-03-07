@@ -31,13 +31,29 @@ export default function Navbar({ drawerOpen, toggleDrawer }) {
         </span>
       </div>
 
-      {/* Hamburger for mobile */}
+      {/* Enhanced tactile menu button for mobile */}
       <button
-        className="md:hidden nav-link-hover"
+        className="md:hidden relative flex items-center justify-center 
+                 min-w-[44px] min-h-[44px] px-3 py-2 rounded-full
+                 bg-gradient-to-b from-brandGray-700/90 to-brandGray-800
+                 border border-brandGray-600/30
+                 shadow-sm hover:shadow-md
+                 hover:border-brandGreen-500/20 hover:bg-brandGray-700
+                 active:scale-90 active:shadow-inner active:bg-brandGray-800
+                 active:border-brandGreen-500/40
+                 group
+                 transition-all duration-200"
         aria-label="Open Menu"
         onClick={handleMenuClick}
       >
-        <LuMenu className="h-8 w-8 text-brandGreen-500" />
+        {/* Pulse effect ring - now using group-hover */}
+        <span className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100
+                       bg-brandGreen-500/10 animate-pulse-slow pointer-events-none
+                       transition-opacity duration-300"></span>
+        
+        <LuMenu className="h-6 w-6 text-brandGreen-400 group-hover:text-brandGreen-300
+                         transition-colors duration-200" />
+        <span className="sr-only">Menu</span>
       </button>
 
       {/* Desktop Nav */}
