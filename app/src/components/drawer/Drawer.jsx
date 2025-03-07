@@ -1,13 +1,13 @@
 /**
  * Enhanced mobile navigation drawer component
- * Improved with React.memo, proper focus management, and animation optimizations
+ * Optimized for cross-platform compatibility including iOS, Android and Edge
  * Follows accessibility best practices for modal dialogs
  */
-import React, { useEffect, useRef, useCallback, memo } from 'react'
+import React, { useEffect, useRef, useCallback, memo, useState } from 'react'
 import { LuX } from 'react-icons/lu'
 import clsx from 'clsx'
 
-// Simpler navigation links without icons for now
+// Navigation links without icons for now
 const navigationLinks = [
     { id: 'home', label: 'Home', href: '#' },
     { id: 'projects', label: 'Projects', href: '#projects' },
@@ -18,6 +18,7 @@ const navigationLinks = [
 const Drawer = memo(function Drawer({ isOpen, onClose }) {
     const drawerRef = useRef(null)
     const closeButtonRef = useRef(null)
+    const [scrollY, setScrollY] = useState(0)
 
     // Handle escape key press to close drawer
     const handleKeyDown = useCallback(
@@ -27,12 +28,18 @@ const Drawer = memo(function Drawer({ isOpen, onClose }) {
         [onClose]
     )
 
-    // Manage body scroll and keyboard events
+    // Manage body scroll and keyboard events - optimized for iOS
     useEffect(() => {
         if (isOpen) {
-            // Lock scroll when drawer is open
+            // Save current scroll position
+            setScrollY(window.scrollY)
+            
+            // Lock scroll - these styles work across browsers including iOS
+            document.body.style.position = 'fixed'
+            document.body.style.top = `-${window.scrollY}px`
+            document.body.style.width = '100%'
             document.body.style.overflow = 'hidden'
-
+            
             // Add keyboard listener
             document.addEventListener('keydown', handleKeyDown)
 
@@ -44,8 +51,14 @@ const Drawer = memo(function Drawer({ isOpen, onClose }) {
             }
         } else {
             // Restore scroll when drawer is closed
+            document.body.style.position = ''
+            document.body.style.top = ''
+            document.body.style.width = ''
             document.body.style.overflow = ''
-
+            
+            // Restore scroll position
+            window.scrollTo(0, scrollY)
+            
             // Remove keyboard listener
             document.removeEventListener('keydown', handleKeyDown)
         }
@@ -53,16 +66,42 @@ const Drawer = memo(function Drawer({ isOpen, onClose }) {
         // Cleanup function
         return () => {
             document.removeEventListener('keydown', handleKeyDown)
-            document.body.style.overflow = ''
+            
+            // Restore scroll if component unmounts while open
+            if (isOpen) {
+                document.body.style.position = ''
+                document.body.style.top = ''
+                document.body.style.width = ''
+                document.body.style.overflow = ''
+                window.scrollTo(0, scrollY)
+            }
         }
-    }, [isOpen, handleKeyDown])
+    }, [isOpen, handleKeyDown, scrollY])
+
+    // Return null when closed for better performance
+    // But only do this after animation completes
+    const [shouldRender, setShouldRender] = useState(isOpen)
+    
+    useEffect(() => {
+        if (isOpen) {
+            setShouldRender(true)
+        } else {
+            // Wait for animation to complete before not rendering
+            const timer = setTimeout(() => {
+                setShouldRender(false)
+            }, 300) // Same as transition duration
+            return () => clearTimeout(timer)
+        }
+    }, [isOpen])
+
+    if (!shouldRender) return null
 
     return (
         <>
             {/* Dark overlay with accessibility attributes */}
             <div
                 className={clsx(
-                    'fixed inset-0 z-[998] bg-black/40 backdrop-blur-sm transition-opacity duration-300',
+                    'fixed inset-0 z-[998] bg-black/50 backdrop-blur-sm transition-opacity duration-300',
                     isOpen
                         ? 'opacity-100 pointer-events-auto'
                         : 'opacity-0 pointer-events-none'
@@ -80,18 +119,18 @@ const Drawer = memo(function Drawer({ isOpen, onClose }) {
                 aria-hidden={!isOpen}
                 tabIndex={-1}
                 className={clsx(
-                    'fixed top-0 left-0 w-full md:w-[75%] md:max-w-sm z-[999]',
-                    'flex flex-col overflow-y-auto',
+                    'fixed inset-y-0 left-0 z-[999]',
+                    'w-[85vw] max-w-xs', // Mobile-first width
+                    'flex flex-col',
                     'bg-gradient-to-b from-brandGray-900 to-brandGray-800',
-                    'transform transition-transform duration-300 ease-in-out',
+                    'transition-transform duration-300 ease-out',
                     'border-r border-brandGray-700/50',
-                    'h-[100dvh]' /* Modern dynamic viewport height */,
-                    'h-screen' /* Fallback */,
                     isOpen ? 'translate-x-0' : '-translate-x-full'
                 )}
                 style={{
                     willChange: 'transform',
-                    boxShadow: isOpen ? '0 0 15px rgba(0, 0, 0, 0.3)' : 'none',
+                    paddingTop: 'env(safe-area-inset-top, 0px)',
+                    paddingBottom: 'env(safe-area-inset-bottom, 0px)'
                 }}
             >
                 {/* Hidden title for screen readers */}
@@ -128,48 +167,46 @@ const Drawer = memo(function Drawer({ isOpen, onClose }) {
                     </p>
                 </div>
 
-                {/* Navigation content */}
-                <nav
-                    aria-label='Mobile navigation'
-                    className='flex-1 px-4 pb-6'
-                >
-                    <ul className='flex flex-col space-y-3 mt-4'>
-                        {navigationLinks.map((item, index) => (
-                            <li
-                                key={item.id}
-                                className={clsx(
-                                    'transition-all duration-300 rounded-md overflow-hidden',
-                                    'opacity-0',
-                                    isOpen &&
-                                        'animate-drawer-link-fade-in opacity-100'
-                                )}
-                                style={{
-                                    animationDelay: `${index * 100}ms`,
-                                }}
-                            >
-                                <a
-                                    href={item.href}
-                                    onClick={onClose}
-                                    className='flex items-center px-4 py-3 text-white hover:bg-brandGray-700/40 
-                                              hover:text-brandGreen-300 transition-colors rounded-md'
+                {/* Scrollable Navigation content */}
+                <div className='flex-1 overflow-y-auto overscroll-contain'>
+                    <nav aria-label='Mobile navigation' className='px-4 pb-20'>
+                        <ul className='flex flex-col space-y-3 mt-4'>
+                            {navigationLinks.map((item, index) => (
+                                <li
+                                    key={item.id}
+                                    className='opacity-0'
+                                    style={{
+                                        animation: isOpen 
+                                            ? 'fadeIn 0.3s ease-out forwards' 
+                                            : 'none',
+                                        animationDelay: isOpen 
+                                            ? `${index * 80 + 50}ms` 
+                                            : '0ms',
+                                    }}
                                 >
-                                    {item.label}
-                                </a>
-                            </li>
-                        ))}
-                    </ul>
-                </nav>
+                                    <a
+                                        href={item.href}
+                                        onClick={onClose}
+                                        className='flex items-center px-4 py-3 text-white hover:bg-brandGray-700/40 
+                                                hover:text-brandGreen-300 transition-colors rounded-md'
+                                    >
+                                        {item.label}
+                                    </a>
+                                </li>
+                            ))}
+                        </ul>
+                    </nav>
+                </div>
 
                 {/* Footer - Call to action */}
-                <div className='sticky bottom-0 px-4 py-6 border-t border-brandGray-700/30 bg-brandGray-800'>
+                <div className='sticky bottom-0 px-4 py-4 border-t border-brandGray-700/30 bg-gradient-to-b from-brandGray-800 to-brandGray-900'>
                     <a
                         href='#contact'
                         onClick={onClose}
                         className='block w-full py-2 px-4 bg-brandGreen-500 hover:bg-brandGreen-600 
                                  text-white text-center rounded-md transition-colors'
                         style={{
-                            paddingBottom:
-                                'calc(0.5rem + env(safe-area-inset-bottom, 0px))',
+                            paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom, 0px))',
                         }}
                     >
                         Get in touch
