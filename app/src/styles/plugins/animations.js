@@ -28,7 +28,7 @@ export default plugin(function ({ addBase, addUtilities }) {
         '@keyframes iconGentlePulse': {
             '0%':   { transform: 'scale(1)', color: '#10B981' },
             '20%':  { transform: 'scale(1.15)', color: '#FF6B00' },
-            '50%':  { transform: 'scale(1.2)', color: '#FF6B00', filter: 'drop-shadow(0 0 5px rgba(255,107,0,0.7))' },
+            '50%':  { transform: 'scale(1.2)', color: '#FF6B00', filter: 'rawrop-shadow(0 0 5px rgba(255,107,0,0.7))' },
             '80%':  { transform: 'scale(1.15)', color: '#FF6B00' },
             '100%': { transform: 'scale(1)', color: '#10B981' },
         },
@@ -46,6 +46,16 @@ export default plugin(function ({ addBase, addUtilities }) {
             '0%': { textShadow: '0 0 0 rgba(255, 107, 0, 0)' },
             '100%': { textShadow: '0 0 5px rgba(255, 107, 0, 0.3)' },
         },
+        '@keyframes drawerLinkFadeIn': {
+  '0%': { 
+    transform: 'translateY(10px)',
+    opacity: '0' 
+  },
+  '100%': { 
+    transform: 'translateY(0)',
+    opacity: '1' 
+  }
+        }
     });
 
     // 2. Add the animation utilities
@@ -65,7 +75,8 @@ export default plugin(function ({ addBase, addUtilities }) {
             filter: 'drop-shadow(0 0 4px currentColor)',
         },
         '.animate-icon-gentle-pulse': {
-            animation: 'iconGentlePulse 2s cubic-bezier(0.4, 0, 0.2, 1) 1 forwards',
+            animation:
+                'iconGentlePulse 2s cubic-bezier(0.4, 0, 0.2, 1) 1 forwards',
             willChange: 'transform, color, filter',
         },
         '.animate-subtle-wobble': {
@@ -89,16 +100,21 @@ export default plugin(function ({ addBase, addUtilities }) {
             animation: 'triplePulseToOrange 4s ease-in-out 1 forwards',
         },
         '.animate-drawer-link-pop': {
-            animation: 'drawerLinkPop 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) forwards',
+            animation:
+                'drawerLinkPop 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) forwards',
             'will-change': 'transform, opacity',
         },
         '.animation-delay-0': { 'animation-delay': '0s' },
         '.animation-delay-1': { 'animation-delay': '0.2s' },
         '.animation-delay-2': { 'animation-delay': '0.4s' },
+        // And add this to your utilities:
+        '.animate-drawer-link-fade-in': {
+            animation: 'drawerLinkFadeIn 0.5s ease-out forwards',
+            willChange: 'transform, opacity',
+        },
         '.nav-link-hover': {
             position: 'relative',
             transition: 'color 0.3s ease, transform 0.3s ease',
         },
-       
-    });
+    })
 })
