@@ -99,28 +99,6 @@ export default plugin(function ({ addBase, addUtilities }) {
             position: 'relative',
             transition: 'color 0.3s ease, transform 0.3s ease',
         },
-        '.nav-link-hover:hover': {
-            color: '#FF6B00', /* neonOrange-500 */
-            transform: 'scale(1.03)',
-            textShadow: '0 0 5px rgba(255, 107, 0, 0.3)',
-        },
-        '.nav-link-hover::after': {
-            content: '""',
-            position: 'absolute',
-            bottom: '-4px',
-            left: '50%',
-            width: '0%',
-            height: '2px',
-            backgroundColor: '#FF6B00', /* neonOrange-500 */
-            transform: 'translateX(-50%) scaleX(0)',
-            transformOrigin: 'center',
-            transition: 'transform 0.3s ease, width 0.3s ease',
-            opacity: '0',
-        },
-        '.nav-link-hover:hover::after': {
-            width: '80%',
-            transform: 'translateX(-50%) scaleX(1)',
-            opacity: '1',
-        },
+       
     });
 })
