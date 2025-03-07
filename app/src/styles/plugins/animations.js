@@ -65,6 +65,11 @@ export default plugin(function ({ addBase, addUtilities }) {
                 opacity: '1', 
                 transform: 'translateY(0)' 
             }
+        },
+        '@keyframes pulseSlow': {
+            '0%': { opacity: '0.1', transform: 'scale(1)' },
+            '50%': { opacity: '0.3', transform: 'scale(1.05)' },
+            '100%': { opacity: '0.1', transform: 'scale(1)' }
         }
     });
 
@@ -129,6 +134,10 @@ export default plugin(function ({ addBase, addUtilities }) {
         '.animate-fade-in': {
             animation: 'fadeIn 0.3s ease-out forwards',
             willChange: 'transform, opacity',
+        },
+        '.animate-pulse-slow': {
+            animation: 'pulseSlow 3s ease-in-out infinite',
+            willChange: 'opacity, transform',
         },
     })
 })
