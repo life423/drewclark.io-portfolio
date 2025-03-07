@@ -6,6 +6,7 @@
 import React, { useEffect, useRef, useCallback, memo, useState } from 'react'
 import { LuX } from 'react-icons/lu'
 import clsx from 'clsx'
+import useLockBodyScroll from '../../hooks/useLockBodyScroll'
 
 // Navigation links without icons for now
 const navigationLinks = [
@@ -18,7 +19,9 @@ const navigationLinks = [
 const Drawer = memo(function Drawer({ isOpen, onClose }) {
     const drawerRef = useRef(null)
     const closeButtonRef = useRef(null)
-    const [scrollY, setScrollY] = useState(0)
+
+    // Use our enhanced hook to lock body scroll - this replaces the manual scroll locking
+    useLockBodyScroll(isOpen)
 
     // Handle escape key press to close drawer
     const handleKeyDown = useCallback(
@@ -28,18 +31,9 @@ const Drawer = memo(function Drawer({ isOpen, onClose }) {
         [onClose]
     )
 
-    // Manage body scroll and keyboard events - optimized for iOS
+    // Manage focus and keyboard events - no longer handling scroll directly
     useEffect(() => {
         if (isOpen) {
-            // Save current scroll position
-            setScrollY(window.scrollY)
-            
-            // Lock scroll - these styles work across browsers including iOS
-            document.body.style.position = 'fixed'
-            document.body.style.top = `-${window.scrollY}px`
-            document.body.style.width = '100%'
-            document.body.style.overflow = 'hidden'
-            
             // Add keyboard listener
             document.addEventListener('keydown', handleKeyDown)
 
@@ -50,15 +44,6 @@ const Drawer = memo(function Drawer({ isOpen, onClose }) {
                 }, 100)
             }
         } else {
-            // Restore scroll when drawer is closed
-            document.body.style.position = ''
-            document.body.style.top = ''
-            document.body.style.width = ''
-            document.body.style.overflow = ''
-            
-            // Restore scroll position
-            window.scrollTo(0, scrollY)
-            
             // Remove keyboard listener
             document.removeEventListener('keydown', handleKeyDown)
         }
@@ -66,17 +51,8 @@ const Drawer = memo(function Drawer({ isOpen, onClose }) {
         // Cleanup function
         return () => {
             document.removeEventListener('keydown', handleKeyDown)
-            
-            // Restore scroll if component unmounts while open
-            if (isOpen) {
-                document.body.style.position = ''
-                document.body.style.top = ''
-                document.body.style.width = ''
-                document.body.style.overflow = ''
-                window.scrollTo(0, scrollY)
-            }
         }
-    }, [isOpen, handleKeyDown, scrollY])
+    }, [isOpen, handleKeyDown])
 
     // Return null when closed for better performance
     // But only do this after animation completes
