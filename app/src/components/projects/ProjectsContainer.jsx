@@ -153,7 +153,7 @@ export default function ProjectsContainer() {
               className={clsx(
                 "h-2 w-2 rounded-full transition-all duration-200",
                 index === activeProjectIndex
-                  ? "bg-brandGreen-500 w-6"
+                  ? "bg-neonOrange-500 w-6"
                   : "bg-brandGray-600 hover:bg-brandGray-500"
               )}
               aria-label={`Go to project ${index + 1}`}
