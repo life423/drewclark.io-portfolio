@@ -96,7 +96,7 @@ export default function Hero() {
               <span className="flex items-center space-x-2">
                 <span className="text-white font-medium">Featured Projects</span>
                 <span className="text-white transform transition-transform duration-300
-                              group-hover:translate-x-1">→</span>
+                              animate-bounce group-hover:translate-y-1">↓</span>
               </span>
             </span>
           </a>
