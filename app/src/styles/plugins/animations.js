@@ -65,6 +65,24 @@ export default plugin(function ({ addBase, addUtilities }) {
                 opacity: '1', 
                 transform: 'translateY(0)' 
             }
+        },
+        '@keyframes pulseSlow': {
+            '0%': { opacity: '0.1', transform: 'scale(1)' },
+            '50%': { opacity: '0.3', transform: 'scale(1.05)' },
+            '100%': { opacity: '0.1', transform: 'scale(1)' }
+        },
+        '@keyframes navUnderline': {
+            '0%': { width: '0%', opacity: '0' },
+            '100%': { width: '100%', opacity: '1' }
+        },
+        '@keyframes navItemFloat': {
+            '0%': { transform: 'translateY(0)' },
+            '50%': { transform: 'translateY(-2px)' },
+            '100%': { transform: 'translateY(0)' }
+        },
+        '@keyframes shimmer': {
+            '0%': { backgroundPosition: '-200% 0' },
+            '100%': { backgroundPosition: '200% 0' }
         }
     });
 
@@ -129,6 +147,41 @@ export default plugin(function ({ addBase, addUtilities }) {
         '.animate-fade-in': {
             animation: 'fadeIn 0.3s ease-out forwards',
             willChange: 'transform, opacity',
+        },
+        '.animate-fade-in-1': {
+            animation: 'fadeIn 0.3s ease-out forwards',
+            animationDelay: '100ms',
+            animationFillMode: 'forwards',
+            willChange: 'transform, opacity',
+        },
+        '.animate-fade-in-2': {
+            animation: 'fadeIn 0.3s ease-out forwards',
+            animationDelay: '200ms',
+            animationFillMode: 'forwards',
+            willChange: 'transform, opacity',
+        },
+        '.animate-fade-in-3': {
+            animation: 'fadeIn 0.3s ease-out forwards',
+            animationDelay: '300ms',
+            animationFillMode: 'forwards',
+            willChange: 'transform, opacity',
+        },
+        '.animate-pulse-slow': {
+            animation: 'pulseSlow 3s ease-in-out infinite',
+            willChange: 'opacity, transform',
+        },
+        '.animate-nav-underline': {
+            animation: 'navUnderline 0.3s ease-out forwards',
+            willChange: 'width, opacity',
+        },
+        '.animate-nav-float': {
+            animation: 'navItemFloat 1.5s ease-in-out infinite',
+            willChange: 'transform',
+        },
+        '.animate-shimmer': {
+            animation: 'shimmer 2s linear infinite',
+            backgroundSize: '200% 100%',
+            willChange: 'background-position',
         },
     })
 })

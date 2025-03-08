@@ -3,11 +3,18 @@
 import backgroundsPlugin from './src/styles/plugins/backgrounds.js'
 import animationsPlugin from './src/styles/plugins/animations.js'
 import progressBarsPlugin from './src/styles/plugins/progressBars.js'
+import textShadowsPlugin from './src/styles/plugins/textShadows.js'
 
 export default {
     content: ['./src/index.html', './src/**/*.{js,jsx,ts,tsx}'],
     theme: {
         extend: {
+            textShadow: {
+                sm: '0 1px 2px rgba(0, 0, 0, 0.2)',
+                DEFAULT: '0 2px 4px rgba(0, 0, 0, 0.2)',
+                lg: '0 8px 16px rgba(0, 0, 0, 0.2)',
+                green: '0 0 5px rgba(16, 185, 129, 0.4)',
+            },
             colors: {
                 brandGreen: {
                     50: '#ECFDF5',
@@ -66,5 +73,6 @@ export default {
         backgroundsPlugin,
         animationsPlugin,
         progressBarsPlugin,
+        textShadowsPlugin,
     ],
 }
