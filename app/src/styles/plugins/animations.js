@@ -79,6 +79,10 @@ export default plugin(function ({ addBase, addUtilities }) {
             '0%': { transform: 'translateY(0)' },
             '50%': { transform: 'translateY(-2px)' },
             '100%': { transform: 'translateY(0)' }
+        },
+        '@keyframes shimmer': {
+            '0%': { backgroundPosition: '-200% 0' },
+            '100%': { backgroundPosition: '200% 0' }
         }
     });
 
@@ -144,6 +148,24 @@ export default plugin(function ({ addBase, addUtilities }) {
             animation: 'fadeIn 0.3s ease-out forwards',
             willChange: 'transform, opacity',
         },
+        '.animate-fade-in-1': {
+            animation: 'fadeIn 0.3s ease-out forwards',
+            animationDelay: '100ms',
+            animationFillMode: 'forwards',
+            willChange: 'transform, opacity',
+        },
+        '.animate-fade-in-2': {
+            animation: 'fadeIn 0.3s ease-out forwards',
+            animationDelay: '200ms',
+            animationFillMode: 'forwards',
+            willChange: 'transform, opacity',
+        },
+        '.animate-fade-in-3': {
+            animation: 'fadeIn 0.3s ease-out forwards',
+            animationDelay: '300ms',
+            animationFillMode: 'forwards',
+            willChange: 'transform, opacity',
+        },
         '.animate-pulse-slow': {
             animation: 'pulseSlow 3s ease-in-out infinite',
             willChange: 'opacity, transform',
@@ -155,6 +177,11 @@ export default plugin(function ({ addBase, addUtilities }) {
         '.animate-nav-float': {
             animation: 'navItemFloat 1.5s ease-in-out infinite',
             willChange: 'transform',
+        },
+        '.animate-shimmer': {
+            animation: 'shimmer 2s linear infinite',
+            backgroundSize: '200% 100%',
+            willChange: 'background-position',
         },
     })
 })
