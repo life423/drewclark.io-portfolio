@@ -4,6 +4,7 @@ import backgroundsPlugin from './src/styles/plugins/backgrounds.js'
 import animationsPlugin from './src/styles/plugins/animations.js'
 import progressBarsPlugin from './src/styles/plugins/progressBars.js'
 import textShadowsPlugin from './src/styles/plugins/textShadows.js'
+import typography from '@tailwindcss/typography'
 
 export default {
     content: ['./src/index.html', './src/**/*.{js,jsx,ts,tsx}'],
@@ -15,6 +16,52 @@ export default {
                 lg: '0 8px 16px rgba(0, 0, 0, 0.2)',
                 green: '0 0 5px rgba(16, 185, 129, 0.4)',
             },
+            typography: (theme) => ({
+                DEFAULT: {
+                    css: {
+                        color: theme('colors.brandGray.300'),
+                        a: {
+                            color: theme('colors.brandGreen.400'),
+                            '&:hover': {
+                                color: theme('colors.brandGreen.300'),
+                            },
+                        },
+                        strong: {
+                            color: theme('colors.brandGreen.300'),
+                        },
+                        h1: {
+                            color: theme('colors.white'),
+                        },
+                        h2: {
+                            color: theme('colors.white'),
+                        },
+                        h3: {
+                            color: theme('colors.brandGreen.300'),
+                        },
+                        h4: {
+                            color: theme('colors.brandGreen.400'),
+                        },
+                        code: {
+                            color: theme('colors.brandGreen.300'),
+                            backgroundColor: theme('colors.brandGray.800'),
+                            borderRadius: theme('borderRadius.md'),
+                            paddingLeft: theme('spacing.1'),
+                            paddingRight: theme('spacing.1'),
+                        },
+                    },
+                },
+                invert: {
+                    css: {
+                        color: theme('colors.brandGray.300'),
+                        a: {
+                            color: theme('colors.brandGreen.400'),
+                            '&:hover': {
+                                color: theme('colors.brandGreen.300'),
+                            },
+                        },
+                    },
+                },
+            }),
             colors: {
                 brandGreen: {
                     50: '#ECFDF5',
@@ -74,5 +121,6 @@ export default {
         animationsPlugin,
         progressBarsPlugin,
         textShadowsPlugin,
+        typography,
     ],
 }
