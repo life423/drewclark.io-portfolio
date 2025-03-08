@@ -70,6 +70,15 @@ export default plugin(function ({ addBase, addUtilities }) {
             '0%': { opacity: '0.1', transform: 'scale(1)' },
             '50%': { opacity: '0.3', transform: 'scale(1.05)' },
             '100%': { opacity: '0.1', transform: 'scale(1)' }
+        },
+        '@keyframes navUnderline': {
+            '0%': { width: '0%', opacity: '0' },
+            '100%': { width: '100%', opacity: '1' }
+        },
+        '@keyframes navItemFloat': {
+            '0%': { transform: 'translateY(0)' },
+            '50%': { transform: 'translateY(-2px)' },
+            '100%': { transform: 'translateY(0)' }
         }
     });
 
@@ -138,6 +147,14 @@ export default plugin(function ({ addBase, addUtilities }) {
         '.animate-pulse-slow': {
             animation: 'pulseSlow 3s ease-in-out infinite',
             willChange: 'opacity, transform',
+        },
+        '.animate-nav-underline': {
+            animation: 'navUnderline 0.3s ease-out forwards',
+            willChange: 'width, opacity',
+        },
+        '.animate-nav-float': {
+            animation: 'navItemFloat 1.5s ease-in-out infinite',
+            willChange: 'transform',
         },
     })
 })
