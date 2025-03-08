@@ -3,8 +3,9 @@ import React from 'react'
 import clsx from 'clsx'
 import { LuMenu } from 'react-icons/lu'
 import useScrollPosition from '../../hooks/useScrollPosition'
+import { getInterpolatedColor } from '../utils/colorInterpolate'
 
-export default function Navbar({ drawerOpen, toggleDrawer }) {
+export default function Navbar({ drawerOpen, toggleDrawer, progressBarVisible = true }) {
   const { y: scrollY, percent: scrollPercent } = useScrollPosition()
   const isScrolled = scrollY > 50
   
@@ -130,6 +131,19 @@ export default function Navbar({ drawerOpen, toggleDrawer }) {
         ))}
       </ul>
 
+      {/* Integrated HorizontalProgressBar positioned at the bottom of navbar */}
+      <div className="absolute bottom-0 left-0 right-0 z-[51]">
+        {progressBarVisible && (
+          <div 
+            className="h-[3px] transition-all duration-200 ease-out"
+            style={{
+              width: `${scrollPercent}%`,
+              backgroundColor: getInterpolatedColor(scrollPercent),
+            }}
+            aria-hidden="true"
+          />
+        )}
+      </div>
     </nav>
   )
 }
