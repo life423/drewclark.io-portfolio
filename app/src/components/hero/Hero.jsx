@@ -38,7 +38,7 @@ export default function Hero() {
         
         {/* Gradient overlay for better text contrast - lightened and brand-tinted */}
         <div className="absolute inset-0 bg-gradient-to-t 
-                     from-brandGray-900/45 via-brandGreen-900/25 to-transparent"></div>
+                     from-brandGray-900/45 via-brandGreen-800/30 to-transparent"></div>
         
         {/* Subtle noise texture overlay */}
         <div className="absolute inset-0 opacity-5 mix-blend-overlay"
