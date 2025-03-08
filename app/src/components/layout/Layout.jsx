@@ -9,7 +9,6 @@ export default function Layout({
     openDrawer,
     closeDrawer,
     toggleDrawer,
-    progressBarVisible,
     children,
 }) {
     return (
@@ -18,7 +17,6 @@ export default function Layout({
                 <Navbar
                     drawerOpen={drawerOpen}
                     toggleDrawer={toggleDrawer}
-                    progressBarVisible={progressBarVisible}
                 />
             </header>
 

@@ -4,6 +4,7 @@ import Layout from './components/layout/Layout'
 import Hero from './components/hero/Hero'
 import ProjectsContainer from './components/projects/ProjectsContainer'
 // import ProgressBar from './components/progress/ProgressBar'
+import HorizontalProgressBar from './components/progress/HorizontalProgressBar'
 
 const MainContent = memo(function MainContent() {
     return (
@@ -30,21 +31,15 @@ export default function App() {
         return () => clearTimeout(timer)
     }, [])
 
-    // We'll pass this visibility state to the Navbar via navigationState
     const progressBarVisible = useMemo(
         () => !initialLoading && !drawerOpen,
         [initialLoading, drawerOpen]
     )
 
-    // Pass progressBarVisible to navigationState so Navbar can access it
-    const navStateWithProgress = {
-        ...navigationState,
-        progressBarVisible
-    }
-
     return (
         <>
-            <Layout {...navStateWithProgress}>
+            <HorizontalProgressBar visible={progressBarVisible} />
+            <Layout {...navigationState}>
                 <MainContent />
             </Layout>
         </>
