@@ -29,17 +29,16 @@ export default function Hero() {
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage: `url(${sproutMobile})`,
-            filter: 'brightness(0.6)',
+            filter: 'brightness(0.75)',
             transform: `translateY(${scrollY * 0.15}px)`,
             transition: 'transform 0.1s ease-out',
             transformOrigin: 'center bottom'
           }}
         />
         
-        {/* Gradient overlay for better text contrast */}
+        {/* Gradient overlay for better text contrast - lightened and brand-tinted */}
         <div className="absolute inset-0 bg-gradient-to-t 
-                     from-brandGray-900 via-brandGray-900/70 to-transparent
-                     opacity-60"></div>
+                     from-brandGray-900/45 via-brandGreen-800/30 to-transparent"></div>
         
         {/* Subtle noise texture overlay */}
         <div className="absolute inset-0 opacity-5 mix-blend-overlay"
@@ -75,9 +74,14 @@ export default function Hero() {
           Creating elegant solutions to complex problems with a focus on user experience and performance.
         </p>
         
-        {/* Enhanced tactile button */}
+        {/* Enhanced tactile button with orange accent line animation */}
         <div className="opacity-0 animate-fade-in-3">
           <a href="#projects" className="inline-flex items-center justify-center group relative">
+            {/* Orange accent underline with transition */}
+            <div className="absolute bottom-[-8px] h-[2px] w-0 left-1/2 transform -translate-x-1/2
+                         bg-gradient-to-r from-transparent via-neonOrange-500 to-transparent
+                         opacity-0 group-hover:opacity-100 group-hover:w-1/2
+                         transition-all duration-300 ease-out"></div>
             <span className="px-5 py-3 rounded-full relative overflow-hidden
                          bg-gradient-to-r from-brandGreen-600 to-brandGreen-500
                          border border-brandGreen-400/20

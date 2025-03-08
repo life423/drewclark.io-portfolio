@@ -63,9 +63,9 @@ export default function ProjectCard({
   return (
     <div className="my-8 overflow-hidden rounded-xl shadow-lg bg-brandGray-800 border border-brandGray-700 transform transition-all duration-300 hover:shadow-xl hover:border-brandGray-600">
       {/* Chapter Header */}
-      <div className="p-5 border-b border-brandGray-700">
+      <div className="p-5 border-b border-brandGray-700 bg-gradient-to-r from-brandGray-800 via-brandGray-800 to-brandGray-800/95">
         <div className="flex items-center mb-2">
-          <span className="text-sm font-semibold text-brandGreen-400 px-2 py-1 rounded-md bg-brandGreen-900/20">
+          <span className="text-sm font-semibold text-white px-2 py-1 rounded-md bg-gradient-to-r from-neonOrange-700 to-neonOrange-600 shadow-sm">
             Chapter {chapterNumber}
           </span>
         </div>
@@ -188,7 +188,7 @@ export default function ProjectCard({
             </form>
             
             {aiResponse && (
-              <div className="bg-brandGray-800 rounded-lg p-3 border-l-2 border-brandGreen-500 animate-fade-in text-sm text-brandGray-200">
+              <div className="bg-brandGray-800 rounded-lg p-3 border-l-2 border-neonOrange-500 animate-fade-in text-sm text-brandGray-200">
                 {aiResponse}
               </div>
             )}
@@ -204,7 +204,7 @@ export default function ProjectCard({
           </svg>
         </button>
         <div className="flex space-x-1">
-          <span className="h-2 w-2 rounded-full bg-brandGreen-500"></span>
+          <span className="h-2 w-2 rounded-full bg-neonOrange-500"></span>
           <span className="h-2 w-2 rounded-full bg-brandGray-600"></span>
           <span className="h-2 w-2 rounded-full bg-brandGray-600"></span>
         </div>

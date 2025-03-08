@@ -87,6 +87,21 @@ export default plugin(function ({ addBase, addUtilities }) {
         '@keyframes bounce': {
             '0%, 100%': { transform: 'translateY(0)' },
             '50%': { transform: 'translateY(4px)' },
+        },
+        '@keyframes drawLineFromCenter': {
+            '0%': { 
+                width: '0%', 
+                left: '50%',
+                opacity: '0' 
+            },
+            '50%': { 
+                opacity: '1' 
+            },
+            '100%': { 
+                width: '50%', 
+                left: '25%',
+                opacity: '1' 
+            }
         }
     });
 
@@ -190,6 +205,10 @@ export default plugin(function ({ addBase, addUtilities }) {
         '.animate-bounce': {
             animation: 'bounce 1.5s ease-in-out infinite',
             willChange: 'transform',
+        },
+        '.animate-line-from-center': {
+            animation: 'drawLineFromCenter 0.6s ease-out forwards',
+            willChange: 'width, left, opacity',
         },
     })
 })
