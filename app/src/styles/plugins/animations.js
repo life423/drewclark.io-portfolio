@@ -83,6 +83,10 @@ export default plugin(function ({ addBase, addUtilities }) {
         '@keyframes shimmer': {
             '0%': { backgroundPosition: '-200% 0' },
             '100%': { backgroundPosition: '200% 0' }
+        },
+        '@keyframes bounce': {
+            '0%, 100%': { transform: 'translateY(0)' },
+            '50%': { transform: 'translateY(4px)' },
         }
     });
 
@@ -182,6 +186,10 @@ export default plugin(function ({ addBase, addUtilities }) {
             animation: 'shimmer 2s linear infinite',
             backgroundSize: '200% 100%',
             willChange: 'background-position',
+        },
+        '.animate-bounce': {
+            animation: 'bounce 1.5s ease-in-out infinite',
+            willChange: 'transform',
         },
     })
 })
