@@ -141,6 +141,10 @@ export default plugin(function ({ addBase, addUtilities }) {
                 opacity: '0.7',
                 transform: 'scale(1)' 
             }
+        },
+        '@keyframes pulseGentle': {
+            '0%, 100%': { transform: 'scale(1)' },
+            '50%': { transform: 'scale(1.1)' }
         }
     });
 
@@ -268,6 +272,10 @@ export default plugin(function ({ addBase, addUtilities }) {
             animation: 'cornerHighlight 2s ease-out forwards',
             animationDelay: '0.5s',
             willChange: 'opacity, transform',
+        },
+        '.animate-pulse-gentle': {
+            animation: 'pulseGentle 2s infinite ease-in-out',
+            willChange: 'transform',
         },
     })
 })
