@@ -1,6 +1,7 @@
 import React, { useRef } from 'react'
 import useScrollPosition from '../../hooks/useScrollPosition'
 import sproutMobile from '../../assets/sprout-mobile.jpg'
+import PrimaryButton from '../utils/PrimaryButton'
 
 export default function Hero() {
   const heroRef = useRef(null)
@@ -74,36 +75,13 @@ export default function Hero() {
           Creating elegant solutions to complex problems with a focus on user experience and performance.
         </p>
         
-        {/* Enhanced tactile button with orange accent line animation */}
+        {/* Primary button using the shared component */}
         <div className="opacity-0 animate-fade-in-3">
-          <a href="#projects" className="inline-flex items-center justify-center group relative">
-            {/* Orange accent underline with transition */}
-            <div className="absolute bottom-[-8px] h-[2px] w-0 left-1/2 transform -translate-x-1/2
-                         bg-gradient-to-r from-transparent via-neonOrange-500 to-transparent
-                         opacity-0 group-hover:opacity-100 group-hover:w-1/2
-                         transition-all duration-300 ease-out"></div>
-            <span className="px-5 py-3 rounded-full relative overflow-hidden
-                         bg-gradient-to-r from-brandGreen-600 to-brandGreen-500
-                         border border-brandGreen-400/20
-                         shadow-lg shadow-brandGreen-800/20
-                         hover:shadow-xl hover:shadow-brandGreen-500/20
-                         hover:-translate-y-0.5 active:translate-y-0.5
-                         active:shadow-sm
-                         transition-all duration-300 ease-out">
-              
-              {/* Button shine/shimmer effect */}
-              <span className="absolute inset-0 rounded-full bg-gradient-to-r 
-                           from-transparent via-white/10 to-transparent opacity-0
-                           group-hover:opacity-100 group-hover:animate-shimmer
-                           transition-opacity duration-300"></span>
-              
-              <span className="flex items-center space-x-2">
-                <span className="text-white font-medium">Featured Projects</span>
-                <span className="text-white transform transition-transform duration-300
-                              animate-bounce group-hover:translate-y-1">↓</span>
-              </span>
-            </span>
-          </a>
+          <PrimaryButton href="#projects">
+            <span className="text-white font-medium">Featured Projects</span>
+            <span className="text-white transition-transform duration-300
+                          animate-bounce active:translate-y-1">↓</span>
+          </PrimaryButton>
         </div>
       </div>
     </section>
