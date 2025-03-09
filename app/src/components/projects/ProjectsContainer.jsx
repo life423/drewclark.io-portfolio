@@ -57,8 +57,11 @@ export default function ProjectsContainer() {
   
   // Intro screen (Chapter 0)
   if (!started) {
-    return (
-      <section className="py-16 px-4">
+  return (
+    <section className="relative py-16 px-4 bg-gradient-to-b from-brandGreen-950/90 via-brandGreen-900/95 to-brandGreen-900">
+      {/* Subtle noise texture overlay */}
+      <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none"
+           style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.65\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%\' height=\'100%\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")' }}></div>
         <div className="max-w-3xl mx-auto">
           <div className="bg-gradient-to-r from-brandGray-900 to-brandGray-800 rounded-2xl shadow-2xl overflow-hidden">
             <div className="p-8 md:p-12">
@@ -94,7 +97,10 @@ export default function ProjectsContainer() {
   }
   
   return (
-    <section className="py-16 px-4">
+    <section className="relative py-16 px-4 bg-gradient-to-b from-brandGreen-950/90 via-brandGreen-900/95 to-brandGreen-900">
+      {/* Subtle noise texture overlay */}
+      <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none"
+           style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.65\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%\' height=\'100%\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")' }}></div>
       <div className="max-w-3xl mx-auto">
         <div className={clsx(
           "transition-all duration-500",
