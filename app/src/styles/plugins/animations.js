@@ -102,6 +102,40 @@ export default plugin(function ({ addBase, addUtilities }) {
                 left: '25%',
                 opacity: '1' 
             }
+        },
+        '@keyframes accentLineDrawMobile': {
+            '0%, 20%': { 
+                width: '0', 
+                opacity: '0' 
+            },
+            '30%': { 
+                width: '0', 
+                opacity: '1' 
+            },
+            '60%, 100%': { 
+                width: '50%', 
+                opacity: '1' 
+            }
+        },
+        '@keyframes subtleShimmer': {
+            '0%': { backgroundPosition: '-100% 0', opacity: '0' },
+            '30%': { opacity: '0.7' },
+            '70%': { opacity: '0.7' },
+            '100%': { backgroundPosition: '200% 0', opacity: '0' }
+        },
+        '@keyframes cornerHighlight': {
+            '0%, 25%': { 
+                opacity: '0',
+                transform: 'scale(0.8)' 
+            },
+            '50%': { 
+                opacity: '1',
+                transform: 'scale(1)' 
+            },
+            '75%, 100%': { 
+                opacity: '0.7',
+                transform: 'scale(1)' 
+            }
         }
     });
 
@@ -209,6 +243,26 @@ export default plugin(function ({ addBase, addUtilities }) {
         '.animate-line-from-center': {
             animation: 'drawLineFromCenter 0.6s ease-out forwards',
             willChange: 'width, left, opacity',
+        },
+        '.animate-accent-line-draw': {
+            animation: 'accentLineDrawMobile 1.5s ease-out forwards',
+            animationDelay: '0.8s',
+            willChange: 'width, opacity',
+        },
+        '.animate-subtle-shimmer': {
+            animation: 'subtleShimmer 3s ease-in-out infinite',
+            backgroundSize: '200% 100%',
+            willChange: 'background-position, opacity',
+        },
+        '.animate-subtle-shimmer-slow': {
+            animation: 'subtleShimmer 5s ease-in-out infinite',
+            backgroundSize: '200% 100%',
+            willChange: 'background-position, opacity',
+        },
+        '.animate-corner-highlight': {
+            animation: 'cornerHighlight 2s ease-out forwards',
+            animationDelay: '0.5s',
+            willChange: 'opacity, transform',
         },
     })
 })
