@@ -64,13 +64,13 @@ export default function ProjectCard({
   return (
     <div className="my-8 overflow-hidden rounded-xl shadow-lg bg-brandGray-800 border border-brandGray-700 transform transition-all duration-300 hover:shadow-xl hover:border-brandGray-600 shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)]">
       {/* Chapter Header */}
-      <div className="p-5 border-b border-brandGray-700 bg-gradient-to-r from-brandGray-800 via-brandGray-800 to-brandGray-800/95">
+      <div className="p-5 border-b border-brandGray-700 bg-gradient-to-r from-brandGray-800 via-brandGray-800 to-brandBlue-900/10">
         <div className="flex items-center mb-2">
           <span className="text-sm font-semibold text-white px-2 py-1 rounded-md bg-gradient-to-r from-neonOrange-700 to-neonOrange-600 shadow-sm">
             Chapter {chapterNumber}
           </span>
         </div>
-        <h2 className="text-2xl font-bold text-white mb-1">{title}</h2>
+        <h2 className="text-2xl font-bold text-brandGreen-300 mb-1">{title}</h2>
         <div className="flex flex-wrap gap-2 mt-3">
           {stack.map((tech, index) => (
             <span 
@@ -155,7 +155,7 @@ export default function ProjectCard({
               <h3 className="text-sm font-medium text-brandGreen-300">Ask About This Project</h3>
               <button 
                 onClick={toggleChat}
-                className="text-brandGray-400 hover:text-white"
+                className="text-brandGray-400 hover:text-brandGreen-400"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -207,7 +207,7 @@ export default function ProjectCard({
       
       {/* Navigation Controls */}
       <div className="flex justify-between items-center px-5 py-3 border-t border-brandGray-700 bg-brandGray-850">
-        <button className="text-brandGray-400 hover:text-white transition-colors duration-200">
+        <button className="text-brandGray-400 hover:text-brandGreen-400 transition-colors duration-200">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
           </svg>
@@ -217,7 +217,7 @@ export default function ProjectCard({
           <span className="h-2 w-2 rounded-full bg-brandGray-600"></span>
           <span className="h-2 w-2 rounded-full bg-brandGray-600"></span>
         </div>
-        <button className="text-brandGray-300 hover:text-white transition-colors duration-200">
+        <button className="text-brandGray-300 hover:text-brandGreen-400 transition-colors duration-200">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
           </svg>

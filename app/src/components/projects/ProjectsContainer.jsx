@@ -63,32 +63,62 @@ export default function ProjectsContainer() {
       <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none"
            style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.65\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%\' height=\'100%\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")' }}></div>
         <div className="max-w-3xl mx-auto">
-          <div className="bg-gradient-to-r from-brandGray-900 to-brandGray-800 rounded-2xl shadow-2xl overflow-hidden">
-            <div className="p-8 md:p-12">
-              <div className="flex items-center mb-4">
-                <span className="text-sm font-semibold text-brandGreen-400 px-2 py-1 rounded-md bg-brandGreen-900/20">
+          <div className="my-8 overflow-hidden rounded-xl shadow-lg bg-brandGray-800 border border-brandGray-700 transform transition-all duration-300 hover:shadow-xl hover:border-brandGray-600 shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)]">
+            {/* Chapter Header - styled like ProjectCard */}
+            <div className="p-5 border-b border-brandGray-700 bg-gradient-to-r from-brandGray-800 via-brandGray-800 to-brandBlue-900/10">
+              <div className="flex items-center mb-2">
+                <span className="text-sm font-semibold text-white px-2 py-1 rounded-md bg-gradient-to-r from-neonOrange-700 to-neonOrange-600 shadow-sm">
                   Chapter 0
                 </span>
               </div>
               
-              <h1 className="text-3xl md:text-4xl font-bold text-white mb-6 bg-clip-text text-transparent bg-gradient-to-r from-brandGreen-300 to-brandBlue-400">
+              <h1 className="text-2xl font-bold text-brandGreen-300 mb-1">
                 The Story of My Work
               </h1>
-              
-              <div className="prose prose-lg prose-invert max-w-none mb-8">
+            </div>
+            
+            <div className="p-8">
+              <div className="prose prose-lg prose-invert max-w-none mb-6">
                 <p>Welcome to an interactive journey through my portfolio projects. Rather than a simple list, I've created a narrative experience that guides you through each project as chapters in a continuing story.</p>
                 <p>Each chapter reveals the challenges, solutions, and technologies behind my work. And you can ask questions along the way to dive deeper into any aspect that interests you.</p>
+              </div>
+              
+              {/* Chapter Title Previews */}
+              <div className="space-y-2 mb-8 text-sm">
+                <h3 className="text-brandGray-400 uppercase text-xs tracking-wider mb-3">Coming Up</h3>
+                {PROJECTS.map((project, index) => (
+                  <div key={index} className="flex items-center text-brandGray-300 hover:text-brandGreen-400 transition-colors duration-200">
+                    <span className="text-neonOrange-500 font-semibold mr-2">Chapter {index + 1}:</span>
+                    <span>{project.title}</span>
+                  </div>
+                ))}
               </div>
               
               <PrimaryButton
                 onClick={handleStart}
                 size="md"
+                className="relative"
               >
                 <span>Begin the Story</span>
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 animate-pulse-gentle" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>
               </PrimaryButton>
+            </div>
+            
+            {/* Chapter Progress Indicators */}
+            <div className="flex justify-center py-4 border-t border-brandGray-700 bg-brandGray-850 space-x-2">
+              <button
+                className="h-2 w-6 rounded-full bg-neonOrange-500"
+                aria-label="Current chapter"
+              />
+              {PROJECTS.map((_, index) => (
+                <button
+                  key={index}
+                  className="h-2 w-2 rounded-full bg-brandGray-600 hover:bg-brandGray-500 transition-all duration-200"
+                  aria-label={`Go to project ${index + 1}`}
+                />
+              ))}
             </div>
           </div>
         </div>
@@ -125,7 +155,7 @@ export default function ProjectsContainer() {
               "px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-1",
               activeProjectIndex === 0
                 ? "bg-brandGray-800 text-brandGray-600 cursor-not-allowed"
-                : "bg-brandGray-800 text-white hover:bg-brandGray-700"
+                : "bg-brandGray-800 text-white hover:bg-brandGreen-900"
             )}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -141,7 +171,7 @@ export default function ProjectsContainer() {
               "px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-1",
               activeProjectIndex === PROJECTS.length - 1
                 ? "bg-brandGray-800 text-brandGray-600 cursor-not-allowed"
-                : "bg-brandGray-800 text-white hover:bg-brandGray-700"
+                : "bg-brandGray-800 text-white hover:bg-brandGreen-900"
             )}
           >
             Next Chapter
