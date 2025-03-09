@@ -1,3 +1,23 @@
+import { brandGreen, brandBlue, neonOrange } from '../../styles/colors.js'
+
+/**
+ * Convert hex color string to RGB array
+ * @param {string} hex - Hex color (e.g., '#10B981' or '10B981')
+ * @returns {[number, number, number]} - [r, g, b] values (0-255)
+ */
+function hexToRgb(hex) {
+    // Remove # if present
+    hex = hex.replace(/^#/, '')
+    
+    // Parse the hex values
+    const bigint = parseInt(hex, 16)
+    const r = (bigint >> 16) & 255
+    const g = (bigint >> 8) & 255
+    const b = bigint & 255
+    
+    return [r, g, b]
+}
+
 /**
  * Convert [r,g,b] (0–255) → [h,s,l] where:
  *   h in [0,360], s,l in [0,100].
@@ -149,17 +169,23 @@ export const getInterpolatedColor = (progress, options = {}) => {
     // Clamp to [0,100]
     const clamped = Math.max(0, Math.min(100, progress))
 
-    // Define comprehensive color stops based on tailwind palette
+    // Get RGB values from our brand colors in colors.js
+    const greenRgb = hexToRgb(brandGreen[500].substring(1))
+    const green350Rgb = hexToRgb(brandGreen[350].substring(1))
+    const blueRgb = hexToRgb(brandBlue[500].substring(1))
+    const orangeRgb = hexToRgb(neonOrange[500].substring(1))
+
+    // Define comprehensive color stops based on our brand palette
     // Each stop carefully selected for optimal perceptual transitioning
     const colorStops = [
         // Green segment (0-33%)
-        { pos: 0, color: rgbToHsl(16, 185, 129) },    // brandGreen-500 (base anchor)
+        { pos: 0, color: rgbToHsl(...greenRgb) },     // brandGreen-500 (base anchor)
         { pos: 4, color: rgbToHsl(20, 190, 133) },    // Slight hue shift
         { pos: 8, color: rgbToHsl(25, 195, 138) },    // Increasing brightness
         { pos: 12, color: rgbToHsl(30, 200, 143) },   // Toward brandGreen-400
         { pos: 16, color: rgbToHsl(38, 207, 150) },   // Higher saturation green
         { pos: 20, color: rgbToHsl(46, 214, 158) },   // Near brandGreen-350
-        { pos: 24, color: rgbToHsl(52, 221, 168) },   // brandGreen-350 (anchor)
+        { pos: 24, color: rgbToHsl(...green350Rgb) }, // brandGreen-350 (anchor)
         { pos: 28, color: rgbToHsl(56, 218, 176) },   // Beginning shift to cyan
         { pos: 33, color: rgbToHsl(62, 214, 185) },   // Teal transition point
         
@@ -171,7 +197,7 @@ export const getInterpolatedColor = (progress, options = {}) => {
         { pos: 44, color: rgbToHsl(65, 195, 215) },   // Light sky blue entry
         { pos: 48, color: rgbToHsl(50, 185, 225) },   // Sky blue
         { pos: 52, color: rgbToHsl(30, 175, 232) },   // Approaching brandBlue
-        { pos: 56, color: rgbToHsl(14, 165, 233) },   // brandBlue-500 (anchor)
+        { pos: 56, color: rgbToHsl(...blueRgb) },     // brandBlue-500 (anchor)
         { pos: 60, color: rgbToHsl(20, 155, 214) },   // Slightly deeper blue
         { pos: 64, color: rgbToHsl(28, 145, 195) },   // Blue exit point
         
@@ -186,7 +212,7 @@ export const getInterpolatedColor = (progress, options = {}) => {
         { pos: 88, color: rgbToHsl(180, 125, 36) },   // Golden-orange
         { pos: 92, color: rgbToHsl(205, 118, 24) },   // Orange
         { pos: 96, color: rgbToHsl(230, 112, 12) },   // Deep orange
-        { pos: 100, color: rgbToHsl(255, 107, 0) },   // neonOrange-500 (final anchor)
+        { pos: 100, color: rgbToHsl(...orangeRgb) },  // neonOrange-500 (final anchor)
     ]
 
     // Find the two color stops we're between

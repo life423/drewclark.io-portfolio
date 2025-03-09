@@ -62,7 +62,7 @@ export default function ProjectCard({
   };
   
   return (
-    <div className="my-8 overflow-hidden rounded-xl shadow-lg bg-brandGray-800 border border-brandGray-700 transform transition-all duration-300 hover:shadow-xl hover:border-brandGray-600">
+    <div className="my-8 overflow-hidden rounded-xl shadow-lg bg-brandGray-800 border border-brandGray-700 transform transition-all duration-300 hover:shadow-xl hover:border-brandGray-600 shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)]">
       {/* Chapter Header */}
       <div className="p-5 border-b border-brandGray-700 bg-gradient-to-r from-brandGray-800 via-brandGray-800 to-brandGray-800/95">
         <div className="flex items-center mb-2">

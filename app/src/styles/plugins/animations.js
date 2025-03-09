@@ -1,4 +1,9 @@
 import plugin from 'tailwindcss/plugin'
+import { brandGreen, neonOrange } from '../colors.js'
+
+// Get color values without the leading #
+const greenColor = brandGreen[500].substring(1)
+const orangeColor = neonOrange[500].substring(1)
 
 export default plugin(function ({ addBase, addUtilities }) {
     // 1. Base keyframes for all animations
@@ -14,23 +19,23 @@ export default plugin(function ({ addBase, addUtilities }) {
             '100%': { backgroundPosition: '0% 50%' },
         },
         '@keyframes iconPulse': {
-            '0%': { transform: 'scale(1)', opacity: '1', color: '#10B981' },
-            '25%': { transform: 'scale(1.2)', opacity: '1', color: '#FF6B00' },
-            '75%': { transform: 'scale(1.2)', opacity: '1', color: '#FF6B00' },
-            '100%': { transform: 'scale(1)', opacity: '1', color: '#10B981' },
+            '0%': { transform: 'scale(1)', opacity: '1', color: `#${greenColor}` },
+            '25%': { transform: 'scale(1.2)', opacity: '1', color: `#${orangeColor}` },
+            '75%': { transform: 'scale(1.2)', opacity: '1', color: `#${orangeColor}` },
+            '100%': { transform: 'scale(1)', opacity: '1', color: `#${greenColor}` },
         },
         '@keyframes iconTap': {
-            '0%': { transform: 'scale(1)', color: '#10B981' },
-            '30%': { transform: 'scale(0.9)', color: '#FF6B00' },
-            '60%': { transform: 'scale(1.15)', color: '#FF6B00' },
-            '100%': { transform: 'scale(1)', color: '#10B981' },
+            '0%': { transform: 'scale(1)', color: `#${greenColor}` },
+            '30%': { transform: 'scale(0.9)', color: `#${orangeColor}` },
+            '60%': { transform: 'scale(1.15)', color: `#${orangeColor}` },
+            '100%': { transform: 'scale(1)', color: `#${greenColor}` },
         },
         '@keyframes iconGentlePulse': {
-            '0%':   { transform: 'scale(1)', color: '#10B981' },
-            '20%':  { transform: 'scale(1.15)', color: '#FF6B00' },
-            '50%':  { transform: 'scale(1.2)', color: '#FF6B00', filter: 'rawrop-shadow(0 0 5px rgba(255,107,0,0.7))' },
-            '80%':  { transform: 'scale(1.15)', color: '#FF6B00' },
-            '100%': { transform: 'scale(1)', color: '#10B981' },
+            '0%':   { transform: 'scale(1)', color: `#${greenColor}` },
+            '20%':  { transform: 'scale(1.15)', color: `#${orangeColor}` },
+            '50%':  { transform: 'scale(1.2)', color: `#${orangeColor}`, filter: 'rawrop-shadow(0 0 5px rgba(255,107,0,0.7))' },
+            '80%':  { transform: 'scale(1.15)', color: `#${orangeColor}` },
+            '100%': { transform: 'scale(1)', color: `#${greenColor}` },
         },
         '@keyframes drawerLinkPop': {
             '0%': { transform: 'translateY(20px) scale(0.9) rotateX(25deg)', opacity: '0' },
@@ -43,8 +48,8 @@ export default plugin(function ({ addBase, addUtilities }) {
             '100%': { transform: 'scaleX(1)', opacity: '1' },
         },
         '@keyframes navLinkGlow': {
-            '0%': { textShadow: '0 0 0 rgba(255, 107, 0, 0)' },
-            '100%': { textShadow: '0 0 5px rgba(255, 107, 0, 0.3)' },
+            '0%': { textShadow: `0 0 0 rgba(${parseInt(orangeColor.substring(0, 2), 16)}, ${parseInt(orangeColor.substring(2, 4), 16)}, ${parseInt(orangeColor.substring(4, 6), 16)}, 0)` },
+            '100%': { textShadow: `0 0 5px rgba(${parseInt(orangeColor.substring(0, 2), 16)}, ${parseInt(orangeColor.substring(2, 4), 16)}, ${parseInt(orangeColor.substring(4, 6), 16)}, 0.3)` },
         },
         '@keyframes drawerLinkFadeIn': {
             '0%': { 
