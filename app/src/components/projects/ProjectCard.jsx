@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import clsx from 'clsx';
 import { answerProjectQuestion } from '../../services/aiGenerationService';
+import PrimaryButton from '../utils/PrimaryButton';
 
 export default function ProjectCard({ 
   chapterNumber,
@@ -134,12 +135,20 @@ export default function ProjectCard({
       {/* Interactive Chat Section */}
       <div className="border-t border-brandGray-700 p-5">
         {!chatVisible ? (
-          <button
+          <PrimaryButton 
             onClick={toggleChat}
-            className="w-full py-2 px-4 rounded-lg bg-gradient-to-r from-brandGreen-600 to-brandGreen-500 text-white font-medium text-sm hover:shadow-lg hover:from-brandGreen-500 hover:to-brandGreen-400 transition-all duration-200"
+            fullWidth={true}
+            size="sm"
+            className="mx-auto max-w-[360px]"
           >
+            {/* Keep the corner highlight from the original design */}
+            <div className="absolute top-0 right-0 w-[20px] h-[20px] opacity-0 animate-corner-highlight">
+              <div className="absolute top-0 right-0 w-[2px] h-[6px] bg-neonOrange-500/70 rounded-sm"></div>
+              <div className="absolute top-0 right-0 w-[6px] h-[2px] bg-neonOrange-500/70 rounded-sm"></div>
+            </div>
+            
             Ask the Storyteller
-          </button>
+          </PrimaryButton>
         ) : (
           <div className="bg-brandGray-900 rounded-lg p-4 animate-fade-in">
             <div className="flex justify-between items-center mb-3">

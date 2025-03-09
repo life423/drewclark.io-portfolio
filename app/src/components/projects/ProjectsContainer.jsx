@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ProjectCard from './ProjectCard';
 import clsx from 'clsx';
+import PrimaryButton from '../utils/PrimaryButton';
 
 // Sample project data - in a real implementation, this could come from an API or CMS
 const PROJECTS = [
@@ -76,15 +77,15 @@ export default function ProjectsContainer() {
                 <p>Each chapter reveals the challenges, solutions, and technologies behind my work. And you can ask questions along the way to dive deeper into any aspect that interests you.</p>
               </div>
               
-              <button
+              <PrimaryButton
                 onClick={handleStart}
-                className="px-6 py-3 rounded-lg bg-gradient-to-r from-brandGreen-600 to-brandGreen-500 text-white font-medium hover:shadow-lg hover:from-brandGreen-500 hover:to-brandGreen-400 transition-all duration-200 flex items-center gap-2"
+                size="md"
               >
-                Begin the Story
+                <span>Begin the Story</span>
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>
-              </button>
+              </PrimaryButton>
             </div>
           </div>
         </div>
