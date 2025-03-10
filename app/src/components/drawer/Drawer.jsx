@@ -70,6 +70,24 @@ const Drawer = memo(function Drawer({ isOpen, onClose }) {
         }
     }, [isOpen])
 
+    // Control the transform state for smooth sliding animation
+    const [drawerPosition, setDrawerPosition] = useState(isOpen ? 'translate-x-0' : '-translate-x-full')
+    
+    useEffect(() => {
+        if (isOpen) {
+            // Render off-screen first
+            setDrawerPosition('-translate-x-full')
+            // Small delay to allow browser to register initial state
+            const timer = setTimeout(() => {
+                setDrawerPosition('translate-x-0')
+            }, 10)
+            return () => clearTimeout(timer)
+        } else {
+            // Animate closing immediately
+            setDrawerPosition('-translate-x-full')
+        }
+    }, [isOpen])
+
     if (!shouldRender) return null
 
     return (
@@ -99,9 +117,9 @@ const Drawer = memo(function Drawer({ isOpen, onClose }) {
                     'w-[85vw] max-w-xs', // Mobile-first width
                     'flex flex-col',
                     'bg-gradient-to-b from-brandGray-900 to-brandGray-800',
-                    'transition-transform duration-300 ease-out',
+                    'transition-transform duration-300 ease-in-out', // Changed to ease-in-out for balanced animation
                     'border-r border-brandGray-700/50',
-                    isOpen ? 'translate-x-0' : '-translate-x-full'
+                    drawerPosition // Use the controlled transform state
                 )}
                 style={{
                     willChange: 'transform',
