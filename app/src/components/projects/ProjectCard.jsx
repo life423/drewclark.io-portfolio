@@ -176,12 +176,15 @@ export default function ProjectCard({
                 />
                 <button
                   type="submit"
-                  disabled={isGenerating || !userQuestion.trim()}
+                  disabled={isGenerating}
                   className={clsx(
                     "px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
-                    isGenerating || !userQuestion.trim()
-                      ? "bg-brandGray-700 text-brandGray-500 cursor-not-allowed"
-                      : "bg-brandGreen-500 text-white hover:bg-brandGreen-400"
+                    "border", // Always have a border for consistent sizing
+                    isGenerating 
+                      ? "bg-brandGray-700 text-brandGray-500 border-transparent cursor-wait"
+                      : !userQuestion.trim()
+                        ? "bg-brandGray-800 text-brandGreen-500 border-brandGreen-500" // Empty state: green text, green border
+                        : "bg-brandGreen-500 text-white hover:bg-brandGreen-400 border-transparent" // Filled state: green bg, white text
                   )}
                 >
                   {isGenerating ? (
