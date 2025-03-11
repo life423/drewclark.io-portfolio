@@ -6,8 +6,6 @@ import Drawer from '../drawer/Drawer'
 
 export default function Layout({
     drawerOpen,
-    openDrawer,
-    closeDrawer,
     toggleDrawer,
     progressBarVisible,
     children,

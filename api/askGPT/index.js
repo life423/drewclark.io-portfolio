@@ -1,12 +1,21 @@
 module.exports = async function (context, req) {
-    // Safely handle missing req.body
-    const userQuestion = req.body?.question || "No question provided";
-    
-    // TODO: Call OpenAI GPT-4 with your API key
-    // const answer = await callOpenAI(userQuestion);
+    // Log something so we can see it in Azure logs
+    context.log('askGPT function invoked.')
 
-    context.res = {
-        status: 200,
-        body: { answer: `Mocked AI response: you asked "${userQuestion}"` },
+    // If the request method is POST, let's parse the body.
+    // This ensures a GET request in the browser won't blow up.
+    if (req.method === 'POST') {
+        const userQuestion =
+            (req.body && req.body.question) || 'No question provided'
+        context.res = {
+            status: 200,
+            body: { answer: `Mocked AI response: you asked "${userQuestion}"` },
+        }
+    } else {
+        // If it’s a GET (like hitting the URL in your browser), return something simple
+        context.res = {
+            status: 200,
+            body: { message: 'askGPT is alive! Use POST with a JSON body.' },
+        }
     }
 }
