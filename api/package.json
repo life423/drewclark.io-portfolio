@@ -1,0 +1,8 @@
+{
+  "name": "drewclark-portfolio-api",
+  "version": "1.0.0",
+  "description": "Azure Functions for DrewClark.io portfolio",
+  "dependencies": {
+    "openai": "^4.24.1"
+  }
+}

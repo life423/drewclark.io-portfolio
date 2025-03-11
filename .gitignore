@@ -13,6 +13,10 @@ logs
 .DS_Store
 *.swp
 
+# Azure Functions
+local.settings.json
+.env
+
 # Production build directories
 # dist/
 build/

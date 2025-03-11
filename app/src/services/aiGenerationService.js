@@ -1,16 +1,21 @@
 /**
  * AI Generation Service
  * 
- * This service simulates interaction with an AI model for generating project narratives
- * and answering questions. In a production environment, this would connect to an 
- * actual AI API (like OpenAI, Anthropic, etc.) or a custom fine-tuned model.
+ * This service provides interaction with AI models for generating project narratives
+ * and answering questions. It can use both simulated responses for development
+ * and real API calls to our Azure Function in production.
  */
 
 // Simple in-memory cache to avoid excessive API calls
 const responseCache = {
   narratives: new Map(),
-  answers: new Map()
+  answers: new Map(),
+  generalQuestions: new Map()
 };
+
+// Environment configuration - set to true to use actual API calls
+const USE_REAL_API = process.env.NODE_ENV === 'production';
+const API_URL = '/api/askGPT';
 
 /**
  * Generates a narrative for a project
@@ -80,15 +85,82 @@ export async function answerProjectQuestion(projectData, question) {
 }
 
 /**
- * Simulates an API call to an LLM service
+ * Ask a general question to the AI (using the Azure Function)
+ * @param {string} question - The user's question
+ * @returns {Promise<string>} The AI-generated answer
+ */
+export async function askGeneralQuestion(question) {
+  const questionText = question.trim();
+  const cacheKey = questionText.toLowerCase();
+  
+  // Check cache first
+  if (responseCache.generalQuestions.has(cacheKey)) {
+    console.log('Using cached general answer');
+    return responseCache.generalQuestions.get(cacheKey);
+  }
+  
+  let response;
+  if (USE_REAL_API) {
+    try {
+      response = await callAskGptFunction(questionText);
+    } catch (error) {
+      console.error('Error calling askGPT function:', error);
+      // Fallback to simulation if API call fails
+      response = "Sorry, I couldn't connect to the AI service. Please try again later.";
+    }
+  } else {
+    // Use simulation for development
+    response = await simulateApiCall({
+      prompt: `Please answer this question in a friendly, conversational tone: "${question}"`,
+      temperature: 0.6,
+      maxTokens: 150
+    });
+  }
+  
+  // Cache the response
+  responseCache.generalQuestions.set(cacheKey, response);
+  
+  return response;
+}
+
+/**
+ * Makes an actual API call to the askGPT Azure Function
+ * @param {string} question - The question to ask
+ * @returns {Promise<string>} The AI response
+ */
+async function callAskGptFunction(question) {
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ question })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`API call failed with status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return data.answer;
+  } catch (error) {
+    console.error('Error calling askGPT API:', error);
+    throw error;
+  }
+}
+
+/**
+ * Simulates an API call to an LLM service or makes a real call based on configuration
  * @param {Object} options - API call options
- * @returns {Promise<string>} The simulated response
+ * @returns {Promise<string>} The response
  */
 async function simulateApiCall(options) {
-  console.log('Simulating API call with options:', options);
+  console.log('API call with options:', options);
   
   // In development, we'll simulate responses
-  // In production, this would be a fetch call to an AI service
+  // In production, we could use the askGPT function, but we're keeping this
+  // separate from askGeneralQuestion for more specific project-related prompts
   return new Promise((resolve) => {
     setTimeout(() => {
       // Generate different responses based on the prompt content
@@ -148,4 +220,5 @@ function generateSimulatedAnswer(prompt) {
 export function clearAiResponseCache() {
   responseCache.narratives.clear();
   responseCache.answers.clear();
+  responseCache.generalQuestions.clear();
 }
