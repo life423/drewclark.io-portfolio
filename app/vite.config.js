@@ -7,4 +7,8 @@ export default defineConfig({
         outDir: '../dist', // puts the final build in app/dist
     },
     plugins: [react()],
+    // Make sure environmental variables are properly loaded
+    define: {
+        'process.env': {}
+    }
 })
