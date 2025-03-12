@@ -1,4 +1,9 @@
 const { OpenAI } = require('openai')
+require('dotenv').config({
+  path: process.env.NODE_ENV === 'production' 
+    ? '.env.production' 
+    : '.env.development'
+});
 
 // Simple in-memory cache (consider using a distributed cache in production)
 const responseCache = new Map()
@@ -242,7 +247,7 @@ function isRateLimited(clientIp) {
     // Check if limit is exceeded
     if (requests.length >= limit) {
         return true // Rate limited
-        
+
     }
 
     // Record this request

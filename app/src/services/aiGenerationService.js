@@ -14,12 +14,10 @@ const responseCache = {
 };
 
 // Environment configuration - set to true to use actual API calls
-// Temporarily set to true for testing the Azure Function even in development mode
-const USE_REAL_API = true; // process.env.NODE_ENV === 'production';
-// Use relative path for deployed app, or localhost URL for local testing
-const API_URL = process.env.NODE_ENV === 'production' 
-  ? '/api/askGPT'
-  : 'http://localhost:7071/api/askGPT';
+// Always use real API with environment-specific URL
+const USE_REAL_API = true;
+// Use environment variables for API URL (handles both development and production)
+const API_URL = import.meta.env.VITE_API_URL;
 
 /**
  * Generates a narrative for a project
