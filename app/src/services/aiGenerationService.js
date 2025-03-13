@@ -14,13 +14,31 @@ const responseCache = {
 };
 
 // Environment configuration
-// Always use real APronment-specific URL from Vite env vars
+// Always use real API with environment-specific URL from Vite env vars
 const USE_REAL_API = true;
-// Get API URL from environment variables
-const API_URL = import.meta.env.VITE_API_URL;
-// Log environment info for debugging
-console.log(`App Environment: ${import.meta.env.MODE}`);
-console.log(`API URL: ${API_URL}`);
+
+// Get API URL with proper fallback for production
+const API_URL = (() => {
+  // Log detailed debugging info
+  console.log('Environment mode:', import.meta.env.MODE);
+  console.log('API URL from env:', import.meta.env.VITE_API_URL);
+  
+  // Check for undefined or empty string
+  if (!import.meta.env.VITE_API_URL) {
+    console.warn('VITE_API_URL is undefined, using fallback URL');
+    
+    // If we're in production (based on hostname), use a relative path
+    if (window.location.hostname !== 'localhost') {
+      return '/api/askGPT'; 
+    }
+    // Otherwise use localhost in development
+    return 'http://localhost:7071/api/askGPT';
+  }
+  
+  return import.meta.env.VITE_API_URL;
+})();
+
+console.log('Final API URL being used:', API_URL);
 
 /**
  * Generates a narrative for a project
@@ -174,7 +192,13 @@ async function callAskGptFunction(question) {
     console.log('Response headers:', [...response.headers.entries()]);
     
     if (!response.ok) {
-      throw new Error(`API call failed with status: ${response.status}`);
+      if (response.status === 405) {
+        throw new Error(`Method not allowed (405): The API endpoint doesn't accept this request method`);
+      } else if (response.status === 404) {
+        throw new Error(`Not found (404): The API endpoint could not be found at ${API_URL}`);
+      } else {
+        throw new Error(`API call failed with status: ${response.status}`);
+      }
     }
     
     const data = await response.json();
