@@ -16,7 +16,7 @@ RUN npm install --production
 
 # Copy server.js and API code
 COPY server.js ./
-COPY api/askGPT/index.js ./api/askGPT/
+COPY api/ ./api/
 
 # Copy built frontend assets
 COPY --from=build-frontend /app/dist ./app/dist

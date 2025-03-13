@@ -30,6 +30,7 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     volumes:
       - ./app:/app/app
+      - ./api:/app/api  # Mount API directory for hot reloading
       - ./server.js:/app/server.js
       - /app/app/node_modules
     command: npm run dev

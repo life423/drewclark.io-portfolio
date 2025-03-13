@@ -1,6 +1,18 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import clsx from 'clsx';
 
+/**
+ * PrimaryButton component with animation and responsive styling
+ * 
+ * @param {Object} props - Component props
+ * @param {React.ReactNode} props.children - Button content
+ * @param {string} props.className - Additional CSS classes
+ * @param {string} props.href - URL for anchor links (renders as <a> when provided)
+ * @param {Function} props.onClick - Click handler function
+ * @param {boolean} props.animateUnderline - Whether to show animated underline effect
+ * @param {boolean} props.fullWidth - Whether button should take full width of parent
+ * @param {'sm'|'md'|'lg'} props.size - Button size (small, medium, large)
+ */
 export default function PrimaryButton({ 
   children, 
   className, 
@@ -8,31 +20,40 @@ export default function PrimaryButton({
   onClick,
   animateUnderline = true,
   fullWidth = false,
-  size = "md", // New size prop with sm, md, lg options
+  size = "md",
   ...props 
 }) {
   const buttonRef = useRef(null);
   const ButtonTag = href ? 'a' : 'button';
   
+  // Memoized touch handler for better performance
+  const handleTouchStart = useCallback(() => {
+    const accentLine = buttonRef.current?.querySelector('[data-accent-line]');
+    if (accentLine) {
+      accentLine.style.width = '80%';
+      accentLine.style.opacity = '1';
+    }
+  }, []);
+  
   // Handle touch interactions for mobile
   useEffect(() => {
     const buttonElement = buttonRef.current;
-    const accentLine = buttonElement?.querySelector('[data-accent-line]');
     
-    if (buttonElement && accentLine) {
-      const handleTouchStart = () => {
-        accentLine.style.width = '80%';
-        accentLine.style.opacity = '1';
-      };
-      
-      
+    if (buttonElement && animateUnderline) {
       buttonElement.addEventListener('touchstart', handleTouchStart);
       
       return () => {
         buttonElement.removeEventListener('touchstart', handleTouchStart);
       };
     }
-  }, []);
+  }, [animateUnderline, handleTouchStart]);
+  
+  // Button size style variants
+  const sizeStyles = {
+    sm: "px-4 py-2 text-sm",
+    md: "px-5 py-3",
+    lg: "px-6 py-4 text-lg"
+  };
   
   return (
     <ButtonTag
@@ -52,13 +73,12 @@ export default function PrimaryButton({
         "transition-all duration-300 ease-out",
         "touch-manipulation",
         // Size variants
-        size === "sm" && "px-4 py-2 text-sm",
-        size === "md" && "px-5 py-3",
-        size === "lg" && "px-6 py-4 text-lg",
+        sizeStyles[size] || sizeStyles.md,
         // Width control
         fullWidth && "w-full",
         className
       )}
+      aria-label={typeof children === 'string' ? children : undefined}
       {...props}
     >
       {/* Button shine/shimmer effect */}
@@ -79,6 +99,7 @@ export default function PrimaryButton({
                    bg-gradient-to-r from-transparent via-neonOrange-500 to-transparent
                    opacity-0 animate-accent-line-draw
                    transition-all duration-300 ease-out"
+          aria-hidden="true"
         ></div>
       )}
     </ButtonTag>

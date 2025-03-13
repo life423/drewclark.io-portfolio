@@ -3,8 +3,8 @@ import useNavigationState from './hooks/useNavigationState'
 import Layout from './components/layout/Layout'
 import Hero from './components/hero/Hero'
 import ProjectsContainer from './components/projects/ProjectsContainer'
-// import ProgressBar from './components/progress/ProgressBar'
 
+// Memoized main content component for better performance
 const MainContent = memo(function MainContent() {
     return (
         <main className='flex flex-col min-h-screen'>
@@ -12,7 +12,6 @@ const MainContent = memo(function MainContent() {
             <div id="projects" className='bg-brandGray-900'>
                 <ProjectsContainer />
             </div>
-            {/* Containerized version - API is now integrated into the main Node server */}
         </main>
     )
 })
@@ -31,23 +30,21 @@ export default function App() {
         return () => clearTimeout(timer)
     }, [])
 
-    // We'll pass this visibility state to the Navbar via navigationState
+    // Calculate whether to show progress indicators based on app state
     const progressBarVisible = useMemo(
         () => !initialLoading && !drawerOpen,
         [initialLoading, drawerOpen]
     )
 
-    // Pass progressBarVisible to navigationState so Navbar can access it
-    const navStateWithProgress = {
+    // Enhanced navigation state with progress bar visibility
+    const enhancedNavigationState = {
         ...navigationState,
         progressBarVisible
     }
 
     return (
-        <>
-            <Layout {...navStateWithProgress}>
-                <MainContent />
-            </Layout>
-        </>
+        <Layout {...enhancedNavigationState}>
+            <MainContent />
+        </Layout>
     )
 }
