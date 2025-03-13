@@ -140,6 +140,7 @@ Example request:
 - `Dockerfile`: Production container configuration
 - `Dockerfile.dev`: Development container with hot reloading
 - `docker-compose.yml`: Service definitions for both dev and production
+<<<<<<< HEAD
 
 ## Continuous Integration and Deployment (CI/CD)
 
@@ -166,3 +167,5 @@ For detailed setup instructions, see the [CI-CD-SETUP.md](./CI-CD-SETUP.md) file
 ### GitHub Actions Files
 
 - `.github/workflows/ci-cd.yml`: Main CI/CD workflow definition
+=======
+>>>>>>> life423/main
