@@ -5,17 +5,30 @@ const config = require('../config')
 const responseCache = new Map()
 const CACHE_TTL = config.cacheTtlMs
 
+// Global variable to track OpenAI initialization errors
+let openAiInitError = null;
+
 module.exports = async function (context, req) {
     // Log function invocation with correlation ID for tracing
     const correlationId =
         req.headers['x-correlation-id'] || generateCorrelationId()
     context.log.info(`askGPT function invoked. CorrelationId: ${correlationId}`)
+    
+    // Log important environment info for debugging
+    context.log.info(`NODE_ENV: ${process.env.NODE_ENV || 'not set'}`);
+    context.log.info(`OpenAI API Key configured: ${!!config.openAiApiKey}`);
+    if (config.openAiApiKey) {
+        context.log.info(`OpenAI API Key length: ${config.openAiApiKey.length}`);
+    }
 
     // Set response headers (Content-Type and Correlation ID)
-    // Note: CORS is handled by Azure Functions configuration
+    // Explicitly add CORS headers for Azure Static Web Apps
     const headers = {
         'Content-Type': 'application/json',
         'X-Correlation-Id': correlationId,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Correlation-Id'
     }
 
     try {
@@ -45,37 +58,50 @@ module.exports = async function (context, req) {
                 ? error.message
                 : 'Please try again later.'
 
-        // Return a friendly error response
+        // Return a friendly error response with debugging details
         return createResponse(context, 500, headers, {
             error: 'An error occurred while processing your request.',
             message: errorMessage,
             correlationId,
+            debugInfo: process.env.NODE_ENV === 'development' ? {
+                stack: error.stack,
+                errorType: error.name,
+                errorDetails: error.toString()
+            } : undefined
         })
     }
 }
 
 // Handle OPTIONS request (CORS preflight)
 function handleOptionsRequest(context, headers) {
+    context.log.info('Handling OPTIONS request (CORS preflight)');
     return createResponse(context, 200, headers, {})
 }
 
 // Handle GET request (health check)
 function handleGetRequest(context, headers) {
+    context.log.info('Handling GET request (health check)');
     return createResponse(context, 200, headers, {
         message:
             'askGPT is alive! Use POST with a JSON body containing a "question" field.',
         version: '1.1.0',
+        environment: process.env.NODE_ENV || 'unknown',
+        timestamp: new Date().toISOString(),
+        openAiInitError: openAiInitError // Will be null if no initialization errors occurred
     })
 }
 
 // Handle POST request (main functionality)
 async function handlePostRequest(context, req, headers) {
+    context.log.info('Handling POST request for question');
+    
     // Validate input
     if (
         !req.body ||
         typeof req.body.question !== 'string' ||
         req.body.question.trim() === ''
     ) {
+        context.log.warn('Invalid request: Missing or empty question');
         return createResponse(context, 400, headers, {
             error: 'Missing or invalid question parameter. Please provide a non-empty question string.',
         })
@@ -83,10 +109,12 @@ async function handlePostRequest(context, req, headers) {
 
     // Get and sanitize the question
     const userQuestion = sanitizeInput(req.body.question.trim())
+    context.log.info(`Question: "${userQuestion.substring(0, 50)}${userQuestion.length > 50 ? '...' : ''}"`);
 
     // Rate limiting check (implement more robust solution in production)
     const clientIp = req.headers['x-forwarded-for'] || req.ip || 'unknown'
     if (isRateLimited(clientIp)) {
+        context.log.warn(`Rate limit exceeded for IP: ${clientIp}`);
         return createResponse(context, 429, headers, {
             error: 'Too many requests. Please try again later.',
         })
@@ -111,6 +139,8 @@ async function handlePostRequest(context, req, headers) {
         req.body.maxTokens <= 4000
             ? req.body.maxTokens
             : 500
+            
+    context.log.info(`Using model: ${modelName}, temperature: ${temperature}, maxTokens: ${maxTokens}`);
 
     // Check cache for identical questions (with same parameters)
     const cacheKey = `${userQuestion}|${modelName}|${temperature}|${maxTokens}`
@@ -128,22 +158,45 @@ async function handlePostRequest(context, req, headers) {
 
     // Check if API key is provided
     if (!apiKey || apiKey === 'your-api-key-here') {
-        context.log.warn(
-            'Missing OpenAI API key. Returning development mode response.'
-        )
+        const errorMsg = 'Missing OpenAI API key. Returning development mode response.';
+        context.log.warn(errorMsg);
 
         // For development, return a mock response if no API key is available
         return createResponse(context, 200, headers, {
             answer: `[DEVELOPMENT MODE] OpenAI API key not configured. Your question was: "${userQuestion}"`,
             note: 'To use the real GPT model, set your OPENAI_API_KEY in Application Settings.',
+            debug: {
+                environment: process.env.NODE_ENV || 'not set',
+                hasApiKey: !!apiKey,
+                apiKeyIsDefault: apiKey === 'your-api-key-here',
+                error: errorMsg
+            }
         })
     }
 
-    // Initialize the OpenAI client
-    const openai = new OpenAI({ apiKey })
+    // Initialize the OpenAI client with error handling
+    let openai;
+    try {
+        openai = new OpenAI({ apiKey });
+        context.log.info('OpenAI client initialized successfully');
+    } catch (error) {
+        openAiInitError = error.message;
+        context.log.error(`Failed to initialize OpenAI client: ${error.message}`);
+        return createResponse(context, 500, headers, {
+            error: 'Failed to initialize OpenAI API client',
+            message: error.message,
+            debug: {
+                apiKeyLength: apiKey ? apiKey.length : 0,
+                environment: process.env.NODE_ENV || 'not set'
+            }
+        });
+    }
 
     try {
         // Call the OpenAI API with configurable parameters
+        context.log.info(`Calling OpenAI API with model ${modelName}`);
+        
+        const startTime = Date.now();
         const response = await openai.chat.completions.create({
             model: modelName,
             messages: [
@@ -159,7 +212,23 @@ async function handlePostRequest(context, req, headers) {
             ],
             max_tokens: maxTokens,
             temperature: temperature,
-        })
+        }).catch(error => {
+            // Explicitly catch and rethrow with more context
+            context.log.error(`OpenAI API error: ${error.message}`);
+            
+            // Add specific error handling for common OpenAI errors
+            if (error.status === 401) {
+                throw new Error(`Authentication error: Invalid API key (${error.message})`);
+            } else if (error.status === 429) {
+                throw new Error(`Rate limit exceeded: ${error.message}`);
+            } else if (error.status === 500) {
+                throw new Error(`OpenAI server error: ${error.message}`);
+            }
+            throw error;
+        });
+        
+        const apiCallDuration = Date.now() - startTime;
+        context.log.info(`Received successful response from OpenAI API in ${apiCallDuration}ms`);
 
         // Get the response text
         const answer = response.choices[0].message.content
@@ -168,18 +237,37 @@ async function handlePostRequest(context, req, headers) {
         cacheResponse(cacheKey, answer)
 
         // Return the answer
-        return createResponse(context, 200, headers, { answer })
+        return createResponse(context, 200, headers, { 
+            answer,
+            metrics: {
+                apiCallDurationMs: apiCallDuration
+            }
+        })
     } catch (error) {
         // Handle specific OpenAI API errors
+        context.log.error(`Error calling OpenAI: ${error.message}`);
+        
         if (error.status === 429) {
             return createResponse(context, 429, headers, {
                 error: 'OpenAI rate limit exceeded. Please try again later.',
+                message: error.message
             })
         }
 
         if (error.status === 400) {
             return createResponse(context, 400, headers, {
                 error: 'Invalid request to OpenAI API. Your question may be too long.',
+                message: error.message
+            })
+        }
+
+        if (error.status === 401) {
+            return createResponse(context, 401, headers, {
+                error: 'Authentication error with OpenAI API. Please check your API key.',
+                message: error.message,
+                debug: process.env.NODE_ENV === 'development' ? {
+                    apiKeyLength: apiKey ? apiKey.length : 0,
+                } : undefined
             })
         }
 
@@ -240,7 +328,6 @@ function isRateLimited(clientIp) {
     // Check if limit is exceeded
     if (requests.length >= limit) {
         return true // Rate limited
-
     }
 
     // Record this request

@@ -8,45 +8,52 @@
 
 // Simple in-memory cache to avoid excessive API calls
 const responseCache = {
-  narratives: new Map(),
-  answers: new Map(),
-  generalQuestions: new Map()
-};
+    narratives: new Map(),
+    answers: new Map(),
+    generalQuestions: new Map(),
+}
 
 // Environment configuration
 // Always use real API with environment-specific URL from Vite env vars
-const USE_REAL_API = true;
+const USE_REAL_API = true
 
 // Get API URL with proper fallback for production
 const API_URL = (() => {
-  // Only show detailed logs in development
-  if (import.meta.env.DEV) {
-    console.log('Environment mode:', import.meta.env.MODE);
-    console.log('API URL from env:', import.meta.env.VITE_API_URL);
-  }
-  
-  // Check for undefined or empty string
-  if (!import.meta.env.VITE_API_URL) {
+    // Only show detailed logs in development
     if (import.meta.env.DEV) {
-      console.warn('VITE_API_URL is undefined, using fallback URL');
+        console.log('Environment mode:', import.meta.env.MODE)
+        console.log('API URL from env:', import.meta.env.VITE_API_URL)
     }
-    
-    // If we're in production (based on hostname), use a relative path
-    if (window.location.hostname !== 'localhost') {
-      return '/api/askGPT'; 
+
+    // Check for undefined or empty string
+    if (!import.meta.env.VITE_API_URL) {
+        if (import.meta.env.DEV) {
+            console.warn('VITE_API_URL is undefined, using fallback URL')
+        }
+
+        // Production handling for drewclark.io
+        const hostname = window.location.hostname;
+        if (hostname === 'drewclark.io' || hostname === 'www.drewclark.io') {
+            // Use relative path for production site
+            console.log('Using production URL for drewclark.io');
+            return '/api/askGPT';
+        } 
+        // General production case (not localhost)
+        else if (hostname !== 'localhost') {
+            return '/api/askGPT'
+        }
+        // Otherwise use localhost in development
+        return 'http://localhost:7071/api/askGPT'
     }
-    // Otherwise use localhost in development
-    return 'http://localhost:7071/api/askGPT';
-  }
-  
-  return import.meta.env.VITE_API_URL;
-})();
+
+    return import.meta.env.VITE_API_URL
+})()
 
 // Only show final URL in development to avoid leaking information in production
 if (import.meta.env.DEV) {
-  console.log('Final API URL being used:', API_URL);
+    console.log('Final API URL being used:', API_URL)
 } else {
-  console.log('App initialized in production mode');
+    console.log('App initialized in production mode')
 }
 
 /**
@@ -55,28 +62,33 @@ if (import.meta.env.DEV) {
  * @param {string} style - Narrative style ('technical', 'storytelling', 'casual')
  * @returns {Promise<string>} The generated narrative
  */
-export async function generateProjectNarrative(projectData, style = 'storytelling') {
-  const cacheKey = `${projectData.id}_${style}`;
-  
-  // Check cache first
-  if (responseCache.narratives.has(cacheKey)) {
-    console.log('Using cached narrative');
-    return responseCache.narratives.get(cacheKey);
-  }
-  
-  // In a real implementation, this would be an API call to an LLM
-  const response = await simulateApiCall({
-    prompt: `Create a ${style} narrative about a project called "${projectData.title}" 
+export async function generateProjectNarrative(
+    projectData,
+    style = 'storytelling'
+) {
+    const cacheKey = `${projectData.id}_${style}`
+
+    // Check cache first
+    if (responseCache.narratives.has(cacheKey)) {
+        console.log('Using cached narrative')
+        return responseCache.narratives.get(cacheKey)
+    }
+
+    // In a real implementation, this would be an API call to an LLM
+    const response = await simulateApiCall({
+        prompt: `Create a ${style} narrative about a project called "${
+            projectData.title
+        }" 
     that uses technologies: ${projectData.stack.join(', ')}. 
     The narrative should highlight challenges and solutions.`,
-    temperature: style === 'technical' ? 0.3 : 0.7,
-    maxTokens: 300
-  });
-  
-  // Cache the response
-  responseCache.narratives.set(cacheKey, response);
-  
-  return response;
+        temperature: style === 'technical' ? 0.3 : 0.7,
+        maxTokens: 300,
+    })
+
+    // Cache the response
+    responseCache.narratives.set(cacheKey, response)
+
+    return response
 }
 
 /**
@@ -86,58 +98,62 @@ export async function generateProjectNarrative(projectData, style = 'storytellin
  * @returns {Promise<string>} The AI-generated answer
  */
 export async function answerProjectQuestion(projectData, question) {
-  const cacheKey = `${projectData.id}_${question.toLowerCase().trim()}`;
-  
-  // Check cache first
-  if (responseCache.answers.has(cacheKey)) {
-    console.log('Using cached answer');
-    return responseCache.answers.get(cacheKey);
-  }
-  
-  // Build a context for the AI that includes project details
-  const context = `
+    const cacheKey = `${projectData.id}_${question.toLowerCase().trim()}`
+
+    // Check cache first
+    if (responseCache.answers.has(cacheKey)) {
+        console.log('Using cached answer')
+        return responseCache.answers.get(cacheKey)
+    }
+
+    // Build a context for the AI that includes project details
+    const context = `
     Project: ${projectData.title}
     Technologies: ${projectData.stack.join(', ')}
     Summary: ${projectData.summary || 'Not provided'}
     Initial story: ${projectData.initialStoryText || 'Not provided'}
-  `;
-  
-  let response;
-  if (USE_REAL_API) {
-    try {
-      // Only show detailed context in development
-      if (import.meta.env.DEV) {
-        console.log('Calling API for project question:', question);
-        console.log('Project context:', context);
-      } else {
-        console.log('Processing project question...');
-      }
-      
-      // Create a question with context
-      const questionWithContext = `Based on this project context: "${context}", 
-      please answer this question in a friendly, conversational tone: "${question}"`;
-      
-      // Call the real API
-      response = await callAskGptFunction(questionWithContext);
-    } catch (error) {
-      console.error('Error calling askGPT function for project question:', error);
-      // Fallback to simulation if API call fails
-      response = "Sorry, I couldn't connect to the AI service. Please try again later.";
-    }
-  } else {
-    // Use simulation for development
-    response = await simulateApiCall({
-      prompt: `Based on this project context: "${context}", 
+  `
+
+    let response
+    if (USE_REAL_API) {
+        try {
+            // Only show detailed context in development
+            if (import.meta.env.DEV) {
+                console.log('Calling API for project question:', question)
+                console.log('Project context:', context)
+            } else {
+                console.log('Processing project question...')
+            }
+
+            // Create a question with context
+            const questionWithContext = `Based on this project context: "${context}", 
+      please answer this question in a friendly, conversational tone: "${question}"`
+
+            // Call the real API
+            response = await callAskGptFunction(questionWithContext)
+        } catch (error) {
+            console.error(
+                'Error calling askGPT function for project question:',
+                error
+            )
+            // Fallback to simulation if API call fails
+            response =
+                "Sorry, I couldn't connect to the AI service. Please try again later."
+        }
+    } else {
+        // Use simulation for development
+        response = await simulateApiCall({
+            prompt: `Based on this project context: "${context}", 
       please answer this question in a friendly, conversational tone: "${question}"`,
-      temperature: 0.6,
-      maxTokens: 150
-    });
-  }
-  
-  // Cache the response
-  responseCache.answers.set(cacheKey, response);
-  
-  return response;
+            temperature: 0.6,
+            maxTokens: 150,
+        })
+    }
+
+    // Cache the response
+    responseCache.answers.set(cacheKey, response)
+
+    return response
 }
 
 /**
@@ -146,37 +162,38 @@ export async function answerProjectQuestion(projectData, question) {
  * @returns {Promise<string>} The AI-generated answer
  */
 export async function askGeneralQuestion(question) {
-  const questionText = question.trim();
-  const cacheKey = questionText.toLowerCase();
-  
-  // Check cache first
-  if (responseCache.generalQuestions.has(cacheKey)) {
-    console.log('Using cached general answer');
-    return responseCache.generalQuestions.get(cacheKey);
-  }
-  
-  let response;
-  if (USE_REAL_API) {
-    try {
-      response = await callAskGptFunction(questionText);
-    } catch (error) {
-      console.error('Error calling askGPT function:', error);
-      // Fallback to simulation if API call fails
-      response = "Sorry, I couldn't connect to the AI service. Please try again later.";
+    const questionText = question.trim()
+    const cacheKey = questionText.toLowerCase()
+
+    // Check cache first
+    if (responseCache.generalQuestions.has(cacheKey)) {
+        console.log('Using cached general answer')
+        return responseCache.generalQuestions.get(cacheKey)
     }
-  } else {
-    // Use simulation for development
-    response = await simulateApiCall({
-      prompt: `Please answer this question in a friendly, conversational tone: "${question}"`,
-      temperature: 0.6,
-      maxTokens: 150
-    });
-  }
-  
-  // Cache the response
-  responseCache.generalQuestions.set(cacheKey, response);
-  
-  return response;
+
+    let response
+    if (USE_REAL_API) {
+        try {
+            response = await callAskGptFunction(questionText)
+        } catch (error) {
+            console.error('Error calling askGPT function:', error)
+            // Fallback to simulation if API call fails
+            response =
+                "Sorry, I couldn't connect to the AI service. Please try again later."
+        }
+    } else {
+        // Use simulation for development
+        response = await simulateApiCall({
+            prompt: `Please answer this question in a friendly, conversational tone: "${question}"`,
+            temperature: 0.6,
+            maxTokens: 150,
+        })
+    }
+
+    // Cache the response
+    responseCache.generalQuestions.set(cacheKey, response)
+
+    return response
 }
 
 /**
@@ -185,61 +202,102 @@ export async function askGeneralQuestion(question) {
  * @returns {Promise<string>} The AI response
  */
 async function callAskGptFunction(question) {
-  try {
-    // Only show detailed API logs in development
-    if (import.meta.env.DEV) {
-      console.log('Calling API at URL:', API_URL);
-      console.log('With question:', question);
-    } else {
-      console.log('Calling API...');
+    try {
+        // Only show detailed API logs in development
+        if (import.meta.env.DEV) {
+            console.log('Calling API at URL:', API_URL)
+            console.log('With question:', question)
+        } else {
+            console.log('Calling API...')
+        }
+
+        // Generate correlation ID for tracing requests across systems
+        const correlationId = `web-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+
+        // API request config with correlation ID
+        const request = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Correlation-Id': correlationId
+            },
+            body: JSON.stringify({ question }),
+        }
+
+        // Detailed request logging only in development
+        if (import.meta.env.DEV) {
+            console.log('Request details:', request)
+        }
+
+        const response = await fetch(API_URL, request)
+
+        // Log response status in both environments, but headers only in dev
+        console.log('Response status:', response.status)
+        if (import.meta.env.DEV) {
+            console.log('Response headers:', [...response.headers.entries()])
+        }
+
+        if (!response.ok) {
+            // Enhanced error handling with more detailed error messages
+            const statusText = response.statusText || 'Unknown Error';
+            let errorMessage = `API call failed with status: ${response.status} (${statusText})`;
+            
+            try {
+                // Try to parse error details from response if possible
+                const errorData = await response.json();
+                if (errorData && errorData.error) {
+                    errorMessage = errorData.error;
+                    if (errorData.message) {
+                        errorMessage += `: ${errorData.message}`;
+                    }
+                    // Log correlation ID for debugging
+                    if (errorData.correlationId) {
+                        console.error(`Error correlation ID: ${errorData.correlationId}`);
+                    }
+                }
+            } catch (parseError) {
+                // If we can't parse JSON, use basic error information
+                if (response.status === 405) {
+                    errorMessage = `Method not allowed (405): The API endpoint doesn't accept this request method`;
+                } else if (response.status === 404) {
+                    errorMessage = `Not found (404): The API endpoint could not be found at ${API_URL}`;
+                } else if (response.status === 500) {
+                    errorMessage = `Server error (500): The API encountered an internal error`;
+                }
+            }
+            
+            throw new Error(errorMessage);
+        }
+
+        const data = await response.json()
+
+        // Only log response data in development environment
+        if (import.meta.env.DEV) {
+            console.log('Response data:', data)
+        } else {
+            console.log('API call completed successfully')
+        }
+
+        return data.answer
+    } catch (error) {
+        console.error('Error calling askGPT API:', error)
+        
+        // Improve diagnostics for network errors (which often indicate CORS issues)
+        if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
+            console.error('Network error details:', {
+                apiUrl: API_URL,
+                browserLocation: window.location.href,
+                possibleCorsIssue: API_URL.startsWith('http') && !API_URL.includes(window.location.host)
+            });
+            
+            // Give more helpful error message for likely CORS issues
+            if (API_URL.startsWith('http') && !API_URL.includes(window.location.host)) {
+                throw new Error(`Network error: Possible CORS issue - ${error.message}`);
+            }
+        }
+        
+        throw error
     }
-    
-    // API request config
-    const request = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ question })
-    };
-    
-    // Detailed request logging only in development
-    if (import.meta.env.DEV) {
-      console.log('Request details:', request);
-    }
-    
-    const response = await fetch(API_URL, request);
-    
-    // Log response status in both environments, but headers only in dev
-    console.log('Response status:', response.status);
-    if (import.meta.env.DEV) {
-      console.log('Response headers:', [...response.headers.entries()]);
-    }
-    
-    if (!response.ok) {
-      if (response.status === 405) {
-        throw new Error(`Method not allowed (405): The API endpoint doesn't accept this request method`);
-      } else if (response.status === 404) {
-        throw new Error(`Not found (404): The API endpoint could not be found at ${API_URL}`);
-      } else {
-        throw new Error(`API call failed with status: ${response.status}`);
-      }
-    }
-    
-    const data = await response.json();
-    
-    // Only log response data in development environment
-    if (import.meta.env.DEV) {
-      console.log('Response data:', data);
-    } else {
-      console.log('API call completed successfully');
-    }
-    
-    return data.answer;
-  } catch (error) {
-    console.error('Error calling askGPT API:', error);
-    throw error;
-  }
 }
 
 /**
@@ -248,27 +306,30 @@ async function callAskGptFunction(question) {
  * @returns {Promise<string>} The response
  */
 async function simulateApiCall(options) {
-  console.log('API call with options:', options);
-  
-  // In development, we'll simulate responses
-  // In production, we could use the askGPT function, but we're keeping this
-  // separate from askGeneralQuestion for more specific project-related prompts
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      // Generate different responses based on the prompt content
-      let response = '';
-      
-      if (options.prompt.includes('narrative') || options.prompt.includes('story')) {
-        response = generateSimulatedStory(options.prompt);
-      } else if (options.prompt.includes('question')) {
-        response = generateSimulatedAnswer(options.prompt);
-      } else {
-        response = "I'm not sure how to respond to that prompt.";
-      }
-      
-      resolve(response);
-    }, 1500); // Simulate network delay
-  });
+    console.log('API call with options:', options)
+
+    // In development, we'll simulate responses
+    // In production, we could use the askGPT function, but we're keeping this
+    // separate from askGeneralQuestion for more specific project-related prompts
+    return new Promise(resolve => {
+        setTimeout(() => {
+            // Generate different responses based on the prompt content
+            let response = ''
+
+            if (
+                options.prompt.includes('narrative') ||
+                options.prompt.includes('story')
+            ) {
+                response = generateSimulatedStory(options.prompt)
+            } else if (options.prompt.includes('question')) {
+                response = generateSimulatedAnswer(options.prompt)
+            } else {
+                response = "I'm not sure how to respond to that prompt."
+            }
+
+            resolve(response)
+        }, 1500) // Simulate network delay
+    })
 }
 
 /**
@@ -277,11 +338,11 @@ async function simulateApiCall(options) {
  * @returns {string} A simulated narrative
  */
 function generateSimulatedStory(prompt) {
-  if (prompt.includes('technical')) {
-    return "This project implemented a microservices architecture to solve the core scalability challenges. By decomposing the monolithic application into independent services, we achieved better fault isolation and could scale individual components as needed. Each service communicated via REST APIs and used event-driven patterns for asynchronous processing.";
-  } else {
-    return "The journey began with a significant challenge: users were experiencing frustrating delays when interacting with the dashboard. Diving deep into the performance bottlenecks, I discovered that the real-time data processing was creating unnecessary database load. By implementing a clever caching strategy and optimizing the WebSocket communication, we reduced response times by 78% while handling even more concurrent users.";
-  }
+    if (prompt.includes('technical')) {
+        return 'This project implemented a microservices architecture to solve the core scalability challenges. By decomposing the monolithic application into independent services, we achieved better fault isolation and could scale individual components as needed. Each service communicated via REST APIs and used event-driven patterns for asynchronous processing.'
+    } else {
+        return 'The journey began with a significant challenge: users were experiencing frustrating delays when interacting with the dashboard. Diving deep into the performance bottlenecks, I discovered that the real-time data processing was creating unnecessary database load. By implementing a clever caching strategy and optimizing the WebSocket communication, we reduced response times by 78% while handling even more concurrent users.'
+    }
 }
 
 /**
@@ -290,27 +351,34 @@ function generateSimulatedStory(prompt) {
  * @returns {string} A simulated answer
  */
 function generateSimulatedAnswer(prompt) {
-  const lowerPrompt = prompt.toLowerCase();
-  
-  if (lowerPrompt.includes('challenges') || lowerPrompt.includes('difficult')) {
-    return "The biggest challenge was definitely optimizing the data visualization components to handle real-time updates without causing browser performance issues. I solved this by implementing a virtual DOM-based rendering approach that only updated the DOM elements that actually changed, rather than re-rendering the entire visualization.";
-  } 
-  else if (lowerPrompt.includes('technology') || lowerPrompt.includes('stack') || lowerPrompt.includes('tools')) {
-    return "For this project, I chose React for the frontend because of its efficient rendering and component-based architecture. The backend used Node.js with Express for the API layer and Socket.IO for real-time communication. Data was stored in MongoDB for flexibility, with Redis handling caching for performance optimization.";
-  }
-  else if (lowerPrompt.includes('learn') || lowerPrompt.includes('takeaway')) {
-    return "The most valuable lesson from this project was the importance of early performance testing. By identifying bottlenecks before they became critical issues, we were able to architect solutions that scaled well from the beginning, rather than having to refactor later.";
-  }
-  else {
-    return "That's an interesting question about the project. The approach involved careful planning and execution, with particular attention to user experience and performance considerations throughout the development lifecycle.";
-  }
+    const lowerPrompt = prompt.toLowerCase()
+
+    if (
+        lowerPrompt.includes('challenges') ||
+        lowerPrompt.includes('difficult')
+    ) {
+        return 'The biggest challenge was definitely optimizing the data visualization components to handle real-time updates without causing browser performance issues. I solved this by implementing a virtual DOM-based rendering approach that only updated the DOM elements that actually changed, rather than re-rendering the entire visualization.'
+    } else if (
+        lowerPrompt.includes('technology') ||
+        lowerPrompt.includes('stack') ||
+        lowerPrompt.includes('tools')
+    ) {
+        return 'For this project, I chose React for the frontend because of its efficient rendering and component-based architecture. The backend used Node.js with Express for the API layer and Socket.IO for real-time communication. Data was stored in MongoDB for flexibility, with Redis handling caching for performance optimization.'
+    } else if (
+        lowerPrompt.includes('learn') ||
+        lowerPrompt.includes('takeaway')
+    ) {
+        return 'The most valuable lesson from this project was the importance of early performance testing. By identifying bottlenecks before they became critical issues, we were able to architect solutions that scaled well from the beginning, rather than having to refactor later.'
+    } else {
+        return "That's an interesting question about the project. The approach involved careful planning and execution, with particular attention to user experience and performance considerations throughout the development lifecycle."
+    }
 }
 
 /**
  * Clears the cache (useful for testing or forcing fresh responses)
  */
 export function clearAiResponseCache() {
-  responseCache.narratives.clear();
-  responseCache.answers.clear();
-  responseCache.generalQuestions.clear();
+    responseCache.narratives.clear()
+    responseCache.answers.clear()
+    responseCache.generalQuestions.clear()
 }
