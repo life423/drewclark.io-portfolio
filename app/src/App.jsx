@@ -13,8 +13,8 @@ const MainContent = memo(function MainContent() {
             <div id="projects" className='bg-brandGray-900'>
                 <ProjectsContainer />
             </div>
-            {/* Development testing section - remove before production */}
-            {process.env.NODE_ENV !== 'production' && (
+            {/* Development testing section - only visible in development */}
+            {import.meta.env.DEV && (
                 <div id="dev-test" className="px-6 py-12 bg-brandGray-900 border-t border-brandGray-700">
                     <div className="max-w-7xl mx-auto">
                         <h2 className="text-2xl font-bold mb-6 text-brandGreen-300">AI Integration Testing</h2>

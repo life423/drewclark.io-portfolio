@@ -14,7 +14,7 @@ const responseCache = {
 };
 
 // Environment configuration
-// Always use real API with environment-specific URL from Vite env vars
+// Always use real APronment-specific URL from Vite env vars
 const USE_REAL_API = true;
 // Get API URL from environment variables
 const API_URL = import.meta.env.VITE_API_URL;
@@ -71,17 +71,36 @@ export async function answerProjectQuestion(projectData, question) {
   const context = `
     Project: ${projectData.title}
     Technologies: ${projectData.stack.join(', ')}
-    Summary: ${projectData.summary}
-    Initial story: ${projectData.initialStoryText}
+    Summary: ${projectData.summary || 'Not provided'}
+    Initial story: ${projectData.initialStoryText || 'Not provided'}
   `;
   
-  // In a real implementation, this would be an API call to an LLM
-  const response = await simulateApiCall({
-    prompt: `Based on this project context: "${context}", 
-    please answer this question in a friendly, conversational tone: "${question}"`,
-    temperature: 0.6,
-    maxTokens: 150
-  });
+  let response;
+  if (USE_REAL_API) {
+    try {
+      console.log('Calling API for project question:', question);
+      console.log('Project context:', context);
+      
+      // Create a question with context
+      const questionWithContext = `Based on this project context: "${context}", 
+      please answer this question in a friendly, conversational tone: "${question}"`;
+      
+      // Call the real API
+      response = await callAskGptFunction(questionWithContext);
+    } catch (error) {
+      console.error('Error calling askGPT function for project question:', error);
+      // Fallback to simulation if API call fails
+      response = "Sorry, I couldn't connect to the AI service. Please try again later.";
+    }
+  } else {
+    // Use simulation for development
+    response = await simulateApiCall({
+      prompt: `Based on this project context: "${context}", 
+      please answer this question in a friendly, conversational tone: "${question}"`,
+      temperature: 0.6,
+      maxTokens: 150
+    });
+  }
   
   // Cache the response
   responseCache.answers.set(cacheKey, response);
