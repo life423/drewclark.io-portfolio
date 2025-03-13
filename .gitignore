@@ -2,7 +2,9 @@
 node_modules/
 npm-debug.log
 yarn-error.log
+# Exclude package-lock.json but allow it in the api directory
 package-lock.json
+!api/package-lock.json
 
 # Logs
 logs
