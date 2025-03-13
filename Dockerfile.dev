@@ -1,47 +1,10 @@
-<<<<<<< HEAD
-# Development Dockerfile with improved caching
-FROM node:18-alpine
+FROM node:14
+
 WORKDIR /app
 
-# Install dependencies in separate layers for better caching
 COPY package.json ./
 RUN npm install
 
-# Install app dependencies
-COPY app/package*.json ./app/
-RUN cd app && npm install && cd ..
+COPY . ./
 
-# Copy server and API files (will be overridden by volumes in dev)
-# This is needed for initial container build
-COPY server.js ./
-COPY api/ ./api/
-COPY app/ ./app/
-=======
-FROM node:18-alpine
-WORKDIR /app
-
-# Install dependencies
-COPY package.json ./
-COPY app/package*.json ./app/
-RUN npm install && \
-    cd app && npm install && cd ..
-
-# Copy code (will be overridden by volumes in dev)
-COPY . .
->>>>>>> life423/main
-
-# Expose port
-EXPOSE 3000
-
-# Set environment variables
-ENV NODE_ENV=development
-
-# Install nodemon for development
-RUN npm install -g nodemon
-
-# Command for development with hot reloading
-<<<<<<< HEAD
-# Watch API directory and server.js for changes
-=======
->>>>>>> life423/main
-CMD ["nodemon", "--watch", "server.js", "--watch", "api", "server.js"]
+CMD ["npm", "start"]

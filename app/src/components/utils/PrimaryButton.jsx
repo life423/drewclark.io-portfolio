@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import React, { useRef, useEffect, useCallback } from 'react';
 import clsx from 'clsx';
 
@@ -14,11 +13,6 @@ import clsx from 'clsx';
  * @param {boolean} props.fullWidth - Whether button should take full width of parent
  * @param {'sm'|'md'|'lg'} props.size - Button size (small, medium, large)
  */
-=======
-import React, { useRef, useEffect } from 'react';
-import clsx from 'clsx';
-
->>>>>>> life423/main
 export default function PrimaryButton({ 
   children, 
   className, 
@@ -26,17 +20,12 @@ export default function PrimaryButton({
   onClick,
   animateUnderline = true,
   fullWidth = false,
-<<<<<<< HEAD
   size = "md",
-=======
-  size = "md", // New size prop with sm, md, lg options
->>>>>>> life423/main
   ...props 
 }) {
   const buttonRef = useRef(null);
   const ButtonTag = href ? 'a' : 'button';
   
-<<<<<<< HEAD
   // Memoized touch handler for better performance
   const handleTouchStart = useCallback(() => {
     const accentLine = buttonRef.current?.querySelector('[data-accent-line]');
@@ -51,26 +40,12 @@ export default function PrimaryButton({
     const buttonElement = buttonRef.current;
     
     if (buttonElement && animateUnderline) {
-=======
-  // Handle touch interactions for mobile
-  useEffect(() => {
-    const buttonElement = buttonRef.current;
-    const accentLine = buttonElement?.querySelector('[data-accent-line]');
-    
-    if (buttonElement && accentLine) {
-      const handleTouchStart = () => {
-        accentLine.style.width = '80%';
-        accentLine.style.opacity = '1';
-      };
-      
->>>>>>> life423/main
       buttonElement.addEventListener('touchstart', handleTouchStart);
       
       return () => {
         buttonElement.removeEventListener('touchstart', handleTouchStart);
       };
     }
-<<<<<<< HEAD
   }, [animateUnderline, handleTouchStart]);
   
   // Button size style variants
@@ -79,9 +54,6 @@ export default function PrimaryButton({
     md: "px-5 py-3",
     lg: "px-6 py-4 text-lg"
   };
-=======
-  }, []);
->>>>>>> life423/main
   
   return (
     <ButtonTag
@@ -101,21 +73,12 @@ export default function PrimaryButton({
         "transition-all duration-300 ease-out",
         "touch-manipulation",
         // Size variants
-<<<<<<< HEAD
         sizeStyles[size] || sizeStyles.md,
-=======
-        size === "sm" && "px-4 py-2 text-sm",
-        size === "md" && "px-5 py-3",
-        size === "lg" && "px-6 py-4 text-lg",
->>>>>>> life423/main
         // Width control
         fullWidth && "w-full",
         className
       )}
-<<<<<<< HEAD
       aria-label={typeof children === 'string' ? children : undefined}
-=======
->>>>>>> life423/main
       {...props}
     >
       {/* Button shine/shimmer effect */}
@@ -136,10 +99,7 @@ export default function PrimaryButton({
                    bg-gradient-to-r from-transparent via-neonOrange-500 to-transparent
                    opacity-0 animate-accent-line-draw
                    transition-all duration-300 ease-out"
-<<<<<<< HEAD
           aria-hidden="true"
-=======
->>>>>>> life423/main
         ></div>
       )}
     </ButtonTag>

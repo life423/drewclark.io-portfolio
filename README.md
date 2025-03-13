@@ -1,6 +1,40 @@
 # Drew Clark Portfolio
 
-Personal portfolio website with OpenAI integration.
+This is the portfolio of Drew Clark, showcasing projects and skills.
+
+## Getting Started
+
+To get started, clone the repository and install the dependencies:
+
+```bash
+git clone https://github.com/drewclark/drewclark.io-portfolio.git
+cd drewclark.io-portfolio
+npm install
+```
+
+## Running the Application
+
+To run the application locally:
+
+```bash
+npm start
+```
+
+## Running Tests
+
+To run tests:
+
+```bash
+npm test
+```
+
+## Deployment
+
+Instructions for deploying the application.
+
+## License
+
+This project is licensed under the MIT License.
 
 ## Containerized Application
 
@@ -8,9 +42,9 @@ This application has been containerized with Docker, which simplifies deployment
 
 ### Prerequisites
 
-- [Docker](https://docs.docker.com/get-docker/)
-- [Docker Compose](https://docs.docker.com/compose/install/)
-- OpenAI API Key
+-   [Docker](https://docs.docker.com/get-docker/)
+-   [Docker Compose](https://docs.docker.com/compose/install/)
+-   OpenAI API Key
 
 ### Environment Variables
 
@@ -60,10 +94,11 @@ docker-compose up dev
 ```
 
 This will:
-- Build the development container
-- Mount your local directories for hot reloading
-- Start the server with Nodemon for automatic restarts
-- Expose the application on http://localhost:3000
+
+-   Build the development container
+-   Mount your local directories for hot reloading
+-   Start the server with Nodemon for automatic restarts
+-   Expose the application on http://localhost:3000
 
 ### Running Locally Without Docker
 
@@ -92,10 +127,11 @@ docker-compose up app
 ```
 
 This will:
-- Build the frontend assets
-- Create an optimized production container
-- Start the server in production mode
-- Expose the application on http://localhost:3000
+
+-   Build the frontend assets
+-   Create an optimized production container
+-   Start the server in production mode
+-   Expose the application on http://localhost:3000
 
 ### Manual Production Build
 
@@ -117,30 +153,30 @@ The application consists of:
 
 1. **Frontend**: React application with Vite
 2. **Backend**: Express.js server that:
-   - Serves the static frontend assets
-   - Provides API endpoints for OpenAI integration
+    - Serves the static frontend assets
+    - Provides API endpoints for OpenAI integration
 
 ## API Endpoints
 
-- `GET /api/askGPT`: Health check endpoint
-- `POST /api/askGPT`: Send questions to OpenAI
+-   `GET /api/askGPT`: Health check endpoint
+-   `POST /api/askGPT`: Send questions to OpenAI
 
 Example request:
+
 ```json
 {
-  "question": "Tell me about Drew Clark's portfolio",
-  "model": "gpt-3.5-turbo",  // optional
-  "temperature": 0.7,        // optional
-  "maxTokens": 500           // optional
+    "question": "Tell me about Drew Clark's portfolio",
+    "model": "gpt-3.5-turbo", // optional
+    "temperature": 0.7, // optional
+    "maxTokens": 500 // optional
 }
 ```
 
 ## Docker Configuration
 
-- `Dockerfile`: Production container configuration
-- `Dockerfile.dev`: Development container with hot reloading
-- `docker-compose.yml`: Service definitions for both dev and production
-<<<<<<< HEAD
+-   `Dockerfile`: Production container configuration
+-   `Dockerfile.dev`: Development container with hot reloading
+-   `docker-compose.yml`: Service definitions for both dev and production
 
 ## Continuous Integration and Deployment (CI/CD)
 
@@ -149,6 +185,7 @@ This project uses GitHub Actions for continuous integration and deployment.
 ### CI/CD Workflow
 
 The workflow automatically:
+
 1. Builds and tests the application
 2. Pushes Docker images to Docker Hub
 
@@ -158,14 +195,12 @@ To set up CI/CD for this project:
 
 1. Push the code to a GitHub repository
 2. Configure the required secrets in your GitHub repository:
-   - `DOCKERHUB_USERNAME`: Your Docker Hub username
-   - `DOCKERHUB_TOKEN`: Docker Hub access token
-   - `OPENAI_API_KEY`: OpenAI API key
+    - `DOCKERHUB_USERNAME`: Your Docker Hub username
+    - `DOCKERHUB_TOKEN`: Docker Hub access token
+    - `OPENAI_API_KEY`: OpenAI API key
 
 For detailed setup instructions, see the [CI-CD-SETUP.md](./CI-CD-SETUP.md) file.
 
 ### GitHub Actions Files
 
-- `.github/workflows/ci-cd.yml`: Main CI/CD workflow definition
-=======
->>>>>>> life423/main
+-   `.github/workflows/ci-cd.yml`: Main CI/CD workflow definition
