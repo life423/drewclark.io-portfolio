@@ -1,88 +1,99 @@
-# Azure Functions API for drewclark.io Portfolio
+# DrewClark.io Portfolio API
 
-This directory contains Azure Functions that power the backend API for the drewclark.io portfolio website.
+This directory contains the Azure Functions that power the API for the DrewClark.io portfolio site.
 
-## Functions
+## Running Locally
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/en/download/) (version 18.x or higher)
+- [Azure Functions Core Tools](https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local#install-the-azure-functions-core-tools) (version 4.x)
+
+To install Azure Functions Core Tools:
+
+```bash
+# Using npm
+npm install -g azure-functions-core-tools@4
+
+# Or using Chocolatey (Windows)
+choco install azure-functions-core-tools
+```
+
+### Starting the API
+
+From the root of the API directory, run:
+
+```bash
+# Install dependencies
+npm install
+
+# Start the function app
+npm start
+
+# Or with live reload
+npm run watch
+```
+
+The API will start on port 7071:
+- http://localhost:7071/api/askGPT
+- http://localhost:7071/api/apiTest
+
+### Testing OpenAI Integration
+
+You can directly test the OpenAI API integration:
+
+```bash
+npm run test-openai
+```
+
+## Available Endpoints
 
 ### askGPT
 
-An AI-powered endpoint that processes questions and returns responses using OpenAI's GPT models.
+Main API for answering questions using OpenAI's GPT models.
 
-**Endpoint:** `/api/askGPT`  
-**Methods:** POST, GET (health check), OPTIONS (CORS preflight)  
-**Input Format:** JSON with a `question` field  
-**Output Format:** JSON with an `answer` field
+- **URL**: `/api/askGPT`
+- **Method**: `POST`
+- **Request Body**:
+  ```json
+  {
+    "question": "Your question here",
+    "model": "gpt-3.5-turbo",  // Optional
+    "temperature": 0.7,        // Optional
+    "maxTokens": 500           // Optional
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "answer": "Response from GPT"
+  }
+  ```
 
-Example request:
-```json
-{
-  "question": "What technologies did you use in your portfolio website?"
-}
-```
+### apiTest
 
-Example response:
-```json
-{
-  "answer": "For my portfolio website, I used React with Tailwind CSS for the frontend, and Azure Functions with Node.js for the backend API integration with OpenAI."
-}
-```
+Diagnostic endpoint that returns information about the API environment.
 
-## Setup Instructions
+- **URL**: `/api/apiTest`
+- **Method**: `GET`
+- **Response**:
+  ```json
+  {
+    "message": "API Test function executed successfully",
+    "timestamp": "2025-03-13T05:20:41.594Z",
+    "environment": "development",
+    "envVars": { /* Environment variables (redacted) */ },
+    // Additional diagnostic information
+  }
+  ```
 
-### Local Development
+## Configuration
 
-1. Install dependencies:
-   ```bash
-   cd api
-   npm install
-   ```
+Environment variables are stored in `local.settings.json` for local development, and are set in the Azure portal for production.
 
-2. Configure your OpenAI API key:
-   - Edit `local.settings.json` and replace `your-api-key-here` with your actual OpenAI API key
-   - This file is git-ignored to prevent committing secrets
+Required variables:
+- `OPENAI_API_KEY`: Your OpenAI API key
 
-3. Install Azure Functions Core Tools (if not already installed):
-   ```bash
-   npm install -g azure-functions-core-tools@4 --unsafe-perm true
-   ```
+## Troubleshooting
 
-4. Run the function locally:
-   ```bash
-   func start
-   ```
-
-5. Test with PowerShell:
-   ```powershell
-   Invoke-RestMethod -Uri "http://localhost:7071/api/askGPT" `
-     -Method POST `
-     -Body '{"question":"Test question?"}' `
-     -ContentType "application/json"
-   ```
-
-### Production Deployment
-
-For production, configure the OpenAI API key in the Azure Portal:
-
-1. In the Azure Portal, navigate to your Static Web App
-2. Go to "Configuration" → "Application settings"
-3. Add a new setting:
-   - Name: `OPENAI_API_KEY`
-   - Value: Your OpenAI API key
-
-## Folder Structure
-
-```
-api/
- ├─ askGPT/
- │   ├─ function.json    # Function definition and bindings
- │   └─ index.js         # Function implementation
- ├─ host.json            # Functions host configuration
- ├─ package.json         # Dependencies and project info
- └─ local.settings.json  # Local environment variables (not committed)
-```
-
-## Development Notes
-
-- The function uses a fallback mock response when the OpenAI API key is not configured
-- For local development, you can manually test with Invoke-RestMethod or other API tools
-- CORS is configured to allow requests from any origin for development ease
+If you encounter issues, refer to the `API-TROUBLESHOOTING.md` file in the root directory for detailed diagnostic procedures.
