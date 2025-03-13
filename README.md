@@ -140,3 +140,29 @@ Example request:
 - `Dockerfile`: Production container configuration
 - `Dockerfile.dev`: Development container with hot reloading
 - `docker-compose.yml`: Service definitions for both dev and production
+
+## Continuous Integration and Deployment (CI/CD)
+
+This project uses GitHub Actions for continuous integration and deployment.
+
+### CI/CD Workflow
+
+The workflow automatically:
+1. Builds and tests the application
+2. Pushes Docker images to Docker Hub
+
+### Setup Instructions
+
+To set up CI/CD for this project:
+
+1. Push the code to a GitHub repository
+2. Configure the required secrets in your GitHub repository:
+   - `DOCKERHUB_USERNAME`: Your Docker Hub username
+   - `DOCKERHUB_TOKEN`: Docker Hub access token
+   - `OPENAI_API_KEY`: OpenAI API key
+
+For detailed setup instructions, see the [CI-CD-SETUP.md](./CI-CD-SETUP.md) file.
+
+### GitHub Actions Files
+
+- `.github/workflows/ci-cd.yml`: Main CI/CD workflow definition
