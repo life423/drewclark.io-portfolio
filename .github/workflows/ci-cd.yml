@@ -5,7 +5,8 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
