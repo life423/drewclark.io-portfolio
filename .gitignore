@@ -16,6 +16,7 @@ logs
 # Azure Functions
 local.settings.json
 .env
+.env.*
 
 # Production build directories
 # dist/
