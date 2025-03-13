@@ -16,11 +16,7 @@ RUN npm install --production
 
 # Copy server.js and API code
 COPY server.js ./
-<<<<<<< HEAD
 COPY api/ ./api/
-=======
-COPY api/askGPT/index.js ./api/askGPT/
->>>>>>> life423/main
 
 # Copy built frontend assets
 COPY --from=build-frontend /app/dist ./app/dist
