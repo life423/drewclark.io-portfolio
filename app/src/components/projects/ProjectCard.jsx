@@ -147,7 +147,7 @@ export default function ProjectCard({
               <div className="absolute top-0 right-0 w-[6px] h-[2px] bg-neonOrange-500/70 rounded-sm"></div>
             </div>
             
-            Ask the Storyteller
+            Ask About This Project
           </PrimaryButton>
         ) : (
           <div className="bg-brandGray-900 rounded-lg p-4 animate-fade-in">

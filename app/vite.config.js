@@ -23,10 +23,14 @@ export default defineConfig(({ command, mode }) => {
             outDir: '../dist', // puts the final build in app/dist
         },
         plugins: [react()],
-        // Make all env variables available in Vite under import.meta.env
-        define: {
-            'process.env.VITE_API_URL': JSON.stringify(env.VITE_API_URL),
-            'process.env.VITE_NODE_ENV': JSON.stringify(env.VITE_NODE_ENV),
-        }
+    // Make all env variables available in Vite under import.meta.env
+    define: {
+        // Properly define for import.meta.env access
+        'import.meta.env.VITE_API_URL': JSON.stringify(env.VITE_API_URL || '/api/askGPT'),
+        'import.meta.env.MODE': JSON.stringify(mode),
+        // Keep backward compatibility with process.env if needed
+        'process.env.VITE_API_URL': JSON.stringify(env.VITE_API_URL || '/api/askGPT'),
+        'process.env.VITE_NODE_ENV': JSON.stringify(env.VITE_NODE_ENV)
+    }
     }
 })
