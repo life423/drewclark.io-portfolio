@@ -19,13 +19,17 @@ const USE_REAL_API = true;
 
 // Get API URL with proper fallback for production
 const API_URL = (() => {
-  // Log detailed debugging info
-  console.log('Environment mode:', import.meta.env.MODE);
-  console.log('API URL from env:', import.meta.env.VITE_API_URL);
+  // Only show detailed logs in development
+  if (import.meta.env.DEV) {
+    console.log('Environment mode:', import.meta.env.MODE);
+    console.log('API URL from env:', import.meta.env.VITE_API_URL);
+  }
   
   // Check for undefined or empty string
   if (!import.meta.env.VITE_API_URL) {
-    console.warn('VITE_API_URL is undefined, using fallback URL');
+    if (import.meta.env.DEV) {
+      console.warn('VITE_API_URL is undefined, using fallback URL');
+    }
     
     // If we're in production (based on hostname), use a relative path
     if (window.location.hostname !== 'localhost') {
@@ -38,7 +42,12 @@ const API_URL = (() => {
   return import.meta.env.VITE_API_URL;
 })();
 
-console.log('Final API URL being used:', API_URL);
+// Only show final URL in development to avoid leaking information in production
+if (import.meta.env.DEV) {
+  console.log('Final API URL being used:', API_URL);
+} else {
+  console.log('App initialized in production mode');
+}
 
 /**
  * Generates a narrative for a project
@@ -96,8 +105,13 @@ export async function answerProjectQuestion(projectData, question) {
   let response;
   if (USE_REAL_API) {
     try {
-      console.log('Calling API for project question:', question);
-      console.log('Project context:', context);
+      // Only show detailed context in development
+      if (import.meta.env.DEV) {
+        console.log('Calling API for project question:', question);
+        console.log('Project context:', context);
+      } else {
+        console.log('Processing project question...');
+      }
       
       // Create a question with context
       const questionWithContext = `Based on this project context: "${context}", 
@@ -172,10 +186,15 @@ export async function askGeneralQuestion(question) {
  */
 async function callAskGptFunction(question) {
   try {
-    console.log('Calling API at URL:', API_URL);
-    console.log('With question:', question);
+    // Only show detailed API logs in development
+    if (import.meta.env.DEV) {
+      console.log('Calling API at URL:', API_URL);
+      console.log('With question:', question);
+    } else {
+      console.log('Calling API...');
+    }
     
-    // Detailed request logging
+    // API request config
     const request = {
       method: 'POST',
       headers: {
@@ -184,12 +203,18 @@ async function callAskGptFunction(question) {
       body: JSON.stringify({ question })
     };
     
-    console.log('Request details:', request);
+    // Detailed request logging only in development
+    if (import.meta.env.DEV) {
+      console.log('Request details:', request);
+    }
     
     const response = await fetch(API_URL, request);
     
+    // Log response status in both environments, but headers only in dev
     console.log('Response status:', response.status);
-    console.log('Response headers:', [...response.headers.entries()]);
+    if (import.meta.env.DEV) {
+      console.log('Response headers:', [...response.headers.entries()]);
+    }
     
     if (!response.ok) {
       if (response.status === 405) {
@@ -202,7 +227,14 @@ async function callAskGptFunction(question) {
     }
     
     const data = await response.json();
-    console.log('Response data:', data);
+    
+    // Only log response data in development environment
+    if (import.meta.env.DEV) {
+      console.log('Response data:', data);
+    } else {
+      console.log('API call completed successfully');
+    }
+    
     return data.answer;
   } catch (error) {
     console.error('Error calling askGPT API:', error);
