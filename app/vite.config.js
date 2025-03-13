@@ -21,8 +21,11 @@ export default defineConfig(({ command, mode }) => {
     return {
         root: './src', // if your index.html is in src/
         publicDir: '../public', // Specify the public directory at project root
+        base: './', // Use relative paths
         build: {
             outDir: '../dist', // puts the final build in app/dist
+            emptyOutDir: true, // Clean the output directory before build
+            assetsInlineLimit: 0, // Don't inline any assets
         },
         plugins: [
             react(),
@@ -40,10 +43,10 @@ export default defineConfig(({ command, mode }) => {
                         if (headEnd !== -1) {
                             const faviconLinks = `
     <!-- Favicon Implementation -->
-    <link rel="icon" href="/favicon/favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
-    <link rel="apple-touch-icon" href="/favicon/apple-touch-icon.png">`;
+    <link rel="icon" href="favicon/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+    <link rel="apple-touch-icon" href="favicon/apple-touch-icon.png">`;
                             
                             html = html.slice(0, headEnd) + faviconLinks + html.slice(headEnd);
                         }
