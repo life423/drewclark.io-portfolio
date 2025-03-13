@@ -13,13 +13,14 @@ const responseCache = {
   generalQuestions: new Map()
 };
 
-// Environment configuration - set to true to use actual API calls
-// Temporarily set to true for testing the Azure Function even in development mode
-const USE_REAL_API = true; // process.env.NODE_ENV === 'production';
-// Use relative path for deployed app, or localhost URL for local testing
-const API_URL = process.env.NODE_ENV === 'production' 
-  ? '/api/askGPT'
-  : 'http://localhost:7071/api/askGPT';
+// Environment configuration
+// Always use real API with environment-specific URL from Vite env vars
+const USE_REAL_API = true;
+// Get API URL from environment variables
+const API_URL = import.meta.env.VITE_API_URL;
+// Log environment info for debugging
+console.log(`App Environment: ${import.meta.env.MODE}`);
+console.log(`API URL: ${API_URL}`);
 
 /**
  * Generates a narrative for a project
