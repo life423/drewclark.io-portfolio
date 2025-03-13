@@ -3,16 +3,23 @@
   "version": "1.0.0",
   "description": "Drew Clark's portfolio website",
   "dependencies": {
+    "express": "^4.18.2",
     "nprogress": "^0.2.0",
-    "prop-types": "^15.8.1"
+    "prop-types": "^15.8.1",
+    "dotenv": "^16.4.7",
+    "openai": "^4.24.1"
   },
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "concurrently": "^9.1.2",
+    "nodemon": "^3.0.1"
   },
   "scripts": {
-    "start:api": "cd api && func start",
-    "start:app": "cd app && npm run dev",
-    "dev": "concurrently \"npm run start:api\" \"npm run start:app\"",
-    "dev:advanced": "node start-dev.js"
+    "start": "node server.js",
+    "build": "cd app && npm run build",
+    "dev": "nodemon server.js",
+    "docker:build": "docker build -t drewclark-portfolio .",
+    "docker:run": "docker run -p 3000:3000 -e OPENAI_API_KEY=${OPENAI_API_KEY} drewclark-portfolio",
+    "docker:dev": "docker-compose up dev",
+    "docker:prod": "docker-compose up app"
   }
 }
