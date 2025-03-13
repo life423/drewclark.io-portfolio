@@ -19,5 +19,5 @@ local.settings.json
 .env.*
 
 # Production build directories
-# dist/
+dist/
 build/
