@@ -25,6 +25,7 @@ export default function PrimaryButton({
         accentLine.style.opacity = '1';
       };
       
+      
       buttonElement.addEventListener('touchstart', handleTouchStart);
       
       return () => {
