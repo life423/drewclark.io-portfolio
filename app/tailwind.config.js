@@ -2,10 +2,14 @@
 
 import backgroundsPlugin from './src/styles/plugins/backgrounds.js'
 import animationsPlugin from './src/styles/plugins/animations.js'
-import progressBarsPlugin from './src/styles/plugins/progressBars.js'
 import textShadowsPlugin from './src/styles/plugins/textShadows.js'
 import typography from '@tailwindcss/typography'
-import { brandGreen, neonOrange, brandBlue, brandGray } from './src/styles/colors.js'
+import {
+    brandGreen,
+    neonOrange,
+    brandBlue,
+    brandGray,
+} from './src/styles/colors.js'
 
 export default {
     content: ['./src/index.html', './src/**/*.{js,jsx,ts,tsx}'],
@@ -17,7 +21,7 @@ export default {
                 lg: '0 8px 16px rgba(0, 0, 0, 0.2)',
                 green: '0 0 5px rgba(16, 185, 129, 0.4)',
             },
-            typography: (theme) => ({
+            typography: theme => ({
                 DEFAULT: {
                     css: {
                         color: theme('colors.brandGray.300'),
@@ -74,7 +78,6 @@ export default {
     plugins: [
         backgroundsPlugin,
         animationsPlugin,
-        progressBarsPlugin,
         textShadowsPlugin,
         typography,
     ],
