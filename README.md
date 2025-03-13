@@ -14,11 +14,38 @@ This application has been containerized with Docker, which simplifies deployment
 
 ### Environment Variables
 
+#### OpenAI API Key Setup
+
+This project requires an OpenAI API key to enable the AI assistant functionality.
+
+**Option 1: Using .env File (Root Directory)**
 Create a `.env` file in the root directory with the following:
 
 ```
 OPENAI_API_KEY=your_openai_api_key_here
 ```
+
+**Option 2: Using Environment-Specific Files (API Directory)**
+For development, copy the template file:
+
+```bash
+# Copy the template
+cp api/.env.development.template api/.env.development
+
+# Edit the file and add your API key
+```
+
+**Option 3: System Environment Variable**
+Set the `OPENAI_API_KEY` environment variable directly in your system.
+
+**Option 4: Docker Environment Variable**
+When using Docker, you can pass the environment variable at runtime:
+
+```bash
+OPENAI_API_KEY=your_key_here docker-compose up dev
+```
+
+> **Security Note**: Never commit your API keys to version control. All `.env*` files are ignored in `.gitignore`.
 
 ## Development
 

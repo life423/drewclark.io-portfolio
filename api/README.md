@@ -1,99 +1,56 @@
-# DrewClark.io Portfolio API
+# Portfolio API
 
-This directory contains the Azure Functions that power the API for the DrewClark.io portfolio site.
+This directory contains the API functionality for Drew Clark's portfolio website, including OpenAI integration.
 
-## Running Locally
+## API Configuration
 
-### Prerequisites
+The API uses the configuration in `config.js` which centralizes all settings and environment variables in one place.
 
-- [Node.js](https://nodejs.org/en/download/) (version 18.x or higher)
-- [Azure Functions Core Tools](https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local#install-the-azure-functions-core-tools) (version 4.x)
+### OpenAI Integration
 
-To install Azure Functions Core Tools:
+The `askGPT/index.js` file provides the OpenAI functionality to answer questions about Drew's portfolio. This requires a valid OpenAI API key to function properly.
 
-```bash
-# Using npm
-npm install -g azure-functions-core-tools@4
+## Environment Variables
 
-# Or using Chocolatey (Windows)
-choco install azure-functions-core-tools
-```
+### Setting Up Your OpenAI API Key
 
-### Starting the API
+1. **Create an Environment File**:
+   ```bash
+   # For development
+   cp .env.development.template .env.development
+   
+   # For production (optional)
+   cp .env.development.template .env.production
+   ```
 
-From the root of the API directory, run:
+2. **Edit the File**:
+   Open the newly created file and replace `your-openai-api-key-here` with your actual OpenAI API key.
 
-```bash
-# Install dependencies
-npm install
+3. **Verification**:
+   When the API starts, it will log whether the OpenAI API key is configured properly.
 
-# Start the function app
-npm start
-
-# Or with live reload
-npm run watch
-```
-
-The API will start on port 7071:
-- http://localhost:7071/api/askGPT
-- http://localhost:7071/api/apiTest
-
-### Testing OpenAI Integration
-
-You can directly test the OpenAI API integration:
-
-```bash
-npm run test-openai
-```
-
-## Available Endpoints
+## API Endpoints
 
 ### askGPT
 
-Main API for answering questions using OpenAI's GPT models.
+- **GET /askGPT**
+  - Health check endpoint
+  - Returns status and configuration information
+  
+- **POST /askGPT**
+  - Processes questions and returns AI-generated responses
+  - Request format:
+    ```json
+    {
+      "question": "Tell me about Drew Clark's portfolio",
+      "model": "gpt-3.5-turbo",  // optional
+      "temperature": 0.7,        // optional
+      "maxTokens": 500           // optional
+    }
+    ```
 
-- **URL**: `/api/askGPT`
-- **Method**: `POST`
-- **Request Body**:
-  ```json
-  {
-    "question": "Your question here",
-    "model": "gpt-3.5-turbo",  // Optional
-    "temperature": 0.7,        // Optional
-    "maxTokens": 500           // Optional
-  }
-  ```
-- **Response**:
-  ```json
-  {
-    "answer": "Response from GPT"
-  }
-  ```
+## Development Notes
 
-### apiTest
-
-Diagnostic endpoint that returns information about the API environment.
-
-- **URL**: `/api/apiTest`
-- **Method**: `GET`
-- **Response**:
-  ```json
-  {
-    "message": "API Test function executed successfully",
-    "timestamp": "2025-03-13T05:20:41.594Z",
-    "environment": "development",
-    "envVars": { /* Environment variables (redacted) */ },
-    // Additional diagnostic information
-  }
-  ```
-
-## Configuration
-
-Environment variables are stored in `local.settings.json` for local development, and are set in the Azure portal for production.
-
-Required variables:
-- `OPENAI_API_KEY`: Your OpenAI API key
-
-## Troubleshooting
-
-If you encounter issues, refer to the `API-TROUBLESHOOTING.md` file in the root directory for detailed diagnostic procedures.
+- The config automatically detects whether the code is running in Azure Functions or locally
+- Different .env files are loaded based on the NODE_ENV environment variable
+- During development, the API will return a mock response if no OpenAI API key is configured
