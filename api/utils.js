@@ -4,7 +4,7 @@
 
 // Simple in-memory cache (consider using a distributed cache in production)
 const responseCache = new Map();
-const CACHE_TTL = 3600000; // Default 1 hour, overridden by config if available
+let CACHE_TTL = 3600; // Default 1 hour, overridden by config if available
 
 // Generate a correlation ID for request tracing
 function generateCorrelationId() {
@@ -20,25 +20,25 @@ function sanitizeInput(input) {
 const rateLimitMap = new Map();
 function isRateLimited(clientIp, limit = 10, window = 60000) {
   const now = Date.now();
-
+  
   // Initialize or update rate limit tracking
   if (!rateLimitMap.has(clientIp)) {
     rateLimitMap.set(clientIp, []);
   }
-
+  
   // Get request history and filter out old requests
   let requests = rateLimitMap.get(clientIp);
   requests = requests.filter(timestamp => now - timestamp < window);
-
+  
   // Check if limit is exceeded
   if (requests.length >= limit) {
     return true; // Rate limited
   }
-
+  
   // Record this request
   requests.push(now);
   rateLimitMap.set(clientIp, requests);
-
+  
   return false; // Not rate limited
 }
 
@@ -56,7 +56,7 @@ function cacheResponse(key, data) {
     timestamp: Date.now(),
     data,
   });
-
+  
   // Clean up old cache entries
   if (responseCache.size > 1000) {
     // Prevent unbounded growth

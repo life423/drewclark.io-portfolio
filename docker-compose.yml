@@ -1,12 +1,10 @@
-version: '3'
-
 services:
     app:
         build:
             context: .
             dockerfile: Dockerfile.dev
         ports:
-            - '3000:3000'
+            - '3000:3000'  # Keep production app on port 3000
         volumes:
             - /app/node_modules
             - .:/app
@@ -14,12 +12,6 @@ services:
             - NODE_ENV=production
             - OPENAI_API_KEY=${OPENAI_API_KEY}
         restart: unless-stopped
-        # For production, you might want to add resource limits
-        # deploy:
-        #   resources:
-        #     limits:
-        #       cpus: '0.5'
-        #       memory: 512M
 
     # Development configuration
     dev:
@@ -27,13 +19,13 @@ services:
             context: .
             dockerfile: Dockerfile.dev
         ports:
-            - '3000:3000'
+            - '3001:3000'  # Map dev container's 3000 port to host's 3001
         environment:
             - NODE_ENV=development
             - OPENAI_API_KEY=${OPENAI_API_KEY}
         volumes:
             - ./app:/app/app
-            - ./api:/app/api # Mount API directory for hot reloading
+            - ./api:/app/api
             - ./server.js:/app/server.js
-            - /app/app/node_modules
+            - /app/node_modules
         command: npm run dev

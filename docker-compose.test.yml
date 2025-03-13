@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  app:
+    environment:
+      - NODE_ENV=test
+    # Override the command to run tests instead of starting the server
+    command: npm test
+    # Don't need port mapping in test environment
+    ports: []
