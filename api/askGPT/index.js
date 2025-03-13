@@ -5,8 +5,23 @@ const config = require('../config')
 const responseCache = new Map()
 const CACHE_TTL = config.cacheTtlMs
 
-// Global variable to track OpenAI initialization errors
+// Global variables to track errors and OpenAI client
 let openAiInitError = null;
+let openAiClient = null;
+
+// Try to initialize OpenAI client ahead of time
+try {
+    if (config.openAiApiKey) {
+        openAiClient = new OpenAI({ apiKey: config.openAiApiKey });
+        console.log('OpenAI client initialized successfully');
+    } else {
+        openAiInitError = 'OpenAI API key is missing';
+        console.error('Failed to initialize OpenAI client: API key missing');
+    }
+} catch (error) {
+    openAiInitError = error.message;
+    console.error(`Failed to initialize OpenAI client: ${error.message}`);
+}
 
 module.exports = async function (context, req) {
     // Log function invocation with correlation ID for tracing
@@ -21,14 +36,23 @@ module.exports = async function (context, req) {
         context.log.info(`OpenAI API Key length: ${config.openAiApiKey.length}`);
     }
 
+    // Enhanced CORS headers for Azure Static Web Apps
     // Set response headers (Content-Type and Correlation ID)
-    // Explicitly add CORS headers for Azure Static Web Apps
     const headers = {
         'Content-Type': 'application/json',
         'X-Correlation-Id': correlationId,
-        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Origin': '*',  // Consider restricting to your domain in production
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Correlation-Id'
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Correlation-Id, Accept',
+        'Access-Control-Max-Age': '86400',  // 24 hours
+        'X-Azure-Ref': correlationId,  // Additional reference ID for Azure logs
+    }
+    
+    // Log environment information for troubleshooting
+    context.log.info(`Node environment: ${process.env.NODE_ENV || 'not set'}`);
+    context.log.info(`Azure Functions detected: ${config.isAzureFunctions}`);
+    if (config.isAzureFunctions) {
+        context.log.info(`Azure hostname: ${process.env.WEBSITE_HOSTNAME}`);
     }
 
     try {
@@ -174,58 +198,85 @@ async function handlePostRequest(context, req, headers) {
         })
     }
 
-    // Initialize the OpenAI client with error handling
-    let openai;
-    try {
-        openai = new OpenAI({ apiKey });
-        context.log.info('OpenAI client initialized successfully');
-    } catch (error) {
-        openAiInitError = error.message;
-        context.log.error(`Failed to initialize OpenAI client: ${error.message}`);
+    // Use the pre-initialized OpenAI client or try to initialize again if needed
+    let openai = openAiClient;
+    
+    // If the global client initialization failed, try again
+    if (!openai && apiKey) {
+        try {
+            context.log.info('Attempting to initialize OpenAI client');
+            openai = new OpenAI({ apiKey });
+            context.log.info('OpenAI client initialized successfully during request');
+        } catch (error) {
+            const errorMsg = `Failed to initialize OpenAI client: ${error.message}`;
+            context.log.error(errorMsg);
+            return createResponse(context, 500, headers, {
+                error: 'Failed to initialize OpenAI API client',
+                message: errorMsg,
+                details: {
+                    apiKeyLength: apiKey ? apiKey.length : 0,
+                    environment: process.env.NODE_ENV || 'not set',
+                    openAiVersion: require('openai/package.json').version,
+                    nodeVersion: process.version
+                }
+            });
+        }
+    } else if (!openai) {
+        const errorMsg = 'OpenAI API key is missing or invalid';
+        context.log.error(errorMsg);
         return createResponse(context, 500, headers, {
-            error: 'Failed to initialize OpenAI API client',
-            message: error.message,
-            debug: {
-                apiKeyLength: apiKey ? apiKey.length : 0,
+            error: errorMsg,
+            apiKeyStatus: apiKey ? 'present but may be invalid' : 'missing',
+            details: {
                 environment: process.env.NODE_ENV || 'not set'
             }
         });
     }
 
     try {
-        // Call the OpenAI API with configurable parameters
+        // Call the OpenAI API with configurable parameters and enhanced error handling
         context.log.info(`Calling OpenAI API with model ${modelName}`);
         
         const startTime = Date.now();
-        const response = await openai.chat.completions.create({
-            model: modelName,
-            messages: [
-                {
-                    role: 'system',
-                    content:
-                        "You are a helpful assistant answering questions for Drew Clark's portfolio website visitors. Keep responses concise, informative, and friendly.",
-                },
-                {
-                    role: 'user',
-                    content: userQuestion,
-                },
-            ],
-            max_tokens: maxTokens,
-            temperature: temperature,
-        }).catch(error => {
-            // Explicitly catch and rethrow with more context
+        let response;
+        
+        try {
+            response = await openai.chat.completions.create({
+                model: modelName,
+                messages: [
+                    {
+                        role: 'system',
+                        content:
+                            "You are a helpful assistant answering questions for Drew Clark's portfolio website visitors. Keep responses concise, informative, and friendly.",
+                    },
+                    {
+                        role: 'user',
+                        content: userQuestion,
+                    },
+                ],
+                max_tokens: maxTokens,
+                temperature: temperature,
+            });
+        } catch (error) {
+            // Detailed error logging for OpenAI API errors
             context.log.error(`OpenAI API error: ${error.message}`);
+            context.log.error(`Error details: ${JSON.stringify(error, null, 2)}`);
             
-            // Add specific error handling for common OpenAI errors
+            // Categorize common OpenAI errors
             if (error.status === 401) {
-                throw new Error(`Authentication error: Invalid API key (${error.message})`);
+                throw new Error(`Authentication error: Invalid API key. Original message: ${error.message}`);
             } else if (error.status === 429) {
-                throw new Error(`Rate limit exceeded: ${error.message}`);
+                throw new Error(`Rate limit exceeded. Original message: ${error.message}`);
             } else if (error.status === 500) {
-                throw new Error(`OpenAI server error: ${error.message}`);
+                throw new Error(`OpenAI server error. Original message: ${error.message}`);
+            } else if (error.status === 400) {
+                throw new Error(`Invalid request to OpenAI API. Original message: ${error.message}`);
+            } else if (error.name === 'TimeoutError' || (error.message && error.message.includes('timeout'))) {
+                throw new Error(`OpenAI API request timed out. Original message: ${error.message}`);
+            } else {
+                throw new Error(`Unexpected error from OpenAI API: ${error.message}. Error type: ${error.name || 'unknown'}`);
             }
-            throw error;
-        });
+        }
         
         const apiCallDuration = Date.now() - startTime;
         context.log.info(`Received successful response from OpenAI API in ${apiCallDuration}ms`);
