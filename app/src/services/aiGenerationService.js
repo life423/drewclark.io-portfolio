@@ -13,11 +13,14 @@ const responseCache = {
   generalQuestions: new Map()
 };
 
-// Environment configuration - set to true to use actual API calls
-// Always use real API with environment-specific URL
+// Environment configuration
+// Always use real API with environment-specific URL from Vite env vars
 const USE_REAL_API = true;
-// Use environment variables for API URL (handles both development and production)
+// Get API URL from environment variables
 const API_URL = import.meta.env.VITE_API_URL;
+// Log environment info for debugging
+console.log(`App Environment: ${import.meta.env.MODE}`);
+console.log(`API URL: ${API_URL}`);
 
 /**
  * Generates a narrative for a project

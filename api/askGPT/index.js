@@ -1,13 +1,9 @@
 const { OpenAI } = require('openai')
-require('dotenv').config({
-  path: process.env.NODE_ENV === 'production' 
-    ? '.env.production' 
-    : '.env.development'
-});
+const config = require('../config')
 
 // Simple in-memory cache (consider using a distributed cache in production)
 const responseCache = new Map()
-const CACHE_TTL = 3600000 // 1 hour in milliseconds
+const CACHE_TTL = config.cacheTtlMs
 
 module.exports = async function (context, req) {
     // Log function invocation with correlation ID for tracing
@@ -15,13 +11,10 @@ module.exports = async function (context, req) {
         req.headers['x-correlation-id'] || generateCorrelationId()
     context.log.info(`askGPT function invoked. CorrelationId: ${correlationId}`)
 
-    // Set response headers for CORS
+    // Set response headers (Content-Type and Correlation ID)
+    // Note: CORS is handled by Azure Functions configuration
     const headers = {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS, GET',
-        'Access-Control-Allow-Headers':
-            'Content-Type, Authorization, X-Correlation-Id',
         'X-Correlation-Id': correlationId,
     }
 
@@ -130,8 +123,8 @@ async function handlePostRequest(context, req, headers) {
         })
     }
 
-    // Get API key from environment variables
-    const apiKey = process.env.OPENAI_API_KEY
+    // Get API key from config
+    const apiKey = config.openAiApiKey
 
     // Check if API key is provided
     if (!apiKey || apiKey === 'your-api-key-here') {
