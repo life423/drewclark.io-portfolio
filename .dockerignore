@@ -1,0 +1,34 @@
+# Node modules
+node_modules
+app/node_modules
+api/node_modules
+
+# Build outputs
+app/dist
+
+# Development files
+.git
+.github
+.vscode
+*.md
+!README.md
+
+# Azure Functions files
+api/local.settings.json
+
+# Logs
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+*.log
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Docker files (already on host)
+Dockerfile
+Dockerfile.dev
+docker-compose.yml
+.dockerignore
