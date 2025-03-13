@@ -18,7 +18,6 @@ if (!process.env.NODE_ENV) {
 // Load appropriate .env file based on NODE_ENV
 if (!isAzureFunctions) {
   // Only load from .env files in local development
-<<<<<<< HEAD
   try {
     require('dotenv').config({
       path: process.env.NODE_ENV === 'production' 
@@ -28,13 +27,6 @@ if (!isAzureFunctions) {
   } catch (error) {
     console.warn(`Warning: Could not load .env file - ${error.message}`);
   }
-=======
-  require('dotenv').config({
-    path: process.env.NODE_ENV === 'production' 
-      ? path.resolve(__dirname, '.env.production')
-      : path.resolve(__dirname, '.env.development')
-  });
->>>>>>> life423/main
 }
 
 // Log environment detection for debugging
@@ -70,11 +62,7 @@ const config = {
   ],
   
   // CORS settings
-<<<<<<< HEAD
   corsOrigins: process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : ['*'],
-=======
-  corsOrigins: ['*'], // You might want to restrict this to specific domains in production
->>>>>>> life423/main
   
   // Logging
   isDevelopment: process.env.NODE_ENV !== 'production',
