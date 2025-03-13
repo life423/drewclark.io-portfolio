@@ -135,19 +135,31 @@ export async function askGeneralQuestion(question) {
  */
 async function callAskGptFunction(question) {
   try {
-    const response = await fetch(API_URL, {
+    console.log('Calling API at URL:', API_URL);
+    console.log('With question:', question);
+    
+    // Detailed request logging
+    const request = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ question })
-    });
+    };
+    
+    console.log('Request details:', request);
+    
+    const response = await fetch(API_URL, request);
+    
+    console.log('Response status:', response.status);
+    console.log('Response headers:', [...response.headers.entries()]);
     
     if (!response.ok) {
       throw new Error(`API call failed with status: ${response.status}`);
     }
     
     const data = await response.json();
+    console.log('Response data:', data);
     return data.answer;
   } catch (error) {
     console.error('Error calling askGPT API:', error);
