@@ -40,11 +40,15 @@ jobs:
           echo "# OPENAI_API_KEY will be set in Azure portal" >> api/.env.production
           cat api/.env.production
       
-      # Run API test script to verify OpenAI package works
+      # Install API dependencies with fallback
       - name: Install API dependencies
         run: |
           cd api
-          npm ci
+          # First try with npm ci (should work now that we have package-lock.json)
+          npm ci || (echo "npm ci failed, falling back to npm install" && npm install)
+          # Verify OpenAI package is installed correctly
+          echo "Checking OpenAI package installation:"
+          node -e "console.log(require('openai') ? 'OpenAI package loaded successfully' : 'OpenAI package not found')"
           
       # Build and deploy the Static Web App
       - name: Build And Deploy
