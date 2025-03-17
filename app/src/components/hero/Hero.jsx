@@ -125,64 +125,34 @@ export default function Hero() {
                             Drew Clark
                         </span>
                         
-                        {/* Orange accent line - positioned below text with correct length */}
+                        {/* Orange accent line with solid fade to transparent */}
                         <svg
                             className='absolute opacity-0 animate-fade-in-1'
                             style={{ 
                                 animationDelay: '400ms',
                                 width: '65%',
                                 left: '-5%',
-                                bottom: '-12px' // More space below text
+                                bottom: '-16px' /* Increased space to better match spacing scale (4px units) */
                             }}
                             viewBox='0 0 200 20'
                             preserveAspectRatio='none'
                             xmlns='http://www.w3.org/2000/svg'
                         >
-                            {/* Glow layer */}
+                            {/* Single path with thinner line, solid fade effect - no animation */}
                             <path
                                 d='M10,10 Q50,8 100,10 Q150,12 190,15'
-                                stroke='url(#orangeGlowGradient)'
-                                strokeWidth='2'
-                                strokeLinecap='round'
-                                fill='none'
-                                opacity='0.6'
-                                className='animate-pulse-subtle'
-                            />
-                            {/* Create multiple paths with decreasing stroke width for tapering effect */}
-                            <path
-                                d='M10,10 Q50,8 90,10'
-                                stroke='url(#orangeGradient)'
-                                strokeWidth='5'
-                                strokeLinecap='round'
-                                fill='none'
-                            />
-                            <path
-                                d='M90,10 Q130,12 150,13'
-                                stroke='url(#orangeGradient)'
-                                strokeWidth='4'
-                                strokeLinecap='round'
-                                fill='none'
-                            />
-                            <path
-                                d='M150,13 Q170,14 190,15'
                                 stroke='url(#orangeGradient)'
                                 strokeWidth='2.5'
                                 strokeLinecap='round'
                                 fill='none'
-                                opacity='0.8'
                             />
                             
                             <defs>
-                                {/* Color gradient for fading effect */}
+                                {/* Solid fade gradient from opaque to fully transparent */}
                                 <linearGradient id='orangeGradient' x1='0%' y1='0%' x2='100%' y2='0%'>
                                     <stop offset='0%' stopColor='#FF6B00' />
-                                    <stop offset='70%' stopColor='#FF8E00' />
-                                    <stop offset='100%' stopColor='rgba(255, 107, 0, 0.3)' />
-                                </linearGradient>
-                                <linearGradient id='orangeGlowGradient' x1='0%' y1='0%' x2='100%' y2='0%'>
-                                    <stop offset='0%' stopColor='rgba(255, 107, 0, 0.8)' />
-                                    <stop offset='80%' stopColor='rgba(255, 142, 0, 0.1)' />
-                                    <stop offset='100%' stopColor='rgba(255, 142, 0, 0)' />
+                                    <stop offset='60%' stopColor='#FF8E00' />
+                                    <stop offset='100%' stopColor='rgba(255, 107, 0, 0)' />
                                 </linearGradient>
                             </defs>
                         </svg>

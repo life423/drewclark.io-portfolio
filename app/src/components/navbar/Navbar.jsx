@@ -31,15 +31,15 @@ export default function Navbar({ drawerOpen, toggleDrawer, progressBarVisible = 
               boxShadow: isScrolled ? '0 2px 10px rgba(0, 0, 0, 0.15)' : 'none',
           }}
       >
-          {/* Dynamic Logo with hover effect and floating animation */}
+          {/* Dynamic Logo with hover effect - animation removed */}
           <div
               className={clsx(
                   'font-extralight uppercase tracking-wider transition-all duration-300',
-                  isScrolled ? 'text-xl' : 'text-2xl',
-                  !isScrolled && !drawerOpen && 'animate-nav-float' // Apply floating animation only when not scrolled
+                  isScrolled ? 'text-xl' : 'text-2xl'
+                  // Animation removed as requested
               )}
           >
-              {/* Animated gradient text that responds to scroll position */}
+              {/* Gradient text that responds to scroll position */}
               <a href='#' className='relative group inline-block'>
                   <span
                       className={clsx(
