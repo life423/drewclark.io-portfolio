@@ -12,6 +12,7 @@ export default function Navbar({ drawerOpen, toggleDrawer, progressBarVisible = 
   const isScrolled = scrollY > 50
   
   function handleMenuClick() {
+    console.log('Menu button clicked!') // Debug helper
     toggleDrawer()
   }
 
@@ -70,6 +71,8 @@ export default function Navbar({ drawerOpen, toggleDrawer, progressBarVisible = 
                   'border hover:shadow-md',
                   'active:shadow-inner',
                   'transition-all duration-200',
+                  'z-[100]', // Add explicit high z-index
+                  'pointer-events-auto', // Ensure it captures clicks
                   isScrolled
                       ? 'min-w-[40px] min-h-[40px] px-2 py-1.5 bg-gradient-to-b from-brandGray-700/90 to-brandGray-800 border-brandGray-600/40'
                       : 'min-w-[44px] min-h-[44px] px-3 py-2 bg-gradient-to-b from-brandGray-700/60 to-brandGray-800/60 border-brandGray-600/20'
@@ -79,6 +82,7 @@ export default function Navbar({ drawerOpen, toggleDrawer, progressBarVisible = 
                   boxShadow: isScrolled
                       ? '0 1px 3px rgba(0, 0, 0, 0.12)'
                       : '0 2px 5px rgba(0, 0, 0, 0.08)',
+                  zIndex: 100, // Redundant but ensures it works in all browsers
               }}
               aria-label='Open Menu'
               onClick={handleMenuClick}

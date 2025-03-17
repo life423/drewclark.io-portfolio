@@ -138,19 +138,19 @@ export default function Hero() {
                         Software Engineer
                     </h2>
 
-                    {/* Specialty tags */}
+                    {/* Specialty tags with improved contrast - left-aligned with consistent spacing */}
                     <div
-                        className='flex flex-wrap gap-2 mb-3 animate-fade-in-1'
+                        className='flex gap-2 mb-3 animate-fade-in-1'
                         style={{ animationDelay: '150ms' }}
                     >
-                        <span className='px-2 py-0.5 bg-brandGreen-800/40 rounded text-xs text-brandGreen-300 border border-brandGreen-500/20'>
-                            Full-Stack Development
+                        <span className='px-2 py-0.5 bg-brandGreen-800/70 rounded text-xs font-medium text-brandGreen-100 border border-brandGreen-500/40 whitespace-nowrap'>
+                            Full-Stack
                         </span>
-                        <span className='px-2 py-0.5 bg-brandBlue-800/40 rounded text-xs text-brandBlue-300 border border-brandBlue-500/20'>
-                            Cloud Architecture
+                        <span className='px-2 py-0.5 bg-brandBlue-800/70 rounded text-xs font-medium text-brandBlue-100 border border-brandBlue-500/40 whitespace-nowrap'>
+                            Cloud
                         </span>
-                        <span className='px-2 py-0.5 bg-neonOrange-900/40 rounded text-xs text-neonOrange-300 border border-neonOrange-600/20'>
-                            AI Integration
+                        <span className='px-2 py-0.5 bg-neonOrange-900/70 rounded text-xs font-medium text-neonOrange-100 border border-neonOrange-600/40 whitespace-nowrap'>
+                            AI
                         </span>
                     </div>
                 </ProgressiveElement>
@@ -163,8 +163,8 @@ export default function Hero() {
                     className='block mb-8'
                 >
                     <div className='relative max-w-2xl'>
-                        {/* Blurred background layer */}
-                        <div className='absolute inset-0 backdrop-blur-sm bg-brandGray-900/40 rounded-lg border-l-2 border-brandGreen-500/40'></div>
+                        {/* Background layer - removed backdrop blur */}
+                        <div className='absolute inset-0 bg-brandGray-900/40 rounded-lg border-l-2 border-brandGreen-500/40 pointer-events-none'></div>
 
                         {/* Text layer with full opacity */}
                         <p className='relative px-3 py-2 text-lg text-white font-medium leading-relaxed'>
@@ -180,45 +180,21 @@ export default function Hero() {
                     appearDelay={900}
                     focusStage={4}
                 >
-                    <PrimaryButton href='#projects' className='group'>
+                    <PrimaryButton href='#projects'>
                         <span className='text-white font-medium'>
                             Featured Projects
                         </span>
-                        <svg
-                            className='w-5 h-5 ml-2 group-hover:translate-y-1 transition-transform duration-300'
-                            fill='none'
-                            viewBox='0 0 24 24'
-                            stroke='currentColor'
-                            aria-hidden='true'
+                        <span
+                            className='text-white ml-1 transition-transform duration-300
+                            animate-pulse-gentle'
                         >
-                            <path
-                                strokeLinecap='round'
-                                strokeLinejoin='round'
-                                strokeWidth={2}
-                                d='M19 14l-7 7m0 0l-7-7m7 7V3'
-                            />
-                        </svg>
-
-                        {/* Corner highlight effect */}
-                        <div className='absolute top-0 right-0 w-[20px] h-[20px] opacity-0 animate-corner-highlight'>
-                            <div className='absolute top-0 right-0 w-[2px] h-[6px] bg-neonOrange-500/70 rounded-sm'></div>
-                            <div className='absolute top-0 right-0 w-[6px] h-[2px] bg-neonOrange-500/70 rounded-sm'></div>
-                        </div>
+                            ↓
+                        </span>
                     </PrimaryButton>
-
-                    {/* Scroll indicator removed */}
                 </ProgressiveElement>
             </div>
 
-            {/* Interactive overlay elements - only show when loaded */}
-            {isLoaded && (
-                <div className='absolute inset-0 pointer-events-none'>
-                    {/* Decorative particles */}
-                    <div className='absolute left-1/4 top-1/4 w-1 h-1 bg-brandGreen-400 rounded-full animate-float'></div>
-                    <div className='absolute left-3/4 top-1/3 w-1 h-1 bg-brandBlue-400 rounded-full animate-float-delayed'></div>
-                    <div className='absolute left-1/5 bottom-1/3 w-1 h-1 bg-neonOrange-400 rounded-full animate-float-slow'></div>
-                </div>
-            )}
+            {/* Removed interactive particles */}
         </section>
     )
 }

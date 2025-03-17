@@ -14,7 +14,7 @@ function HorizontalProgressBar({ visible, progress, getInterpolatedColor }) {
     if (!visible) return null
 
     return (
-        <div className='absolute bottom-0 left-0 right-0 z-[51]'>
+        <div className='absolute bottom-0 left-0 right-0 z-[51] pointer-events-none'>
             <div
                 className='h-[3px] transition-all duration-200 ease-out'
                 style={{
