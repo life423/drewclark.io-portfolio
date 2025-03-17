@@ -3,6 +3,7 @@ import useNavigationState from './hooks/useNavigationState'
 import Layout from './components/layout/Layout'
 import Hero from './components/hero/Hero'
 import ProjectsContainer from './components/projects/ProjectsContainer'
+import { FocusProvider } from './contexts/FocusContext'
 
 // Memoized main content component for better performance
 const MainContent = memo(function MainContent() {
@@ -43,8 +44,10 @@ export default function App() {
     }
 
     return (
-        <Layout {...enhancedNavigationState}>
-            <MainContent />
-        </Layout>
+        <FocusProvider>
+            <Layout {...enhancedNavigationState}>
+                <MainContent />
+            </Layout>
+        </FocusProvider>
     )
 }

@@ -138,11 +138,11 @@ export default function ProjectsContainer() {
           transitionDirection === 'prev' && 'translate-x-[100px] opacity-0',
         )}>
           <ProjectCard
-            chapterNumber={activeProjectIndex + 1} // TODO: Rename this prop in a future update
+            projectNumber={activeProjectIndex + 1}
             title={PROJECTS[activeProjectIndex].title}
             summary={PROJECTS[activeProjectIndex].summary}
             stack={PROJECTS[activeProjectIndex].stack}
-            initialStoryText={PROJECTS[activeProjectIndex].initialDescription}
+            initialDescription={PROJECTS[activeProjectIndex].initialDescription}
           />
         </div>
         

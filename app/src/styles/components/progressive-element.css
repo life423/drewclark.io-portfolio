@@ -1,0 +1,34 @@
+/* Progressive Element Styles */
+.progressive-element {
+  will-change: opacity, transform, filter;
+  position: relative;
+  transition: filter 600ms ease-out, opacity 600ms ease-out, transform 600ms ease-out;
+}
+
+.pe-hidden {
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+}
+
+.pe-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.pe-focused {
+  opacity: 1;
+  filter: blur(0);
+  z-index: 2;
+  transform: scale(1.01);
+}
+
+.pe-unfocused {
+  z-index: 1;
+}
+
+.pe-dimmed {
+  opacity: 0.85; /* Increased from 0.7 for better visibility */
+  filter: blur(0.5px); /* Reduced from 1px for a more subtle effect */
+}
