@@ -4,6 +4,7 @@ import clsx from 'clsx'
 import { LuMenu } from 'react-icons/lu'
 import useScrollPosition from '../../hooks/useScrollPosition'
 import HorizontalProgressBar from '../progress/HorizontalProgressBar'
+import { getInterpolatedColor } from '../../components/utils/colorInterpolate'
 
 
 export default function Navbar({ drawerOpen, toggleDrawer, progressBarVisible = true }) {
@@ -151,7 +152,8 @@ export default function Navbar({ drawerOpen, toggleDrawer, progressBarVisible = 
 
           <HorizontalProgressBar
               visible={progressBarVisible}
-              percent={scrollPercent}
+              progress={scrollPercent}
+              getInterpolatedColor={getInterpolatedColor}
           />
       </nav>
   )
