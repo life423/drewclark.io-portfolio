@@ -7,7 +7,7 @@ export default function Hero() {
   const heroRef = useRef(null)
   const { y: scrollY } = useScrollPosition()
   
-  // Calculate transform based on scroll position
+  // Calculate transform based on scroll position for parallax effect
   const calculateTransform = () => {
     const maxScroll = window.innerHeight * 0.7
     const scrollRatio = Math.min(scrollY / maxScroll, 1)
@@ -23,9 +23,9 @@ export default function Hero() {
       className="relative h-[70vh] flex items-center justify-center px-4 py-16 text-white overflow-hidden"
       style={calculateTransform()}
     >
-      {/* Enhanced background with parallax and gradient overlay */}
+      {/* Background with parallax effect and gradient overlay */}
       <div className="absolute inset-0 z-0">
-        {/* Base image with parallax effect */}
+        {/* Base image with parallax scrolling */}
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{
@@ -33,35 +33,34 @@ export default function Hero() {
             filter: 'brightness(0.75)',
             transform: `translateY(${scrollY * 0.15}px)`,
             transition: 'transform 0.1s ease-out',
-            transformOrigin: 'center bottom'
           }}
         />
         
-        {/* Gradient overlay for better text contrast - lightened and brand-tinted */}
+        {/* Gradient overlay for better text contrast */}
         <div className="absolute inset-0 bg-gradient-to-t 
-                     from-brandGray-900/45 via-brandGreen-800/30 to-transparent"></div>
+                       from-brandGray-900/45 via-brandGreen-800/30 to-transparent"></div>
         
-        {/* Subtle noise texture overlay */}
+        {/* Subtle noise texture for depth */}
         <div className="absolute inset-0 opacity-5 mix-blend-overlay"
              style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.65\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%\' height=\'100%\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")' }}></div>
       </div>
       
-      {/* Content with enhanced typography and layout */}
+      {/* Content container */}
       <div className="container mx-auto z-10 relative">
-        {/* Name with backdrop for better contrast */}
+        {/* Name with backdrop blur for better contrast */}
         <div className="relative mb-2">
           <span className="absolute -inset-x-4 -inset-y-2 bg-gradient-to-r 
-                       from-brandGray-900/80 to-brandGray-900/40 rounded-lg blur-xl"></span>
+                         from-brandGray-900/80 to-brandGray-900/40 rounded-lg blur-xl"></span>
           <h1 className="relative text-4xl md:text-6xl font-bold">
             <span className="bg-clip-text text-transparent bg-gradient-to-r 
-                         from-brandGreen-300 via-brandGreen-200 to-brandBlue-400
-                         animate-fade-in">
+                           from-brandGreen-300 via-brandGreen-200 to-brandBlue-400
+                           animate-fade-in">
               Drew Clark
             </span>
           </h1>
         </div>
         
-        {/* Role with subtle reveal animation */}
+        {/* Role with subtle animation */}
         <h2 className="text-2xl md:text-3xl mb-3 font-light text-white 
                      opacity-0 animate-fade-in-1">
           Software Engineer
@@ -75,7 +74,7 @@ export default function Hero() {
           Creating elegant solutions to complex problems with a focus on user experience and performance.
         </p>
         
-        {/* Primary button using the shared component */}
+        {/* CTA Button with animation */}
         <div className="opacity-0 animate-fade-in-3">
           <PrimaryButton href="#projects">
             <span className="text-white font-medium">Featured Projects</span>
