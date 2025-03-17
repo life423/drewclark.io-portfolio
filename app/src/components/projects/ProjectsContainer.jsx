@@ -106,16 +106,16 @@ export default function ProjectsContainer() {
               </PrimaryButton>
             </div>
             
-            {/* Chapter Progress Indicators */}
+            {/* Chapter Progress Indicators - Updated to match main screen */}
             <div className="flex justify-center py-4 border-t border-brandGray-700 bg-brandGray-850 space-x-2">
               <button
-                className="h-2 w-6 rounded-full bg-neonOrange-500"
+                className="h-2 w-8 rounded-full bg-neonOrange-500 transform scale-110"
                 aria-label="Current chapter"
               />
               {PROJECTS.map((_, index) => (
                 <button
                   key={index}
-                  className="h-2 w-2 rounded-full bg-brandGray-600 hover:bg-brandGray-500 transition-all duration-200"
+                  className="h-2 w-2 rounded-full bg-brandGray-600 hover:bg-brandGray-500 transition-all duration-300"
                   aria-label={`Go to project ${index + 1}`}
                 />
               ))}
@@ -146,8 +146,25 @@ export default function ProjectsContainer() {
           />
         </div>
         
+        {/* Progress indicator - Moved above the navigation buttons */}
+        <div className="flex justify-center mt-6 mb-5 space-x-2">
+          {PROJECTS.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => navigateToProject(index)}
+              className={clsx(
+                "h-2 rounded-full transition-all duration-300",
+                index === activeProjectIndex
+                  ? "bg-neonOrange-500 w-8 transform scale-110" // Made wider and with slight scale effect
+                  : "bg-brandGray-600 hover:bg-brandGray-500 w-2"
+              )}
+              aria-label={`Go to project ${index + 1}`}
+            />
+          ))}
+        </div>
+        
         {/* Navigation buttons outside of the card for easier access */}
-        <div className="flex justify-between mt-8">
+        <div className="flex justify-between mt-4">
           <button
             onClick={() => navigateToProject(activeProjectIndex - 1)}
             disabled={activeProjectIndex === 0}
@@ -179,23 +196,6 @@ export default function ProjectsContainer() {
               <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
             </svg>
           </button>
-        </div>
-        
-        {/* Progress indicator */}
-        <div className="flex justify-center mt-6 space-x-2">
-          {PROJECTS.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => navigateToProject(index)}
-              className={clsx(
-                "h-2 w-2 rounded-full transition-all duration-200",
-                index === activeProjectIndex
-                  ? "bg-neonOrange-500 w-6"
-                  : "bg-brandGray-600 hover:bg-brandGray-500"
-              )}
-              aria-label={`Go to project ${index + 1}`}
-            />
-          ))}
         </div>
       </div>
     </section>
