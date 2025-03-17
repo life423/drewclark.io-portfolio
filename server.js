@@ -57,8 +57,7 @@ app.get('*', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`)
-    console.log(`OpenAI API Key configured: ${!!config.openAiApiKey}`)
-    if (config.openAiApiKey) {
-        console.log(`OpenAI API Key length: ${config.openAiApiKey.length}`)
-    }
+    console.log(
+        `OpenAI API Key: ${config.openAiApiKey ? 'Configured' : 'Missing'}`
+    )
 })

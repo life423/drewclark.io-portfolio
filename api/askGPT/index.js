@@ -1,4 +1,5 @@
-const { OpenAI } = require('openai')
+const { OpenAI } = require('openai');
+const { handleRequest } = require('../unified-server')
 const config = require('../config')
 
 // Simple in-memory cache (consider using a distributed cache in production)
@@ -24,80 +25,30 @@ try {
 }
 
 module.exports = async function (context, req) {
-    // Log function invocation with correlation ID for tracing
-    const correlationId =
-        req.headers['x-correlation-id'] || generateCorrelationId()
-    context.log.info(`askGPT function invoked. CorrelationId: ${correlationId}`)
+    context.log('JavaScript HTTP trigger function processed a request.')
 
-    // Log important environment info for debugging
-    context.log.info(`NODE_ENV: ${process.env.NODE_ENV || 'not set'}`)
-    context.log.info(`OpenAI API Key configured: ${!!config.openAiApiKey}`)
-    if (config.openAiApiKey) {
-        context.log.info(`OpenAI API Key length: ${config.openAiApiKey.length}`)
-    }
-
-    // Enhanced CORS headers for Azure Static Web Apps
-    // Set response headers (Content-Type and Correlation ID)
-    const headers = {
-        'Content-Type': 'application/json',
-        'X-Correlation-Id': correlationId,
-        'Access-Control-Allow-Origin': '*', // Consider restricting to your domain in production
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers':
-            'Content-Type, Authorization, X-Correlation-Id, Accept',
-        'Access-Control-Max-Age': '86400', // 24 hours
-        'X-Azure-Ref': correlationId, // Additional reference ID for Azure logs
-    }
-
-    // Log environment information for troubleshooting
-    context.log.info(`Node environment: ${process.env.NODE_ENV || 'not set'}`)
-    context.log.info(`Azure Functions detected: ${config.isAzureFunctions}`)
-    if (config.isAzureFunctions) {
-        context.log.info(`Azure hostname: ${process.env.WEBSITE_HOSTNAME}`)
-    }
-
-    try {
-        // Handle different HTTP methods
-        switch (req.method) {
-            case 'OPTIONS':
-                return handleOptionsRequest(context, headers)
-            case 'GET':
-                return handleGetRequest(context, headers)
-            case 'POST':
-                return await handlePostRequest(context, req, headers)
-            default:
-                return createResponse(context, 405, headers, {
-                    error: 'Method not allowed. Use POST to ask a question.',
-                })
+    // Create adapter functions for unified server
+    const createResponse = (status, headers, body) => {
+        context.res = {
+            status,
+            headers,
+            body,
         }
-    } catch (error) {
-        // Log the error with correlation ID for easier debugging
-        context.log.error(
-            `Error processing request (${correlationId}): ${error.message}`
-        )
-        context.log.error(error)
-
-        // Determine the appropriate error message based on environment
-        const errorMessage =
-            process.env.NODE_ENV === 'development'
-                ? error.message
-                : 'Please try again later.'
-
-        // Return a friendly error response with debugging details
-        return createResponse(context, 500, headers, {
-            error: 'An error occurred while processing your request.',
-            message: errorMessage,
-            correlationId,
-            debugInfo:
-                process.env.NODE_ENV === 'development'
-                    ? {
-                          stack: error.stack,
-                          errorType: error.name,
-                          errorDetails: error.toString(),
-                      }
-                    : undefined,
-        })
+        return context.res
     }
+
+    const logInfo = message => context.log(message)
+    const logError = message => context.log.error(message)
+    const logWarn = message => context.log.warn(message)
+
+    // Call the unified handler
+    await handleRequest({
+        req,
+        createResponse,
+        logInfo,
+        logError,
+        logWarn,
+    })
 }
 
 // Handle OPTIONS request (CORS preflight)
