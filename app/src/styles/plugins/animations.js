@@ -71,6 +71,47 @@ export default plugin(function ({ addBase, addUtilities }) {
                 transform: 'translateY(0)' 
             }
         },
+        '@keyframes smoothFadeIn': {
+            '0%': { 
+                opacity: '0', 
+                transform: 'translateY(15px)',
+                filter: 'blur(5px)'
+            },
+            '60%': {
+                filter: 'blur(0)'
+            },
+            '100%': { 
+                opacity: '1', 
+                transform: 'translateY(0)',
+                filter: 'blur(0)'
+            }
+        },
+        '@keyframes titleReveal': {
+            '0%': { 
+                opacity: '0',
+                transform: 'scale(0.97) translateY(10px)',
+                filter: 'blur(8px)'
+            },
+            '30%': {
+                opacity: '0.5',
+                filter: 'blur(4px)'
+            },
+            '100%': { 
+                opacity: '1', 
+                transform: 'scale(1) translateY(0)',
+                filter: 'blur(0)'
+            }
+        },
+        '@keyframes subtleSlideUp': {
+            '0%': { 
+                opacity: '0', 
+                transform: 'translateY(8px)'
+            },
+            '100%': { 
+                opacity: '1', 
+                transform: 'translateY(0)'
+            }
+        },
         '@keyframes pulseSlow': {
             '0%': { opacity: '0.1', transform: 'scale(1)' },
             '50%': { opacity: '0.3', transform: 'scale(1.05)' },
@@ -143,8 +184,8 @@ export default plugin(function ({ addBase, addUtilities }) {
             }
         },
         '@keyframes pulseGentle': {
-            '0%, 100%': { transform: 'scale(1)' },
-            '50%': { transform: 'scale(1.1)' }
+            '0%, 100%': { transform: 'translateY(0)' },
+            '50%': { transform: 'translateY(-4px)' }
         }
     });
 
@@ -276,6 +317,30 @@ export default plugin(function ({ addBase, addUtilities }) {
         '.animate-pulse-gentle': {
             animation: 'pulseGentle 2s infinite ease-in-out',
             willChange: 'transform',
+        },
+        '.animate-smooth-fade-in': {
+            animation: 'smoothFadeIn 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards',
+            willChange: 'transform, opacity, filter',
+        },
+        '.animate-title-reveal': {
+            animation: 'titleReveal 1.2s cubic-bezier(0.33, 1, 0.68, 1) forwards',
+            willChange: 'transform, opacity, filter',
+        },
+        '.animate-subtle-slide': {
+            animation: 'subtleSlideUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards',
+            willChange: 'transform, opacity',
+        },
+        '.animate-subtle-slide-1': {
+            animation: 'subtleSlideUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards',
+            animationDelay: '300ms',
+            animationFillMode: 'forwards',
+            willChange: 'transform, opacity',
+        },
+        '.animate-subtle-slide-2': {
+            animation: 'subtleSlideUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards',
+            animationDelay: '500ms',
+            animationFillMode: 'forwards',
+            willChange: 'transform, opacity',
         },
     })
 })

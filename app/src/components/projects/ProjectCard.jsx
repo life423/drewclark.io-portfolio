@@ -4,11 +4,11 @@ import { answerProjectQuestion } from '../../services/aiGenerationService'
 import PrimaryButton from '../utils/PrimaryButton'
 
 export default function ProjectCard({
-    chapterNumber,
+    projectNumber,
     title,
     summary,
     stack,
-    initialStoryText: initialDescription,
+    initialDescription,
     onAskQuestion,
 }) {
     const [expanded, setExpanded] = useState(false)
@@ -43,7 +43,7 @@ export default function ProjectCard({
         try {
             // Create a project data object to pass to the AI service
             const projectData = {
-                id: `chapter-${chapterNumber}`,
+                id: `project-${projectNumber}`,
                 title,
                 summary,
                 stack,
@@ -72,7 +72,7 @@ export default function ProjectCard({
             <div className='p-5 border-b border-brandGray-700 bg-gradient-to-r from-brandGray-800 via-brandGray-800 to-brandBlue-900/10'>
                 <div className='flex items-center mb-2'>
                     <span className='text-sm font-semibold text-white px-2 py-1 rounded-md bg-gradient-to-r from-neonOrange-700 to-neonOrange-600 shadow-sm'>
-                        Project {chapterNumber}
+                        Project {projectNumber}
                     </span>
                 </div>
                 <h2 className='text-2xl font-bold text-brandGreen-300 mb-1'>
@@ -262,11 +262,11 @@ export default function ProjectCard({
                 )}
             </div>
 
-            {/* Footer with chapter indicator */}
+            {/* Footer with project indicator */}
             <div className='border-t border-brandGray-700 bg-brandGray-850 py-3'>
                 <div className='flex justify-center'>
                     <span className='text-xs text-brandGray-500'>
-                        Project {chapterNumber}
+                        Project {projectNumber}
                     </span>
                 </div>
             </div>

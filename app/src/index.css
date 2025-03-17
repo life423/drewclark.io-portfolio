@@ -1,5 +1,7 @@
+/* Import component-specific styles */
+@import './styles/nprogress.css';
+@import './styles/components/progressive-element.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-
