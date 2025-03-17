@@ -13,7 +13,7 @@
  * @param {string} projectData.title - Project title
  * @param {string} projectData.summary - Brief project summary
  * @param {string[]} projectData.stack - Technologies used in the project
- * @param {string} projectData.initialStoryText - Initial project description
+ * @param {string} projectData.initialDescription - Initial project description
  * @param {string} question - The user's question about the project
  * @returns {Promise<string>} - The AI-generated response
  */
@@ -21,7 +21,7 @@ export async function answerProjectQuestion(projectData, question) {
   try {
     // Prepare the request body
     const requestBody = {
-      question: `Project: ${projectData.title}. Tech: ${projectData.stack.join(', ')}. Context: ${projectData.initialStoryText}. Question: ${question}`,
+      question: `Project: ${projectData.title}. Tech: ${projectData.stack.join(', ')}. Context: ${projectData.initialDescription}. Question: ${question}`,
       maxTokens: 250,
       temperature: 0.7
     };

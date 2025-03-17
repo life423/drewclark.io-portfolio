@@ -1,6 +1,6 @@
 /**
  * Enhanced mobile navigation drawer component
- * Optimized for cross-platform compatibility including iOS, Android and Edge
+ * Optimized for cross-platform compatibility including iOS, Android, and Edge
  * Follows accessibility best practices for modal dialogs
  */
 import React, { useEffect, useRef, useCallback, memo, useState } from 'react'
@@ -12,7 +12,7 @@ import useLockBodyScroll from '../../hooks/useLockBodyScroll'
 const navigationLinks = [
     { id: 'home', label: 'Home', href: '#' },
     { id: 'projects', label: 'Projects', href: '#projects' },
-    { id: 'contact', label: 'Contact', href: '#contact' },
+    { id: 'contact', label: 'Contact', href: '#contact' }
 ]
 
 // Memoize the Drawer for performance
@@ -57,7 +57,7 @@ const Drawer = memo(function Drawer({ isOpen, onClose }) {
     // Return null when closed for better performance
     // But only do this after animation completes
     const [shouldRender, setShouldRender] = useState(isOpen)
-    
+
     useEffect(() => {
         if (isOpen) {
             setShouldRender(true)
@@ -72,7 +72,7 @@ const Drawer = memo(function Drawer({ isOpen, onClose }) {
 
     // Control the transform state for smooth sliding animation
     const [drawerPosition, setDrawerPosition] = useState(isOpen ? 'translate-x-0' : '-translate-x-full')
-    
+
     useEffect(() => {
         if (isOpen) {
             // Render off-screen first
@@ -153,7 +153,7 @@ const Drawer = memo(function Drawer({ isOpen, onClose }) {
                 {/* Welcome message */}
                 <div className='px-6 py-4 text-brandGray-100/80 text-sm'>
                     <p>
-                        Hello, I'm{' '}
+                        Hello I'm{' '}
                         <span className='text-brandGreen-300'>Drew Clark</span>
                     </p>
                     <p className='mt-1 text-xs text-brandGray-300'>
@@ -170,18 +170,18 @@ const Drawer = memo(function Drawer({ isOpen, onClose }) {
                                     key={item.id}
                                     className='opacity-0'
                                     style={{
-                                        animation: isOpen 
-                                            ? 'fadeIn 0.3s ease-out forwards' 
+                                        animation: isOpen
+                                            ? 'fadeIn 0.3s ease-out forwards'
                                             : 'none',
-                                        animationDelay: isOpen 
-                                            ? `${index * 80 + 50}ms` 
-                                            : '0ms',
+                                        animationDelay: isOpen
+                                            ? `${index * 80 + 50}ms`
+                                            : '0ms'
                                     }}
                                 >
                                     <a
                                         href={item.href}
                                         onClick={onClose}
-                                        className='flex items-center px-4 py-3 text-white hover:bg-brandGray-700/40 
+                                        className='flex items-center px-4 py-3 text-white hover:bg-brandGray-700/40
                                                 hover:text-brandGreen-300 transition-colors rounded-md'
                                     >
                                         {item.label}
@@ -197,10 +197,10 @@ const Drawer = memo(function Drawer({ isOpen, onClose }) {
                     <a
                         href='#contact'
                         onClick={onClose}
-                        className='block w-full py-2 px-4 bg-brandGreen-500 hover:bg-brandGreen-600 
+                        className='block w-full py-2 px-4 bg-brandGreen-500 hover:bg-brandGreen-600
                                  text-white text-center rounded-md transition-colors'
                         style={{
-                            paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom, 0px))',
+                            paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom, 0px))'
                         }}
                     >
                         Get in touch

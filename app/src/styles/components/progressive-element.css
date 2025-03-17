@@ -1,0 +1,58 @@
+/* Progressive Element Styles */
+.progressive-element {
+    will-change: opacity, transform, filter;
+    position: relative;
+    transition:
+        filter 600ms ease-out,
+        opacity 600ms ease-out,
+        transform 600ms ease-out;
+}
+
+.pe-hidden {
+    opacity: 0;
+    transform: translateY(20px);
+    pointer-events: none;
+}
+
+.pe-visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.pe-focused {
+    opacity: 1;
+    filter: blur(0);
+    z-index: 2;
+    transform: scale(1.01);
+}
+
+.pe-unfocused {
+    z-index: 1;
+}
+
+.pe-dimmed {
+    opacity: 0.85; /* Increased from 0.7 for better visibility */
+    filter: blur(0.5px); /* Reduced from 1px for a more subtle effect */
+}
+
+/* Fix for blurry text in progressive elements */
+.progressive-element h1,
+.progressive-element h2,
+.progressive-element h3,
+.progressive-element p,
+.progressive-element span {
+    transform: translateZ(0); /* Force GPU rendering for text */
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Ensure text elements don't get scaled fractionally */
+.progressive-element.pe-visible.pe-focused h1,
+.progressive-element.pe-visible.pe-focused h2,
+.progressive-element.pe-visible.pe-focused h3,
+.progressive-element.pe-visible.pe-focused p,
+.progressive-element.pe-visible.pe-focused span {
+    transform: translateZ(0) scale(1); /* Exact integer scale */
+}
