@@ -22,6 +22,14 @@ export default defineConfig(({ command, mode }) => {
         root: './src', // if your index.html is in src/
         publicDir: '../public', // Specify the public directory at project root
         base: './', // Use relative paths
+        server: {
+            proxy: {
+                '/api': {
+                    target: 'http://localhost:3000',
+                    changeOrigin: true
+                }
+            }
+        },
         build: {
             outDir: '../dist', // puts the final build in app/dist
             emptyOutDir: true, // Clean the output directory before build
