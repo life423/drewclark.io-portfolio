@@ -2,6 +2,12 @@
 @import './styles/nprogress.css';
 @import './styles/components/progressive-element.css';
 
+/* 
+ * These are valid Tailwind CSS directives - ignore CSS linter warnings
+ * The @tailwind directive is used by the PostCSS processor and Tailwind
+ * to inject CSS into your final stylesheet.
+ * See: https://tailwindcss.com/docs/functions-and-directives#tailwind
+ */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

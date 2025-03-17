@@ -186,6 +186,27 @@ export default plugin(function ({ addBase, addUtilities }) {
         '@keyframes pulseGentle': {
             '0%, 100%': { transform: 'translateY(0)' },
             '50%': { transform: 'translateY(-4px)' }
+        },
+        '@keyframes light-sweep': {
+            '0%': { transform: 'translateX(-100%)' },
+            '100%': { transform: 'translateX(100%)' }
+        },
+        '@keyframes float': {
+            '0%, 100%': { transform: 'translateY(0)' },
+            '50%': { transform: 'translateY(-10px)' }
+        },
+        '@keyframes float-delayed': {
+            '0%, 100%': { transform: 'translateY(0)' },
+            '50%': { transform: 'translateY(-10px)' }
+        },
+        '@keyframes float-slow': {
+            '0%, 100%': { transform: 'translateY(0)' },
+            '50%': { transform: 'translateY(-5px)' }
+        },
+        '@keyframes scroll-indicator': {
+            '0%': { transform: 'translateY(0)', opacity: '0.7' },
+            '50%': { transform: 'translateY(5px)', opacity: '1' },
+            '100%': { transform: 'translateY(0)', opacity: '0.7' }
         }
     });
 
@@ -342,5 +363,23 @@ export default plugin(function ({ addBase, addUtilities }) {
             animationFillMode: 'forwards',
             willChange: 'transform, opacity',
         },
+        '.animate-light-sweep': {
+            animation: 'light-sweep 8s ease-in-out infinite',
+            animationDelay: '2s'
+        },
+        '.animate-float': {
+            animation: 'float 4s ease-in-out infinite'
+        },
+        '.animate-float-delayed': {
+            animation: 'float-delayed 4s ease-in-out infinite',
+            animationDelay: '1s'
+        },
+        '.animate-float-slow': {
+            animation: 'float-slow 6s ease-in-out infinite',
+            animationDelay: '2s'
+        },
+        '.animate-scroll-indicator': {
+            animation: 'scroll-indicator 2s ease-in-out infinite'
+        }
     })
 })
