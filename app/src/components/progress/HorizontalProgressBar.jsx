@@ -10,7 +10,7 @@ import PropTypes from 'prop-types'
  * @param {function} props.getInterpolatedColor - Function that returns the color for a given progress
  * @returns {React.ReactElement|null} The progress bar component
  */
-function HorizontalProgressBar({ visible, progress, getInterpolatedColor }) {
+function HorizontalProgressBar({ visible = true, progress, getInterpolatedColor }) {
     if (!visible) return null
 
     return (
@@ -31,10 +31,6 @@ HorizontalProgressBar.propTypes = {
     progress: PropTypes.number.isRequired,
     getInterpolatedColor: PropTypes.func.isRequired,
     visible: PropTypes.bool
-}
-
-HorizontalProgressBar.defaultProps = {
-    visible: true
 }
 
 export default HorizontalProgressBar
