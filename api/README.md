@@ -15,6 +15,7 @@ The `askGPT/index.js` file provides the OpenAI functionality to answer questions
 ### Setting Up Your OpenAI API Key
 
 1. **Create an Environment File**:
+
    ```bash
    # For development
    cp .env.development.template .env.development
@@ -40,6 +41,7 @@ The `askGPT/index.js` file provides the OpenAI functionality to answer questions
 - **POST /askGPT**
   - Processes questions and returns AI-generated responses
   - Request format:
+
     ```json
     {
       "question": "Tell me about Drew Clark's portfolio",

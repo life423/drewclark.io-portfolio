@@ -3,7 +3,8 @@
     <msapplication>
         <tile>
             <!-- <square150x150logo src="/favicon/android-chrome-192x192.png"/> -->
-            
+            <link rel="manifest" href="/favicon/manifest.json">
+            </link>
             <TileColor>#da532c</TileColor>
         </tile>
     </msapplication>

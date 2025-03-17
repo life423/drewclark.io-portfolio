@@ -42,9 +42,9 @@ This application has been containerized with Docker, which simplifies deployment
 
 ### Prerequisites
 
--   [Docker](https://docs.docker.com/get-docker/)
--   [Docker Compose](https://docs.docker.com/compose/install/)
--   OpenAI API Key
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+- OpenAI API Key
 
 ### Environment Variables
 
@@ -55,7 +55,7 @@ This project requires an OpenAI API key to enable the AI assistant functionality
 **Option 1: Using .env File (Root Directory)**
 Create a `.env` file in the root directory with the following:
 
-```
+```env
 OPENAI_API_KEY=your_openai_api_key_here
 ```
 
@@ -95,10 +95,10 @@ docker-compose up dev
 
 This will:
 
--   Build the development container
--   Mount your local directories for hot reloading
--   Start the server with Nodemon for automatic restarts
--   Expose the application on http://localhost:3000
+- Build the development container
+- Mount your local directories for hot reloading
+- Start the server with Nodemon for automatic restarts
+- Expose the application on <http://localhost:3000>
 
 ### Running Locally Without Docker
 
@@ -128,10 +128,10 @@ docker-compose up app
 
 This will:
 
--   Build the frontend assets
--   Create an optimized production container
--   Start the server in production mode
--   Expose the application on http://localhost:3000
+- Build the frontend assets
+- Create an optimized production container
+- Start the server in production mode
+- Expose the application on <http://localhost:3000>
 
 ### Manual Production Build
 
@@ -158,8 +158,8 @@ The application consists of:
 
 ## API Endpoints
 
--   `GET /api/askGPT`: Health check endpoint
--   `POST /api/askGPT`: Send questions to OpenAI
+- `GET /api/askGPT`: Health check endpoint
+- `POST /api/askGPT`: Send questions to OpenAI
 
 Example request:
 
@@ -174,9 +174,9 @@ Example request:
 
 ## Docker Configuration
 
--   `Dockerfile`: Production container configuration
--   `Dockerfile.dev`: Development container with hot reloading
--   `docker-compose.yml`: Service definitions for both dev and production
+- `Dockerfile`: Production container configuration
+- `Dockerfile.dev`: Development container with hot reloading
+- `docker-compose.yml`: Service definitions for both dev and production
 
 ## Continuous Integration and Deployment (CI/CD)
 
@@ -203,4 +203,4 @@ For detailed setup instructions, see the [CI-CD-SETUP.md](./CI-CD-SETUP.md) file
 
 ### GitHub Actions Files
 
--   `.github/workflows/ci-cd.yml`: Main CI/CD workflow definition
+- `.github/workflows/ci-cd.yml`: Main CI/CD workflow definition
