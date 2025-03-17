@@ -44,7 +44,6 @@
 .progressive-element span {
     transform: translateZ(0); /* Force GPU rendering for text */
     backface-visibility: hidden;
-    -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 

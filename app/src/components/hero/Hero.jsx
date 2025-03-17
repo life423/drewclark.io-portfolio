@@ -139,21 +139,20 @@ export default function Hero() {
                         Software Engineer
                     </h2>
 
-                    {/* Specialty tags with improved contrast - left-aligned with consistent spacing (animations removed) */}
-                    <div
-                        className='flex gap-2 mb-3'
-                    >
-                        <span className='px-2 py-0.5 bg-brandGreen-800/70 rounded text-xs font-medium text-brandGreen-100 border border-brandGreen-500/40 whitespace-nowrap'>
-                            Full-Stack
-                        </span>
-                        <span className='px-2 py-0.5 bg-brandBlue-800/70 rounded text-xs font-medium text-brandBlue-100 border border-brandBlue-500/40 whitespace-nowrap'>
-                            Cloud
-                        </span>
-                        <span className='px-2 py-0.5 bg-neonOrange-900/70 rounded text-xs font-medium text-neonOrange-100 border border-neonOrange-600/40 whitespace-nowrap'>
-                            AI
-                        </span>
-                    </div>
                 </ProgressiveElement>
+                
+                {/* Specialty tags moved outside ProgressiveElement to remove transform effects */}
+                <div className='flex gap-2 mb-3'>
+                    <span className='px-2 py-0.5 bg-brandGreen-800/70 rounded text-xs font-medium text-brandGreen-100 border border-brandGreen-500/40 whitespace-nowrap'>
+                        Full-Stack
+                    </span>
+                    <span className='px-2 py-0.5 bg-brandBlue-800/70 rounded text-xs font-medium text-brandBlue-100 border border-brandBlue-500/40 whitespace-nowrap'>
+                        Cloud
+                    </span>
+                    <span className='px-2 py-0.5 bg-neonOrange-900/70 rounded text-xs font-medium text-neonOrange-100 border border-neonOrange-600/40 whitespace-nowrap'>
+                        AI
+                    </span>
+                </div>
 
                 {/* Progressive description - Stage 3 */}
                 <ProgressiveElement
