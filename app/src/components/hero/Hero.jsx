@@ -124,6 +124,44 @@ export default function Hero() {
                         >
                             Drew Clark
                         </span>
+                        
+                        {/* Orange accent line with enhanced animation */}
+                        <svg
+                            className='absolute -bottom-2 left-0 w-full h-4 opacity-0 animate-fade-in-1'
+                            style={{ animationDelay: '400ms' }}
+                            viewBox='0 0 320 16'
+                            preserveAspectRatio='none'
+                            xmlns='http://www.w3.org/2000/svg'
+                        >
+                            {/* More pronounced curve with double path for glow effect */}
+                            <path
+                                d='M0,8 Q80,2 160,10 Q240,18 320,8'
+                                stroke='url(#orangeGlowGradient)'
+                                strokeWidth='1.5'
+                                strokeLinecap='round'
+                                fill='none'
+                                opacity='0.6'
+                                className='animate-pulse-subtle'
+                            />
+                            <path
+                                d='M0,8 Q80,2 160,10 Q240,18 320,8'
+                                stroke='url(#orangeGradient)'
+                                strokeWidth='3'
+                                strokeLinecap='round'
+                                fill='none'
+                            />
+                            <defs>
+                                <linearGradient id='orangeGradient' x1='0%' y1='0%' x2='100%' y2='0%'>
+                                    <stop offset='0%' stopColor='#FF6B00' />
+                                    <stop offset='50%' stopColor='#FF8E00' />
+                                    <stop offset='100%' stopColor='rgba(255, 107, 0, 0.7)' />
+                                </linearGradient>
+                                <linearGradient id='orangeGlowGradient' x1='0%' y1='0%' x2='100%' y2='0%'>
+                                    <stop offset='0%' stopColor='rgba(255, 107, 0, 0.8)' />
+                                    <stop offset='100%' stopColor='rgba(255, 142, 0, 0.4)' />
+                                </linearGradient>
+                            </defs>
+                        </svg>
                     </h1>
                 </ProgressiveElement>
 
