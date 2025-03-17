@@ -124,38 +124,7 @@ export default function Hero() {
                         >
                             Drew Clark
                         </span>
-                        
-                        {/* Orange accent line with solid fade to transparent */}
-                        <svg
-                            className='absolute opacity-0 animate-fade-in-1'
-                            style={{ 
-                                animationDelay: '400ms',
-                                width: '65%',
-                                left: '-5%',
-                                bottom: '-16px' /* Increased space to better match spacing scale (4px units) */
-                            }}
-                            viewBox='0 0 200 20'
-                            preserveAspectRatio='none'
-                            xmlns='http://www.w3.org/2000/svg'
-                        >
-                            {/* Single path with thinner line, solid fade effect - no animation */}
-                            <path
-                                d='M10,10 Q50,8 100,10 Q150,12 190,15'
-                                stroke='url(#orangeGradient)'
-                                strokeWidth='2.5'
-                                strokeLinecap='round'
-                                fill='none'
-                            />
-                            
-                            <defs>
-                                {/* Solid fade gradient from opaque to fully transparent */}
-                                <linearGradient id='orangeGradient' x1='0%' y1='0%' x2='100%' y2='0%'>
-                                    <stop offset='0%' stopColor='#FF6B00' />
-                                    <stop offset='60%' stopColor='#FF8E00' />
-                                    <stop offset='100%' stopColor='rgba(255, 107, 0, 0)' />
-                                </linearGradient>
-                            </defs>
-                        </svg>
+                        {/* Orange line removed as requested */}
                     </h1>
                 </ProgressiveElement>
 
@@ -170,10 +139,9 @@ export default function Hero() {
                         Software Engineer
                     </h2>
 
-                    {/* Specialty tags with improved contrast - left-aligned with consistent spacing */}
+                    {/* Specialty tags with improved contrast - left-aligned with consistent spacing (animations removed) */}
                     <div
-                        className='flex gap-2 mb-3 animate-fade-in-1'
-                        style={{ animationDelay: '150ms' }}
+                        className='flex gap-2 mb-3'
                     >
                         <span className='px-2 py-0.5 bg-brandGreen-800/70 rounded text-xs font-medium text-brandGreen-100 border border-brandGreen-500/40 whitespace-nowrap'>
                             Full-Stack
