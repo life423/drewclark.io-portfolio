@@ -3,35 +3,43 @@ import clsx from 'clsx';
 import { brandGreen, neonOrange, brandGray } from '../../../styles/colors';
 
 /**
- * Interactive project markers that display on the progress timeline
- * Shows completed, current, and upcoming projects with appropriate styling
+ * Enhanced project markers that display on the progress timeline
+ * Shows completed, current, and upcoming projects with sophisticated styling
+ * and improved interaction states
  */
 const ProjectMarkers = ({ currentProject, totalProjects, onProjectClick }) => {
   return (
-    <div className="absolute inset-0 flex justify-between items-center">
+    <div className="absolute inset-0 flex justify-between items-center px-[2px]">
       {Array.from({ length: totalProjects }).map((_, index) => (
         <button
           key={index}
-          onClick={() => onProjectClick?.(index)}
+          onClick={() => onProjectClick?.(index + 1)}
           className={clsx(
-            'w-3 h-3 rounded-full transform transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-brandGreen-500 group',
-            'border-2 border-brandGray-800',
-            index < currentProject
-              ? 'bg-brandGreen-400 scale-100' // Completed projects
-              : index === currentProject
-                ? 'bg-neonOrange-500 scale-110 animate-pulse-subtle' // Current project
-                : 'bg-brandGray-600 scale-90' // Upcoming projects
+            'group relative w-4 h-4 rounded-full transition-all duration-300',
+            'hover:scale-110 focus:outline-none focus:ring-2 focus:ring-brandGreen-500/50',
+            index + 1 === currentProject && 'z-10'
           )}
-          aria-label={`Go to project ${index + 1}`}
-          aria-current={index === currentProject ? 'step' : undefined}
+          aria-label={`Project ${index + 1}`}
+          aria-current={index + 1 === currentProject ? 'step' : undefined}
         >
-          {/* Tooltip showing project number on hover/focus */}
           <div className={clsx(
-            'absolute -top-8 left-1/2 -translate-x-1/2',
-            'opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-200',
-            'text-xs text-brandGray-400 whitespace-nowrap bg-brandGray-800 px-2 py-1 rounded pointer-events-none'
+            'absolute inset-0 rounded-full transform transition-all duration-300',
+            'border-2',
+            index + 1 === currentProject
+              ? 'border-neonOrange-500 scale-100 animate-pulse-subtle'
+              : index + 1 < currentProject
+                ? 'border-brandGreen-500 scale-90'
+                : 'border-brandGray-600 scale-75'
+          )} />
+          
+          {/* Hover tooltip */}
+          <div className={clsx(
+            'absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1',
+            'bg-brandGray-800 rounded text-xs text-white whitespace-nowrap',
+            'opacity-0 group-hover:opacity-100 transition-opacity duration-200',
+            'pointer-events-none'
           )}>
-            {index + 1}/{totalProjects}
+            Project {index + 1}
           </div>
         </button>
       ))}

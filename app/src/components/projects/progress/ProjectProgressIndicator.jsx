@@ -1,16 +1,14 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import ProgressBar from './ProgressBar'
-import ProjectMarkers from './ProjectMarkers'
 import clsx from 'clsx'
 
 /**
  * ProjectProgressIndicator - Shows visual indication of progress through projects
  * Features:
- * - Interactive timeline with progress bar
- * - Project markers showing completed, current, and upcoming states
- * - Dynamic status message
- * - Accent-focused color progression
+ * - Dynamic shimmer gradient progress bar with smooth animation
+ * - Clean, minimal design without interactive markers
+ * - Consistent visual hierarchy with sophisticated animations
  */
 const ProjectProgressIndicator = ({
     currentProject,
@@ -26,26 +24,15 @@ const ProjectProgressIndicator = ({
             role='region'
             aria-label='Project progress indicator'
         >
-            {/* Interactive Timeline */}
-            <div className='relative flex-grow h-1 bg-brandGray-700 rounded-full overflow-hidden'>
-                {/* Animated Progress Bar */}
+            {/* Interactive Timeline with Animated Progress Bar */}
+            <div className='relative flex-grow h-1.5 bg-brandGray-700 rounded-full overflow-hidden'>
                 <ProgressBar progress={progress} />
-
-                {/* Project Markers */}
-                <ProjectMarkers
-                    currentProject={currentProject}
-                    totalProjects={totalProjects}
-                    onProjectClick={onProjectClick}
-                />
             </div>
 
             {/* Project Progress Counter */}
-            <div
-                className='flex items-center gap-2 text-brandGray-400'
-                style={{
-                    justifyContent: 'flex-end',
-                }}
-            >
+            <div className='flex items-center gap-2 text-brandGray-400' style={{
+                justifyContent: 'flex-end'
+            }}>
                 <span className='font-mono'>
                     {currentProject}/{totalProjects}
                 </span>

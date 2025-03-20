@@ -1,31 +1,22 @@
 import React, { useMemo } from 'react';
-import { brandGreen, neonOrange } from '../../../styles/colors';
+import { brandGreen, brandBlue, neonOrange } from '../../../styles/colors';
 
 /**
- * Get a gradient color based on progress percentage
- * Uses an accent-focused progression from green to orange
- */
-const getProgressColor = (progress) => {
-  if (progress < 40) {
-    // Early progress: subtle orange-green gradient
-    return `linear-gradient(to right, ${brandGreen[350]}, ${neonOrange[300]})`;
-  } else if (progress < 80) {
-    // Mid progress: brighter orange
-    return `linear-gradient(to right, ${neonOrange[300]}, ${neonOrange[400]})`;
-  } else {
-    // Near completion: full neon accent
-    return `linear-gradient(to right, ${neonOrange[400]}, ${neonOrange[500]})`;
-  }
-};
-
-/**
- * A progress bar component that changes color based on completion percentage
+ * Enhanced progress bar component with dynamic shimmer animation
+ * Uses a sophisticated color interpolation between brand colors
  */
 const ProgressBar = ({ progress }) => {
   // Memoize the style calculation to prevent unnecessary re-renders
   const progressStyle = useMemo(() => ({
-    background: getProgressColor(progress),
-    width: `${progress}%`
+    width: `${progress}%`,
+    background: `linear-gradient(
+      90deg,
+      ${brandGreen[500]} 0%,
+      ${brandBlue[500]} 50%,
+      ${neonOrange[500]} 100%
+    )`,
+    backgroundSize: '200% 100%',
+    animation: 'shimmer 2s linear infinite',
   }), [progress]);
 
   return (
