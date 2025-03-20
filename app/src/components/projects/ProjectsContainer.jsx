@@ -13,6 +13,14 @@ const PROJECTS = [
         stack: ['React', 'Node.js', 'WebSockets', 'D3.js'],
         initialDescription:
             'This project began as a challenge: how to visualize thousands of data points in real-time without sacrificing performance. I architected a solution using WebSockets for data streaming and custom D3.js visualizations that could handle high-frequency updates.',
+        detailedDescription:
+            'The Real-Time Analytics Dashboard provides businesses with immediate insights into user behavior and system health. The dashboard updates in real-time as events occur, allowing instant decision-making based on current data rather than historical reports.',
+        technicalDetails:
+            'The frontend uses React with custom D3.js visualizations. Data flows through WebSocket connections to minimize latency, with a Node.js backend handling data aggregation and stream management. We implemented efficient data structures to handle thousands of events per second while maintaining 60fps rendering performance.',
+        challenges:
+            'One key challenge was handling disconnections and reconnections gracefully while ensuring no data loss. We developed a local buffer system that temporarily stores events during connection issues and synchs with the server upon reconnection. Another challenge was optimizing the rendering pipeline to handle frequent updates without causing browser performance issues.',
+        readme:
+            'This dashboard monitors key performance indicators in real-time with millisecond latency. It includes customizable widgets for different metrics, alerts for anomaly detection, and historical comparison views. Users can filter data by various dimensions including time ranges, user segments, and event types.'
     },
     {
         id: 2,
@@ -22,6 +30,14 @@ const PROJECTS = [
         stack: ['Python', 'TensorFlow', 'FastAPI', 'React'],
         initialDescription:
             'As lead developer on this project, I implemented a natural language processing pipeline that could analyze existing content and generate new variations optimized for different target demographics. The system learned from user feedback to continuously improve output quality.',
+        detailedDescription:
+            'The AI-Powered Content Generator is a sophisticated tool that creates marketing copy, product descriptions, and social media posts tailored to specific audience segments. It analyzes successful content patterns and applies these insights to generate new content that resonates with particular demographics.',
+        technicalDetails:
+            'The system uses a fine-tuned language model based on TensorFlow with custom transfer learning layers to adapt to specific marketing domains. The Python backend handles the NLP pipeline and model serving, while a React frontend provides an intuitive interface for content requests and feedback collection. We use FastAPI to create a high-performance API layer between the frontend and ML components.',
+        challenges:
+            'The biggest challenge was creating content that truly felt personalized to different audience segments. We solved this by developing a multi-layered approach that considers demographic data, engagement history, and linguistic preferences. We also implemented a feedback loop system that allows the model to continuously improve based on user ratings and engagement metrics.',
+        readme:
+            'This tool generates customized marketing content for different audience segments based on demographic data and engagement patterns. Features include tone adjustment (professional, casual, persuasive), length control, keyword incorporation, and A/B test generation. Users can save favorite outputs, track performance metrics, and train the system on their own content corpus.'
     },
     {
         id: 3,
@@ -31,6 +47,14 @@ const PROJECTS = [
         stack: ['React Native', 'Firebase', 'Redux', 'GraphQL'],
         initialDescription:
             'Developing a cross-platform app that maintains native performance while sharing the majority of code was our primary objective. I designed a modular architecture that allowed platform-specific optimizations where needed while maintaining a consistent user experience.',
+        detailedDescription:
+            'This mobile application delivers a premium user experience across both iOS and Android platforms while maintaining a single codebase for most functionality. The app includes offline capabilities, push notifications, and integrated authentication systems.',
+        technicalDetails:
+            'Built with React Native for cross-platform compatibility with platform-specific modules where necessary for optimal performance. State management is handled through Redux with persistent storage. The backend uses Firebase for real-time database functionality, authentication, and cloud functions. We implemented GraphQL to optimize data fetching and minimize bandwidth usage on mobile networks.',
+        challenges:
+            'The primary challenge was achieving native-quality performance across different devices with varying capabilities. We developed a dynamic resource loading system that adapts to device specifications. Another challenge was ensuring consistent animations and transitions across platforms - we created a custom animation library that automatically adjusts timing and easing based on the platform to maintain a consistent feel.',
+        readme:
+            'This cross-platform mobile app provides a seamless experience across iOS and Android devices. Features include user authentication, offline data synchronization, push notifications, in-app messaging, media sharing, and location services. The app automatically adapts to different screen sizes and orientations and complies with accessibility standards on both platforms.'
     },
 ]
 
@@ -165,6 +189,18 @@ export default function ProjectsContainer() {
                         stack={PROJECTS[activeProjectIndex].stack}
                         initialDescription={
                             PROJECTS[activeProjectIndex].initialDescription
+                        }
+                        detailedDescription={
+                            PROJECTS[activeProjectIndex].detailedDescription
+                        }
+                        technicalDetails={
+                            PROJECTS[activeProjectIndex].technicalDetails
+                        }
+                        challenges={
+                            PROJECTS[activeProjectIndex].challenges
+                        }
+                        readme={
+                            PROJECTS[activeProjectIndex].readme
                         }
                         totalProjects={PROJECTS.length}
                         onNavigateToProject={index => {
