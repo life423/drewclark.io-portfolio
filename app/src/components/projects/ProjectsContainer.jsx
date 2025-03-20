@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import ProjectCard from './ProjectCard'
 import clsx from 'clsx'
 import PrimaryButton from '../utils/PrimaryButton'
+import { ProjectProgressIndicator } from './progress'
 
 // Sample project data - in a real implementation, this could come from an API or CMS
 const PROJECTS = [
@@ -129,34 +130,19 @@ export default function ProjectsContainer() {
                                 className='relative'
                             >
                                 <span>View Projects</span>
-                                <svg
-                                    xmlns='http://www.w3.org/2000/svg'
-                                    className='h-5 w-5 animate-pulse-gentle'
-                                    viewBox='0 0 20 20'
-                                    fill='currentColor'
-                                >
-                                    <path
-                                        fillRule='evenodd'
-                                        d='M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z'
-                                        clipRule='evenodd'
-                                    />
-                                </svg>
                             </PrimaryButton>
                         </div>
 
-                        {/* Project Progress Indicators - Updated to match main screen */}
-                        <div className='flex justify-center py-4 border-t border-brandGray-700 bg-brandGray-850 space-x-2'>
-                            <button
-                                className='h-2 w-8 rounded-full bg-neonOrange-500 transform scale-110'
-                                aria-label='Current project'
+                        {/* Project Progress Indicator */}
+                        <div className='py-4 border-t border-brandGray-700 bg-brandGray-850'>
+                            <ProjectProgressIndicator
+                                currentProject={0}
+                                totalProjects={PROJECTS.length}
+                                onProjectClick={index => {
+                                    setStarted(true)
+                                    navigateToProject(index)
+                                }}
                             />
-                            {PROJECTS.map((_, index) => (
-                                <button
-                                    key={index}
-                                    className='h-2 w-2 rounded-full bg-brandGray-600 hover:bg-brandGray-500 transition-all duration-300'
-                                    aria-label={`Go to project ${index + 1}`}
-                                />
-                            ))}
                         </div>
                     </div>
                 </div>
@@ -192,39 +178,32 @@ export default function ProjectsContainer() {
                         initialDescription={
                             PROJECTS[activeProjectIndex].initialDescription
                         }
+                        totalProjects={PROJECTS.length}
+                        onNavigateToProject={index => {
+                            if (index === -1) {
+                                // Special value -1 means "go to overview"
+                                setStarted(false)
+                            } else {
+                                navigateToProject(index)
+                            }
+                        }}
                     />
                 </div>
 
-                {/* Progress indicator - Moved above the navigation buttons */}
-                <div className='flex justify-center mt-6 mb-5 space-x-2'>
-                    {PROJECTS.map((_, index) => (
-                        <button
-                            key={index}
-                            onClick={() => navigateToProject(index)}
-                            className={clsx(
-                                'h-2 rounded-full transition-all duration-300',
-                                index === activeProjectIndex
-                                    ? 'bg-neonOrange-500 w-8 transform scale-110' // Made wider and with slight scale effect
-                                    : 'bg-brandGray-600 hover:bg-brandGray-500 w-2'
-                            )}
-                            aria-label={`Go to project ${index + 1}`}
-                        />
-                    ))}
-                </div>
+                {/* Navigation buttons */}
 
                 {/* Navigation buttons outside of the card for easier access */}
                 <div className='flex justify-between mt-4'>
                     <button
                         onClick={() =>
-                            navigateToProject(activeProjectIndex - 1)
+                            activeProjectIndex === 0
+                                ? setStarted(false)
+                                : navigateToProject(activeProjectIndex - 1)
                         }
-                        disabled={activeProjectIndex === 0}
                         className={clsx(
                             'px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-1',
-                            'focus:outline-none', // Add focus state
-                            activeProjectIndex === 0
-                                ? 'bg-brandGray-800 text-brandGray-600 cursor-not-allowed'
-                                : 'bg-brandGray-800 text-white active:bg-brandGray-800 active:text-white' // Add active state
+                            'focus:outline-none focus:ring-2 focus:ring-brandGreen-500/50',
+                            'bg-brandGray-800 text-white hover:bg-brandGray-700 active:bg-brandGray-800 active:text-white'
                         )}
                     >
                         <svg
@@ -239,7 +218,9 @@ export default function ProjectsContainer() {
                                 clipRule='evenodd'
                             />
                         </svg>
-                        Previous Project
+                        {activeProjectIndex === 0
+                            ? 'Overview'
+                            : 'Previous Project'}
                     </button>
 
                     <button
@@ -249,13 +230,13 @@ export default function ProjectsContainer() {
                         disabled={activeProjectIndex === PROJECTS.length - 1}
                         className={clsx(
                             'px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-1',
-                            'focus:outline-none', // Add focus state
+                            'focus:outline-none focus:ring-2 focus:ring-brandGreen-500/50',
                             activeProjectIndex === PROJECTS.length - 1
                                 ? 'bg-brandGray-800 text-brandGray-600 cursor-not-allowed'
-                                : 'bg-brandGray-800 text-white active:bg-brandGray-800 active:text-white' // Add active state
+                                : 'bg-brandGray-800 text-white hover:bg-brandGray-700 active:bg-brandGray-800 active:text-white'
                         )}
                     >
-                        Next Project
+                        <span>Next Project</span>
                         <svg
                             xmlns='http://www.w3.org/2000/svg'
                             className='h-5 w-5'
@@ -264,7 +245,7 @@ export default function ProjectsContainer() {
                         >
                             <path
                                 fillRule='evenodd'
-                                d='M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z'
+                                d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z'
                                 clipRule='evenodd'
                             />
                         </svg>

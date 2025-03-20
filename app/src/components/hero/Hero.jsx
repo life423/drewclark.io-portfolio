@@ -183,12 +183,6 @@ export default function Hero() {
                         <span className='text-white font-medium'>
                             Featured Projects
                         </span>
-                        <span
-                            className='text-white ml-1 transition-transform duration-300
-                            animate-pulse-gentle'
-                        >
-                            ↓
-                        </span>
                     </PrimaryButton>
                 </ProgressiveElement>
             </div>
