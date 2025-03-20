@@ -19,6 +19,7 @@ export default function useScrollPosition() {
     const prevScrollY = useRef(typeof window !== 'undefined' ? document.documentElement.scrollTop : 0)
     const frameRef = useRef(null)
     const throttleTimeoutRef = useRef(null)
+    const scrollEndTimeoutRef = useRef(null)
     
     // We use this ref to track if we should update state
     // This avoids unnecessary re-renders if scroll position didn't change enough
@@ -39,7 +40,8 @@ export default function useScrollPosition() {
         const scrollable = scrollHeight - clientHeight
         
         // Prevent division by zero and calculate percentage
-        const percent = scrollable <= 0 ? 0 : Math.min(100, (scrollTop / scrollable) * 100)
+        // Using Math.round and a slight buffer (100.5%) to ensure we hit 100% on mobile
+        const percent = scrollable <= 0 ? 0 : Math.min(100.5, Math.round((scrollTop / scrollable) * 100))
         
         // Determine scroll direction
         const direction = scrollTop > prevScrollY.current ? 'down' : 
@@ -88,10 +90,34 @@ export default function useScrollPosition() {
             }
         }
         
+        // Special handler for scroll end detection
+        // This helps catch the end of scrolling, including mobile "bounce" effects
+        function onScrollEnd() {
+            if (scrollLockState.isLocked) return
+            
+            // Clear existing timeout to avoid multiple calls
+            if (scrollEndTimeoutRef.current) {
+                clearTimeout(scrollEndTimeoutRef.current)
+            }
+            
+            // Set a new timeout that will trigger once scrolling stops
+            scrollEndTimeoutRef.current = setTimeout(() => {
+                forceRecalculation()
+                scrollEndTimeoutRef.current = null
+            }, 150) // Wait for scrolling to fully stop
+        }
+        
         // Add event listeners with passive option for performance
         window.addEventListener('scroll', throttledHandler, { passive: true })
+        window.addEventListener('scroll', onScrollEnd, { passive: true })
         window.addEventListener('resize', throttledHandler, { passive: true })
         window.addEventListener('orientationchange', throttledHandler, { passive: true })
+        
+        // Support for Visual Viewport API (specifically for mobile)
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', throttledHandler)
+            window.visualViewport.addEventListener('scroll', throttledHandler)
+        }
         
         // Use ResizeObserver to watch for changes in document body height
         // This helps capture dynamic content changes like "Show More" toggles
@@ -106,8 +132,16 @@ export default function useScrollPosition() {
         return () => {
             // Clean up event listeners
             window.removeEventListener('scroll', throttledHandler)
+            window.removeEventListener('scroll', onScrollEnd)
             window.removeEventListener('resize', throttledHandler)
             window.removeEventListener('orientationchange', throttledHandler)
+            
+            // Clean up Visual Viewport listeners
+            if (window.visualViewport) {
+                window.visualViewport.removeEventListener('resize', throttledHandler)
+                window.visualViewport.removeEventListener('scroll', throttledHandler)
+            }
+            
             resizeObserver.disconnect()
             
             // Cancel any pending animations
@@ -120,6 +154,11 @@ export default function useScrollPosition() {
             if (throttleTimeoutRef.current) {
                 clearTimeout(throttleTimeoutRef.current)
                 throttleTimeoutRef.current = null
+            }
+            
+            if (scrollEndTimeoutRef.current) {
+                clearTimeout(scrollEndTimeoutRef.current)
+                scrollEndTimeoutRef.current = null
             }
         }
     }, [forceRecalculation])

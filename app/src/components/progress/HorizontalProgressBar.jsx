@@ -15,7 +15,7 @@ function HorizontalProgressBar({
 
     return (
         <div
-            className='absolute bottom-0 left-0 right-0 z-[51] pointer-events-none'
+            className='absolute bottom-0 left-0 right-0 -mx-4 sm:-mx-6 z-[51] pointer-events-none'
             ref={containerRef}
         >
             <div

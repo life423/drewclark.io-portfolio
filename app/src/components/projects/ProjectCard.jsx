@@ -30,11 +30,15 @@ export default function ProjectCard({
     const handleReadMore = () => {
         setExpanded(!expanded)
         
-        // Force recalculation after the transition completes
+        // Force multiple recalculations after the transition completes
         // The transition duration is 500ms as defined in the CSS classes
         setTimeout(() => {
             forceRecalculation()
-        }, 510) // Add a small buffer to ensure the transition is complete
+            // Secondary recalculation to catch any late DOM updates
+            setTimeout(() => forceRecalculation(), 300)
+            // Final fallback recalculation
+            setTimeout(() => forceRecalculation(), 600)
+        }, 600) // Increased from 510ms to ensure transition is fully complete on slower devices
     }
 
     const toggleChat = () => {
@@ -46,10 +50,12 @@ export default function ProjectCard({
             }, 100)
         }
         
-        // Force recalculation after the chat transition completes
+        // Force multiple recalculations after the chat transition completes
         // The animation duration is shorter than the content expansion
         setTimeout(() => {
             forceRecalculation()
+            // Secondary recalculation to catch any late DOM updates
+            setTimeout(() => forceRecalculation(), 200)
         }, 300) // Animation timing based on animate-fade-in class
     }
 
@@ -84,11 +90,15 @@ export default function ProjectCard({
         } finally {
             setIsGenerating(false)
             
-            // Force recalculation after the AI response is displayed
+            // Force multiple recalculations after the AI response is displayed
             // This is necessary because the response can change the page height
             setTimeout(() => {
                 forceRecalculation()
-            }, 100) // Small delay to ensure the DOM has updated
+                // Secondary recalculation to catch any late DOM updates
+                setTimeout(() => forceRecalculation(), 200)
+                // Final fallback recalculation for slower devices
+                setTimeout(() => forceRecalculation(), 500)
+            }, 100) // Initial delay to ensure the DOM has updated
         }
     }
 
