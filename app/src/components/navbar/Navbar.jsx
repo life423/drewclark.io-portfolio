@@ -12,25 +12,26 @@ export default function Navbar({ drawerOpen, toggleDrawer, progressBarVisible = 
   const isScrolled = scrollY > 50
   
   function handleMenuClick() {
-    console.log('Menu button clicked!') // Debug helper
     toggleDrawer()
   }
 
   return (
       <nav
           className={clsx(
-              'fixed top-0 w-full flex items-center justify-between z-50',
+              'fixed top-0 w-full z-50',
               'transition-all duration-300 ease-in-out',
-              'shadow-sm',
               isScrolled
-                  ? 'h-14 px-4 py-2 bg-brandGray-800/90 backdrop-blur-md'
-                  : 'h-18 px-6 py-5 bg-gradient-to-b from-brandGray-900/70 to-transparent backdrop-blur-sm',
+                  ? 'backdrop-blur-md bg-brandGray-800/90 shadow-nav'
+                  : 'backdrop-blur-sm bg-gradient-to-b from-brandGray-900/70 to-transparent',
               drawerOpen ? '-translate-y-[64px]' : 'translate-y-0'
           )}
-          style={{
-              boxShadow: isScrolled ? '0 2px 10px rgba(0, 0, 0, 0.15)' : 'none',
-          }}
       >
+          <div
+              className={clsx(
+                  'flex items-center justify-between w-full',
+                  isScrolled ? 'h-14 px-4 py-2' : 'h-18 px-6 py-5'
+              )}
+          >
           {/* Dynamic Logo with hover effect - animation removed */}
           <div
               className={clsx(
@@ -154,6 +155,9 @@ export default function Navbar({ drawerOpen, toggleDrawer, progressBarVisible = 
               ))}
           </ul>
 
+          </div>
+
+          {/* Full-width progress bar at bottom of nav */}
           <HorizontalProgressBar
               visible={progressBarVisible}
               progress={scrollPercent}
