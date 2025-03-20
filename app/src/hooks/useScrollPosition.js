@@ -43,6 +43,17 @@ export default function useScrollPosition() {
         // Using Math.round and a slight buffer (100.5%) to ensure we hit 100% on mobile
         const percent = scrollable <= 0 ? 0 : Math.min(100.5, Math.round((scrollTop / scrollable) * 100))
         
+        // Temporary debug logging to help diagnose scroll calculation issues
+        console.log('DEBUG SCROLL: ', {
+            scrollTop,
+            scrollHeight,
+            clientHeight,
+            scrollable,
+            rawPercent: (scrollTop / scrollable) * 100,
+            finalPercent: percent,
+            isBottomReached: scrollTop + clientHeight >= scrollHeight - 5 // within 5px of bottom
+        });
+        
         // Determine scroll direction
         const direction = scrollTop > prevScrollY.current ? 'down' : 
                          scrollTop < prevScrollY.current ? 'up' : 'none'
