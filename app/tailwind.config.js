@@ -15,6 +15,9 @@ export default {
     content: ['./src/index.html', './src/**/*.{js,jsx,ts,tsx}'],
     theme: {
         extend: {
+            boxShadow: {
+                nav: '0 2px 10px rgba(0, 0, 0, 0.15)',
+            },
             textShadow: {
                 sm: '0 1px 2px rgba(0, 0, 0, 0.2)',
                 DEFAULT: '0 2px 4px rgba(0, 0, 0, 0.2)',

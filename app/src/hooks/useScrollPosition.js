@@ -91,6 +91,9 @@ export default function useScrollPosition() {
         // Add event listener with passive option for performance
         window.addEventListener('scroll', throttledScrollHandler, { passive: true })
         
+        // Add window resize listener to ensure updates on viewport changes (fix for Pixel devices)
+        window.addEventListener('resize', updateOnResize, { passive: true })
+        
         // Use ResizeObserver to watch for changes in document body height
         const resizeObserver = new ResizeObserver(updateOnResize);
         resizeObserver.observe(document.body);
@@ -102,6 +105,7 @@ export default function useScrollPosition() {
         
         return () => {
             window.removeEventListener('scroll', throttledScrollHandler)
+            window.removeEventListener('resize', updateOnResize)
             resizeObserver.disconnect();
             
             if (frameRef.current) {
