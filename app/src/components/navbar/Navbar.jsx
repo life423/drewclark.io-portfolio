@@ -1,5 +1,5 @@
 // FILE: app/src/components/navbar/Navbar.jsx
-import React from 'react'
+import React, { useEffect } from 'react'
 import clsx from 'clsx'
 import { LuMenu } from 'react-icons/lu'
 import useScrollPosition from '../../hooks/useScrollPosition'
@@ -8,12 +8,37 @@ import { getInterpolatedColor } from '../../components/utils/colorInterpolate'
 
 
 export default function Navbar({ drawerOpen, toggleDrawer, progressBarVisible = true }) {
-  const { y: scrollY, percent: scrollPercent } = useScrollPosition()
+  const { y: scrollY, percent: scrollPercent, forceRecalculation } = useScrollPosition()
   const isScrolled = scrollY > 50
   
+  // Force recalculation when the drawer is toggled
   function handleMenuClick() {
     toggleDrawer()
+    
+    // Force scroll recalculation after the drawer animation completes
+    setTimeout(() => {
+      forceRecalculation()
+    }, 310) // Drawer transition is 300ms + small buffer
   }
+  
+  // Force a recalculation on the first render
+  // This ensures the progress bar is correctly positioned on initial load
+  useEffect(() => {
+    forceRecalculation()
+    
+    // Force recalculation on orientation changes specifically for mobile devices
+    const handleOrientationChange = () => {
+      setTimeout(() => {
+        forceRecalculation()
+      }, 100) // Small delay to let the browser finish orientation change
+    }
+    
+    window.addEventListener('orientationchange', handleOrientationChange)
+    
+    return () => {
+      window.removeEventListener('orientationchange', handleOrientationChange)
+    }
+  }, [forceRecalculation])
 
   return (
       <nav

@@ -3,6 +3,7 @@ import clsx from 'clsx'
 import { answerProjectQuestion } from '../../services/aiGenerationService'
 import PrimaryButton from '../utils/PrimaryButton'
 import { ProjectProgressIndicator } from './progress'
+import useScrollPosition from '../../hooks/useScrollPosition'
 
 export default function ProjectCard({
     projectNumber,
@@ -22,8 +23,18 @@ export default function ProjectCard({
 
     const chatInputRef = useRef(null)
 
+    // Get the forceRecalculation function from useScrollPosition
+    const { forceRecalculation } = useScrollPosition()
+    
+    // Handle content expansion and recalculate scroll progress
     const handleReadMore = () => {
         setExpanded(!expanded)
+        
+        // Force recalculation after the transition completes
+        // The transition duration is 500ms as defined in the CSS classes
+        setTimeout(() => {
+            forceRecalculation()
+        }, 510) // Add a small buffer to ensure the transition is complete
     }
 
     const toggleChat = () => {
@@ -34,6 +45,12 @@ export default function ProjectCard({
                 chatInputRef.current?.focus()
             }, 100)
         }
+        
+        // Force recalculation after the chat transition completes
+        // The animation duration is shorter than the content expansion
+        setTimeout(() => {
+            forceRecalculation()
+        }, 300) // Animation timing based on animate-fade-in class
     }
 
     const handleQuestionSubmit = async e => {
@@ -66,6 +83,12 @@ export default function ProjectCard({
             )
         } finally {
             setIsGenerating(false)
+            
+            // Force recalculation after the AI response is displayed
+            // This is necessary because the response can change the page height
+            setTimeout(() => {
+                forceRecalculation()
+            }, 100) // Small delay to ensure the DOM has updated
         }
     }
 
