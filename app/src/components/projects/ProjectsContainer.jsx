@@ -221,9 +221,10 @@ export default function ProjectsContainer() {
                         disabled={activeProjectIndex === 0}
                         className={clsx(
                             'px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-1',
+                            'focus:outline-none', // Add focus state
                             activeProjectIndex === 0
                                 ? 'bg-brandGray-800 text-brandGray-600 cursor-not-allowed'
-                                : 'bg-brandGray-800 text-white hover:bg-brandGreen-900'
+                                : 'bg-brandGray-800 text-white active:bg-brandGray-800 active:text-white' // Add active state
                         )}
                     >
                         <svg
@@ -248,9 +249,10 @@ export default function ProjectsContainer() {
                         disabled={activeProjectIndex === PROJECTS.length - 1}
                         className={clsx(
                             'px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-1',
+                            'focus:outline-none', // Add focus state
                             activeProjectIndex === PROJECTS.length - 1
                                 ? 'bg-brandGray-800 text-brandGray-600 cursor-not-allowed'
-                                : 'bg-brandGray-800 text-white hover:bg-brandGreen-900'
+                                : 'bg-brandGray-800 text-white active:bg-brandGray-800 active:text-white' // Add active state
                         )}
                     >
                         Next Project
