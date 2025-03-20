@@ -1,4 +1,3 @@
-// FILE: app/src/components/footer/Footer.jsx
 import React, { useRef, useState, useEffect } from 'react';
 import { LuTwitter, LuGithub } from 'react-icons/lu';
 import useIntersection from '../../hooks/useIntersection';
@@ -12,28 +11,26 @@ export default function Footer() {
   const [animateTwitter, setAnimateTwitter] = useState(false);
   const [animateGithub, setAnimateGithub] = useState(false);
   
-  // Handle animations based on visibility
   useEffect(() => {
     if (inView) {
-      // Start Twitter animation immediately
       setAnimateTwitter(true);
-      
-      // Start GitHub animation after a delay
-      setTimeout(() => {
-        setAnimateGithub(true);
-      }, 800);
+      setTimeout(() => setAnimateGithub(true), 800);
     } else {
-      // Reset animations when out of view
       setAnimateTwitter(false);
       setAnimateGithub(false);
     }
   }, [inView]);
 
+  const currentYear = new Date().getFullYear();
+
   return (
-    <footer className=" text-white" ref={containerRef}>
-      <div className="bg-brandGray-900 py-6 px-6">
-        <div className="flex justify-between items-center">
-          <div className="flex space-x-8">
+    <footer ref={containerRef} className="bg-brandGray-900 text-white">
+      <div className="py-8 px-6">
+        {/* Single row layout on all screen sizes */}
+        <div className="flex flex-row justify-between items-center">
+          
+          {/* Left side: icons with reduced spacing */}
+          <div className="flex space-x-6">
             {/* Twitter Icon - Apply animation class directly */}
             <a
               href="https://twitter.com/andrewgenai"
@@ -69,10 +66,20 @@ export default function Footer() {
             </a>
           </div>
 
-          <div className="flex items-center space-x-2">
-            <span>Clark Company Limited</span>
-            <span>&copy;</span>
-            <span>{new Date().getFullYear()}</span>
+          {/* Right side with consistent text sizing */}
+          <div className="flex flex-col items-end text-right space-y-1">
+            {/* Email with explicit text size */}
+            <a
+              href="mailto:drew@drewclark.io"
+              className="text-sm text-brandGreen-500 hover:underline"
+            >
+              drew@drewclark.io
+            </a>
+
+            {/* Copyright with matching text size */}
+            <div className="text-sm text-brandGray-200">
+              Clark Company Limited &copy; {currentYear}
+            </div>
           </div>
         </div>
       </div>
