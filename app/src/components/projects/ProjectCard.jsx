@@ -187,7 +187,6 @@ export default function ProjectCard({
                         onClick={toggleChat}
                         fullWidth={true}
                         size='sm'
-                        className='mx-auto max-w-[360px]'
                     >
                         {/* Keep the corner highlight from the original design */}
                         <div className='absolute top-0 right-0 w-[20px] h-[20px] opacity-0 animate-corner-highlight'>
