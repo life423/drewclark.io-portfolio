@@ -30,15 +30,14 @@ export default function ProjectCard({
     const handleReadMore = () => {
         setExpanded(!expanded)
         
-        // Force multiple recalculations after the transition completes
-        // The transition duration is 500ms as defined in the CSS classes
+        // Since we've added onTransitionEnd handler to the content container,
+        // we now only need a single fallback timeout in case the transition
+        // event doesn't fire correctly on some devices
         setTimeout(() => {
             forceRecalculation()
-            // Secondary recalculation to catch any late DOM updates
-            setTimeout(() => forceRecalculation(), 300)
-            // Final fallback recalculation
-            setTimeout(() => forceRecalculation(), 600)
-        }, 600) // Increased from 510ms to ensure transition is fully complete on slower devices
+            // Final safety net recalculation for very slow devices
+            setTimeout(() => forceRecalculation(), 400)
+        }, 600) // This matches the duration-500 plus a small buffer
     }
 
     const toggleChat = () => {
@@ -50,13 +49,12 @@ export default function ProjectCard({
             }, 100)
         }
         
-        // Force multiple recalculations after the chat transition completes
-        // The animation duration is shorter than the content expansion
+        // Since we've added onTransitionEnd handler to the chat container,
+        // we only need a single fallback timeout in case the transition
+        // event doesn't fire correctly on some devices
         setTimeout(() => {
             forceRecalculation()
-            // Secondary recalculation to catch any late DOM updates
-            setTimeout(() => forceRecalculation(), 200)
-        }, 300) // Animation timing based on animate-fade-in class
+        }, 300) // This matches the animate-fade-in duration
     }
 
     const handleQuestionSubmit = async e => {
@@ -90,14 +88,13 @@ export default function ProjectCard({
         } finally {
             setIsGenerating(false)
             
-            // Force multiple recalculations after the AI response is displayed
-            // This is necessary because the response can change the page height
+            // Force recalculation after the AI response is displayed
+            // The animate-fade-in class will trigger onTransitionEnd,
+            // but we need a fallback in case that doesn't fire
             setTimeout(() => {
                 forceRecalculation()
-                // Secondary recalculation to catch any late DOM updates
-                setTimeout(() => forceRecalculation(), 200)
-                // Final fallback recalculation for slower devices
-                setTimeout(() => forceRecalculation(), 500)
+                // Final safety net recalculation for slow devices
+                setTimeout(() => forceRecalculation(), 300)
             }, 100) // Initial delay to ensure the DOM has updated
         }
     }
@@ -156,6 +153,12 @@ export default function ProjectCard({
                             ? 'max-h-[500px] sm:max-h-[600px] md:max-h-[800px]'
                             : 'max-h-[80px] sm:max-h-[100px] md:max-h-[120px] overflow-hidden relative'
                     )}
+                    onTransitionEnd={() => {
+                        // Force recalculation when the transition completes
+                        forceRecalculation();
+                        // Fallback: if onTransitionEnd fires slightly early, force again after a brief delay
+                        setTimeout(() => forceRecalculation(), 200);
+                    }}
                 >
                     {!expanded && (
                         <div className='absolute bottom-0 left-0 right-0 h-8 sm:h-10 md:h-12 bg-gradient-to-t from-brandGray-800 to-transparent'></div>
@@ -229,7 +232,15 @@ export default function ProjectCard({
                         Ask About This Project
                     </PrimaryButton>
                 ) : (
-                            <div className='bg-brandGray-900 rounded-lg p-2 sm:p-3 md:p-4 animate-fade-in'>
+                    <div 
+                        className='bg-brandGray-900 rounded-lg p-2 sm:p-3 md:p-4 animate-fade-in'
+                        onTransitionEnd={() => {
+                            // Force recalculation when animation completes
+                            forceRecalculation();
+                            // Fallback recalculation
+                            setTimeout(() => forceRecalculation(), 200);
+                        }}
+                    >
                         <div className='flex justify-between items-center mb-3'>
                             <h3 className='text-sm font-medium text-brandGreen-300'>
                                 Ask About This Project
