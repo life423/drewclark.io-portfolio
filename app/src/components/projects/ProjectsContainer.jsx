@@ -72,18 +72,22 @@ export default function ProjectsContainer() {
                     }}
                 ></div>
                 <div className='max-w-3xl mx-auto'>
-                    <div className='my-8 overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transform transition-all duration-300 hover:shadow-xl hover:border-brandGray-600'>
+                <div className='my-4 sm:my-6 md:my-8 overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transform transition-all duration-300 hover:shadow-xl hover:border-brandGray-600 flex flex-col min-h-[400px] sm:min-h-[450px] md:min-h-[480px] lg:min-h-[520px]'>
                         {}
-                        <div className='p-5 border-b border-brandGray-700 bg-gradient-to-r from-brandGray-800 via-brandGray-800 to-brandBlue-900/10'>
-                           
+                        <div className='p-3 sm:p-4 md:p-5 border-b border-brandGray-700 bg-gradient-to-r from-brandGray-800 via-brandGray-800 to-brandBlue-900/10'>
+                            <div className='flex items-center justify-between mb-2'>
+                                <span className='text-sm font-semibold text-white px-2 py-1 rounded-md bg-gradient-to-r from-neonOrange-700 to-neonOrange-600 shadow-sm'>
+                                    Overview
+                                </span>
+                            </div>
 
-                            <h1 className='text-2xl font-bold text-brandGreen-300 mb-1'>
+                            <h1 className='text-xl sm:text-2xl font-bold text-brandGreen-300 mb-1'>
                                 My Portfolio Projects
                             </h1>
                         </div>
 
-                        <div className='p-8'>
-                            <div className='prose prose-lg prose-invert max-w-none mb-6'>
+                        <div className='p-3 sm:p-4 md:p-5 flex-1 flex flex-col'>
+                            <div className='prose prose-sm prose-invert max-w-none mb-3 sm:mb-4 md:mb-6'>
                                 <p>
                                     Welcome to an interactive journey through my
                                     portfolio projects. Rather than a simple
@@ -100,8 +104,8 @@ export default function ProjectsContainer() {
                             </div>
 
                             {}
-                            <div className='space-y-2 mb-8 text-sm'>
-                                <h3 className='text-brandGray-400 uppercase text-xs tracking-wider mb-3'>
+                            <div className='space-y-1 sm:space-y-2 mb-4 sm:mb-6 md:mb-8 text-xs sm:text-sm'>
+                                <h3 className='text-brandGray-400 uppercase text-xs tracking-wider mb-2 md:mb-3'>
                                     Coming Up
                                 </h3>
                                 {PROJECTS.map((project, index) => (
@@ -117,14 +121,16 @@ export default function ProjectsContainer() {
                                 ))}
                             </div>
 
-                            <PrimaryButton
-                                onClick={handleStart}
-                                size='md'
-                                className='relative'
-                                fullWidth={true}
-                            >
-                                <span>View Projects</span>
-                            </PrimaryButton>
+                            <div className='mt-auto'>
+                                <PrimaryButton
+                                    onClick={handleStart}
+                                    size='md'
+                                    className='relative'
+                                    fullWidth={true}
+                                >
+                                    <span>View Projects</span>
+                                </PrimaryButton>
+                            </div>
                         </div>
                     </div>
                 </div>

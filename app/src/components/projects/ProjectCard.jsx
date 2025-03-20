@@ -70,9 +70,9 @@ export default function ProjectCard({
     }
 
     return (
-        <div className='my-8 overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transform transition-all duration-300 hover:shadow-xl hover:border-brandGray-600'>
+        <div className='my-4 sm:my-6 md:my-8 overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transform transition-all duration-300 hover:shadow-xl hover:border-brandGray-600 flex flex-col min-h-[400px] sm:min-h-[450px] md:min-h-[480px] lg:min-h-[520px]'>
             {/* Project Header */}
-            <div className='p-5 border-b border-brandGray-700 bg-gradient-to-r from-brandGray-800 via-brandGray-800 to-brandBlue-900/10'>
+            <div className='p-3 sm:p-4 md:p-5 border-b border-brandGray-700 bg-gradient-to-r from-brandGray-800 via-brandGray-800 to-brandBlue-900/10'>
                 <div className='flex items-center justify-between mb-2'>
                     <span className='text-sm font-semibold text-white px-2 py-1 rounded-md bg-gradient-to-r from-neonOrange-700 to-neonOrange-600 shadow-sm'>
                         Project {projectNumber}
@@ -97,14 +97,14 @@ export default function ProjectCard({
                     </button>
                 </div>
 
-                <h2 className='text-2xl font-bold text-brandGreen-300 mb-1'>
+                <h2 className='text-xl sm:text-2xl font-bold text-brandGreen-300 mb-1'>
                     {title}
                 </h2>
-                <div className='flex flex-wrap gap-2 mt-3'>
+                <div className='flex flex-wrap gap-1 sm:gap-2 mt-2 sm:mt-3'>
                     {stack.map((tech, index) => (
                         <span
                             key={index}
-                            className='text-xs font-medium text-brandGray-300 px-2 py-1 rounded-full bg-brandGray-700'
+                            className='text-xs font-medium text-brandGray-300 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full bg-brandGray-700'
                         >
                             {tech}
                         </span>
@@ -113,19 +113,19 @@ export default function ProjectCard({
             </div>
 
             {/* Project Content */}
-            <div className='p-5'>
+            <div className='p-3 sm:p-4 md:p-5 flex-1 flex flex-col'>
                 <div
                     className={clsx(
                         'prose prose-sm prose-invert max-w-none',
                         'prose-headings:text-brandGreen-300 prose-strong:text-brandGreen-400',
                         'transition-all duration-500 ease-in-out',
                         expanded
-                            ? 'max-h-[800px]'
-                            : 'max-h-[120px] overflow-hidden relative'
+                            ? 'max-h-[500px] sm:max-h-[600px] md:max-h-[800px]'
+                            : 'max-h-[80px] sm:max-h-[100px] md:max-h-[120px] overflow-hidden relative'
                     )}
                 >
                     {!expanded && (
-                        <div className='absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-brandGray-800 to-transparent'></div>
+                        <div className='absolute bottom-0 left-0 right-0 h-8 sm:h-10 md:h-12 bg-gradient-to-t from-brandGray-800 to-transparent'></div>
                     )}
                     <p>{initialDescription}</p>
 
@@ -159,7 +159,7 @@ export default function ProjectCard({
                 {/* Read More Toggle */}
                 <button
                     onClick={handleReadMore}
-                    className='mt-2 text-sm font-medium text-brandGreen-400 hover:text-brandGreen-300 flex items-center gap-1 transition-all duration-200'
+                    className='mt-auto mb-3 text-sm font-medium text-brandGreen-400 hover:text-brandGreen-300 flex items-center gap-1 transition-all duration-200'
                 >
                     {expanded ? 'Show Less' : 'Read More'}
                     <svg
@@ -181,7 +181,7 @@ export default function ProjectCard({
             </div>
 
             {/* Interactive Chat Section */}
-            <div className='border-t border-brandGray-700 p-5'>
+            <div className='border-t border-brandGray-700 p-3 sm:p-4 md:p-5 flex-shrink-0'>
                 {!chatVisible ? (
                     <PrimaryButton
                         onClick={toggleChat}
@@ -196,7 +196,7 @@ export default function ProjectCard({
                         Ask About This Project
                     </PrimaryButton>
                 ) : (
-                    <div className='bg-brandGray-900 rounded-lg p-4 animate-fade-in'>
+                            <div className='bg-brandGray-900 rounded-lg p-2 sm:p-3 md:p-4 animate-fade-in'>
                         <div className='flex justify-between items-center mb-3'>
                             <h3 className='text-sm font-medium text-brandGreen-300'>
                                 Ask About This Project
@@ -230,14 +230,14 @@ export default function ProjectCard({
                                         setUserQuestion(e.target.value)
                                     }
                                     placeholder='E.g., How did you handle state management?'
-                                    className='flex-1 px-3 py-2 bg-brandGray-800 border border-brandGray-700 rounded-lg text-sm text-white focus:ring-1 focus:ring-brandGreen-400 focus:border-brandGreen-400 outline-none'
+                                    className='flex-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-brandGray-800 border border-brandGray-700 rounded-lg text-xs sm:text-sm text-white focus:ring-1 focus:ring-brandGreen-400 focus:border-brandGreen-400 outline-none'
                                     maxLength={140}
                                 />
                                 <button
                                     type='submit'
                                     disabled={isGenerating}
                                     className={clsx(
-                                        'px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200',
+                                        'px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200',
                                         'border', // Always have a border for consistent sizing
                                         isGenerating
                                             ? 'bg-brandGray-700 text-brandGray-500 border-transparent cursor-wait'
@@ -275,7 +275,7 @@ export default function ProjectCard({
                         </form>
 
                         {aiResponse && (
-                            <div className='bg-brandGray-800 rounded-lg p-3 border-l-2 border-neonOrange-500 animate-fade-in text-sm text-brandGray-200'>
+                            <div className='bg-brandGray-800 rounded-lg p-2 sm:p-3 border-l-2 border-neonOrange-500 animate-fade-in text-xs sm:text-sm text-brandGray-200'>
                                 {aiResponse}
                             </div>
                         )}
