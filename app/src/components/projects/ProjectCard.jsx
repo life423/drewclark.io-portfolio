@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import clsx from 'clsx'
 import { answerProjectQuestion } from '../../services/aiGenerationService'
 import PrimaryButton from '../utils/PrimaryButton'
+import { ProjectProgressIndicator } from './progress'
 
 export default function ProjectCard({
     projectNumber,
@@ -10,6 +11,8 @@ export default function ProjectCard({
     stack,
     initialDescription,
     onAskQuestion,
+    onNavigateToProject,
+    totalProjects = 3,
 }) {
     const [expanded, setExpanded] = useState(false)
     const [chatVisible, setChatVisible] = useState(false)
@@ -70,11 +73,30 @@ export default function ProjectCard({
         <div className='my-8 overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transform transition-all duration-300 hover:shadow-xl hover:border-brandGray-600'>
             {/* Project Header */}
             <div className='p-5 border-b border-brandGray-700 bg-gradient-to-r from-brandGray-800 via-brandGray-800 to-brandBlue-900/10'>
-                <div className='flex items-center mb-2'>
+                <div className='flex items-center justify-between mb-2'>
                     <span className='text-sm font-semibold text-white px-2 py-1 rounded-md bg-gradient-to-r from-neonOrange-700 to-neonOrange-600 shadow-sm'>
                         Project {projectNumber}
                     </span>
+                    <button
+                        onClick={() => onNavigateToProject?.(-1)} /* -1 is a special value that means "go to overview" */
+                        className="group flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm text-brandGray-400 hover:text-brandGreen-400 transition-all duration-300"
+                    >
+                        <svg
+                            xmlns='http://www.w3.org/2000/svg'
+                            className='h-4 w-4'
+                            viewBox='0 0 20 20'
+                            fill='currentColor'
+                        >
+                            <path
+                                fillRule='evenodd'
+                                d='M10 18a8 8 0 100-16 8 8 0 000 16zm.707-10.293a1 1 0 00-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L9.414 11H13a1 1 0 100-2H9.414l1.293-1.293z'
+                                clipRule='evenodd'
+                            />
+                        </svg>
+                        <span>Overview</span>
+                    </button>
                 </div>
+
                 <h2 className='text-2xl font-bold text-brandGreen-300 mb-1'>
                     {title}
                 </h2>
@@ -262,13 +284,13 @@ export default function ProjectCard({
                 )}
             </div>
 
-            {/* Footer with project indicator */}
+            {/* Footer with project progress indicator */}
             <div className='border-t border-brandGray-700 bg-brandGray-850 py-3'>
-                <div className='flex justify-center'>
-                    <span className='text-xs text-brandGray-500'>
-                        Project {projectNumber}
-                    </span>
-                </div>
+                <ProjectProgressIndicator
+                    currentProject={projectNumber}
+                    totalProjects={totalProjects}
+                    onProjectClick={(index) => onNavigateToProject?.(index + 1)}
+                />
             </div>
         </div>
     )

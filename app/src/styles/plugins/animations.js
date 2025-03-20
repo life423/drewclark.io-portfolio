@@ -171,6 +171,21 @@ export default plugin(function ({ addBase, addUtilities }) {
             '0%': { opacity: '0.6', transform: 'scale(1)' },
             '50%': { opacity: '1', transform: 'scale(1.05)' },
             '100%': { opacity: '0.6', transform: 'scale(1)' }
+        },
+        '@keyframes bounce-gentle': {
+            '0%, 100%': { transform: 'translateY(0)' },
+            '50%': { transform: 'translateY(-5px)' }
+        },
+        '@keyframes spin-slow': {
+            '0%': { transform: 'rotate(0deg)' },
+            '100%': { transform: 'rotate(360deg)' }
+        },
+        '@keyframes celebrate': {
+            '0%': { transform: 'scale(1)' },
+            '25%': { transform: 'scale(1.2)' },
+            '50%': { transform: 'scale(0.95)' },
+            '75%': { transform: 'scale(1.1)' },
+            '100%': { transform: 'scale(1)' }
         }
     });
 
@@ -293,6 +308,18 @@ export default plugin(function ({ addBase, addUtilities }) {
         '.animate-pulse-subtle': {
             animation: 'pulse-subtle 2s ease-in-out infinite',
             willChange: 'opacity, transform'
+        },
+        '.animate-bounce-gentle': {
+            animation: 'bounce-gentle 2s infinite ease-in-out',
+            willChange: 'transform'
+        },
+        '.animate-spin-slow': {
+            animation: 'spin-slow 3s infinite linear',
+            willChange: 'transform'
+        },
+        '.animate-celebrate': {
+            animation: 'celebrate 1s ease-in-out',
+            willChange: 'transform'
         }
     })
 })
