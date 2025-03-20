@@ -225,7 +225,7 @@ export default function ProjectsContainer() {
                         </svg>
                         Previous Project
                     </button>
-
+                      
                     <button
                         onClick={() =>
                             navigateToProject(activeProjectIndex + 1)

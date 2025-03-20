@@ -81,8 +81,19 @@ export default function useScrollPosition() {
             }
         }
         
+        // Force recalculation when content height changes
+        const updateOnResize = () => {
+            if (!scrollLockState.isLocked) {
+                handleScroll();
+            }
+        };
+        
         // Add event listener with passive option for performance
         window.addEventListener('scroll', throttledScrollHandler, { passive: true })
+        
+        // Use ResizeObserver to watch for changes in document body height
+        const resizeObserver = new ResizeObserver(updateOnResize);
+        resizeObserver.observe(document.body);
         
         // Initial call to set initial position - but only if not locked
         if (!scrollLockState.isLocked) {
@@ -91,6 +102,7 @@ export default function useScrollPosition() {
         
         return () => {
             window.removeEventListener('scroll', throttledScrollHandler)
+            resizeObserver.disconnect();
             
             if (frameRef.current) {
                 cancelAnimationFrame(frameRef.current)
