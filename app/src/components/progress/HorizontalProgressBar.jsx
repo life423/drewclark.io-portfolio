@@ -2,10 +2,6 @@ import React, { useRef } from 'react'
 import PropTypes from 'prop-types'
 import useResizeObserver from '../../hooks/useResizeObserver'
 
-/**
- * Horizontal progress indicator that visualizes page scroll position.
- * Uses ResizeObserver to force re-rendering when the container's width changes.
- */
 function HorizontalProgressBar({
     visible = true,
     progress,
@@ -13,7 +9,6 @@ function HorizontalProgressBar({
 }) {
     const containerRef = useRef(null)
 
-    // Just call the hook; don't destructure width or height if not used
     useResizeObserver(containerRef)
 
     if (!visible) return null
