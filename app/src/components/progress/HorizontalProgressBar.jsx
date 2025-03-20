@@ -1,15 +1,10 @@
-import React, { useRef, useState, useEffect } from 'react'
+import React, { useRef } from 'react'
 import PropTypes from 'prop-types'
+import useResizeObserver from '../../hooks/useResizeObserver'
 
 /**
  * Horizontal progress indicator that visualizes page scroll position.
- * This version uses a ResizeObserver to force re-rendering when the container's width changes.
- *
- * @param {Object} props - Component props
- * @param {boolean} props.visible - Whether the progress bar should be displayed
- * @param {number} props.progress - Current scroll percentage (0-100)
- * @param {function} props.getInterpolatedColor - Function that returns the color for a given progress
- * @returns {React.ReactElement|null} The progress bar component
+ * Uses ResizeObserver to force re-rendering when the container's width changes.
  */
 function HorizontalProgressBar({
     visible = true,
@@ -17,25 +12,9 @@ function HorizontalProgressBar({
     getInterpolatedColor,
 }) {
     const containerRef = useRef(null)
-    const [containerWidth, setContainerWidth] = useState(0)
 
-    useEffect(() => {
-        if (!containerRef.current) return
-
-        // Set the initial width
-        setContainerWidth(containerRef.current.clientWidth)
-
-        // Create a ResizeObserver to update width on container resize
-        const resizeObserver = new ResizeObserver(entries => {
-            for (let entry of entries) {
-                setContainerWidth(entry.contentRect.width)
-            }
-        })
-        resizeObserver.observe(containerRef.current)
-
-        // Cleanup the observer on unmount
-        return () => resizeObserver.disconnect()
-    }, [])
+    // Just call the hook; don't destructure width or height if not used
+    useResizeObserver(containerRef)
 
     if (!visible) return null
 
