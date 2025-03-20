@@ -11,6 +11,10 @@ export default function ProjectCard({
     summary,
     stack,
     initialDescription,
+    detailedDescription,
+    technicalDetails,
+    challenges,
+    readme,
     onAskQuestion,
     onNavigateToProject,
     totalProjects = 3,
@@ -65,13 +69,17 @@ export default function ProjectCard({
         setIsGenerating(true)
 
         try {
-            // Create a project data object to pass to the AI service
+            // Create a comprehensive project data object with all available context
             const projectData = {
                 id: `project-${projectNumber}`,
                 title,
                 summary,
                 stack,
                 initialDescription,
+                detailedDescription,
+                technicalDetails,
+                challenges,
+                readme,
             }
 
             // Call the AI service to generate a response
