@@ -128,6 +128,11 @@ export default plugin(function ({ addBase, addUtilities }) {
             '70%': { opacity: '0.7' },
             '100%': { backgroundPosition: '200% 0', opacity: '0' }
         },
+        '@keyframes shimmer': {
+            '0%': { backgroundPosition: '200% 0' },
+            '50%': { backgroundPosition: '0% 0' },
+            '100%': { backgroundPosition: '-200% 0' }
+        },
         '@keyframes cornerHighlight': {
             '0%, 25%': { 
                 opacity: '0',
