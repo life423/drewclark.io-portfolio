@@ -124,10 +124,11 @@ export default function ProjectsContainer() {
                                 ))}
                             </div>
 
-                            <PrimaryButton
+<PrimaryButton
                                 onClick={handleStart}
                                 size='md'
                                 className='relative'
+                                fullWidth={true}
                             >
                                 <span>View Projects</span>
                             </PrimaryButton>
