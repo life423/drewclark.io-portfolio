@@ -177,7 +177,7 @@ export default function ProjectsContainer() {
                     />
                 </div>
 
-                <div className='flex justify-between mt-4'>
+                <div className='flex justify-between mt-3 sm:mt-4'>
                     <button
                         onClick={() =>
                             activeProjectIndex === 0
@@ -185,14 +185,14 @@ export default function ProjectsContainer() {
                                 : navigateToProject(activeProjectIndex - 1)
                         }
                         className={clsx(
-                            'px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-1',
+                            'px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 flex items-center gap-1',
                             'focus:outline-none focus:ring-2 focus:ring-brandGreen-500/50',
                             'bg-brandGray-800 text-white hover:bg-brandGray-700 active:bg-brandGray-800 active:text-white'
                         )}
                     >
                         <svg
                             xmlns='http://www.w3.org/2000/svg'
-                            className='h-5 w-5'
+                            className='h-4 w-4 sm:h-5 sm:w-5'
                             viewBox='0 0 20 20'
                             fill='currentColor'
                         >
@@ -213,7 +213,7 @@ export default function ProjectsContainer() {
                         }
                         disabled={activeProjectIndex === PROJECTS.length - 1}
                         className={clsx(
-                            'px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-1',
+                            'px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 flex items-center gap-1',
                             'focus:outline-none focus:ring-2 focus:ring-brandGreen-500/50',
                             activeProjectIndex === PROJECTS.length - 1
                                 ? 'bg-brandGray-800 text-brandGray-600 cursor-not-allowed'
@@ -223,7 +223,7 @@ export default function ProjectsContainer() {
                         <span>Next Project</span>
                         <svg
                             xmlns='http://www.w3.org/2000/svg'
-                            className='h-5 w-5'
+                            className='h-4 w-4 sm:h-5 sm:w-5'
                             viewBox='0 0 20 20'
                             fill='currentColor'
                         >

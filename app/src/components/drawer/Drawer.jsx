@@ -153,7 +153,7 @@ const Drawer = memo(function Drawer({ isOpen, onClose }) {
                 {/* Welcome message */}
                 <div className='px-6 py-4 text-brandGray-100/80 text-sm'>
                     <p>
-                        Hello I'm{' '}
+                        
                         <span className='text-brandGreen-300'>Drew Clark</span>
                     </p>
                     <p className='mt-1 text-xs text-brandGray-300'>

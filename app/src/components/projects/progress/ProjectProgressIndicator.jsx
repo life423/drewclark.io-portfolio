@@ -21,7 +21,7 @@ const ProjectProgressIndicator = ({
 
     return (
         <div
-            className='flex items-center gap-4 text-sm px-5'
+            className='flex items-center gap-2 sm:gap-4 text-xs sm:text-sm px-3 sm:px-5'
             role='region'
             aria-label='Project progress indicator'
         >
