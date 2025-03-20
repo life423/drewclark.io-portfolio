@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import ProjectCard from './ProjectCard'
 import clsx from 'clsx'
 import PrimaryButton from '../utils/PrimaryButton'
-import { ProjectProgressIndicator } from './progress'
+
 
 const PROJECTS = [
     {
@@ -75,11 +75,7 @@ export default function ProjectsContainer() {
                     <div className='my-8 overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transform transition-all duration-300 hover:shadow-xl hover:border-brandGray-600'>
                         {}
                         <div className='p-5 border-b border-brandGray-700 bg-gradient-to-r from-brandGray-800 via-brandGray-800 to-brandBlue-900/10'>
-                            <div className='flex items-center mb-2'>
-                                <span className='text-sm font-semibold text-white px-2 py-1 rounded-md bg-gradient-to-r from-neonOrange-700 to-neonOrange-600 shadow-sm'>
-                                    Project 0
-                                </span>
-                            </div>
+                           
 
                             <h1 className='text-2xl font-bold text-brandGreen-300 mb-1'>
                                 My Portfolio Projects
