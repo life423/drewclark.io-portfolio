@@ -6,7 +6,7 @@ import clsx from 'clsx'
 /**
  * ProjectProgressIndicator - Shows visual indication of progress through projects
  * Features:
- * - Dynamic shimmer gradient progress bar with smooth animation
+ * - Dynamic shimmer gradient progress bar with smooth animation during transitions
  * - Clean, minimal design without interactive markers
  * - Consistent visual hierarchy with sophisticated animations
  */
@@ -14,6 +14,7 @@ const ProjectProgressIndicator = ({
     currentProject,
     totalProjects,
     onProjectClick,
+    isTransitioning = false,
 }) => {
     // Calculate progress percentage
     const progress = (currentProject / totalProjects) * 100
@@ -26,7 +27,10 @@ const ProjectProgressIndicator = ({
         >
             {/* Interactive Timeline with Animated Progress Bar */}
             <div className='relative flex-grow h-1.5 bg-brandGray-700 rounded-full overflow-hidden'>
-                <ProgressBar progress={progress} />
+                <ProgressBar 
+                    progress={progress} 
+                    isTransitioning={isTransitioning} 
+                />
             </div>
 
             {/* Project Progress Counter */}
@@ -45,6 +49,7 @@ ProjectProgressIndicator.propTypes = {
     currentProject: PropTypes.number.isRequired,
     totalProjects: PropTypes.number.isRequired,
     onProjectClick: PropTypes.func,
+    isTransitioning: PropTypes.bool,
 }
 
 export default React.memo(ProjectProgressIndicator)
