@@ -3,6 +3,7 @@ import ProjectCard from './ProjectCard'
 import clsx from 'clsx'
 import PrimaryButton from '../utils/PrimaryButton'
 
+// Sample project data - in a real implementation, this could come from an API or CMS
 const PROJECTS = [
     {
         id: 1,
@@ -50,6 +51,7 @@ export default function ProjectsContainer() {
     }
 
     useEffect(() => {
+        // Reset transition direction after animation completes
         if (transitionDirection) {
             const timer = setTimeout(() => {
                 setTransitionDirection(null)
@@ -59,10 +61,11 @@ export default function ProjectsContainer() {
         }
     }, [transitionDirection])
 
+    // Intro screen (Project 0)
     if (!started) {
         return (
             <section className='relative py-16 px-4 bg-gradient-to-b from-brandGreen-950/90 via-brandGreen-900/95 to-brandGreen-900'>
-                {}
+                {/* Subtle noise texture overlay */}
                 <div
                     className='absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none'
                     style={{
@@ -72,7 +75,7 @@ export default function ProjectsContainer() {
                 ></div>
                 <div className='max-w-3xl mx-auto'>
                     <div className='my-8 overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transform transition-all duration-300 hover:shadow-xl hover:border-brandGray-600'>
-                        {}
+                        {/* Project Header - styled like ProjectCard */}
                         <div className='p-5 border-b border-brandGray-700 bg-gradient-to-r from-brandGray-800 via-brandGray-800 to-brandBlue-900/10'>
                             <div className='flex items-center mb-2'>
                                 <span className='text-sm font-semibold text-white px-2 py-1 rounded-md bg-gradient-to-r from-neonOrange-700 to-neonOrange-600 shadow-sm'>
@@ -102,7 +105,7 @@ export default function ProjectsContainer() {
                                 </p>
                             </div>
 
-                            {}
+                            {/* Project Title Previews */}
                             <div className='space-y-2 mb-8 text-sm'>
                                 <h3 className='text-brandGray-400 uppercase text-xs tracking-wider mb-3'>
                                     Coming Up
@@ -126,10 +129,22 @@ export default function ProjectsContainer() {
                                 className='relative'
                             >
                                 <span>View Projects</span>
+                                <svg
+                                    xmlns='http://www.w3.org/2000/svg'
+                                    className='h-5 w-5 animate-pulse-gentle'
+                                    viewBox='0 0 20 20'
+                                    fill='currentColor'
+                                >
+                                    <path
+                                        fillRule='evenodd'
+                                        d='M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z'
+                                        clipRule='evenodd'
+                                    />
+                                </svg>
                             </PrimaryButton>
                         </div>
 
-                        {}
+                        {/* Project Progress Indicators - Updated to match main screen */}
                         <div className='flex justify-center py-4 border-t border-brandGray-700 bg-brandGray-850 space-x-2'>
                             <button
                                 className='h-2 w-8 rounded-full bg-neonOrange-500 transform scale-110'
@@ -151,7 +166,7 @@ export default function ProjectsContainer() {
 
     return (
         <section className='relative py-16 px-4 bg-gradient-to-b from-brandGreen-950/90 via-brandGreen-900/95 to-brandGreen-900'>
-            {}
+            {/* Subtle noise texture overlay */}
             <div
                 className='absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none'
                 style={{
@@ -180,7 +195,7 @@ export default function ProjectsContainer() {
                     />
                 </div>
 
-                {}
+                {/* Progress indicator - Moved above the navigation buttons */}
                 <div className='flex justify-center mt-6 mb-5 space-x-2'>
                     {PROJECTS.map((_, index) => (
                         <button
@@ -189,7 +204,7 @@ export default function ProjectsContainer() {
                             className={clsx(
                                 'h-2 rounded-full transition-all duration-300',
                                 index === activeProjectIndex
-                                    ? 'bg-neonOrange-500 w-8 transform scale-110'
+                                    ? 'bg-neonOrange-500 w-8 transform scale-110' // Made wider and with slight scale effect
                                     : 'bg-brandGray-600 hover:bg-brandGray-500 w-2'
                             )}
                             aria-label={`Go to project ${index + 1}`}
@@ -197,7 +212,7 @@ export default function ProjectsContainer() {
                     ))}
                 </div>
 
-                {}
+                {/* Navigation buttons outside of the card for easier access */}
                 <div className='flex justify-between mt-4'>
                     <button
                         onClick={() =>
@@ -225,7 +240,7 @@ export default function ProjectsContainer() {
                         </svg>
                         Previous Project
                     </button>
-                      
+
                     <button
                         onClick={() =>
                             navigateToProject(activeProjectIndex + 1)
