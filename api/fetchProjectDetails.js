@@ -13,7 +13,7 @@ const config = require('./config');
 
 // Default repository to fetch if none specified
 const DEFAULT_USERNAME = 'life423';
-const DEFAULT_REPO = 'ai-platform-trainer';
+const DEFAULT_REPO = 'Ascend-Avoid';
 
 async function main() {
     try {

@@ -24,37 +24,37 @@ const PROJECTS = [
     },
     {
         id: 2,
-        title: 'AI-Powered Content Generator',
+        title: 'Cryptography Toolkit with AI Analysis',
         summary:
-            'A tool that uses machine learning to generate marketing content tailored to different audiences.',
-        stack: ['Python', 'TensorFlow', 'FastAPI', 'React'],
+            'A comprehensive encryption application implementing Caesar and Polyalphabetic ciphers with AI-powered cryptanalysis capabilities.',
+        stack: ['Python', 'PyQt', 'Cryptography', 'Machine Learning'],
         initialDescription:
-            'As lead developer on this project, I implemented a natural language processing pipeline that could analyze existing content and generate new variations optimized for different target demographics. The system learned from user feedback to continuously improve output quality.',
+            'I developed this cryptography toolkit to explore classical encryption techniques while implementing modern analysis methods. The application features both encryption/decryption capabilities and intelligent cipher-breaking algorithms that can detect and analyze encrypted text patterns.',
         detailedDescription:
-            'The AI-Powered Content Generator is a sophisticated tool that creates marketing copy, product descriptions, and social media posts tailored to specific audience segments. It analyzes successful content patterns and applies these insights to generate new content that resonates with particular demographics.',
+            'This Cryptography Toolkit provides an educational platform for understanding how classical ciphers work, their vulnerabilities, and methods for breaking them. It implements Caesar cipher (with simple character shifting) and more complex Polyalphabetic substitution ciphers that use multiple substitution alphabets. The AI analyzer component can detect the cipher type and attempt to break it using statistical analysis and pattern recognition.',
         technicalDetails:
-            'The system uses a fine-tuned language model based on TensorFlow with custom transfer learning layers to adapt to specific marketing domains. The Python backend handles the NLP pipeline and model serving, while a React frontend provides an intuitive interface for content requests and feedback collection. We use FastAPI to create a high-performance API layer between the frontend and ML components.',
+            'Built with Python and PyQt for the graphical interface, the application features a modular architecture with separate components for encryption/decryption logic, file handling, and AI analysis. The cryptanalysis module uses frequency analysis, pattern matching, and machine learning techniques to identify cipher types and attempt decryption without knowing the key. The application supports both text and file-based encryption with customizable parameters.',
         challenges:
-            'The biggest challenge was creating content that truly felt personalized to different audience segments. We solved this by developing a multi-layered approach that considers demographic data, engagement history, and linguistic preferences. We also implemented a feedback loop system that allows the model to continuously improve based on user ratings and engagement metrics.',
+            'The primary challenge was developing effective cipher-breaking algorithms that could work reliably across different languages and text lengths. I implemented a layered approach to frequency analysis that adapts to the input text characteristics. Another significant challenge was creating an intuitive interface that makes complex cryptographic concepts accessible to users without extensive background in the field.',
         readme:
-            'This tool generates customized marketing content for different audience segments based on demographic data and engagement patterns. Features include tone adjustment (professional, casual, persuasive), length control, keyword incorporation, and A/B test generation. Users can save favorite outputs, track performance metrics, and train the system on their own content corpus.'
+            'This desktop application provides tools for encrypting/decrypting text using classical ciphers, with a built-in AI analyzer that can detect encryption methods and attempt to break simple ciphers. Features include: multiple cipher implementations, key generation tools, frequency analysis visualizations, brute-force attack simulations, and educational resources about cryptographic principles. The codebase follows object-oriented design principles with comprehensive testing and documentation.'
     },
     {
         id: 3,
-        title: 'Cross-Platform Mobile App',
+        title: 'Ascend-Avoid',
         summary:
-            'A feature-rich mobile application that works seamlessly across iOS and Android.',
-        stack: ['React Native', 'Firebase', 'Redux', 'GraphQL'],
+            'A responsive HTML5 Canvas game with touch controls and progressive difficulty.',
+        stack: ['JavaScript', 'HTML5 Canvas', 'CSS3', 'Jest'],
         initialDescription:
-            'Developing a cross-platform app that maintains native performance while sharing the majority of code was our primary objective. I designed a modular architecture that allowed platform-specific optimizations where needed while maintaining a consistent user experience.',
+            'I created this browser-based arcade game to practice object-oriented JavaScript and canvas animation. The game features a player-controlled white block that must navigate across the screen while avoiding moving obstacles, with difficulty increasing as your score rises.',
         detailedDescription:
-            'This mobile application delivers a premium user experience across both iOS and Android platforms while maintaining a single codebase for most functionality. The app includes offline capabilities, push notifications, and integrated authentication systems.',
+            'Ascend-Avoid is an HTML5 Canvas game that works across devices, offering both keyboard and touch controls. The game presents the player with a simple yet challenging objective: guide a white block to the top of the screen without colliding with blue obstacle blocks. As you progress, the game becomes increasingly difficult by spawning more obstacles at higher speeds.',
         technicalDetails:
-            'Built with React Native for cross-platform compatibility with platform-specific modules where necessary for optimal performance. State management is handled through Redux with persistent storage. The backend uses Firebase for real-time database functionality, authentication, and cloud functions. We implemented GraphQL to optimize data fetching and minimize bandwidth usage on mobile networks.',
+            'Built with vanilla JavaScript using ES6+ features and classes for game objects. The animation system uses requestAnimationFrame with delta time calculations to ensure consistent gameplay regardless of device performance. Collision detection is optimized using axis-aligned bounding box (AABB) algorithms. The game includes intelligent obstacle spawning logic to prevent unfair object clustering.',
         challenges:
-            'The primary challenge was achieving native-quality performance across different devices with varying capabilities. We developed a dynamic resource loading system that adapts to device specifications. Another challenge was ensuring consistent animations and transitions across platforms - we created a custom animation library that automatically adjusts timing and easing based on the platform to maintain a consistent feel.',
+            'The main challenge was creating frame-rate independent animations that would run consistently across different devices. I solved this by implementing delta time-based movement instead of frame-based updates. Another significant challenge was designing responsive controls that work well on both desktop and mobile devices, which I addressed by developing keyboard input for desktop and touch/swipe detection for mobile.',
         readme:
-            'This cross-platform mobile app provides a seamless experience across iOS and Android devices. Features include user authentication, offline data synchronization, push notifications, in-app messaging, media sharing, and location services. The app automatically adapts to different screen sizes and orientations and complies with accessibility standards on both platforms.'
+            'This browser game demonstrates object-oriented programming principles and responsive design techniques. Features include adaptive difficulty based on player score, intelligent obstacle spawning to prevent unfair overlaps, responsive design for all screen sizes, touch controls for mobile devices, and comprehensive test coverage with Jest. The game presents a simple yet engaging challenge suitable for players of all ages.'
     },
 ]
 
