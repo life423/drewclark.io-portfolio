@@ -1,10 +1,14 @@
 const { OpenAI } = require('openai');
-const { handleRequest } = require('../unified-server')
-const config = require('../config')
+const { handleRequest } = require('../unified-server');
+const config = require('../config');
+const githubUtils = require('../github-utils');
 
 // Simple in-memory cache (consider using a distributed cache in production)
-const responseCache = new Map()
-const CACHE_TTL = config.cacheTtlMs
+const responseCache = new Map();
+const CACHE_TTL = config.cacheTtlMs;
+
+// GitHub repository information extraction pattern
+const GITHUB_URL_PATTERN = /https:\/\/github\.com\/[^\/\s]+\/[^\/\s]+/g;
 
 // Global variables to track errors and OpenAI client
 let openAiInitError = null
@@ -198,6 +202,20 @@ async function handlePostRequest(context, req, headers) {
     }
 
     try {
+        // Enhance the question with GitHub repository documentation if available
+        context.log.info('Checking for GitHub repository documentation')
+        const enhancedQuestion = await enhanceWithRepositoryContent(userQuestion, {
+            info: context.log.info || context.log,
+            error: context.log.error || context.log.error
+        })
+        
+        const hasRepoContent = enhancedQuestion !== userQuestion
+        if (hasRepoContent) {
+            context.log.info('Enhanced question with GitHub repository documentation')
+        } else {
+            context.log.info('No GitHub repository documentation was added')
+        }
+        
         // Call the OpenAI API with configurable parameters and enhanced error handling
         context.log.info(`Calling OpenAI API with model ${modelName}`)
 
@@ -211,11 +229,17 @@ async function handlePostRequest(context, req, headers) {
                     {
                         role: 'system',
                         content:
-                            "You are a helpful assistant answering questions for Drew Clark's portfolio website visitors. Keep responses concise, informative, and friendly.",
+                            "You are a helpful assistant answering questions for Drew Clark's portfolio website visitors about specific projects. " +
+                            "Use the provided project context and GitHub repository documentation to give accurate, concise, and informative responses. " +
+                            "When repository documentation is available, prioritize this information as it's the most authoritative source. " +
+                            "Focus on technical details and implementation choices when asked about them. " +
+                            "When discussing challenges, emphasize both the problems faced and how they were solved. " +
+                            "Always reference the GitHub repository when it's provided in your answers. " +
+                            "Keep responses friendly and professional, tailored specifically to the project being discussed.",
                     },
                     {
                         role: 'user',
-                        content: userQuestion,
+                        content: enhancedQuestion,
                     },
                 ],
                 max_tokens: maxTokens,
@@ -329,6 +353,69 @@ function createResponse(context, status, headers, body) {
 function sanitizeInput(input) {
     // Remove any HTML/script tags
     return input.replace(/<[^>]*>?/gm, '')
+}
+
+/**
+ * Extracts GitHub repository URLs from text
+ * @param {string} text - Text that may contain GitHub URLs
+ * @returns {string[]} Array of GitHub repository URLs found
+ */
+function extractGitHubUrls(text) {
+    if (!text) return [];
+    const matches = text.match(GITHUB_URL_PATTERN);
+    return matches || [];
+}
+
+/**
+ * Enhances user question with repository documentation if available
+ * @param {string} question - Original user question
+ * @param {object} logFunctions - Object with logging functions
+ * @returns {Promise<string>} Enhanced question with repository content
+ */
+async function enhanceWithRepositoryContent(question, logFunctions = { info: console.log, error: console.error }) {
+    try {
+        // Extract GitHub URLs from the question
+        const githubUrls = extractGitHubUrls(question);
+        
+        if (githubUrls.length === 0) {
+            logFunctions.info('No GitHub URLs found in the question');
+            return question;
+        }
+        
+        logFunctions.info(`Found ${githubUrls.length} GitHub URLs in the question`);
+        
+        // For each GitHub URL, fetch the repository documentation
+        let repoContent = '';
+        let repoCount = 0;
+        
+        for (const url of githubUrls) {
+            try {
+                logFunctions.info(`Fetching documentation for ${url}`);
+                const docs = await githubUtils.fetchRepositoryDocs(url, logFunctions.error);
+                
+                if (docs && docs.length > 100) { // Ensure we got meaningful content
+                    // Extract relevant content based on the question
+                    const relevantDocs = githubUtils.extractRelevantContent(docs, question);
+                    repoContent += `\n\n${relevantDocs}`;
+                    repoCount++;
+                }
+            } catch (err) {
+                logFunctions.error(`Error fetching repo content for ${url}: ${err.message}`);
+                // Continue with other URLs if one fails
+            }
+        }
+        
+        if (repoCount > 0) {
+            logFunctions.info(`Successfully added documentation from ${repoCount} repositories`);
+            return `${question}\n\nREPOSITORY DOCUMENTATION:\n${repoContent}`;
+        } else {
+            logFunctions.info('No repository content could be fetched');
+            return question;
+        }
+    } catch (error) {
+        logFunctions.error(`Error enhancing question with repo content: ${error.message}`);
+        return question; // Return original question if enhancement fails
+    }
 }
 
 // Generate a correlation ID for request tracing

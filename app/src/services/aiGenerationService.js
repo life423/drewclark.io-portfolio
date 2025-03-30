@@ -6,6 +6,38 @@
  */
 
 /**
+ * Extracts GitHub repository URL from project data
+ * 
+ * @param {Object} projectData - Project data object
+ * @returns {string|null} - GitHub repository URL or null if not found
+ */
+function extractGitHubUrl(projectData) {
+  if (!projectData) return null;
+  
+  // Check various fields where GitHub URL might be mentioned
+  const fieldsToCheck = [
+    'readme',
+    'technicalDetails',
+    'detailedDescription', 
+    'initialDescription'
+  ];
+  
+  // GitHub URL pattern
+  const githubUrlPattern = /https:\/\/github\.com\/[^\/\s]+\/[^\/\s]+/g;
+  
+  for (const field of fieldsToCheck) {
+    if (projectData[field]) {
+      const matches = projectData[field].match(githubUrlPattern);
+      if (matches && matches.length > 0) {
+        return matches[0]; // Return the first GitHub URL found
+      }
+    }
+  }
+  
+  return null;
+}
+
+/**
  * Sends a question about a project to the backend API which uses OpenAI to generate a response
  * 
  * @param {Object} projectData - Data about the project being asked about
@@ -19,9 +51,25 @@
  */
 export async function answerProjectQuestion(projectData, question) {
   try {
-    // Prepare the request body
+    // Extract GitHub repository URL
+    const repoUrl = extractGitHubUrl(projectData);
+    
+    // Create a comprehensive context from all available project data
+    const context = `
+Project: ${projectData.title}
+Tech Stack: ${projectData.stack.join(', ')}
+Summary: ${projectData.summary || ''}
+Basic Description: ${projectData.initialDescription || ''}
+${projectData.detailedDescription ? `Detailed Description: ${projectData.detailedDescription}` : ''}
+${projectData.technicalDetails ? `Technical Implementation: ${projectData.technicalDetails}` : ''}
+${projectData.challenges ? `Challenges & Solutions: ${projectData.challenges}` : ''}
+${repoUrl ? `GitHub Repository: ${repoUrl}` : ''}
+${projectData.readme ? `Documentation: ${projectData.readme}` : ''}
+`;
+
+    // Prepare the request body with the comprehensive context
     const requestBody = {
-      question: `Project: ${projectData.title}. Tech: ${projectData.stack.join(', ')}. Context: ${projectData.initialDescription}. Question: ${question}`,
+      question: `${context}\n\nQuestion: ${question}`,
       maxTokens: 250,
       temperature: 0.7
     };
