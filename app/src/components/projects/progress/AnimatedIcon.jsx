@@ -51,7 +51,7 @@ const AnimatedIcon = ({ progress }) => {
     ),
     almostDone: (
       <svg 
-        className="w-4 h-4 animate-spin-slow text-neonOrange-400" 
+        className="w-4 h-4 animate-spin-slow text-brandOrange-400" 
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -66,7 +66,7 @@ const AnimatedIcon = ({ progress }) => {
     ),
     complete: (
       <svg 
-        className="w-4 h-4 animate-celebrate text-neonOrange-500" 
+        className="w-4 h-4 animate-celebrate text-brandOrange-500" 
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"

@@ -4,10 +4,19 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         
-        <!-- Google Fonts - Lato -->
+        <!-- Google Fonts - Lato - Optimized loading -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+        
+        <!-- Main font stylesheet - Load this first to reference the correct font resources -->
+        <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap&text=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,;:?!()%@#/" rel="stylesheet">
+        <style>
+            /* Fallback font while Lato is loading */
+            body {
+                font-family: 'Lato', sans-serif;
+                font-display: swap;
+            }
+        </style>
 
         <!-- Simple Favicon Implementation -->
         <!-- <link rel="icon" href="favicon/favicon.ico"> -->

@@ -6,7 +6,18 @@ export default function useResizeObserver(ref) {
     useEffect(() => {
         if (!ref.current) return
 
+        // Set initial dimensions on mount if ref.current exists
+        if (ref.current) {
+            setDimensions({
+                width: ref.current.clientWidth,
+                height: ref.current.clientHeight
+            })
+        }
+
         const handleResize = entries => {
+            // Early return if entries is empty or ref is null
+            if (!entries.length || !ref.current) return
+            
             for (let entry of entries) {
                 setDimensions({
                     width: entry.contentRect.width,

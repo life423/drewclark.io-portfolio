@@ -1,9 +1,9 @@
 import plugin from 'tailwindcss/plugin'
-import { brandGreen, neonOrange } from '../colors.js'
+import { brandColors } from '../colors.js'
 
 // Get color values without the leading #
-const greenColor = brandGreen[500].substring(1)
-const orangeColor = neonOrange[500].substring(1)
+const greenColor = brandColors.green[500].substring(1)
+const orangeColor = brandColors.orange[500].substring(1)
 
 export default plugin(function ({ addBase, addUtilities }) {
     // 1. Base keyframes for all animations
