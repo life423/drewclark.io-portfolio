@@ -1,0 +1,9 @@
+{
+  "commands": [
+    {
+      "name": "Fetch GitHub Project Details",
+      "description": "Runs the script to fetch live repo info from GitHub",
+      "command": "node api/fetchProjectDetails.js"
+    }
+  ]
+}

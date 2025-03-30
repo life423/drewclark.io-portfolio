@@ -1,4 +1,4 @@
-import { brandGreen, brandBlue, neonOrange } from '../../styles/colors.js'
+import { brandColors } from '../../styles/colors.js'
 
 /**
  * Convert hex color string to RGB array
@@ -170,10 +170,10 @@ export const getInterpolatedColor = (progress, options = {}) => {
     const clamped = Math.max(0, Math.min(100, progress))
 
     // Get RGB values from our brand colors in colors.js
-    const greenRgb = hexToRgb(brandGreen[500].substring(1))
-    const green350Rgb = hexToRgb(brandGreen[350].substring(1))
-    const blueRgb = hexToRgb(brandBlue[500].substring(1))
-    const orangeRgb = hexToRgb(neonOrange[500].substring(1))
+    const greenRgb = hexToRgb(brandColors.green[500].substring(1))
+    const green350Rgb = hexToRgb(brandColors.green[350].substring(1))
+    const blueRgb = hexToRgb(brandColors.blue[500].substring(1))
+    const orangeRgb = hexToRgb(brandColors.orange[500].substring(1))
 
     // Define comprehensive color stops based on our brand palette
     // Each stop carefully selected for optimal perceptual transitioning
@@ -212,7 +212,7 @@ export const getInterpolatedColor = (progress, options = {}) => {
         { pos: 88, color: rgbToHsl(180, 125, 36) },   // Golden-orange
         { pos: 92, color: rgbToHsl(205, 118, 24) },   // Orange
         { pos: 96, color: rgbToHsl(230, 112, 12) },   // Deep orange
-        { pos: 100, color: rgbToHsl(...orangeRgb) },  // neonOrange-500 (final anchor)
+        { pos: 100, color: rgbToHsl(...orangeRgb) },  // brandOrange-500 (final anchor)
     ]
 
     // Find the two color stops we're between

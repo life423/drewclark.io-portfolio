@@ -7,12 +7,20 @@ import PrimaryButton from '../utils/PrimaryButton'
 const PROJECTS = [
     {
         id: 1,
-        title: 'Real-Time Analytics Dashboard',
+        title: 'AI Platform Trainer',
         summary:
-            'A modern dashboard for monitoring user engagement and system performance.',
-        stack: ['React', 'Node.js', 'WebSockets', 'D3.js'],
+            'A 2D platformer game featuring AI-driven enemy behavior built with Python and Pygame.',
+        stack: ['Python', 'Pygame', 'AI Algorithms', 'Game Development'],
         initialDescription:
-            'This project began as a challenge: how to visualize thousands of data points in real-time without sacrificing performance. I architected a solution using WebSockets for data streaming and custom D3.js visualizations that could handle high-frequency updates.',
+            'I developed this 2D platformer game from scratch to deepen my understanding of game development and AI implementation. The project features intelligent enemies that adapt their behavior based on player actions, creating a dynamic and challenging gameplay experience.',
+        detailedDescription:
+            'AI Platform Trainer is a complete 2D platformer with modular code architecture and AI-driven enemy behavior. The game demonstrates how even simple AI implementations can create engaging gameplay by having enemies that learn and respond to player actions, rather than following fixed patterns.',
+        technicalDetails:
+            'Built with Python and the Pygame library, the game uses a component-based architecture to handle various game elements. Enemy AI is implemented using pathfinding algorithms and basic machine learning concepts to create adaptive behavior. The project includes collision detection, physics simulation, sprite animations, and state management systems.',
+        challenges:
+            'The biggest challenge was creating enemy AI that felt intelligent without being frustratingly difficult. I solved this by implementing a layered approach to enemy decision-making that balances aggression with vulnerability. Another challenge was optimizing performance while maintaining visual quality, which required efficient sprite handling and collision detection algorithms.',
+        readme:
+            'This project showcases game development skills and basic AI implementation in a practical, playable format. The code is structured in a modular way that allows for easy expansion and modification. The MIT-licensed codebase is available on GitHub and serves as both a fun game and a learning resource for those interested in game development or AI programming fundamentals.'
     },
     {
         id: 2,
@@ -22,6 +30,14 @@ const PROJECTS = [
         stack: ['Python', 'TensorFlow', 'FastAPI', 'React'],
         initialDescription:
             'As lead developer on this project, I implemented a natural language processing pipeline that could analyze existing content and generate new variations optimized for different target demographics. The system learned from user feedback to continuously improve output quality.',
+        detailedDescription:
+            'The AI-Powered Content Generator is a sophisticated tool that creates marketing copy, product descriptions, and social media posts tailored to specific audience segments. It analyzes successful content patterns and applies these insights to generate new content that resonates with particular demographics.',
+        technicalDetails:
+            'The system uses a fine-tuned language model based on TensorFlow with custom transfer learning layers to adapt to specific marketing domains. The Python backend handles the NLP pipeline and model serving, while a React frontend provides an intuitive interface for content requests and feedback collection. We use FastAPI to create a high-performance API layer between the frontend and ML components.',
+        challenges:
+            'The biggest challenge was creating content that truly felt personalized to different audience segments. We solved this by developing a multi-layered approach that considers demographic data, engagement history, and linguistic preferences. We also implemented a feedback loop system that allows the model to continuously improve based on user ratings and engagement metrics.',
+        readme:
+            'This tool generates customized marketing content for different audience segments based on demographic data and engagement patterns. Features include tone adjustment (professional, casual, persuasive), length control, keyword incorporation, and A/B test generation. Users can save favorite outputs, track performance metrics, and train the system on their own content corpus.'
     },
     {
         id: 3,
@@ -31,6 +47,14 @@ const PROJECTS = [
         stack: ['React Native', 'Firebase', 'Redux', 'GraphQL'],
         initialDescription:
             'Developing a cross-platform app that maintains native performance while sharing the majority of code was our primary objective. I designed a modular architecture that allowed platform-specific optimizations where needed while maintaining a consistent user experience.',
+        detailedDescription:
+            'This mobile application delivers a premium user experience across both iOS and Android platforms while maintaining a single codebase for most functionality. The app includes offline capabilities, push notifications, and integrated authentication systems.',
+        technicalDetails:
+            'Built with React Native for cross-platform compatibility with platform-specific modules where necessary for optimal performance. State management is handled through Redux with persistent storage. The backend uses Firebase for real-time database functionality, authentication, and cloud functions. We implemented GraphQL to optimize data fetching and minimize bandwidth usage on mobile networks.',
+        challenges:
+            'The primary challenge was achieving native-quality performance across different devices with varying capabilities. We developed a dynamic resource loading system that adapts to device specifications. Another challenge was ensuring consistent animations and transitions across platforms - we created a custom animation library that automatically adjusts timing and easing based on the platform to maintain a consistent feel.',
+        readme:
+            'This cross-platform mobile app provides a seamless experience across iOS and Android devices. Features include user authentication, offline data synchronization, push notifications, in-app messaging, media sharing, and location services. The app automatically adapts to different screen sizes and orientations and complies with accessibility standards on both platforms.'
     },
 ]
 
@@ -72,11 +96,11 @@ export default function ProjectsContainer() {
                     }}
                 ></div>
                 <div className='max-w-3xl mx-auto'>
-                <div className='my-4 sm:my-6 md:my-8 overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transform transition-all duration-300 hover:shadow-xl hover:border-brandGray-600 flex flex-col min-h-[400px] sm:min-h-[450px] md:min-h-[480px] lg:min-h-[520px]'>
+                <div className='my-4 sm:my-6 md:my-8 overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transform transition-all duration-300 hover:shadow-xl hover:border-brandGray-600 flex flex-col h-[600px] sm:h-[650px] md:h-[670px] lg:h-[700px]'>
                         {}
                         <div className='p-3 sm:p-4 md:p-5 border-b border-brandGray-700 bg-gradient-to-r from-brandGray-800 via-brandGray-800 to-brandBlue-900/10'>
                             <div className='flex items-center justify-between mb-2'>
-                                <span className='text-sm font-semibold text-white px-2 py-1 rounded-md bg-gradient-to-r from-neonOrange-700 to-neonOrange-600 shadow-sm'>
+                                <span className='text-sm font-semibold text-white px-2 py-1 rounded-md bg-gradient-to-r from-brandOrange-700 to-brandOrange-600 shadow-sm'>
                                     Overview
                                 </span>
                             </div>
@@ -113,7 +137,7 @@ export default function ProjectsContainer() {
                                         key={index}
                                         className='flex items-center text-brandGray-300 hover:text-brandGreen-400 transition-colors duration-200'
                                     >
-                                        <span className='text-neonOrange-500 font-semibold mr-2'>
+                                        <span className='text-brandOrange-500 font-semibold mr-2'>
                                             Project {index + 1}:
                                         </span>
                                         <span>{project.title}</span>
@@ -165,6 +189,18 @@ export default function ProjectsContainer() {
                         stack={PROJECTS[activeProjectIndex].stack}
                         initialDescription={
                             PROJECTS[activeProjectIndex].initialDescription
+                        }
+                        detailedDescription={
+                            PROJECTS[activeProjectIndex].detailedDescription
+                        }
+                        technicalDetails={
+                            PROJECTS[activeProjectIndex].technicalDetails
+                        }
+                        challenges={
+                            PROJECTS[activeProjectIndex].challenges
+                        }
+                        readme={
+                            PROJECTS[activeProjectIndex].readme
                         }
                         totalProjects={PROJECTS.length}
                         onNavigateToProject={index => {

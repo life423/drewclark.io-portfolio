@@ -13,7 +13,6 @@ import clsx from 'clsx'
 const ProjectProgressIndicator = ({
     currentProject,
     totalProjects,
-    onProjectClick,
     isTransitioning = false,
 }) => {
     // Calculate progress percentage
@@ -34,9 +33,7 @@ const ProjectProgressIndicator = ({
             </div>
 
             {/* Project Progress Counter */}
-            <div className='flex items-center gap-2 text-brandGray-400' style={{
-                justifyContent: 'flex-end'
-            }}>
+            <div className='flex items-center gap-2 text-brandGray-400 justify-end'>
                 <span className='font-mono'>
                     {currentProject}/{totalProjects}
                 </span>
@@ -48,7 +45,6 @@ const ProjectProgressIndicator = ({
 ProjectProgressIndicator.propTypes = {
     currentProject: PropTypes.number.isRequired,
     totalProjects: PropTypes.number.isRequired,
-    onProjectClick: PropTypes.func,
     isTransitioning: PropTypes.bool,
 }
 

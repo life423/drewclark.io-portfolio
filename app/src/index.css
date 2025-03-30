@@ -2,6 +2,20 @@
 @import './styles/nprogress.css';
 @import './styles/components/progressive-element.css';
 
+/* Font variables - centralizes font-related properties for easier maintenance */
+:root {
+  --font-lato: 'Lato', sans-serif;
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-bold: 700;
+  --font-weight-black: 900;
+  
+  /* Common line heights for better typography */
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+}
+
 /* 
  * These are valid Tailwind CSS directives - ignore CSS linter warnings
  * The @tailwind directive is used by the PostCSS processor and Tailwind
@@ -11,3 +25,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Apply global font settings */
+@layer base {
+  html {
+    font-family: var(--font-lato);
+    font-feature-settings: "kern", "liga", "calt";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Optimize number rendering */
+  .numeric {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+}

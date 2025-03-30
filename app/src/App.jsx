@@ -1,12 +1,13 @@
-import React, { useState, useEffect, useMemo, memo } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import useNavigationState from './hooks/useNavigationState'
 import Layout from './components/layout/Layout'
 import Hero from './components/hero/Hero'
 import ProjectsContainer from './components/projects/ProjectsContainer'
 import { FocusProvider } from './contexts/FocusContext'
+import { ANIMATION } from './styles/constants'
 
-// Memoized main content component for better performance
-const MainContent = memo(function MainContent() {
+// Main content component
+function MainContent() {
     return (
         <main className='flex flex-col min-h-screen'>
             <Hero />
@@ -15,7 +16,7 @@ const MainContent = memo(function MainContent() {
             </div>
         </main>
     )
-})
+}
 
 export default function App() {
     const navigationState = useNavigationState()
@@ -26,7 +27,7 @@ export default function App() {
     useEffect(() => {
         const timer = setTimeout(() => {
             setInitialLoading(false)
-        }, 1600)
+        }, ANIMATION.EXTRA_LONG)
 
         return () => clearTimeout(timer)
     }, [])

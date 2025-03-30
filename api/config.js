@@ -44,6 +44,7 @@ const config = {
   
   // API Keys
   openAiApiKey: process.env.OPENAI_API_KEY,
+  githubToken: process.env.GITHUB_TOKEN,
   
   // Rate Limiting
   rateLimitRequests: 10,
@@ -69,11 +70,17 @@ const config = {
   logLevel: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
 };
 
-// Log OpenAI API key status (without revealing the key)
+// Log API keys status (without revealing the keys)
 if (config.openAiApiKey) {
   console.log(`OpenAI API key is configured (${config.openAiApiKey.length} characters)`);
 } else {
   console.log('WARNING: OpenAI API key is missing');
+}
+
+if (config.githubToken) {
+  console.log(`GitHub token is configured (${config.githubToken.length} characters)`);
+} else {
+  console.log('Note: GitHub token is not configured. Public repository access only.');
 }
 
 module.exports = config;

@@ -6,7 +6,7 @@ import textShadowsPlugin from './src/styles/plugins/textShadows.js'
 import typography from '@tailwindcss/typography'
 import {
     brandGreen,
-    neonOrange,
+    brandOrange,
     brandBlue,
     brandGray,
 } from './src/styles/colors.js'
@@ -15,6 +15,9 @@ export default {
     content: ['./src/index.html', './src/**/*.{js,jsx,ts,tsx}'],
     theme: {
         extend: {
+            fontFamily: {
+                sans: ['Lato', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'Noto Sans', 'sans-serif', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'],
+            },
             boxShadow: {
                 nav: '0 2px 10px rgba(0, 0, 0, 0.15)',
             },
@@ -72,7 +75,7 @@ export default {
             }),
             colors: {
                 brandGreen,
-                neonOrange,
+                brandOrange,
                 brandBlue,
                 brandGray,
             },
