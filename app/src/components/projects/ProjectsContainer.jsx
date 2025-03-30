@@ -7,20 +7,20 @@ import PrimaryButton from '../utils/PrimaryButton'
 const PROJECTS = [
     {
         id: 1,
-        title: 'Real-Time Analytics Dashboard',
+        title: 'AI Platform Trainer',
         summary:
-            'A modern dashboard for monitoring user engagement and system performance.',
-        stack: ['React', 'Node.js', 'WebSockets', 'D3.js'],
+            'A 2D platformer game featuring AI-driven enemy behavior built with Python and Pygame.',
+        stack: ['Python', 'Pygame', 'AI Algorithms', 'Game Development'],
         initialDescription:
-            'This project began as a challenge: how to visualize thousands of data points in real-time without sacrificing performance. I architected a solution using WebSockets for data streaming and custom D3.js visualizations that could handle high-frequency updates.',
+            'I developed this 2D platformer game from scratch to deepen my understanding of game development and AI implementation. The project features intelligent enemies that adapt their behavior based on player actions, creating a dynamic and challenging gameplay experience.',
         detailedDescription:
-            'The Real-Time Analytics Dashboard provides businesses with immediate insights into user behavior and system health. The dashboard updates in real-time as events occur, allowing instant decision-making based on current data rather than historical reports.',
+            'AI Platform Trainer is a complete 2D platformer with modular code architecture and AI-driven enemy behavior. The game demonstrates how even simple AI implementations can create engaging gameplay by having enemies that learn and respond to player actions, rather than following fixed patterns.',
         technicalDetails:
-            'The frontend uses React with custom D3.js visualizations. Data flows through WebSocket connections to minimize latency, with a Node.js backend handling data aggregation and stream management. We implemented efficient data structures to handle thousands of events per second while maintaining 60fps rendering performance.',
+            'Built with Python and the Pygame library, the game uses a component-based architecture to handle various game elements. Enemy AI is implemented using pathfinding algorithms and basic machine learning concepts to create adaptive behavior. The project includes collision detection, physics simulation, sprite animations, and state management systems.',
         challenges:
-            'One key challenge was handling disconnections and reconnections gracefully while ensuring no data loss. We developed a local buffer system that temporarily stores events during connection issues and synchs with the server upon reconnection. Another challenge was optimizing the rendering pipeline to handle frequent updates without causing browser performance issues.',
+            'The biggest challenge was creating enemy AI that felt intelligent without being frustratingly difficult. I solved this by implementing a layered approach to enemy decision-making that balances aggression with vulnerability. Another challenge was optimizing performance while maintaining visual quality, which required efficient sprite handling and collision detection algorithms.',
         readme:
-            'This dashboard monitors key performance indicators in real-time with millisecond latency. It includes customizable widgets for different metrics, alerts for anomaly detection, and historical comparison views. Users can filter data by various dimensions including time ranges, user segments, and event types.'
+            'This project showcases game development skills and basic AI implementation in a practical, playable format. The code is structured in a modular way that allows for easy expansion and modification. The MIT-licensed codebase is available on GitHub and serves as both a fun game and a learning resource for those interested in game development or AI programming fundamentals.'
     },
     {
         id: 2,
@@ -100,7 +100,7 @@ export default function ProjectsContainer() {
                         {}
                         <div className='p-3 sm:p-4 md:p-5 border-b border-brandGray-700 bg-gradient-to-r from-brandGray-800 via-brandGray-800 to-brandBlue-900/10'>
                             <div className='flex items-center justify-between mb-2'>
-                                <span className='text-sm font-semibold text-white px-2 py-1 rounded-md bg-gradient-to-r from-neonOrange-700 to-neonOrange-600 shadow-sm'>
+                                <span className='text-sm font-semibold text-white px-2 py-1 rounded-md bg-gradient-to-r from-brandOrange-700 to-brandOrange-600 shadow-sm'>
                                     Overview
                                 </span>
                             </div>
@@ -137,7 +137,7 @@ export default function ProjectsContainer() {
                                         key={index}
                                         className='flex items-center text-brandGray-300 hover:text-brandGreen-400 transition-colors duration-200'
                                     >
-                                        <span className='text-neonOrange-500 font-semibold mr-2'>
+                                        <span className='text-brandOrange-500 font-semibold mr-2'>
                                             Project {index + 1}:
                                         </span>
                                         <span>{project.title}</span>

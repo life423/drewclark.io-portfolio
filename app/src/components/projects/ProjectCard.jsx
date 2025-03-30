@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react'
-import clsx from 'clsx'
-import { answerProjectQuestion } from '../../services/aiGenerationService'
-import PrimaryButton from '../utils/PrimaryButton'
-import { ProjectProgressIndicator } from './progress'
-import useScrollPosition from '../../hooks/useScrollPosition'
+import React, { useState, useRef } from 'react';
+import clsx from 'clsx';
+import { answerProjectQuestion } from '../../services/aiGenerationService';
+import PrimaryButton from '../utils/PrimaryButton';
+import { ProjectProgressIndicator } from './progress';
+import useScrollPosition from '../../hooks/useScrollPosition';
 
 export default function ProjectCard({
     projectNumber,
@@ -19,54 +19,37 @@ export default function ProjectCard({
     onNavigateToProject,
     totalProjects = 3,
 }) {
-    const [expanded, setExpanded] = useState(false)
-    const [chatVisible, setChatVisible] = useState(false)
-    const [userQuestion, setUserQuestion] = useState('')
-    const [isGenerating, setIsGenerating] = useState(false)
-    const [aiResponse, setAiResponse] = useState('')
+    const [chatVisible, setChatVisible] = useState(false);
+    const [userQuestion, setUserQuestion] = useState('');
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [aiResponse, setAiResponse] = useState('');
 
-    const chatInputRef = useRef(null)
+    const chatInputRef = useRef(null);
 
     // Get the forceRecalculation function from useScrollPosition
-    const { forceRecalculation } = useScrollPosition()
+    const { forceRecalculation } = useScrollPosition();
     
-    // Handle content expansion and recalculate scroll progress
-    const handleReadMore = () => {
-        setExpanded(!expanded)
-        
-        // Since we've added onTransitionEnd handler to the content container,
-        // we now only need a single fallback timeout in case the transition
-        // event doesn't fire correctly on some devices
-        setTimeout(() => {
-            forceRecalculation()
-            // Final safety net recalculation for very slow devices
-            setTimeout(() => forceRecalculation(), 400)
-        }, 600) // This matches the duration-500 plus a small buffer
-    }
-
     const toggleChat = () => {
-        setChatVisible(!chatVisible)
+        setChatVisible(!chatVisible);
         if (!chatVisible) {
             // Focus the input when chat becomes visible
             setTimeout(() => {
-                chatInputRef.current?.focus()
-            }, 100)
+                chatInputRef.current?.focus();
+            }, 100);
         }
         
-        // Since we've added onTransitionEnd handler to the chat container,
-        // we only need a single fallback timeout in case the transition
-        // event doesn't fire correctly on some devices
+        // Force recalculation after toggling chat
         setTimeout(() => {
-            forceRecalculation()
-        }, 300) // This matches the animate-fade-in duration
-    }
+            forceRecalculation();
+        }, 300);
+    };
 
     const handleQuestionSubmit = async e => {
-        e.preventDefault()
+        e.preventDefault();
 
-        if (!userQuestion.trim()) return
+        if (!userQuestion.trim()) return;
 
-        setIsGenerating(true)
+        setIsGenerating(true);
 
         try {
             // Create a comprehensive project data object with all available context
@@ -80,43 +63,39 @@ export default function ProjectCard({
                 technicalDetails,
                 challenges,
                 readme,
-            }
+            };
 
             // Call the AI service to generate a response
             const response = await answerProjectQuestion(
                 projectData,
                 userQuestion
-            )
-            setAiResponse(response)
+            );
+            setAiResponse(response);
         } catch (error) {
-            console.error('Error generating AI response:', error)
+            console.error('Error generating AI response:', error);
             setAiResponse(
                 "I'm sorry, I couldn't generate a response at this time. Please try again later."
-            )
+            );
         } finally {
-            setIsGenerating(false)
+            setIsGenerating(false);
             
             // Force recalculation after the AI response is displayed
-            // The animate-fade-in class will trigger onTransitionEnd,
-            // but we need a fallback in case that doesn't fire
             setTimeout(() => {
-                forceRecalculation()
-                // Final safety net recalculation for slow devices
-                setTimeout(() => forceRecalculation(), 300)
-            }, 100) // Initial delay to ensure the DOM has updated
+                forceRecalculation();
+            }, 100);
         }
-    }
+    };
 
     return (
         <div className='my-4 sm:my-6 md:my-8 overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transform transition-all duration-300 hover:shadow-xl hover:border-brandGray-600 flex flex-col h-[600px] sm:h-[650px] md:h-[670px] lg:h-[700px]'>
             {/* Project Header */}
             <div className='p-3 sm:p-4 md:p-5 border-b border-brandGray-700 bg-gradient-to-r from-brandGray-800 via-brandGray-800 to-brandBlue-900/10'>
                 <div className='flex items-center justify-between mb-2'>
-                    <span className='text-sm font-semibold text-white px-2 py-1 rounded-md bg-gradient-to-r from-neonOrange-700 to-neonOrange-600 shadow-sm'>
+                    <span className='text-sm font-semibold text-white px-2 py-1 rounded-md bg-gradient-to-r from-brandOrange-700 to-brandOrange-600 shadow-sm'>
                         Project {projectNumber}
                     </span>
                     <button
-                        onClick={() => onNavigateToProject?.(-1)} /* -1 is a special value that means "go to overview" */
+                        onClick={() => onNavigateToProject?.(-1)}
                         className="group flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm text-brandGray-400 hover:text-brandGreen-400 transition-all duration-300"
                     >
                         <svg
@@ -151,77 +130,35 @@ export default function ProjectCard({
             </div>
 
             {/* Project Content */}
-            <div className='p-3 sm:p-4 md:p-5 flex-1 flex flex-col'>
-                <div
-                    className={clsx(
-                        'prose prose-sm prose-invert max-w-none',
-                        'prose-headings:text-brandGreen-300 prose-strong:text-brandGreen-400',
-                        'transition-all duration-500 ease-in-out',
-                        expanded
-                            ? 'max-h-[500px] sm:max-h-[600px] md:max-h-[800px]'
-                            : 'max-h-[80px] sm:max-h-[100px] md:max-h-[120px] overflow-hidden relative'
-                    )}
-                    onTransitionEnd={() => {
-                        // Force recalculation when the transition completes
-                        forceRecalculation();
-                        // Fallback: if onTransitionEnd fires slightly early, force again after a brief delay
-                        setTimeout(() => forceRecalculation(), 200);
-                    }}
-                >
-                    {!expanded && (
-                        <div className='absolute bottom-0 left-0 right-0 h-8 sm:h-10 md:h-12 bg-gradient-to-t from-brandGray-800 to-transparent'></div>
-                    )}
+            <div className='p-3 sm:p-4 md:p-5 flex-1 flex flex-col overflow-y-auto'>
+                <div className='prose prose-sm prose-invert max-w-none prose-headings:text-brandGreen-300 prose-strong:text-brandGreen-400'>
                     <p>{initialDescription}</p>
 
-                    {expanded && (
-                        <>
-                            <h3>The Challenge</h3>
-                            <p>
-                                This project presented numerous technical and
-                                design challenges that pushed our team to
-                                innovate.
-                            </p>
+                    <h3>The Challenge</h3>
+                    <p>
+                        This project presented numerous technical and
+                        design challenges that pushed our team to
+                        innovate.
+                    </p>
 
-                            <h3>Key Innovations</h3>
-                            <ul>
-                                <li>
-                                    Implemented real-time data processing
-                                    pipelines
-                                </li>
-                                <li>
-                                    Designed an intuitive interface for complex
-                                    information
-                                </li>
-                                <li>
-                                    Optimized performance for mobile devices
-                                </li>
-                            </ul>
-                        </>
-                    )}
+                    <h3>Key Innovations</h3>
+                    <ul>
+                        <li>
+                            Implemented real-time data processing
+                            pipelines
+                        </li>
+                        <li>
+                            Designed an intuitive interface for complex
+                            information
+                        </li>
+                        <li>
+                            Optimized performance for mobile devices
+                        </li>
+                    </ul>
                 </div>
-
-                {/* Read More Toggle */}
-                <button
-                    onClick={handleReadMore}
-                    className='mt-auto mb-3 text-sm font-medium text-brandGreen-400 hover:text-brandGreen-300 flex items-center gap-1 transition-all duration-200'
-                >
-                    {expanded ? 'Show Less' : 'Read More'}
-                    <svg
-                        xmlns='http://www.w3.org/2000/svg'
-                        className={clsx(
-                            'h-4 w-4 transition-transform duration-200',
-                            expanded ? 'rotate-180' : ''
-                        )}
-                        viewBox='0 0 20 20'
-                        fill='currentColor'
-                    >
-                        <path
-                            fillRule='evenodd'
-                            d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z'
-                            clipRule='evenodd'
-                        />
-                    </svg>
-                </button>
+                
+                {/* Spacer to push content to top */}
+                <div className="flex-grow"></div>
             </div>
 
             {/* Interactive Chat Section */}
@@ -232,22 +169,17 @@ export default function ProjectCard({
                         fullWidth={true}
                         size='sm'
                     >
-                        {/* Keep the corner highlight from the original design */}
+                        {/* Corner highlight */}
                         <div className='absolute top-0 right-0 w-[20px] h-[20px] opacity-0 animate-corner-highlight'>
-                            <div className='absolute top-0 right-0 w-[2px] h-[6px] bg-neonOrange-500/70 rounded-sm'></div>
-                            <div className='absolute top-0 right-0 w-[6px] h-[2px] bg-neonOrange-500/70 rounded-sm'></div>
+                            <div className='absolute top-0 right-0 w-[2px] h-[6px] bg-brandOrange-500/70 rounded-sm'></div>
+                            <div className='absolute top-0 right-0 w-[6px] h-[2px] bg-brandOrange-500/70 rounded-sm'></div>
                         </div>
                         Ask About This Project
                     </PrimaryButton>
                 ) : (
                     <div 
                         className='bg-brandGray-900 rounded-lg p-2 sm:p-3 md:p-4 animate-fade-in'
-                        onTransitionEnd={() => {
-                            // Force recalculation when animation completes
-                            forceRecalculation();
-                            // Fallback recalculation
-                            setTimeout(() => forceRecalculation(), 200);
-                        }}
+                        onTransitionEnd={() => forceRecalculation()}
                     >
                         <div className='flex justify-between items-center mb-3'>
                             <h3 className='text-sm font-medium text-brandGreen-300'>
@@ -278,9 +210,7 @@ export default function ProjectCard({
                                     ref={chatInputRef}
                                     type='text'
                                     value={userQuestion}
-                                    onChange={e =>
-                                        setUserQuestion(e.target.value)
-                                    }
+                                    onChange={e => setUserQuestion(e.target.value)}
                                     placeholder='E.g., How did you handle state management?'
                                     className='flex-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-brandGray-800 border border-brandGray-700 rounded-lg text-xs sm:text-sm text-white focus:ring-1 focus:ring-brandGreen-400 focus:border-brandGreen-400 outline-none'
                                     maxLength={140}
@@ -327,7 +257,7 @@ export default function ProjectCard({
                         </form>
 
                         {aiResponse && (
-                            <div className='bg-brandGray-800 rounded-lg p-2 sm:p-3 border-l-2 border-neonOrange-500 animate-fade-in text-xs sm:text-sm text-brandGray-200'>
+                            <div className='bg-brandGray-800 rounded-lg p-2 sm:p-3 border-l-2 border-brandOrange-500 animate-fade-in text-xs sm:text-sm text-brandGray-200'>
                                 {aiResponse}
                             </div>
                         )}
@@ -344,5 +274,5 @@ export default function ProjectCard({
                 />
             </div>
         </div>
-    )
+    );
 }
