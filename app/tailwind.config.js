@@ -6,7 +6,7 @@ import textShadowsPlugin from './src/styles/plugins/textShadows.js'
 import typography from '@tailwindcss/typography'
 import {
     brandGreen,
-    neonOrange,
+    brandOrange,
     brandBlue,
     brandGray,
 } from './src/styles/colors.js'
@@ -75,7 +75,7 @@ export default {
             }),
             colors: {
                 brandGreen,
-                neonOrange,
+                brandOrange,
                 brandBlue,
                 brandGray,
             },
