@@ -41,14 +41,14 @@ const PROJECTS = [
     },
     {
         id: 3,
-        title: 'Cross the Box Game',
+        title: 'Ascend-Avoid',
         summary:
             'A responsive HTML5 Canvas game with touch controls and progressive difficulty.',
         stack: ['JavaScript', 'HTML5 Canvas', 'CSS3', 'Jest'],
         initialDescription:
             'I created this browser-based arcade game to practice object-oriented JavaScript and canvas animation. The game features a player-controlled white block that must navigate across the screen while avoiding moving obstacles, with difficulty increasing as your score rises.',
         detailedDescription:
-            'Cross the Box is an HTML5 Canvas game that works across devices, offering both keyboard and touch controls. The game presents the player with a simple yet challenging objective: guide a white block to the top of the screen without colliding with blue obstacle blocks. As you progress, the game becomes increasingly difficult by spawning more obstacles at higher speeds.',
+            'Ascend-Avoid is an HTML5 Canvas game that works across devices, offering both keyboard and touch controls. The game presents the player with a simple yet challenging objective: guide a white block to the top of the screen without colliding with blue obstacle blocks. As you progress, the game becomes increasingly difficult by spawning more obstacles at higher speeds.',
         technicalDetails:
             'Built with vanilla JavaScript using ES6+ features and classes for game objects. The animation system uses requestAnimationFrame with delta time calculations to ensure consistent gameplay regardless of device performance. Collision detection is optimized using axis-aligned bounding box (AABB) algorithms. The game includes intelligent obstacle spawning logic to prevent unfair object clustering.',
         challenges:
