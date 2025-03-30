@@ -1,6 +1,6 @@
 import React from 'react';
 import clsx from 'clsx';
-import { brandGreen, neonOrange, brandGray } from '../../../styles/colors';
+import { brandColors } from '../../../styles/colors';
 
 /**
  * Enhanced project markers that display on the progress timeline
@@ -26,7 +26,7 @@ const ProjectMarkers = ({ currentProject, totalProjects, onProjectClick }) => {
             'absolute inset-0 rounded-full transform transition-all duration-300',
             'border-2',
             index + 1 === currentProject
-              ? 'border-neonOrange-500 scale-100 animate-pulse-subtle'
+              ? 'border-brandOrange-500 scale-100 animate-pulse-subtle'
               : index + 1 < currentProject
                 ? 'border-brandGreen-500 scale-90'
                 : 'border-brandGray-600 scale-75'

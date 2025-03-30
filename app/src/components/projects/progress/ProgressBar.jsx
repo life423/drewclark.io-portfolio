@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { brandGreen, brandBlue, neonOrange } from '../../../styles/colors';
+import { brandColors } from '../../../styles/colors';
 
 /**
  * Enhanced progress bar component with dynamic shimmer animation
@@ -12,10 +12,10 @@ const ProgressBar = ({ progress, isTransitioning = false }) => {
     width: `${progress}%`,
     background: `linear-gradient(
       90deg,
-      ${brandGreen[500]} 0%,
-      ${brandBlue[500]} 50%, 
-      ${neonOrange[400]} 75%,
-      ${neonOrange[500]} 100%
+      ${brandColors.green[500]} 0%,
+      ${brandColors.blue[500]} 50%, 
+      ${brandColors.orange[400]} 75%,
+      ${brandColors.orange[500]} 100%
     )`,
     backgroundSize: '200% 100%',
     // Only animate during transitions

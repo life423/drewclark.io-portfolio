@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react'
+import clsx from 'clsx'
 import { useFocus } from '../../contexts/FocusContext'
 import useIntersection from '../../hooks/useIntersection'
+import { ANIMATION, EASING } from '../../styles/constants'
 
 export default function ProgressiveElement({
   id,
@@ -8,10 +10,11 @@ export default function ProgressiveElement({
   className = '',
   appearOnScroll = false,
   appearDelay = 0,
+  // TODO: Implement or remove unused prop
   focusStage = 0,
   dimWhenInactive = true,
-  transitionDuration = 800,
-  transitionEasing = 'cubic-bezier(0.23, 1, 0.32, 1)'
+  transitionDuration = ANIMATION.STANDARD,
+  transitionEasing = EASING.SMOOTH
 }) {
   const [visible, setVisible] = useState(false)
   const { isActive, focusElement } = useFocus()
@@ -34,23 +37,26 @@ export default function ProgressiveElement({
     }
   }, [appearOnScroll, isIntersecting])
   
-  // Determine the state-based classes - modified to use wasActive for preventing re-blur
-  const stateClasses = [
+  // Determine the state-based classes
+  // Note: Despite the comment below, there is no 'wasActive' tracking in the current implementation
+  // The dimming logic is solely based on current active state, visibility, and the dimWhenInactive prop
+  const stateClasses = clsx(
     visible ? 'pe-visible' : 'pe-hidden',
     isActive(id) ? 'pe-focused' : 'pe-unfocused',
     // Only apply the dimmed (blur) effect if:
     // - Dimming is enabled via prop
     // - The element is not active
     // - The element is visible
-    // - AND the element has never been active before (to prevent re-blurring)
-    dimWhenInactive && !isActive(id) && visible ? 'pe-dimmed' : ''
-  ].filter(Boolean).join(' ')
+    {
+      'pe-dimmed': dimWhenInactive && !isActive(id) && visible
+    }
+  )
   
   return (
     <div
       ref={elementRef}
       id={id}
-      className={`progressive-element ${stateClasses} ${className}`}
+      className={clsx('progressive-element', stateClasses, className)}
       style={{
         transition: `opacity ${transitionDuration}ms ${transitionEasing}, 
                      transform ${transitionDuration}ms ${transitionEasing},

@@ -18,7 +18,7 @@ export const brandGreen = {
     950: '#015338', // extra dark green
 }
 
-export const neonOrange = {
+export const brandOrange = {
     50: '#FFF2E8',
     100: '#FFE6D1',
     200: '#FFC199',
@@ -58,23 +58,31 @@ export const brandGray = {
 }
 
 /**
- * Core brand colors for easy access
+ * Brand colors - single standardized export pattern
+ * 
+ * Usage:
+ * import { brandColors } from '../styles/colors'
+ * 
+ * Access individual colors:
+ * - brandColors.green[500]  // #10B981
+ * - brandColors.orange[500] // #FF6B00
+ * - brandColors.blue[500]   // #0EA5E9
+ * - brandColors.gray[500]   // #71717A
  */
+export const brandColors = {
+    green: brandGreen,
+    orange: brandOrange,
+    blue: brandBlue,
+    gray: brandGray
+}
+
+// For easy access to most commonly used shades
 export const coreColors = {
     green: brandGreen[500],  // #10B981
     blue: brandBlue[500],    // #0EA5E9
-    orange: neonOrange[500], // #FF6B00
+    orange: brandOrange[500], // #FF6B00
     gray: brandGray[500],    // #71717A
 }
 
-/**
- * Complete color palette for the application
- */
-export const colors = {
-    brandGreen,
-    neonOrange,
-    brandBlue,
-    brandGray,
-}
-
-export default colors;
+// Export as default for backward compatibility
+export default brandColors;
