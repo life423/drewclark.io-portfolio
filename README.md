@@ -1,6 +1,34 @@
 # Drew Clark Portfolio
 
-This is the portfolio of Drew Clark, showcasing projects and skills.
+Welcome to the portfolio of Drew Clark, showcasing projects and skills!
+
+![Portfolio Banner](https://via.placeholder.com/1200x400?text=Drew+Clark+Portfolio)
+
+## Table of Contents
+- [Drew Clark Portfolio](#drew-clark-portfolio)
+  - [Table of Contents](#table-of-contents)
+  - [Getting Started](#getting-started)
+  - [Running the Application](#running-the-application)
+  - [Running Tests](#running-tests)
+  - [Deployment](#deployment)
+  - [License](#license)
+  - [Containerized Application](#containerized-application)
+    - [Prerequisites](#prerequisites)
+    - [Environment Variables](#environment-variables)
+      - [OpenAI API Key Setup](#openai-api-key-setup)
+  - [Development](#development)
+    - [Running with Docker (Recommended)](#running-with-docker-recommended)
+    - [Running Locally Without Docker](#running-locally-without-docker)
+  - [Production](#production)
+    - [Building and Running the Production Container](#building-and-running-the-production-container)
+    - [Manual Production Build](#manual-production-build)
+  - [Architecture](#architecture)
+  - [API Endpoints](#api-endpoints)
+  - [Docker Configuration](#docker-configuration)
+  - [Continuous Integration and Deployment (CI/CD)](#continuous-integration-and-deployment-cicd)
+    - [CI/CD Workflow](#cicd-workflow)
+    - [Setup Instructions](#setup-instructions)
+    - [GitHub Actions Files](#github-actions-files)
 
 ## Getting Started
 
@@ -53,6 +81,7 @@ This application has been containerized with Docker, which simplifies deployment
 This project requires an OpenAI API key to enable the AI assistant functionality.
 
 **Option 1: Using .env File (Root Directory)**
+
 Create a `.env` file in the root directory with the following:
 
 ```env
@@ -60,6 +89,7 @@ OPENAI_API_KEY=your_openai_api_key_here
 ```
 
 **Option 2: Using Environment-Specific Files (API Directory)**
+
 For development, copy the template file:
 
 ```bash
@@ -70,9 +100,11 @@ cp api/.env.development.template api/.env.development
 ```
 
 **Option 3: System Environment Variable**
+
 Set the `OPENAI_API_KEY` environment variable directly in your system.
 
 **Option 4: Docker Environment Variable**
+
 When using Docker, you can pass the environment variable at runtime:
 
 ```bash
@@ -204,3 +236,5 @@ For detailed setup instructions, see the [CI-CD-SETUP.md](./CI-CD-SETUP.md) file
 ### GitHub Actions Files
 
 - `.github/workflows/ci-cd.yml`: Main CI/CD workflow definition
+
+![CI/CD Pipeline](https://via.placeholder.com/1200x400?text=CI%2FCD+Pipeline)
