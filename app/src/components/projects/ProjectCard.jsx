@@ -5,6 +5,9 @@ import PrimaryButton from '../utils/PrimaryButton'
 import { ProjectProgressIndicator } from './progress'
 import useScrollPosition from '../../hooks/useScrollPosition'
 
+import TypedTextEffect from '../hero/TypedTextEffect'
+import useIntersection from '../../hooks/useIntersection'
+
 export default function ProjectCard({
     projectNumber,
     title,
@@ -19,6 +22,8 @@ export default function ProjectCard({
     onNavigateToProject,
     totalProjects = 3,
     hideToc = false, // New prop to hide the table of contents in the card
+    isActive = false, // Whether this card is the active one
+    onClick = null, // Click handler for the card
 }) {
     const [expanded, setExpanded] = useState(true) // Always start expanded
     const [chatVisible, setChatVisible] = useState(false)
@@ -253,10 +258,19 @@ export default function ProjectCard({
         }
     }
 
+    // Set up ref and use the intersection hook for title animation
+    const headerRef = useRef(null)
+    const headerInView = useIntersection(headerRef, { threshold: 0.2 })
+    
     return (
         <div 
             ref={cardRef}
-            className='my-4 @container overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transform transition-all duration-300 hover:shadow-xl hover:border-brandGray-600 flex flex-col h-auto min-h-[600px] @sm:min-h-[650px] @md:min-h-[670px] @lg:min-h-[700px]'
+            className={clsx(
+                'my-4 @container overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transform transition-all duration-300 flex flex-col h-auto min-h-[600px] @sm:min-h-[650px] @md:min-h-[670px] @lg:min-h-[700px]',
+                isActive ? 'shadow-xl border-brandGreen-600/50' : 'hover:shadow-lg hover:border-brandGray-600',
+                onClick && 'cursor-pointer'
+            )}
+            onClick={() => onClick && onClick()}
         >
             {/* Project Header */}
             <div className='p-3 @sm:p-4 @md:p-5 border-b border-brandGray-700 bg-gradient-to-r from-brandGray-800 via-brandGray-800 to-brandBlue-900/10'>
@@ -284,8 +298,18 @@ export default function ProjectCard({
                     </button>
                 </div>
 
-                <h2 className='text-xl @sm:text-2xl font-bold text-brandGreen-300 mb-1'>
-                    {title}
+                <h2 
+                    ref={headerRef}
+                    className='text-xl @sm:text-2xl font-bold text-brandGreen-300 mb-1 min-h-[1.75rem] @sm:min-h-[2rem]'
+                >
+                    {headerInView ? (
+                        <TypedTextEffect 
+                            phrases={[title]} 
+                            typingSpeed={40} 
+                            deletingSpeed={30}
+                            pauseTime={30000} // Very long pause so it doesn't loop
+                        />
+                    ) : title}
                 </h2>
                 <div className='flex flex-wrap gap-1 @sm:gap-2 mt-2 @sm:mt-3'>
                     {stack.map((tech, index) => (
@@ -369,72 +393,27 @@ export default function ProjectCard({
                         onTransitionEnd={() => forceRecalculation()}
                     >
                         <div className='flex justify-between items-center mb-3'>
-                            <div className="flex items-center">
-                                <h3 className='text-sm font-semibold text-brandGreen-400 tracking-wide'>
-                                    Ask About This Project
-                                </h3>
-                                <div className="flex space-x-1">
-                                    {messages.length > 0 && (
-                                        <span className="ml-2 px-1.5 py-0.5 bg-brandGreen-500/10 rounded text-[10px] text-brandGreen-300 border border-brandGreen-500/20">
-                                            Context aware
-                                        </span>
-                                    )}
-                                    {autoHeight && (
-                                        <span className="ml-2 px-1.5 py-0.5 bg-brandOrange-500/10 rounded text-[10px] text-brandOrange-300 border border-brandOrange-500/20">
-                                            Expanded view
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                {messages.length > 0 && (
-                                    <button
-                                        onClick={() => setAutoHeight(prev => !prev)}
-                                        className='text-brandGray-400 hover:text-brandGreen-400 transition-colors duration-200'
-                                        aria-label={autoHeight ? "Collapse chat" : "Expand chat"}
-                                        title={autoHeight ? "Collapse chat" : "Expand chat"}
-                                    >
-                                        <svg
-                                            xmlns='http://www.w3.org/2000/svg'
-                                            className='h-5 w-5'
-                                            viewBox='0 0 20 20'
-                                            fill='currentColor'
-                                        >
-                                            {autoHeight ? (
-                                                <path
-                                                    fillRule='evenodd'
-                                                    d='M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z'
-                                                    clipRule='evenodd'
-                                                />
-                                            ) : (
-                                                <path
-                                                    fillRule='evenodd'
-                                                    d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z'
-                                                    clipRule='evenodd'
-                                                />
-                                            )}
-                                        </svg>
-                                    </button>
-                                )}
-                                <button
-                                    onClick={toggleChat}
-                                    className='text-brandGray-400 hover:text-brandGreen-400'
-                                    aria-label="Close chat"
+                            <h3 className='text-sm font-semibold text-brandGreen-400 tracking-wide'>
+                                Ask About This Project
+                            </h3>
+                            <button
+                                onClick={toggleChat}
+                                className='text-brandGray-400 hover:text-brandGreen-400'
+                                aria-label="Close chat"
+                            >
+                                <svg
+                                    xmlns='http://www.w3.org/2000/svg'
+                                    className='h-5 w-5'
+                                    viewBox='0 0 20 20'
+                                    fill='currentColor'
                                 >
-                                    <svg
-                                        xmlns='http://www.w3.org/2000/svg'
-                                        className='h-5 w-5'
-                                        viewBox='0 0 20 20'
-                                        fill='currentColor'
-                                    >
-                                        <path
-                                            fillRule='evenodd'
-                                            d='M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z'
-                                            clipRule='evenodd'
-                                        />
-                                    </svg>
-                                </button>
-                            </div>
+                                    <path
+                                        fillRule='evenodd'
+                                        d='M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z'
+                                        clipRule='evenodd'
+                                    />
+                                </svg>
+                            </button>
                         </div>
 
                         <form onSubmit={handleQuestionSubmit} className='mb-3'>

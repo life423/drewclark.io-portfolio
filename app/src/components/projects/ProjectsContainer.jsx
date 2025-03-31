@@ -283,29 +283,62 @@ export default function ProjectsContainer() {
                             </div>
                         </div>
                         
-                        {/* On desktop - show all projects in a grid */}
-                        <div className='hidden lg:grid grid-cols-3 gap-6'>
-                            {PROJECTS.map((project, index) => (
-                                <div 
-                                    key={project.id}
-                                    className='container-type-inline-size'
-                                >
-                                    <ProjectCard
-                                        projectNumber={index + 1}
-                                        title={project.title}
-                                        summary={project.summary}
-                                        stack={project.stack}
-                                        initialDescription={project.initialDescription}
-                                        detailedDescription={project.detailedDescription}
-                                        technicalDetails={project.technicalDetails}
-                                        challenges={project.challenges}
-                                        readme={project.readme}
-                                        totalProjects={PROJECTS.length}
-                                        onNavigateToProject={() => {/* No-op on desktop grid view */}}
-                                        hideToc={true} // Hide the progress indicator on all cards
-                                    />
-                                </div>
-                            ))}
+                        {/* On desktop - show all projects in a grid with animation */}
+                        <div className='hidden lg:grid grid-cols-3 gap-6 relative'>
+                            {PROJECTS.map((project, index) => {
+                                const isActive = activeProjectIndex === index;
+                                
+                                return (
+                                    <div 
+                                        key={project.id}
+                                        className={clsx(
+                                            'container-type-inline-size transition-all duration-700',
+                                            isActive ? 'z-10 col-span-2 scale-105 origin-left' : 'z-0',
+                                            // Only apply transformations if any card is active
+                                            activeProjectIndex !== null && !isActive && (
+                                                index < activeProjectIndex 
+                                                    ? 'transform -translate-x-[150%] opacity-0 scale-95' 
+                                                    : 'transform translate-x-[100%] opacity-0 scale-95'
+                                            )
+                                        )}
+                                        style={{
+                                            transitionDelay: `${Math.abs(index - activeProjectIndex) * 50}ms`,
+                                            gridColumn: isActive ? 'span 2' : 'span 1'
+                                        }}
+                                    >
+                                        <ProjectCard
+                                            projectNumber={index + 1}
+                                            title={project.title}
+                                            summary={project.summary}
+                                            stack={project.stack}
+                                            initialDescription={project.initialDescription}
+                                            detailedDescription={project.detailedDescription}
+                                            technicalDetails={project.technicalDetails}
+                                            challenges={project.challenges}
+                                            readme={project.readme}
+                                            totalProjects={PROJECTS.length}
+                                            onNavigateToProject={(newIndex) => {
+                                                // If clicking on the active card, toggle it off
+                                                if (isActive && newIndex === -1) {
+                                                    setActiveProjectIndex(null);
+                                                } else if (newIndex >= 0) {
+                                                    navigateToProject(newIndex);
+                                                }
+                                            }}
+                                            hideToc={true}
+                                            isActive={isActive}
+                                            onClick={() => {
+                                                // Toggle active state when clicking on a card
+                                                if (isActive) {
+                                                    setActiveProjectIndex(null);
+                                                } else {
+                                                    setActiveProjectIndex(index);
+                                                }
+                                            }}
+                                        />
+                                    </div>
+                                );
+                            })}
                         </div>
 
                         {/* Mobile/Tablet Navigation Controls */}
