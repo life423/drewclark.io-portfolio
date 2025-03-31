@@ -19,18 +19,11 @@ export default function ProjectCard({
     onNavigateToProject,
     totalProjects = 3,
 }) {
-<<<<<<< Updated upstream
+    const [expanded, setExpanded] = useState(true); // Always start expanded
     const [chatVisible, setChatVisible] = useState(false);
     const [userQuestion, setUserQuestion] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
     const [aiResponse, setAiResponse] = useState('');
-=======
-    const [expanded, setExpanded] = useState(true) // Always start expanded
-    const [chatVisible, setChatVisible] = useState(false)
-    const [userQuestion, setUserQuestion] = useState('')
-    const [isGenerating, setIsGenerating] = useState(false)
-    const [aiResponse, setAiResponse] = useState('')
->>>>>>> Stashed changes
 
     const chatInputRef = useRef(null);
 
@@ -138,37 +131,6 @@ export default function ProjectCard({
             </div>
 
             {/* Project Content */}
-<<<<<<< Updated upstream
-            <div className='p-3 sm:p-4 md:p-5 flex-1 flex flex-col overflow-y-auto'>
-                <div className='prose prose-sm prose-invert max-w-none prose-headings:text-brandGreen-300 prose-strong:text-brandGreen-400'>
-                    <p>{initialDescription}</p>
-
-                    <h3>The Challenge</h3>
-                    <p>
-                        This project presented numerous technical and
-                        design challenges that pushed our team to
-                        innovate.
-                    </p>
-
-                    <h3>Key Innovations</h3>
-                    <ul>
-                        <li>
-                            Implemented real-time data processing
-                            pipelines
-                        </li>
-                        <li>
-                            Designed an intuitive interface for complex
-                            information
-                        </li>
-                        <li>
-                            Optimized performance for mobile devices
-                        </li>
-                    </ul>
-                </div>
-                
-                {/* Spacer to push content to top */}
-                <div className="flex-grow"></div>
-=======
             <div className='p-3 sm:p-4 md:p-5 flex-1 flex flex-col'>
                 <div
                     className={clsx(
@@ -209,7 +171,6 @@ export default function ProjectCard({
                         </ul>
                     </>
                 </div>
->>>>>>> Stashed changes
             </div>
 
             {/* Interactive Chat Section */}
