@@ -162,7 +162,7 @@ export default function Hero() {
                     <span className='px-2 py-0.5 bg-brandBlue-800/70 rounded text-xs font-medium text-brandBlue-100 border border-brandBlue-500/40 whitespace-nowrap'>
                         Cloud
                     </span>
-                    <span className='px-2 py-0.5 bg-neonOrange-900/70 rounded text-xs font-medium text-neonOrange-100 border border-neonOrange-600/40 whitespace-nowrap'>
+                    <span className='px-2 py-0.5 bg-brandOrange-900/70 rounded text-xs font-medium text-brandOrange-100 border border-brandOrange-600/40 whitespace-nowrap'>
                         AI
                     </span>
                 </div>
