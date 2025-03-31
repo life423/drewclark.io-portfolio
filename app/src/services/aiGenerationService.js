@@ -46,6 +46,7 @@ function extractGitHubUrl(projectData) {
  * @param {string} projectData.summary - Brief project summary
  * @param {string[]} projectData.stack - Technologies used in the project
  * @param {string} projectData.initialDescription - Initial project description
+ * @param {Object} [projectData.uiContext] - Current UI context information (optional)
  * @param {string} question - The user's question about the project
  * @returns {Promise<string>} - The AI-generated response
  */
@@ -67,10 +68,22 @@ ${repoUrl ? `GitHub Repository: ${repoUrl}` : ''}
 ${projectData.readme ? `Documentation: ${projectData.readme}` : ''}
 `;
 
-    // Prepare the request body with the comprehensive context
+    // Add UI context if available
+    const uiContextStr = projectData.uiContext ? `
+Current User Context:
+- User is currently viewing: ${projectData.uiContext.activeSection || 'project overview'}
+- User interaction state: ${projectData.uiContext.interactionState || 'browsing'}
+- Previous questions in this session: ${projectData.uiContext.previousQuestions?.length ? projectData.uiContext.previousQuestions.join(', ') : 'None'}
+${projectData.uiContext.scrollPosition ? `- User has scrolled to: ${projectData.uiContext.scrollPosition}` : ''}
+${projectData.uiContext.customContext || ''}
+
+When responding, acknowledge the user's current context and tailor your answer to be relevant to what they're currently viewing or interacting with. Be conversational and reference specific details they can see on their screen.
+` : '';
+
+    // Prepare the request body with the comprehensive context including UI state
     const requestBody = {
-      question: `${context}\n\nQuestion: ${question}`,
-      maxTokens: 250,
+      question: `${context}${projectData.uiContext ? uiContextStr : ''}\n\nQuestion: ${question}`,
+      maxTokens: 300, // Increased to allow for more contextual responses
       temperature: 0.7
     };
     
