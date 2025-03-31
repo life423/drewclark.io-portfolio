@@ -311,16 +311,11 @@ export default function ProjectCard({
                             </div>
                         </form>
 
-                        {/* Message thread container */}
+                        {/* Message thread container with optimized scrolling */}
                         {messages.length > 0 && (
                             <div
                                 ref={chatContainerRef}
-                                className='max-h-60 overflow-y-auto mb-3 pr-1'
-                                style={{
-                                    scrollbarWidth: 'thin',
-                                    scrollbarColor:
-                                        'rgb(55, 65, 81) transparent',
-                                }}
+                                className='max-h-[200px] overflow-y-auto mb-3 space-y-2 pr-1 scrollbar-thin scrollbar-thumb-brandGray-700 scrollbar-track-transparent'
                             >
                                 {messages.map((msg, index) => (
                                     <div
