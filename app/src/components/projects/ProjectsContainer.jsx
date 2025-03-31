@@ -142,14 +142,19 @@ export default function ProjectsContainer() {
                             </div>
 
                             <div className='mt-auto'>
-                                <PrimaryButton
+                                <button
                                     onClick={handleStart}
-                                    size='md'
-                                    className='relative'
-                                    fullWidth={true}
+                                    className='w-full px-4 py-2 bg-brandGreen-600 hover:bg-brandGreen-500 text-white rounded-md font-medium transition-colors duration-200 will-change-transform'
+                                    style={{
+                                        backfaceVisibility: 'hidden',
+                                        WebkitBackfaceVisibility: 'hidden',
+                                        transform: 'translateZ(0)',
+                                        WebkitFontSmoothing: 'antialiased',
+                                        MozOsxFontSmoothing: 'grayscale'
+                                    }}
                                 >
                                     <span>View Projects</span>
-                                </PrimaryButton>
+                                </button>
                             </div>
                         </div>
                     </div>

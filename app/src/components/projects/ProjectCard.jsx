@@ -388,8 +388,15 @@ export default function ProjectCard({
                     </PrimaryButton>
                 ) : (
                     <div
-                        className='bg-brandGray-900 rounded-lg p-2 @sm:p-3 @md:p-4 animate-fade-in relative z-50 shadow-md'
-                        style={{ zIndex: 50 }} // Inline style for clarity and to ensure it takes precedence
+                        className='bg-brandGray-900 rounded-lg p-2 @sm:p-3 @md:p-4 animate-fade-in relative z-50 shadow-md will-change-transform'
+                        style={{ 
+                            zIndex: 50,
+                            backfaceVisibility: 'hidden', // Prevent blurriness
+                            WebkitBackfaceVisibility: 'hidden',
+                            transform: 'translateZ(0)', // Force GPU acceleration to fix blurriness
+                            WebkitFontSmoothing: 'antialiased',
+                            MozOsxFontSmoothing: 'grayscale'
+                        }}
                         onTransitionEnd={() => forceRecalculation()}
                     >
                         <div className='flex justify-between items-center mb-3'>
@@ -426,7 +433,14 @@ export default function ProjectCard({
                                         setUserQuestion(e.target.value)
                                     }
                                     placeholder='E.g., How did you handle state management?'
-                                    className='flex-1 px-2 @sm:px-3 py-1.5 @sm:py-2 bg-brandGray-800 border border-brandGray-700 rounded-lg text-xs @sm:text-sm text-white focus:ring-2 focus:ring-brandGreen-500/40 focus:border-brandGreen-500 outline-none transition-all duration-200'
+                                    className='flex-1 px-2 @sm:px-3 py-1.5 @sm:py-2 bg-brandGray-800 border border-brandGray-700 rounded-lg text-xs @sm:text-sm text-white focus:ring-2 focus:ring-brandGreen-500/40 focus:border-brandGreen-500 outline-none transition-all duration-200 will-change-transform'
+                                    style={{
+                                        backfaceVisibility: 'hidden',
+                                        WebkitBackfaceVisibility: 'hidden',
+                                        transform: 'translateZ(0)',
+                                        WebkitFontSmoothing: 'antialiased',
+                                        MozOsxFontSmoothing: 'grayscale'
+                                    }}
                                     maxLength={140}
                                 />
                                 <button
@@ -434,13 +448,20 @@ export default function ProjectCard({
                                     disabled={isGenerating}
                                     className={clsx(
                                         'px-2 @sm:px-3 py-1.5 @sm:py-2 rounded-lg text-xs @sm:text-sm font-medium transition-all duration-300',
-                                        'relative overflow-hidden border',
+                                        'relative overflow-hidden border will-change-transform',
                                         isGenerating
                                             ? 'bg-brandGray-700 text-brandGray-500 border-transparent cursor-wait'
                                             : !userQuestion.trim()
                                             ? 'bg-transparent text-brandGreen-400 border-brandGreen-500/50 hover:bg-brandGreen-500/10' // Empty state: green text, green border
                                             : 'bg-gradient-to-r from-brandGreen-600 to-brandGreen-500 text-white hover:shadow-lg hover:shadow-brandGreen-500/20 border-transparent' // Filled state: gradient green
                                     )}
+                                    style={{
+                                        backfaceVisibility: 'hidden',
+                                        WebkitBackfaceVisibility: 'hidden',
+                                        transform: 'translateZ(0)',
+                                        WebkitFontSmoothing: 'antialiased',
+                                        MozOsxFontSmoothing: 'grayscale'
+                                    }}
                                 >
                                     {/* Shine effect for filled state */}
                                     {userQuestion.trim() && !isGenerating && (
