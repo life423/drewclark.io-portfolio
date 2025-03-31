@@ -110,9 +110,9 @@ export default function ProjectCard({
     };
 
     return (
-        <div className='my-4 sm:my-6 md:my-8 overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transform transition-all duration-300 hover:shadow-xl hover:border-brandGray-600 flex flex-col h-[600px] sm:h-[650px] md:h-[670px] lg:h-[700px]'>
+        <div className='my-4 @container overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transform transition-all duration-300 hover:shadow-xl hover:border-brandGray-600 flex flex-col h-[600px] @sm:h-[650px] @md:h-[670px] @lg:h-[700px]'>
             {/* Project Header */}
-            <div className='p-3 sm:p-4 md:p-5 border-b border-brandGray-700 bg-gradient-to-r from-brandGray-800 via-brandGray-800 to-brandBlue-900/10'>
+            <div className='p-3 @sm:p-4 @md:p-5 border-b border-brandGray-700 bg-gradient-to-r from-brandGray-800 via-brandGray-800 to-brandBlue-900/10'>
                 <div className='flex items-center justify-between mb-2'>
                     <span className='text-sm font-semibold text-white px-2 py-1 rounded-md bg-gradient-to-r from-brandOrange-700 to-brandOrange-600 shadow-sm'>
                         Project {projectNumber}
@@ -137,14 +137,14 @@ export default function ProjectCard({
                     </button>
                 </div>
 
-                <h2 className='text-xl sm:text-2xl font-bold text-brandGreen-300 mb-1'>
+                <h2 className='text-xl @sm:text-2xl font-bold text-brandGreen-300 mb-1'>
                     {title}
                 </h2>
-                <div className='flex flex-wrap gap-1 sm:gap-2 mt-2 sm:mt-3'>
+                <div className='flex flex-wrap gap-1 @sm:gap-2 mt-2 @sm:mt-3'>
                     {stack.map((tech, index) => (
                         <span
                             key={index}
-                            className='text-xs font-medium text-brandGray-300 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full bg-brandGray-700'
+                            className='text-xs font-medium text-brandGray-300 px-1.5 @sm:px-2 py-0.5 @sm:py-1 rounded-full bg-brandGray-700'
                         >
                             {tech}
                         </span>
@@ -153,7 +153,7 @@ export default function ProjectCard({
             </div>
 
             {/* Project Content */}
-            <div className='p-3 sm:p-4 md:p-5 flex-1 flex flex-col'>
+            <div className='p-3 @sm:p-4 @md:p-5 flex-1 flex flex-col'>
                 <div
                     className={clsx(
                         'prose prose-sm prose-invert max-w-none',
@@ -196,7 +196,7 @@ export default function ProjectCard({
             </div>
 
             {/* Interactive Chat Section */}
-            <div className='relative p-3 sm:p-4 md:p-5 flex-shrink-0 overflow-hidden'>
+            <div className='relative p-3 @sm:p-4 @md:p-5 flex-shrink-0 overflow-hidden'>
                 {/* Animated divider that extends when chat opens */}
                 <div className={clsx(
                     "absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-brandGreen-600/10 via-brandGreen-500 to-brandGreen-600/10 transition-all duration-500 ease-out",
@@ -219,7 +219,7 @@ export default function ProjectCard({
                     </PrimaryButton>
                 ) : (
                     <div 
-                        className='bg-brandGray-900 rounded-lg p-2 sm:p-3 md:p-4 animate-fade-in'
+                        className='bg-brandGray-900 rounded-lg p-2 @sm:p-3 @md:p-4 animate-fade-in'
                         onTransitionEnd={() => forceRecalculation()}
                     >
                         <div className='flex justify-between items-center mb-3'>
@@ -253,14 +253,14 @@ export default function ProjectCard({
                                     value={userQuestion}
                                     onChange={e => setUserQuestion(e.target.value)}
                                     placeholder='E.g., How did you handle state management?'
-                                    className='flex-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-brandGray-800 border border-brandGray-700 rounded-lg text-xs sm:text-sm text-white focus:ring-2 focus:ring-brandGreen-500/40 focus:border-brandGreen-500 outline-none transition-all duration-200'
+                                    className='flex-1 px-2 @sm:px-3 py-1.5 @sm:py-2 bg-brandGray-800 border border-brandGray-700 rounded-lg text-xs @sm:text-sm text-white focus:ring-2 focus:ring-brandGreen-500/40 focus:border-brandGreen-500 outline-none transition-all duration-200'
                                     maxLength={140}
                                 />
                                 <button
                                     type='submit'
                                     disabled={isGenerating}
                                     className={clsx(
-                                        'px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-300',
+                                        'px-2 @sm:px-3 py-1.5 @sm:py-2 rounded-lg text-xs @sm:text-sm font-medium transition-all duration-300',
                                         'relative overflow-hidden border',
                                         isGenerating
                                             ? 'bg-brandGray-700 text-brandGray-500 border-transparent cursor-wait'
@@ -320,7 +320,7 @@ export default function ProjectCard({
                                         )}
                                     >
                                         <div className={clsx(
-                                            'rounded-lg p-2 sm:p-3 text-xs sm:text-sm',
+                                            'rounded-lg p-2 @sm:p-3 text-xs @sm:text-sm',
                                             msg.role === 'user'
                                                 ? 'bg-brandGray-700 text-brandGreen-200 border-r-2 border-r-brandGreen-500' 
                                                 : 'bg-brandGray-800 bg-opacity-80 border-l-2 border-l-brandOrange-500 shadow-inner shadow-brandGray-900/50 text-brandGray-200'
@@ -331,7 +331,7 @@ export default function ProjectCard({
                                 ))}
                                 {isGenerating && (
                                     <div className='ml-4 mb-2 animate-fade-in'>
-                                        <div className='bg-brandGray-800 bg-opacity-80 rounded-lg p-2 sm:p-3 border-l-2 border-l-brandOrange-500 shadow-inner shadow-brandGray-900/50 text-xs sm:text-sm text-brandGray-200'>
+                                        <div className='bg-brandGray-800 bg-opacity-80 rounded-lg p-2 @sm:p-3 border-l-2 border-l-brandOrange-500 shadow-inner shadow-brandGray-900/50 text-xs @sm:text-sm text-brandGray-200'>
                                             <div className="flex items-center space-x-2">
                                                 <div className="w-2 h-2 rounded-full bg-brandOrange-500 animate-pulse"></div>
                                                 <div className="w-2 h-2 rounded-full bg-brandOrange-500 animate-pulse" style={{ animationDelay: '0.2s' }}></div>
