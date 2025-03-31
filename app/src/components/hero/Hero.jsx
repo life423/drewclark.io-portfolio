@@ -1,7 +1,15 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react'
 import useScrollPosition from '../../hooks/useScrollPosition'
+<<<<<<< Updated upstream
 import HeroBackground from './HeroBackground'
 import HeroContent from './HeroContent'
+=======
+import useViewport from '../../hooks/useViewport'
+import sproutMobile from '../../assets/sprout-mobile.jpg'
+import largeSprout from '../../assets/large-sprout.jpg'
+import PrimaryButton from '../utils/PrimaryButton'
+import ProgressiveElement from '../utils/ProgressiveElement'
+>>>>>>> Stashed changes
 
 export default function Hero() {
     const heroRef = useRef(null)
@@ -48,7 +56,7 @@ export default function Hero() {
         <section
             ref={heroRef}
             onMouseMove={handleMouseMove}
-            className='relative h-[70vh] flex items-center justify-center px-4 py-16 text-white overflow-hidden'
+            className='relative h-[70vh] md:h-[85vh] lg:min-h-screen flex items-center justify-center px-4 py-16 text-white overflow-hidden'
             style={calculateTransform()}
         >
             {/* Spotlight overlay - follows cursor */}
@@ -57,8 +65,29 @@ export default function Hero() {
                 className='absolute inset-0 z-0 pointer-events-none'
             />
 
+<<<<<<< Updated upstream
             {/* Background component with parallax effects */}
             <HeroBackground scrollY={scrollY} />
+=======
+            {/* Enhanced background with parallax and improved effects */}
+            <div className='absolute inset-0 z-0 bg-brandGray-800 transition-padding duration-300 ease-in-out lg:p-[2.5%_5%]'>
+                {/* Base image with parallax scrolling using picture element for responsive images */}
+                <div className='absolute inset-0'>
+                    <picture>
+                        <source media="(min-width: 1024px)" srcSet={largeSprout} />
+                        <img 
+                            src={sproutMobile}
+                            alt="Background"
+                            className='w-full h-full object-cover'
+                            style={{
+                                filter: 'brightness(0.75)',
+                                transform: `translateY(${scrollY * 0.15}px)`,
+                                transition: 'transform 0.2s ease-out',
+                            }}
+                        />
+                    </picture>
+                </div>
+>>>>>>> Stashed changes
 
             {/* Content component with progressive animations */}
             <HeroContent isLoaded={isLoaded} />
