@@ -18,6 +18,7 @@ export default function ProjectCard({
     onAskQuestion,
     onNavigateToProject,
     totalProjects = 3,
+    hideToc = false, // New prop to hide the table of contents in the card
 }) {
     const [expanded, setExpanded] = useState(true) // Always start expanded
     const [chatVisible, setChatVisible] = useState(false)
@@ -26,6 +27,8 @@ export default function ProjectCard({
     const [messages, setMessages] = useState([])
     // Track previous questions to provide context
     const [previousQuestions, setPreviousQuestions] = useState([])
+    // Track when we need to auto-adjust the card height based on content
+    const [autoHeight, setAutoHeight] = useState(false)
     // Track the user's current UI state
     const [uiContext, setUiContext] = useState({
         activeSection: 'overview',
@@ -125,8 +128,27 @@ export default function ProjectCard({
         if (chatContainerRef.current && messages.length > 0) {
             chatContainerRef.current.scrollTop =
                 chatContainerRef.current.scrollHeight
+            
+            // Enable auto-height after messages are added
+            if (messages.length > 1) {
+                setAutoHeight(true)
+            }
         }
     }, [messages])
+    
+    // Measure content height and adjust card height if needed
+    const cardRef = useRef(null)
+    const contentRef = useRef(null)
+    
+    useEffect(() => {
+        if (autoHeight && cardRef.current && contentRef.current) {
+            // Get the current content height
+            const contentHeight = contentRef.current.scrollHeight
+            
+            // Force layout recalculation to ensure accurate measurements
+            forceRecalculation()
+        }
+    }, [autoHeight, messages, forceRecalculation])
 
     const handleQuestionSubmit = async e => {
         e.preventDefault()
@@ -232,7 +254,16 @@ export default function ProjectCard({
     }
 
     return (
-        <div className='my-4 @container overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transform transition-all duration-300 hover:shadow-xl hover:border-brandGray-600 flex flex-col h-[600px] @sm:h-[650px] @md:h-[670px] @lg:h-[700px]'>
+        <div 
+            ref={cardRef}
+            className={clsx(
+                'my-4 @container overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transform',
+                'transition-all duration-500 hover:shadow-xl hover:border-brandGray-600 flex flex-col',
+                !autoHeight 
+                    ? 'h-[600px] @sm:h-[650px] @md:h-[670px] @lg:h-[700px]'
+                    : 'h-auto min-h-[600px] @sm:min-h-[650px] @md:min-h-[670px] @lg:min-h-[700px]'
+            )}
+        >
             {/* Project Header */}
             <div className='p-3 @sm:p-4 @md:p-5 border-b border-brandGray-700 bg-gradient-to-r from-brandGray-800 via-brandGray-800 to-brandBlue-900/10'>
                 <div className='flex items-center justify-between mb-2'>
@@ -275,7 +306,7 @@ export default function ProjectCard({
             </div>
 
             {/* Project Content */}
-            <div className='p-3 @sm:p-4 @md:p-5 flex-1 flex flex-col'>
+            <div ref={contentRef} className='p-3 @sm:p-4 @md:p-5 flex-1 flex flex-col'>
                 <div
                     className={clsx(
                         'prose prose-sm prose-invert max-w-none',
@@ -339,7 +370,8 @@ export default function ProjectCard({
                     </PrimaryButton>
                 ) : (
                     <div
-                        className='bg-brandGray-900 rounded-lg p-2 @sm:p-3 @md:p-4 animate-fade-in relative z-10 shadow-md'
+                        className='bg-brandGray-900 rounded-lg p-2 @sm:p-3 @md:p-4 animate-fade-in relative z-50 shadow-md'
+                        style={{ zIndex: 50 }} // Inline style for clarity and to ensure it takes precedence
                         onTransitionEnd={() => forceRecalculation()}
                     >
                         <div className='flex justify-between items-center mb-3'>
@@ -347,30 +379,68 @@ export default function ProjectCard({
                                 <h3 className='text-sm font-semibold text-brandGreen-400 tracking-wide'>
                                     Ask About This Project
                                 </h3>
-                                {messages.length > 0 && (
-                                    <span className="ml-2 px-1.5 py-0.5 bg-brandGreen-500/10 rounded text-[10px] text-brandGreen-300 border border-brandGreen-500/20">
-                                        Context aware
-                                    </span>
-                                )}
+                                <div className="flex space-x-1">
+                                    {messages.length > 0 && (
+                                        <span className="ml-2 px-1.5 py-0.5 bg-brandGreen-500/10 rounded text-[10px] text-brandGreen-300 border border-brandGreen-500/20">
+                                            Context aware
+                                        </span>
+                                    )}
+                                    {autoHeight && (
+                                        <span className="ml-2 px-1.5 py-0.5 bg-brandOrange-500/10 rounded text-[10px] text-brandOrange-300 border border-brandOrange-500/20">
+                                            Expanded view
+                                        </span>
+                                    )}
+                                </div>
                             </div>
-                            <button
-                                onClick={toggleChat}
-                                className='text-brandGray-400 hover:text-brandGreen-400'
-                                aria-label="Close chat"
-                            >
-                                <svg
-                                    xmlns='http://www.w3.org/2000/svg'
-                                    className='h-5 w-5'
-                                    viewBox='0 0 20 20'
-                                    fill='currentColor'
+                            <div className="flex items-center space-x-2">
+                                {messages.length > 0 && (
+                                    <button
+                                        onClick={() => setAutoHeight(prev => !prev)}
+                                        className='text-brandGray-400 hover:text-brandGreen-400 transition-colors duration-200'
+                                        aria-label={autoHeight ? "Collapse chat" : "Expand chat"}
+                                        title={autoHeight ? "Collapse chat" : "Expand chat"}
+                                    >
+                                        <svg
+                                            xmlns='http://www.w3.org/2000/svg'
+                                            className='h-5 w-5'
+                                            viewBox='0 0 20 20'
+                                            fill='currentColor'
+                                        >
+                                            {autoHeight ? (
+                                                <path
+                                                    fillRule='evenodd'
+                                                    d='M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z'
+                                                    clipRule='evenodd'
+                                                />
+                                            ) : (
+                                                <path
+                                                    fillRule='evenodd'
+                                                    d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z'
+                                                    clipRule='evenodd'
+                                                />
+                                            )}
+                                        </svg>
+                                    </button>
+                                )}
+                                <button
+                                    onClick={toggleChat}
+                                    className='text-brandGray-400 hover:text-brandGreen-400'
+                                    aria-label="Close chat"
                                 >
-                                    <path
-                                        fillRule='evenodd'
-                                        d='M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z'
-                                        clipRule='evenodd'
-                                    />
-                                </svg>
-                            </button>
+                                    <svg
+                                        xmlns='http://www.w3.org/2000/svg'
+                                        className='h-5 w-5'
+                                        viewBox='0 0 20 20'
+                                        fill='currentColor'
+                                    >
+                                        <path
+                                            fillRule='evenodd'
+                                            d='M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z'
+                                            clipRule='evenodd'
+                                        />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
 
                         <form onSubmit={handleQuestionSubmit} className='mb-3'>
@@ -436,7 +506,10 @@ export default function ProjectCard({
                         {messages.length > 0 && (
                             <div
                                 ref={chatContainerRef}
-                                className='max-h-[200px] overflow-y-auto mb-3 space-y-2 pr-1 scrollbar-thin scrollbar-thumb-brandGray-700 scrollbar-track-transparent'
+                                className={clsx(
+                                    'overflow-y-auto mb-3 space-y-2 pr-1 scrollbar-thin scrollbar-thumb-brandGray-700 scrollbar-track-transparent',
+                                    !autoHeight ? 'max-h-[200px]' : 'max-h-[400px]'
+                                )}
                             >
                                 {messages.map((msg, index) => (
                                     <div
@@ -495,14 +568,16 @@ export default function ProjectCard({
                 )}
             </div>
 
-            {/* Footer with project progress indicator */}
-            <div className='border-t border-brandGray-700 bg-brandGray-850 py-3'>
-                <ProjectProgressIndicator
-                    currentProject={projectNumber}
-                    totalProjects={totalProjects}
-                    onProjectClick={index => onNavigateToProject?.(index + 1)}
-                />
-            </div>
+            {/* Footer with project progress indicator - only shown if hideToc is false */}
+            {!hideToc && (
+                <div className='border-t border-brandGray-700 bg-brandGray-850 py-3'>
+                    <ProjectProgressIndicator
+                        currentProject={projectNumber}
+                        totalProjects={totalProjects}
+                        onProjectClick={index => onNavigateToProject?.(index + 1)}
+                    />
+                </div>
+            )}
         </div>
     )
 }
