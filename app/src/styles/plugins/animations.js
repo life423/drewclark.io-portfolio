@@ -195,6 +195,47 @@ export default plugin(function ({ addBase, addUtilities }) {
             '50%': { transform: 'scale(0.95)' },
             '75%': { transform: 'scale(1.1)' },
             '100%': { transform: 'scale(1)' }
+        },
+        '@keyframes disc-drop': {
+            '0%': { 
+                transform: 'translateY(-100%)',
+                opacity: '0.5'
+            },
+            '50%': { 
+                transform: 'translateY(5%)'
+            },
+            '70%': { 
+                transform: 'translateY(-3%)'
+            },
+            '85%': { 
+                transform: 'translateY(1%)'
+            },
+            '100%': { 
+                transform: 'translateY(0)',
+                opacity: '1'
+            }
+        },
+        '@keyframes glow-gentle': {
+            '0%': { 
+                opacity: '0.7',
+                boxShadow: '0 0 5px rgba(16, 185, 129, 0.5)'
+            },
+            '50%': { 
+                opacity: '1',
+                boxShadow: '0 0 10px rgba(16, 185, 129, 0.7)'
+            },
+            '100%': { 
+                opacity: '0.7',
+                boxShadow: '0 0 5px rgba(16, 185, 129, 0.5)'
+            }
+        },
+        '@keyframes column-hover': {
+            '0%': { 
+                backgroundColor: 'rgba(16, 185, 129, 0)' 
+            },
+            '100%': { 
+                backgroundColor: 'rgba(16, 185, 129, 0.1)' 
+            }
         }
     });
 
@@ -332,6 +373,19 @@ export default plugin(function ({ addBase, addUtilities }) {
         },
         '.animate-blink': {
             animation: 'blink 0.8s infinite ease-in-out'
+        },
+        // Connect 4 specific animations
+        '.animate-disc-drop': {
+            animation: 'disc-drop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+            willChange: 'transform, opacity'
+        },
+        '.animate-glow-gentle': {
+            animation: 'glow-gentle 2s ease-in-out infinite',
+            willChange: 'opacity, box-shadow'
+        },
+        '.animate-column-hover': {
+            animation: 'column-hover 0.3s ease-out forwards',
+            willChange: 'background-color'
         }
     })
 })

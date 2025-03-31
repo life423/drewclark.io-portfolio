@@ -3,7 +3,6 @@ import useViewport from '../../hooks/useViewport'
 import { brandGreen, brandBlue } from '../../styles/colors'
 // Temporarily removing Three.js dependency to fix build error
 // import * as THREE from 'three'
-// import { Canvas, useFrame, useThree } from '@react-three/fiber'
 
 // Placeholder static canvas with simple dots (temporary solution)
 const PlaceholderCanvas = ({ scrollPosition }) => {

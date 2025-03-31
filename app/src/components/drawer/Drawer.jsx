@@ -3,10 +3,13 @@
  * Optimized for cross-platform compatibility including iOS, Android, and Edge
  * Follows accessibility best practices for modal dialogs
  */
-import React, { useEffect, useRef, useCallback, memo, useState } from 'react'
-import { LuX } from 'react-icons/lu'
+import React, { useEffect, useRef, useCallback, memo, useState, lazy, Suspense } from 'react'
+import { LuX, LuGamepad2 } from 'react-icons/lu'
 import clsx from 'clsx'
 import useLockBodyScroll from '../../hooks/useLockBodyScroll'
+
+// Lazy load the Connect4Game component to avoid impacting initial load time
+const Connect4Game = lazy(() => import('../games/connect4/Connect4Game'))
 
 // Navigation links without icons for now
 const navigationLinks = [
@@ -19,6 +22,7 @@ const navigationLinks = [
 const Drawer = memo(function Drawer({ isOpen, onClose }) {
     const drawerRef = useRef(null)
     const closeButtonRef = useRef(null)
+    const [showGame, setShowGame] = useState(false)
 
     // Use our enhanced hook to lock body scroll - this replaces the manual scroll locking
     useLockBodyScroll(isOpen)
@@ -190,6 +194,40 @@ const Drawer = memo(function Drawer({ isOpen, onClose }) {
                             ))}
                         </ul>
                     </nav>
+
+                    {/* Connect 4 Game Section */}
+                    <div className="mt-6 px-4">
+                        <button 
+                            onClick={() => setShowGame(!showGame)}
+                            className="flex items-center justify-between w-full px-4 py-3 text-white hover:bg-brandGray-700/40 hover:text-brandGreen-300 transition-colors rounded-md"
+                            aria-expanded={showGame}
+                        >
+                            <span className="flex items-center gap-2">
+                                <LuGamepad2 className="w-5 h-5 text-brandGreen-400" />
+                                <span>Connect 4 Challenge</span>
+                            </span>
+                            <span className={`transform transition-transform duration-300 ${showGame ? 'rotate-180' : ''}`}>
+                                ▼
+                            </span>
+                        </button>
+                        
+                        {showGame && (
+                            <div className="mt-3 pb-4 animate-fade-in">
+                                <Suspense fallback={
+                                    <div className="p-4 text-center text-sm text-brandGray-300 bg-brandGray-800 rounded-lg border border-brandGray-700">
+                                        <div className="flex justify-center items-center h-12 mb-2">
+                                            <div className="w-2 h-2 rounded-full bg-brandGreen-500 animate-pulse mr-1" style={{ animationDelay: '0s' }}></div>
+                                            <div className="w-2 h-2 rounded-full bg-brandGreen-500 animate-pulse mx-1" style={{ animationDelay: '0.2s' }}></div>
+                                            <div className="w-2 h-2 rounded-full bg-brandGreen-500 animate-pulse ml-1" style={{ animationDelay: '0.4s' }}></div>
+                                        </div>
+                                        <span>Loading AI-powered game...</span>
+                                    </div>
+                                }>
+                                    <Connect4Game />
+                                </Suspense>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* Footer - Call to action */}

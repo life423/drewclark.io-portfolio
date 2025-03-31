@@ -22,15 +22,25 @@ setCacheTTL(config.cacheTtlMs)
 
 // Initialize Express app
 const app = express()
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 3001 // Changed from 3000 to 3001
 
 // Middleware
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
-// CORS middleware
+// Improved CORS middleware with specific allowed origins
 app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*')
+    // Allow specific origins in development
+    const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000']
+    const origin = req.headers.origin
+    
+    if (allowedOrigins.includes(origin)) {
+        res.header('Access-Control-Allow-Origin', origin)
+    } else if (process.env.NODE_ENV !== 'production') {
+        // In development, fallback to allow all if not matching specific origins
+        res.header('Access-Control-Allow-Origin', '*')
+    }
+    
     res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
     res.header(
         'Access-Control-Allow-Headers',
