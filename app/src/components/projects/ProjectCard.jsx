@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import clsx from 'clsx';
 import { answerProjectQuestion } from '../../services/aiGenerationService';
 import PrimaryButton from '../utils/PrimaryButton';
@@ -23,9 +23,10 @@ export default function ProjectCard({
     const [chatVisible, setChatVisible] = useState(false);
     const [userQuestion, setUserQuestion] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
-    const [aiResponse, setAiResponse] = useState('');
-
+    const [messages, setMessages] = useState([]);
+    
     const chatInputRef = useRef(null);
+    const chatContainerRef = useRef(null);
 
     // Get the forceRecalculation function from useScrollPosition
     const { forceRecalculation } = useScrollPosition();
@@ -45,11 +46,27 @@ export default function ProjectCard({
         }, 300);
     };
 
+    // Auto-scroll to the bottom of the chat when new messages are added
+    useEffect(() => {
+        if (chatContainerRef.current && messages.length > 0) {
+            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+    }, [messages]);
+    
     const handleQuestionSubmit = async e => {
         e.preventDefault();
 
         if (!userQuestion.trim()) return;
 
+        // Add user question to the messages array
+        setMessages(prev => [...prev, { role: 'user', content: userQuestion }]);
+        
+        // Store the current question before clearing the input
+        const currentQuestion = userQuestion;
+        
+        // Clear the input field immediately for better UX
+        setUserQuestion('');
+        
         setIsGenerating(true);
 
         try {
@@ -69,14 +86,19 @@ export default function ProjectCard({
             // Call the AI service to generate a response
             const response = await answerProjectQuestion(
                 projectData,
-                userQuestion
+                currentQuestion
             );
-            setAiResponse(response);
+            
+            // Add AI response to the messages array
+            setMessages(prev => [...prev, { role: 'assistant', content: response }]);
         } catch (error) {
             console.error('Error generating AI response:', error);
-            setAiResponse(
-                "I'm sorry, I couldn't generate a response at this time. Please try again later."
-            );
+            
+            // Add error message to the messages array
+            setMessages(prev => [...prev, { 
+                role: 'assistant', 
+                content: "I'm sorry, I couldn't generate a response at this time. Please try again later."
+            }]);
         } finally {
             setIsGenerating(false);
             
@@ -280,9 +302,44 @@ export default function ProjectCard({
                             </div>
                         </form>
 
-                        {aiResponse && (
-                            <div className='bg-brandGray-800 bg-opacity-80 rounded-lg p-2 sm:p-3 border-l-2 border-l-brandOrange-500 shadow-inner shadow-brandGray-900/50 animate-fade-in text-xs sm:text-sm text-brandGray-200'>
-                                {aiResponse}
+                        {/* Message thread container */}
+                        {messages.length > 0 && (
+                            <div 
+                                ref={chatContainerRef}
+                                className='max-h-60 overflow-y-auto mb-3 pr-1'
+                                style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgb(55, 65, 81) transparent' }}
+                            >
+                                {messages.map((msg, index) => (
+                                    <div 
+                                        key={index} 
+                                        className={clsx(
+                                            'mb-2 animate-fade-in',
+                                            msg.role === 'user' 
+                                                ? 'ml-4' 
+                                                : 'mr-4'
+                                        )}
+                                    >
+                                        <div className={clsx(
+                                            'rounded-lg p-2 sm:p-3 text-xs sm:text-sm',
+                                            msg.role === 'user'
+                                                ? 'bg-brandGray-700 text-brandGreen-200 border-r-2 border-r-brandGreen-500' 
+                                                : 'bg-brandGray-800 bg-opacity-80 border-l-2 border-l-brandOrange-500 shadow-inner shadow-brandGray-900/50 text-brandGray-200'
+                                        )}>
+                                            {msg.content}
+                                        </div>
+                                    </div>
+                                ))}
+                                {isGenerating && (
+                                    <div className='ml-4 mb-2 animate-fade-in'>
+                                        <div className='bg-brandGray-800 bg-opacity-80 rounded-lg p-2 sm:p-3 border-l-2 border-l-brandOrange-500 shadow-inner shadow-brandGray-900/50 text-xs sm:text-sm text-brandGray-200'>
+                                            <div className="flex items-center space-x-2">
+                                                <div className="w-2 h-2 rounded-full bg-brandOrange-500 animate-pulse"></div>
+                                                <div className="w-2 h-2 rounded-full bg-brandOrange-500 animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                                                <div className="w-2 h-2 rounded-full bg-brandOrange-500 animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
