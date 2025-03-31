@@ -244,10 +244,8 @@ export default function ProjectsContainer() {
                     
                     {/* Projects Grid */}
                     <div className='flex-1'>
-                        <div className={clsx(
-                            'grid gap-6',
-                            'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
-                        )}>
+                        {/* On mobile and tablet - show one active project with navigation */}
+                        <div className='block lg:hidden'>
                             <div
                                 className={clsx(
                                     'transition-all duration-500',
@@ -283,6 +281,31 @@ export default function ProjectsContainer() {
                                     hideToc={true} // Hide the TOC in the card since we have the sidebar
                                 />
                             </div>
+                        </div>
+                        
+                        {/* On desktop - show all projects in a grid */}
+                        <div className='hidden lg:grid grid-cols-3 gap-6'>
+                            {PROJECTS.map((project, index) => (
+                                <div 
+                                    key={project.id}
+                                    className='container-type-inline-size'
+                                >
+                                    <ProjectCard
+                                        projectNumber={index + 1}
+                                        title={project.title}
+                                        summary={project.summary}
+                                        stack={project.stack}
+                                        initialDescription={project.initialDescription}
+                                        detailedDescription={project.detailedDescription}
+                                        technicalDetails={project.technicalDetails}
+                                        challenges={project.challenges}
+                                        readme={project.readme}
+                                        totalProjects={PROJECTS.length}
+                                        onNavigateToProject={() => {/* No-op on desktop grid view */}}
+                                        hideToc={true} // Hide the progress indicator on all cards
+                                    />
+                                </div>
+                            ))}
                         </div>
 
                         {/* Mobile/Tablet Navigation Controls */}

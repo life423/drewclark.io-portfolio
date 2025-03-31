@@ -256,13 +256,7 @@ export default function ProjectCard({
     return (
         <div 
             ref={cardRef}
-            className={clsx(
-                'my-4 @container overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transform',
-                'transition-all duration-500 hover:shadow-xl hover:border-brandGray-600 flex flex-col',
-                !autoHeight 
-                    ? 'h-[600px] @sm:h-[650px] @md:h-[670px] @lg:h-[700px]'
-                    : 'h-auto min-h-[600px] @sm:min-h-[650px] @md:min-h-[670px] @lg:min-h-[700px]'
-            )}
+            className='my-4 @container overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transform transition-all duration-300 hover:shadow-xl hover:border-brandGray-600 flex flex-col h-auto min-h-[600px] @sm:min-h-[650px] @md:min-h-[670px] @lg:min-h-[700px]'
         >
             {/* Project Header */}
             <div className='p-3 @sm:p-4 @md:p-5 border-b border-brandGray-700 bg-gradient-to-r from-brandGray-800 via-brandGray-800 to-brandBlue-900/10'>
