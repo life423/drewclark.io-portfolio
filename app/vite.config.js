@@ -49,6 +49,12 @@ export default defineConfig(({ command, mode }) => {
                 }
             }
         ],
+        resolve: {
+            alias: {
+                '@react-three/fiber': path.resolve(__dirname, 'node_modules/@react-three/fiber/dist/index.js'),
+                'three': path.resolve(__dirname, 'node_modules/three/build/three.module.js')
+            }
+        },
     // Make all env variables available in Vite under import.meta.env
     define: {
         // Properly define for import.meta.env access
