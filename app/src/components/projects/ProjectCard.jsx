@@ -24,16 +24,58 @@ export default function ProjectCard({
     const [userQuestion, setUserQuestion] = useState('')
     const [isGenerating, setIsGenerating] = useState(false)
     const [messages, setMessages] = useState([])
+    // Track previous questions to provide context
+    const [previousQuestions, setPreviousQuestions] = useState([])
+    // Track the user's current UI state
+    const [uiContext, setUiContext] = useState({
+        activeSection: 'overview',
+        interactionState: 'browsing',
+        scrollPosition: 0,
+        customContext: ''
+    })
 
     const chatInputRef = useRef(null)
     const chatContainerRef = useRef(null)
 
-    // Get the forceRecalculation function from useScrollPosition
-    const { forceRecalculation } = useScrollPosition()
+    // Get scroll info from useScrollPosition
+    const { y: scrollY, direction: scrollDirection, percent: scrollPercent, forceRecalculation } = useScrollPosition()
+
+    // Update UI context when scroll position changes in the main window
+    useEffect(() => {
+        if (scrollPercent > 0) {
+            let activeSection = 'overview';
+            
+            // Determine which section is in view based on scroll percentage
+            if (scrollPercent < 30) {
+                activeSection = 'project header';
+            } else if (scrollPercent < 70) {
+                activeSection = 'project details';
+            } else {
+                activeSection = 'project innovations';
+            }
+            
+            setUiContext(prev => ({
+                ...prev,
+                scrollPosition: scrollPercent,
+                activeSection,
+                interactionState: `scrolling ${scrollDirection}`,
+                customContext: `User is viewing the ${activeSection} section`
+            }));
+        }
+    }, [scrollPercent, scrollDirection]);
 
     const toggleChat = () => {
-        setChatVisible(!chatVisible)
-        if (!chatVisible) {
+        const newChatVisible = !chatVisible
+        setChatVisible(newChatVisible)
+        
+        // Update UI context when chat visibility changes
+        setUiContext(prev => ({
+            ...prev,
+            activeSection: newChatVisible ? 'chat' : 'overview',
+            interactionState: newChatVisible ? 'asking questions' : 'browsing'
+        }))
+        
+        if (newChatVisible) {
             // Focus the input when chat becomes visible
             setTimeout(() => {
                 chatInputRef.current?.focus()
@@ -45,6 +87,38 @@ export default function ProjectCard({
             forceRecalculation()
         }, 300)
     }
+    
+    // Update UI context based on scroll position
+    useEffect(() => {
+        const handleScroll = () => {
+            if (!chatContainerRef.current) return
+            
+            const scrollTop = chatContainerRef.current.scrollTop
+            const scrollHeight = chatContainerRef.current.scrollHeight
+            const clientHeight = chatContainerRef.current.clientHeight
+            const scrollPosition = Math.round((scrollTop / (scrollHeight - clientHeight)) * 100)
+            
+            // Only update if there's a significant change
+            if (Math.abs(scrollPosition - uiContext.scrollPosition) > 10) {
+                setUiContext(prev => ({
+                    ...prev,
+                    scrollPosition,
+                    interactionState: 'scrolling chat history'
+                }))
+            }
+        }
+        
+        const chatContainer = chatContainerRef.current
+        if (chatContainer) {
+            chatContainer.addEventListener('scroll', handleScroll)
+        }
+        
+        return () => {
+            if (chatContainer) {
+                chatContainer.removeEventListener('scroll', handleScroll)
+            }
+        }
+    }, [chatContainerRef, uiContext.scrollPosition])
 
     // Auto-scroll to the bottom of the chat when new messages are added
     useEffect(() => {
@@ -64,6 +138,16 @@ export default function ProjectCard({
 
         // Store the current question before clearing the input
         const currentQuestion = userQuestion
+        
+        // Update previous questions for context
+        setPreviousQuestions(prev => [...prev, currentQuestion])
+        
+        // Update UI context to reflect that a question was asked
+        setUiContext(prev => ({
+            ...prev,
+            interactionState: 'asked a question',
+            customContext: `User just asked: "${currentQuestion}"`
+        }))
 
         // Clear the input field immediately for better UX
         setUserQuestion('')
@@ -82,7 +166,34 @@ export default function ProjectCard({
                 technicalDetails,
                 challenges,
                 readme,
+                // Add UI context information
+                uiContext: {
+                    activeSection: uiContext.activeSection,
+                    interactionState: uiContext.interactionState,
+                    scrollPosition: uiContext.scrollPosition,
+                    customContext: uiContext.customContext,
+                    previousQuestions: previousQuestions
+                }
             }
+
+            // Display a subtle indicator that context-aware answering is active
+            setMessages(prev => {
+                // Only add the indicator if it doesn't exist yet
+                const hasIndicator = prev.some(msg => 
+                    msg.role === 'system' && msg.content.includes('context-aware'))
+                
+                if (!hasIndicator && prev.length > 0) {
+                    return [
+                        ...prev,
+                        { 
+                            role: 'system', 
+                            content: 'Using context-aware answering...',
+                            isIndicator: true
+                        }
+                    ]
+                }
+                return prev
+            })
 
             // Call the AI service to generate a response
             const response = await answerProjectQuestion(
@@ -90,11 +201,14 @@ export default function ProjectCard({
                 currentQuestion
             )
 
-            // Add AI response to the messages array
-            setMessages(prev => [
-                ...prev,
-                { role: 'assistant', content: response },
-            ])
+            // Remove the indicator before adding the actual response
+            setMessages(prev => {
+                const filtered = prev.filter(msg => !msg.isIndicator)
+                return [
+                    ...filtered,
+                    { role: 'assistant', content: response }
+                ]
+            })
         } catch (error) {
             console.error('Error generating AI response:', error)
 
@@ -229,9 +343,16 @@ export default function ProjectCard({
                         onTransitionEnd={() => forceRecalculation()}
                     >
                         <div className='flex justify-between items-center mb-3'>
-                            <h3 className='text-sm font-semibold text-brandGreen-400 tracking-wide'>
-                                Ask About This Project
-                            </h3>
+                            <div className="flex items-center">
+                                <h3 className='text-sm font-semibold text-brandGreen-400 tracking-wide'>
+                                    Ask About This Project
+                                </h3>
+                                {messages.length > 0 && (
+                                    <span className="ml-2 px-1.5 py-0.5 bg-brandGreen-500/10 rounded text-[10px] text-brandGreen-300 border border-brandGreen-500/20">
+                                        Context aware
+                                    </span>
+                                )}
+                            </div>
                             <button
                                 onClick={toggleChat}
                                 className='text-brandGray-400 hover:text-brandGreen-400'
@@ -324,19 +445,27 @@ export default function ProjectCard({
                                             'mb-2 animate-fade-in',
                                             msg.role === 'user'
                                                 ? 'ml-4'
+                                                : msg.role === 'system'
+                                                ? 'mx-auto text-center'
                                                 : 'mr-4'
                                         )}
                                     >
-                                        <div
-                                            className={clsx(
-                                                'rounded-lg p-2 @sm:p-3 text-xs @sm:text-sm',
-                                                msg.role === 'user'
-                                                    ? 'bg-brandGray-700 text-brandGreen-200 border-r-2 border-r-brandGreen-500'
-                                                    : 'bg-brandGray-800 bg-opacity-80 border-l-2 border-l-brandOrange-500 shadow-inner shadow-brandGray-900/50 text-brandGray-200'
-                                            )}
-                                        >
-                                            {msg.content}
-                                        </div>
+                                        {msg.role === 'system' ? (
+                                            <div className="text-xs text-brandGray-400 italic px-2 py-1 bg-brandGray-800/50 rounded-md inline-block">
+                                                {msg.content}
+                                            </div>
+                                        ) : (
+                                            <div
+                                                className={clsx(
+                                                    'rounded-lg p-2 @sm:p-3 text-xs @sm:text-sm',
+                                                    msg.role === 'user'
+                                                        ? 'bg-brandGray-700 text-brandGreen-200 border-r-2 border-r-brandGreen-500'
+                                                        : 'bg-brandGray-800 bg-opacity-80 border-l-2 border-l-brandOrange-500 shadow-inner shadow-brandGray-900/50 text-brandGray-200'
+                                                )}
+                                            >
+                                                {msg.content}
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                                 {isGenerating && (
