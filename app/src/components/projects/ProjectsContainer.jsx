@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+ import React, { useState, useEffect } from 'react'
 import ProjectCard from './ProjectCard'
 import clsx from 'clsx'
 import PrimaryButton from '../utils/PrimaryButton'
@@ -172,6 +172,7 @@ export default function ProjectsContainer() {
                 <div
                     className={clsx(
                         'transition-all duration-500 overflow-hidden',
+                        'container-type-inline-size', // Add container context for container queries
                         transitionDirection === 'next' &&
                             'translate-x-[-100px] opacity-0',
                         transitionDirection === 'prev' &&
