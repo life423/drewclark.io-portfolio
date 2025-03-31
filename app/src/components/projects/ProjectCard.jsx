@@ -174,7 +174,14 @@ export default function ProjectCard({
             </div>
 
             {/* Interactive Chat Section */}
-            <div className='border-t border-brandGray-700 p-3 sm:p-4 md:p-5 flex-shrink-0'>
+            <div className='relative p-3 sm:p-4 md:p-5 flex-shrink-0 overflow-hidden'>
+                {/* Animated divider that extends when chat opens */}
+                <div className={clsx(
+                    "absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-brandGreen-600/10 via-brandGreen-500 to-brandGreen-600/10 transition-all duration-500 ease-out",
+                    chatVisible 
+                        ? "w-full opacity-100 shadow-[0_0_8px_rgba(16,185,129,0.3)]" 
+                        : "w-0 left-1/2 opacity-0"
+                )}></div>
                 {!chatVisible ? (
                     <PrimaryButton
                         onClick={toggleChat}
@@ -194,7 +201,7 @@ export default function ProjectCard({
                         onTransitionEnd={() => forceRecalculation()}
                     >
                         <div className='flex justify-between items-center mb-3'>
-                            <h3 className='text-sm font-medium text-brandGreen-300'>
+                            <h3 className='text-sm font-semibold text-brandGreen-400 tracking-wide'>
                                 Ask About This Project
                             </h3>
                             <button
@@ -224,22 +231,27 @@ export default function ProjectCard({
                                     value={userQuestion}
                                     onChange={e => setUserQuestion(e.target.value)}
                                     placeholder='E.g., How did you handle state management?'
-                                    className='flex-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-brandGray-800 border border-brandGray-700 rounded-lg text-xs sm:text-sm text-white focus:ring-1 focus:ring-brandGreen-400 focus:border-brandGreen-400 outline-none'
+                                    className='flex-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-brandGray-800 border border-brandGray-700 rounded-lg text-xs sm:text-sm text-white focus:ring-2 focus:ring-brandGreen-500/40 focus:border-brandGreen-500 outline-none transition-all duration-200'
                                     maxLength={140}
                                 />
                                 <button
                                     type='submit'
                                     disabled={isGenerating}
                                     className={clsx(
-                                        'px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200',
-                                        'border', // Always have a border for consistent sizing
+                                        'px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-300',
+                                        'relative overflow-hidden border',
                                         isGenerating
                                             ? 'bg-brandGray-700 text-brandGray-500 border-transparent cursor-wait'
                                             : !userQuestion.trim()
-                                              ? 'bg-brandGray-800 text-brandGreen-500 border-brandGreen-500' // Empty state: green text, green border
-                                              : 'bg-brandGreen-500 text-white hover:bg-brandGreen-400 border-transparent' // Filled state: green bg, white text
+                                              ? 'bg-transparent text-brandGreen-400 border-brandGreen-500/50 hover:bg-brandGreen-500/10' // Empty state: green text, green border
+                                              : 'bg-gradient-to-r from-brandGreen-600 to-brandGreen-500 text-white hover:shadow-lg hover:shadow-brandGreen-500/20 border-transparent' // Filled state: gradient green
                                     )}
                                 >
+                                    {/* Shine effect for filled state */}
+                                    {userQuestion.trim() && !isGenerating && (
+                                        <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-transparent via-white/10 to-transparent animate-subtle-shimmer"></span>
+                                    )}
+                                    
                                     {isGenerating ? (
                                         <svg
                                             className='animate-spin h-5 w-5 text-white'
@@ -269,7 +281,7 @@ export default function ProjectCard({
                         </form>
 
                         {aiResponse && (
-                            <div className='bg-brandGray-800 rounded-lg p-2 sm:p-3 border-l-2 border-brandOrange-500 animate-fade-in text-xs sm:text-sm text-brandGray-200'>
+                            <div className='bg-brandGray-800 bg-opacity-80 rounded-lg p-2 sm:p-3 border-l-2 border-l-brandOrange-500 shadow-inner shadow-brandGray-900/50 animate-fade-in text-xs sm:text-sm text-brandGray-200'>
                                 {aiResponse}
                             </div>
                         )}
