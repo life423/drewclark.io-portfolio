@@ -302,7 +302,7 @@ export default function ProjectsContainer() {
                                             )
                                         )}
                                         style={{
-                                            transitionDelay: `${Math.abs(index - activeProjectIndex) * 50}ms`,
+                                            transitionDelay: `${Math.abs(index - (activeProjectIndex !== null ? activeProjectIndex : 0)) * 50}ms`,
                                             gridColumn: isActive ? 'span 2' : 'span 1'
                                         }}
                                     >
@@ -320,7 +320,8 @@ export default function ProjectsContainer() {
                                             onNavigateToProject={(newIndex) => {
                                                 // If clicking on the active card, toggle it off
                                                 if (isActive && newIndex === -1) {
-                                                    setActiveProjectIndex(null);
+                                                    // Instead of setting to null, set to first project
+                                                    setActiveProjectIndex(0);
                                                 } else if (newIndex >= 0) {
                                                     navigateToProject(newIndex);
                                                 }
@@ -330,7 +331,8 @@ export default function ProjectsContainer() {
                                             onClick={() => {
                                                 // Toggle active state when clicking on a card
                                                 if (isActive) {
-                                                    setActiveProjectIndex(null);
+                                                    // Instead of setting to null, set to first project
+                                                    setActiveProjectIndex(0);
                                                 } else {
                                                     setActiveProjectIndex(index);
                                                 }
