@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
+import useIntersection from '../../hooks/useIntersection';
 
 /**
  * A component that creates a typing animation effect for multiple phrases
+ * Automatically cycles through phrases continuously, and pauses when not visible
  * 
  * @param {Object} props
  * @param {string[]} props.phrases - Array of phrases to cycle through
@@ -23,22 +25,24 @@ const TypedTextEffect = ({
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   
-  // Keep track of whether we've shown all phrases at least once
-  const completedFirstCycle = useRef(false);
-  
-  // Helper to handle phrase cycling
+  // References
+  const elementRef = useRef(null);
   const currentPhrase = phrases[currentPhraseIndex];
+  
+  // Use intersection observer to pause animation when not in view
+  const isVisible = useIntersection(elementRef, { threshold: 0.1 });
 
   useEffect(() => {
-    if (!phrases.length) return;
+    // Stop animation if not visible or no phrases
+    if (!phrases.length || !isVisible) return;
     
     // Delay to use based on current state
     let delay = typingSpeed;
     
     if (isDeleting) {
       delay = deletingSpeed;
-    } else if (currentText === currentPhrase && !completedFirstCycle.current) {
-      // First pause after completing a phrase
+    } else if (currentText === currentPhrase) {
+      // Pause after completing a phrase (always, not just first cycle)
       delay = pauseTime;
       setIsPaused(true);
     }
@@ -58,11 +62,6 @@ const TypedTextEffect = ({
         if (currentText === '') {
           setIsDeleting(false);
           setCurrentPhraseIndex(prevIndex => (prevIndex + 1) % phrases.length);
-          
-          // Mark that we've completed a full cycle once we get back to the start
-          if (currentPhraseIndex === 0) {
-            completedFirstCycle.current = true;
-          }
         }
       } else {
         // We're in typing state, add the next character
@@ -85,11 +84,12 @@ const TypedTextEffect = ({
     deletingSpeed, 
     pauseTime, 
     phrases, 
-    currentPhraseIndex
+    currentPhraseIndex,
+    isVisible // Added so animation pauses when not visible
   ]);
 
   return (
-    <span className={className}>
+    <span ref={elementRef} className={className}>
       {currentText}
       <span className="inline-block w-[0.1em] h-[1.2em] bg-current ml-0.5 animate-blink"></span>
     </span>
