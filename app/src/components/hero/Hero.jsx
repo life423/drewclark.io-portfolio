@@ -6,6 +6,7 @@ import largeSprout from '../../assets/large-sprout.jpg'
 import PrimaryButton from '../utils/PrimaryButton'
 import ProgressiveElement from '../utils/ProgressiveElement'
 import NeuralNetworkCanvas from './NeuralNetworkCanvas'
+import TypedTextEffect from './TypedTextEffect'
 
 export default function Hero() {
     const heroRef = useRef(null)
@@ -52,7 +53,7 @@ export default function Hero() {
         <section
             ref={heroRef}
             onMouseMove={handleMouseMove}
-            className='relative h-[70vh] md:h-[85vh] lg:min-h-screen flex items-center justify-center px-4 py-16 text-white overflow-hidden'
+            className='relative h-[70vh] md:h-[85vh] lg:h-[95vh] flex items-center justify-center px-4 py-16 text-white overflow-hidden'
             style={calculateTransform()}
         >
             {/* Spotlight overlay - follows cursor */}
@@ -178,10 +179,21 @@ export default function Hero() {
                         {/* Background layer - removed backdrop blur */}
                         <div className='absolute inset-0 bg-brandGray-900/40 rounded-lg border-l-2 border-brandGreen-500/40 pointer-events-none'></div>
 
-                        {/* Text layer with full opacity */}
+                        {/* AI-Powered Text layer with dynamic typing effect */}
                         <p className='relative px-3 py-2 text-lg text-white font-medium leading-relaxed'>
-                            Creating elegant solutions to complex problems with
-                            a focus on user experience and performance.
+                            <TypedTextEffect 
+                                phrases={[
+                                    "Creating elegant solutions to complex problems with a focus on user experience and performance.",
+                                    "Building AI-powered applications that deliver real business value.",
+                                    "Architecting scalable cloud systems with security and performance in mind.",
+                                    "Developing intuitive interfaces backed by robust full-stack technology.",
+                                    "Optimizing machine learning models for production environments.",
+                                    "Transforming concepts into responsive, accessible web experiences."
+                                ]}
+                                typingSpeed={40}
+                                deletingSpeed={30}
+                                pauseTime={3000}
+                            />
                         </p>
                     </div>
                 </ProgressiveElement>
@@ -200,7 +212,14 @@ export default function Hero() {
                 </ProgressiveElement>
             </div>
 
-            {/* Removed interactive particles */}
+            {/* Diagonal slice indicator */}
+            <div className="absolute bottom-0 left-0 right-0 w-full overflow-hidden z-10">
+                <div
+                    className="absolute w-[120%] h-20 bg-gradient-to-r
+                    from-brandGray-900 to-brandGray-800
+                    transform -rotate-3 translate-y-1/2 origin-bottom-left"
+                />
+            </div>
         </section>
     )
 }

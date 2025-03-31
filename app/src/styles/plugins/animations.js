@@ -172,6 +172,10 @@ export default plugin(function ({ addBase, addUtilities }) {
             '50%': { transform: 'translateY(5px)', opacity: '1' },
             '100%': { transform: 'translateY(0)', opacity: '0.7' }
         },
+        '@keyframes blink': {
+            '0%, 100%': { opacity: '1' },
+            '50%': { opacity: '0' }
+        },
         '@keyframes pulse-subtle': {
             '0%': { opacity: '0.6', transform: 'scale(1)' },
             '50%': { opacity: '1', transform: 'scale(1.05)' },
@@ -325,6 +329,9 @@ export default plugin(function ({ addBase, addUtilities }) {
         '.animate-celebrate': {
             animation: 'celebrate 1s ease-in-out',
             willChange: 'transform'
+        },
+        '.animate-blink': {
+            animation: 'blink 0.8s infinite ease-in-out'
         }
     })
 })
