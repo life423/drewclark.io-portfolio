@@ -3,7 +3,6 @@ import ProjectCard from './ProjectCard'
 import clsx from 'clsx'
 import PrimaryButton from '../utils/PrimaryButton'
 
-
 const PROJECTS = [
     {
         id: 1,
@@ -19,8 +18,7 @@ const PROJECTS = [
             'Built with Python and the Pygame library, the game uses a component-based architecture to handle various game elements. Enemy AI is implemented using pathfinding algorithms and basic machine learning concepts to create adaptive behavior. The project includes collision detection, physics simulation, sprite animations, and state management systems.',
         challenges:
             'The biggest challenge was creating enemy AI that felt intelligent without being frustratingly difficult. I solved this by implementing a layered approach to enemy decision-making that balances aggression with vulnerability. Another challenge was optimizing performance while maintaining visual quality, which required efficient sprite handling and collision detection algorithms.',
-        readme:
-            'This project showcases game development skills and basic AI implementation in a practical, playable format. The code is structured in a modular way that allows for easy expansion and modification. The MIT-licensed codebase is available on GitHub and serves as both a fun game and a learning resource for those interested in game development or AI programming fundamentals.'
+        readme: 'This project showcases game development skills and basic AI implementation in a practical, playable format. The code is structured in a modular way that allows for easy expansion and modification. The MIT-licensed codebase is available on GitHub and serves as both a fun game and a learning resource for those interested in game development or AI programming fundamentals.',
     },
     {
         id: 2,
@@ -36,8 +34,7 @@ const PROJECTS = [
             'Built with Python and PyQt for the graphical interface, the application features a modular architecture with separate components for encryption/decryption logic, file handling, and AI analysis. The cryptanalysis module uses frequency analysis, pattern matching, and machine learning techniques to identify cipher types and attempt decryption without knowing the key. The application supports both text and file-based encryption with customizable parameters.',
         challenges:
             'The primary challenge was developing effective cipher-breaking algorithms that could work reliably across different languages and text lengths. I implemented a layered approach to frequency analysis that adapts to the input text characteristics. Another significant challenge was creating an intuitive interface that makes complex cryptographic concepts accessible to users without extensive background in the field.',
-        readme:
-            'This desktop application provides tools for encrypting/decrypting text using classical ciphers, with a built-in AI analyzer that can detect encryption methods and attempt to break simple ciphers. Features include: multiple cipher implementations, key generation tools, frequency analysis visualizations, brute-force attack simulations, and educational resources about cryptographic principles. The codebase follows object-oriented design principles with comprehensive testing and documentation.'
+        readme: 'This desktop application provides tools for encrypting/decrypting text using classical ciphers, with a built-in AI analyzer that can detect encryption methods and attempt to break simple ciphers. Features include: multiple cipher implementations, key generation tools, frequency analysis visualizations, brute-force attack simulations, and educational resources about cryptographic principles. The codebase follows object-oriented design principles with comprehensive testing and documentation.',
     },
     {
         id: 3,
@@ -53,8 +50,7 @@ const PROJECTS = [
             'Built with vanilla JavaScript using ES6+ features and classes for game objects. The animation system uses requestAnimationFrame with delta time calculations to ensure consistent gameplay regardless of device performance. Collision detection is optimized using axis-aligned bounding box (AABB) algorithms. The game includes intelligent obstacle spawning logic to prevent unfair object clustering.',
         challenges:
             'The main challenge was creating frame-rate independent animations that would run consistently across different devices. I solved this by implementing delta time-based movement instead of frame-based updates. Another significant challenge was designing responsive controls that work well on both desktop and mobile devices, which I addressed by developing keyboard input for desktop and touch/swipe detection for mobile.',
-        readme:
-            'This browser game demonstrates object-oriented programming principles and responsive design techniques. Features include adaptive difficulty based on player score, intelligent obstacle spawning to prevent unfair overlaps, responsive design for all screen sizes, touch controls for mobile devices, and comprehensive test coverage with Jest. The game presents a simple yet engaging challenge suitable for players of all ages.'
+        readme: 'This browser game demonstrates object-oriented programming principles and responsive design techniques. Features include adaptive difficulty based on player score, intelligent obstacle spawning to prevent unfair overlaps, responsive design for all screen sizes, touch controls for mobile devices, and comprehensive test coverage with Jest. The game presents a simple yet engaging challenge suitable for players of all ages.',
     },
 ]
 
@@ -86,7 +82,7 @@ export default function ProjectsContainer() {
 
     if (!started) {
         return (
-            <section className='relative py-16 px-4 bg-gradient-to-b from-brandGreen-950/90 via-brandGreen-900/95 to-brandGreen-900'>
+            <section className='relative py-16 px-4 bg-gradient-to-b from-brandGreen-950/90 via-brandGreen-900/95 to-brandGreen-900 overflow-x-hidden'>
                 {}
                 <div
                     className='absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none'
@@ -96,7 +92,7 @@ export default function ProjectsContainer() {
                     }}
                 ></div>
                 <div className='max-w-3xl mx-auto'>
-                <div className='my-4 sm:my-6 md:my-8 overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transform transition-all duration-300 hover:shadow-xl hover:border-brandGray-600 flex flex-col h-[600px] sm:h-[650px] md:h-[670px] lg:h-[700px]'>
+                    <div className='my-4 sm:my-6 md:my-8 overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transform transition-all duration-300 hover:shadow-xl hover:border-brandGray-600 flex flex-col h-[600px] sm:h-[650px] md:h-[670px] lg:h-[700px]'>
                         {}
                         <div className='p-3 sm:p-4 md:p-5 border-b border-brandGray-700 bg-gradient-to-r from-brandGray-800 via-brandGray-800 to-brandBlue-900/10'>
                             <div className='flex items-center justify-between mb-2'>
@@ -163,7 +159,7 @@ export default function ProjectsContainer() {
     }
 
     return (
-        <section className='relative py-16 px-4 bg-gradient-to-b from-brandGreen-950/90 via-brandGreen-900/95 to-brandGreen-900'>
+        <section className='relative py-16 px-4 bg-gradient-to-b from-brandGreen-950/90 via-brandGreen-900/95 to-brandGreen-900 overflow-x-hidden'>
             {}
             <div
                 className='absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none'
@@ -175,7 +171,7 @@ export default function ProjectsContainer() {
             <div className='max-w-3xl mx-auto'>
                 <div
                     className={clsx(
-                        'transition-all duration-500',
+                        'transition-all duration-500 overflow-hidden',
                         transitionDirection === 'next' &&
                             'translate-x-[-100px] opacity-0',
                         transitionDirection === 'prev' &&
@@ -196,12 +192,8 @@ export default function ProjectsContainer() {
                         technicalDetails={
                             PROJECTS[activeProjectIndex].technicalDetails
                         }
-                        challenges={
-                            PROJECTS[activeProjectIndex].challenges
-                        }
-                        readme={
-                            PROJECTS[activeProjectIndex].readme
-                        }
+                        challenges={PROJECTS[activeProjectIndex].challenges}
+                        readme={PROJECTS[activeProjectIndex].readme}
                         totalProjects={PROJECTS.length}
                         onNavigateToProject={index => {
                             if (index === -1) {
