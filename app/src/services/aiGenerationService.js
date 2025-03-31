@@ -84,7 +84,8 @@ When responding, acknowledge the user's current context and tailor your answer t
     const requestBody = {
       question: `${context}${projectData.uiContext ? uiContextStr : ''}\n\nQuestion: ${question}`,
       maxTokens: 300, // Increased to allow for more contextual responses
-      temperature: 0.7
+      temperature: 0.7,
+      model: "gpt-4o-mini"
     };
     
     // Call the backend API
