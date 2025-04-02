@@ -30,6 +30,14 @@ jobs:
           client-id: ${{ secrets.PORTFOLIO_AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.PORTFOLIO_AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.PORTFOLIO_AZURE_SUBSCRIPTION_ID }}
+          
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'  # Using Node 18 to match Dockerfile
+          
+      - name: Install dependencies
+        run: npm install
 
       - name: Build and push container image to registry
         uses: azure/container-apps-deploy-action@v2
