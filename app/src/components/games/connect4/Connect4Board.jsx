@@ -12,6 +12,7 @@ export default function Connect4Board({
   onColumnClick,
   winningCells = null,
   lastMove = null,
+  droppingPiece = null,
   isActive = true
 }) {
   // Transform the board data for easier column-based rendering
@@ -70,6 +71,7 @@ export default function Connect4Board({
               onDiscDrop={onColumnClick}
               lastMove={lastMove}
               winningCells={winningCells}
+              droppingPiece={droppingPiece && droppingPiece.column === colIndex ? droppingPiece : null}
             />
           ))}
             

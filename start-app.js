@@ -111,24 +111,43 @@ function confirm(question) {
 function startDevServer() {
   console.log('\nStarting development server...\n');
   
-  // Start backend and frontend concurrently
-  const devProcess = spawn('concurrently', [
-    `nodemon server.js`,
-    `cd app && npm run dev`
-  ], {
+  // Start backend and frontend directly - avoid using concurrently command
+  const backendProcess = spawn('nodemon', ['server.js'], {
     stdio: 'inherit',
     shell: true
   });
   
-  devProcess.on('error', (error) => {
-    console.error('\nFailed to start development server:', error.message);
+  console.log('Starting frontend...');
+  const frontendProcess = spawn('npm', ['run', 'dev'], {
+    stdio: 'inherit',
+    shell: true,
+    cwd: './app'
+  });
+  
+  // Store processes for cleanup
+  const processes = [backendProcess, frontendProcess];
+  
+  // Handle process errors
+  backendProcess.on('error', (error) => {
+    console.error('\nFailed to start backend server:', error.message);
+    process.exit(1);
+  });
+  
+  frontendProcess.on('error', (error) => {
+    console.error('\nFailed to start frontend server:', error.message);
     process.exit(1);
   });
   
   // Handle CTRL+C gracefully
   process.on('SIGINT', () => {
     console.log('\nShutting down development server...');
-    devProcess.kill('SIGINT');
+    processes.forEach(process => {
+      try {
+        process.kill('SIGINT');
+      } catch (err) {
+        // Ignore errors during shutdown
+      }
+    });
     setTimeout(() => process.exit(0), 500);
   });
 }
