@@ -42,7 +42,19 @@ class SharedApiService {
     this.processQueues();
   }
   
-  // Add a request to the appropriate queue
+  /**
+   * Add a request to the appropriate queue with improved error handling and logging
+   * @param {Object} options - Request options
+   * @param {string} [options.endpoint='/api/askGPT'] - API endpoint
+   * @param {string} [options.method='POST'] - HTTP method
+   * @param {Object} options.body - Request body
+   * @param {string} [options.category=CATEGORY.OTHER] - Request category
+   * @param {string} [options.priority=PRIORITY.MEDIUM] - Request priority
+   * @param {AbortSignal} [options.signal] - AbortController signal
+   * @param {Function} [options.onProgress] - Progress callback (for streaming responses)
+   * @param {number} [options.timeout=30000] - Request timeout in milliseconds
+   * @returns {Promise<Object>} - Promise resolving to the API response
+   */
   async enqueueRequest(options) {
     const {
       endpoint = '/api/askGPT',
@@ -51,41 +63,82 @@ class SharedApiService {
       category = CATEGORY.OTHER,
       priority = PRIORITY.MEDIUM,
       signal, // AbortController signal
-      onSuccess,
-      onError
+      onProgress,
+      timeout = 30000 // Default 30s timeout
     } = options;
     
     return new Promise((resolve, reject) => {
-      // Generate a simple request ID based on timestamp and random number
-      const requestId = `req_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
-      
-      // Create the request object
-      const request = {
-        id: requestId,
-        endpoint,
-        method,
-        body,
-        priority,
-        createdAt: Date.now(),
-        resolve,
-        reject,
-        signal
-      };
-      
-      // Add to appropriate queue, sorting by priority
-      this.requestQueues[category].push(request);
-      this.requestQueues[category].sort((a, b) => {
-        // First by priority
-        if (a.priority !== b.priority) {
-          return a.priority === PRIORITY.HIGH ? -1 : 
-                 b.priority === PRIORITY.HIGH ? 1 : 
-                 a.priority === PRIORITY.MEDIUM ? -1 : 1;
+      try {
+        // Generate a request ID with better uniqueness
+        const requestId = `req_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+        
+        // Validate inputs
+        if (!body) {
+          throw new Error('Request body is required');
         }
-        // Then by creation time (oldest first)
-        return a.createdAt - b.createdAt;
-      });
-      
-      console.log(`Request queued: ${requestId} (Category: ${category}, Priority: ${priority})`);
+        
+        if (!Object.values(CATEGORY).includes(category)) {
+          console.warn(`Unknown category: ${category}, falling back to OTHER`);
+        }
+        
+        if (!Object.values(PRIORITY).includes(priority)) {
+          console.warn(`Unknown priority: ${priority}, falling back to MEDIUM`);
+        }
+        
+        // Create the request object with additional metadata
+        const request = {
+          id: requestId,
+          endpoint,
+          method,
+          body,
+          priority,
+          createdAt: Date.now(),
+          resolve,
+          reject,
+          signal,
+          onProgress,
+          timeout,
+          retryCount: 0, // For tracking retries
+          category // Store category for logging
+        };
+        
+        // Get the appropriate queue
+        const queue = this.requestQueues[
+          Object.values(CATEGORY).includes(category) ? category : CATEGORY.OTHER
+        ];
+        
+        // Add to queue, sorting by priority then creation time
+        queue.push(request);
+        queue.sort((a, b) => {
+          // First by priority
+          if (a.priority !== b.priority) {
+            return a.priority === PRIORITY.HIGH ? -1 : 
+                   b.priority === PRIORITY.HIGH ? 1 : 
+                   a.priority === PRIORITY.MEDIUM ? -1 : 1;
+          }
+          // Then by creation time (oldest first)
+          return a.createdAt - b.createdAt;
+        });
+        
+        console.log(`Request queued: ${requestId} (Category: ${category}, Priority: ${priority})`);
+        
+        // Set timeout to reject if request takes too long in queue
+        const timeoutId = setTimeout(() => {
+          // Only reject if still in queue (not picked up for processing)
+          const queueIndex = queue.findIndex(req => req.id === requestId);
+          if (queueIndex !== -1) {
+            console.warn(`Request ${requestId} timed out in queue after ${timeout}ms`);
+            queue.splice(queueIndex, 1);
+            reject(new Error(`Request timed out after ${timeout}ms waiting in queue`));
+          }
+        }, timeout);
+        
+        // Store the timeout ID for cleanup
+        request.queueTimeoutId = timeoutId;
+      } catch (error) {
+        console.error('Error enqueueing request:', error);
+        reject(error);
+      }
     });
   }
   

@@ -103,11 +103,12 @@ export function useConnect4AI(gameState, isAITurn) {
     setIsThinking(true);
     setError(null);
     
-    // Cancel any in-flight request
-    if (abortControllerRef.current) {
-      console.log("Aborting previous request");
-      abortControllerRef.current.abort();
-    }
+  // Cancel any in-flight request
+  if (abortControllerRef.current) {
+    console.log("Aborting previous request");
+    abortControllerRef.current.abort();
+    abortControllerRef.current = null; // Immediately nullify to prevent memory leaks
+  }
     
     // Create new abort controller and increment request ID
     const currentRequestId = requestId + 1;
@@ -384,15 +385,18 @@ Respond with ONLY a JSON object in this exact format:
       // Cancel any pending API requests
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
+        abortControllerRef.current = null;
       }
       
       // Clear timeouts
       if (moveTimeoutId) {
         clearTimeout(moveTimeoutId);
+        moveTimeoutId = null;
       }
       
       if (retryTimeout) {
         clearTimeout(retryTimeout);
+        setRetryTimeout(null);
       }
       
       // Always reset the processing flag on cleanup

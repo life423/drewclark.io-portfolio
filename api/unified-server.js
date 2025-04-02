@@ -8,9 +8,75 @@
 const OpenAI = require('openai');
 const config = require('./config');
 
-// Simple in-memory cache (consider using a distributed cache in production)
-const responseCache = new Map();
-const CACHE_TTL = config.cacheTtlMs;
+/**
+ * Enhanced LRU cache implementation with size limits
+ * This prevents memory leaks by limiting both the number of entries and
+ * performing periodic cleanup of expired items
+ */
+class LRUCache {
+  constructor(maxSize = 1000, ttl = 3600000) {
+    this.cache = new Map();
+    this.maxSize = maxSize;
+    this.ttl = ttl;
+    this.lastCleanup = Date.now();
+    this.cleanupInterval = 60000; // Cleanup every minute
+  }
+
+  get(key) {
+    this.maybeCleanup();
+    const item = this.cache.get(key);
+    
+    if (!item) return null;
+    
+    // Check if item is expired
+    if (Date.now() - item.timestamp > this.ttl) {
+      this.cache.delete(key);
+      return null;
+    }
+    
+    // Update timestamp to mark as recently used
+    item.timestamp = Date.now();
+    
+    // Move to the end to maintain LRU order
+    this.cache.delete(key);
+    this.cache.set(key, item);
+    
+    return item.data;
+  }
+
+  set(key, data) {
+    this.maybeCleanup();
+    
+    // Enforce size limit by removing least recently used items
+    if (this.cache.size >= this.maxSize) {
+      const oldestKey = this.cache.keys().next().value;
+      this.cache.delete(oldestKey);
+    }
+    
+    this.cache.set(key, {
+      data,
+      timestamp: Date.now(),
+      size: JSON.stringify(data).length
+    });
+  }
+
+  // Cleanup expired items when needed
+  maybeCleanup() {
+    const now = Date.now();
+    if (now - this.lastCleanup > this.cleanupInterval) {
+      this.lastCleanup = now;
+      
+      for (const [key, value] of this.cache.entries()) {
+        if (now - value.timestamp > this.ttl) {
+          this.cache.delete(key);
+        }
+      }
+    }
+  }
+}
+
+// Initialize the cache
+const responseCache = new LRUCache(1000, config.cacheTtlMs);
 
 // Initialize OpenAI client
 let openAiClient = null;
@@ -283,10 +349,17 @@ async function handlePostRequest(req, createResponse, headers, { logInfo, logErr
   }
 }
 
-// Basic input sanitization
+// Enhanced input sanitization
 function sanitizeInput(input) {
-  // Remove any HTML/script tags
-  return input.replace(/<[^>]*>?/gm, '');
+  if (typeof input !== 'string') return '';
+  
+  // More thorough sanitization
+  return input
+    .replace(/<[^>]*>?/gm, '') // Remove HTML tags
+    .replace(/javascript:/gi, '') // Remove javascript: protocol
+    .replace(/on\w+=/gi, '') // Remove event handlers
+    .replace(/data:[^,]*,/gi, '') // Remove data: URI scheme
+    .trim();
 }
 
 // Simple validation of model names
@@ -322,30 +395,13 @@ function isRateLimited(clientIp) {
   return false; // Not rate limited
 }
 
-// Cache helpers
+// Cache helpers simplified to use the LRUCache implementation
 function checkCache(key) {
-  const cached = responseCache.get(key);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-    return cached.data;
-  }
-  return null;
+  return responseCache.get(key);
 }
 
 function cacheResponse(key, data) {
-  responseCache.set(key, {
-    timestamp: Date.now(),
-    data
-  });
-
-  // Clean up old cache entries
-  if (responseCache.size > 1000) { // Prevent unbounded growth
-    const now = Date.now();
-    for (const [k, v] of responseCache.entries()) {
-      if (now - v.timestamp > CACHE_TTL) {
-        responseCache.delete(k);
-      }
-    }
-  }
+  responseCache.set(key, data);
 }
 
 module.exports = {

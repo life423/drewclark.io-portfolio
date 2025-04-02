@@ -24,33 +24,98 @@ setCacheTTL(config.cacheTtlMs)
 const app = express()
 const PORT = process.env.PORT || 3001 // Changed from 3000 to 3001
 
-// Middleware
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
+// Security middleware
+const helmet = require('helmet');
 
-// Improved CORS middleware with specific allowed origins
+// Parse JSON with a size limit to prevent JSON bombs
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+
+// Add security headers
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'"], // Allow inline scripts for frontend
+            styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles
+            imgSrc: ["'self'", "data:", "blob:"], // Allow data URIs for images
+            connectSrc: ["'self'", process.env.NODE_ENV === 'development' ? '*' : ''] // More permissive in dev
+        }
+    }
+}));
+
+// Enhanced CORS middleware with proper security
 app.use((req, res, next) => {
-    // Allow specific origins in development
-    const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000']
-    const origin = req.headers.origin
+    // Production domains (add your actual production domains)
+    const productionDomains = [
+        'https://drewclark.io',
+        'https://www.drewclark.io'
+    ];
     
-    if (allowedOrigins.includes(origin)) {
-        res.header('Access-Control-Allow-Origin', origin)
+    // Local development domains
+    const developmentDomains = [
+        'http://localhost:3000',
+        'http://127.0.0.1:3000',
+        'http://localhost:3001',
+        'http://127.0.0.1:3001'
+    ];
+    
+    // Determine allowed origins based on environment
+    const allowedOrigins = process.env.NODE_ENV === 'production' 
+        ? productionDomains 
+        : [...productionDomains, ...developmentDomains];
+    
+    const origin = req.headers.origin;
+    
+    // Set appropriate CORS headers
+    if (origin && allowedOrigins.includes(origin)) {
+        // Allow specific origin that's in our whitelist
+        res.header('Access-Control-Allow-Origin', origin);
     } else if (process.env.NODE_ENV !== 'production') {
-        // In development, fallback to allow all if not matching specific origins
-        res.header('Access-Control-Allow-Origin', '*')
+        // In development, be more permissive (but log it)
+        console.log(`Non-whitelisted origin request: ${origin || 'Unknown'}`);
+        res.header('Access-Control-Allow-Origin', '*');
+    } else {
+        // In production, don't set the header for non-whitelisted origins
+        // This effectively blocks CORS requests from unauthorized domains
     }
     
-    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+    // Standard CORS headers
+    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.header(
         'Access-Control-Allow-Headers',
         'Content-Type, Authorization, X-Correlation-Id'
-    )
+    );
+    
+    // Add security headers
+    res.header('X-Content-Type-Options', 'nosniff');
+    res.header('X-Frame-Options', 'DENY');
+    res.header('X-XSS-Protection', '1; mode=block');
+    
+    // Handle preflight requests
     if (req.method === 'OPTIONS') {
-        return res.sendStatus(200)
+        return res.sendStatus(200);
     }
-    next()
-})
+    
+    next();
+});
+
+// Request validation middleware
+app.use((req, res, next) => {
+    // Validate request size
+    const contentLength = parseInt(req.headers['content-length'] || '0');
+    if (contentLength > 1024 * 1024) { // 1MB limit
+        return res.status(413).json({ error: 'Request entity too large' });
+    }
+    
+    // Validate Content-Type for POST requests
+    if (req.method === 'POST' && req.headers['content-type'] && 
+        !req.headers['content-type'].includes('application/json')) {
+        return res.status(415).json({ error: 'Unsupported media type. Use application/json' });
+    }
+    
+    next();
+});
 
 // API routes
 app.use('/api', apiRoutes)
