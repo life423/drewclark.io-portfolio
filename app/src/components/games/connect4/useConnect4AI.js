@@ -371,8 +371,8 @@ export function useConnect4AI(gameState, isAITurn) {
         console.log("Setting AI commentary:", aiDecision.commentary);
         setAiCommentary(aiDecision.commentary);
         
-        // Small delay before making the move for a more natural feel
-        console.log("Scheduling AI move in 600ms to column:", aiDecision.column);
+        // Longer delay before making the move to allow for animation and more natural timing
+        console.log("Scheduling AI move in 1200ms to column:", aiDecision.column);
         moveTimeoutId = setTimeout(() => {
           if (!isMounted) {
             console.log("Component unmounted during move timeout");
@@ -392,7 +392,7 @@ export function useConnect4AI(gameState, isAITurn) {
           // Reset the processing flag AFTER the move is made
           console.log("Resetting processingTurnRef to false after move");
           processingTurnRef.current = false;
-        }, 600);
+        }, 1250); // Ensure it's long enough to allow for the full animation cycle
       } else {
         // Not AI's turn or game not playing, ensure flag is reset
         if (processingTurnRef.current) {

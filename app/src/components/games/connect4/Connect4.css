@@ -63,10 +63,10 @@
 /* Simple drop animation for discs */
 @keyframes simple-drop {
   0% {
-    transform: translateY(0);
+    top: 0;
   }
   100% {
-    transform: translateY(calc(100% - 30px));  /* Adjust to stop at the right row */
+    top: calc(100% - 40px); /* Using top property instead of transform */
   }
 }
 

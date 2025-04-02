@@ -9,7 +9,7 @@ LABEL version="1.0.0"
 
 # Install dependencies - leverage cache layers
 COPY app/package*.json ./
-RUN npm ci --no-audit --no-fund
+RUN if [ -f package-lock.json ]; then npm ci --no-audit --no-fund; else npm install --no-audit --no-fund; fi
 
 # Copy source files and build
 COPY app/ ./
@@ -21,7 +21,7 @@ WORKDIR /app
 
 # Install backend dependencies
 COPY package*.json ./
-RUN npm ci --no-audit --no-fund --production
+RUN if [ -f package-lock.json ]; then npm ci --no-audit --no-fund --production; else npm install --no-audit --no-fund --production; fi
 
 # Final production image (smaller)
 FROM node:18-alpine AS production
@@ -50,7 +50,7 @@ COPY start-app.js ./
 
 # Set proper permissions
 USER root
-RUN chmod +x ./start-app.js && chown -R appuser:appgroup /app
+RUN if [ -f ./start-app.js ]; then chmod +x ./start-app.js; fi && chown -R appuser:appgroup /app
 USER appuser
 
 # Set up healthcheck - checks server response every 30s
