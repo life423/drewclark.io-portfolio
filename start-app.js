@@ -7,7 +7,9 @@
  * - Automatically handling port conflicts
  * - Starting the application with proper error handling
  * 
- * Usage: node start-app.js
+ * Usage: 
+ *   node start-app.js          - Interactive mode with prompts
+ *   node start-app.js --auto   - Automatic mode that kills conflicting processes
  */
 
 const { exec, spawn } = require('child_process');
@@ -15,16 +17,21 @@ const util = require('util');
 const execAsync = util.promisify(exec);
 const readline = require('readline');
 
+// Parse command line arguments
+const args = process.argv.slice(2);
+const autoMode = args.includes('--auto');
+
 // Configuration
 const config = {
-  backendPort: 3001,
+  backendPort: process.env.PORT || 3001,
   frontendPort: 3000,
   checkCommand: process.platform === 'win32' 
     ? 'netstat -ano | findstr /R ":%PORT%\\s"'
     : 'lsof -i :%PORT% -t',
   killCommand: process.platform === 'win32'
     ? 'taskkill /F /PID %PID%'
-    : 'kill -9 %PID%'
+    : 'kill -9 %PID%',
+  autoMode: autoMode
 };
 
 /**
@@ -122,14 +129,18 @@ function startDevServer() {
 async function main() {
   console.log('Portfolio App Starter');
   console.log('===================');
+  console.log(`Mode: ${config.autoMode ? 'Automatic' : 'Interactive'}`);
   
   // Check frontend port (3000)
   const frontendPid = await checkPort(config.frontendPort);
   if (frontendPid) {
     console.log(`Frontend port ${config.frontendPort} is in use by process ${frontendPid}.`);
-    const shouldKill = await confirm('Do you want to kill this process?');
+    
+    // In auto mode, kill automatically; otherwise, ask for confirmation
+    const shouldKill = config.autoMode ? true : await confirm('Do you want to kill this process?');
     
     if (shouldKill) {
+      console.log(`Attempting to kill process ${frontendPid}...`);
       const success = await killProcess(frontendPid);
       if (!success) {
         console.error(`Failed to free port ${config.frontendPort}. Please close the application manually.`);
@@ -146,9 +157,12 @@ async function main() {
   const backendPid = await checkPort(config.backendPort);
   if (backendPid) {
     console.log(`Backend port ${config.backendPort} is in use by process ${backendPid}.`);
-    const shouldKill = await confirm('Do you want to kill this process?');
+    
+    // In auto mode, kill automatically; otherwise, ask for confirmation
+    const shouldKill = config.autoMode ? true : await confirm('Do you want to kill this process?');
     
     if (shouldKill) {
+      console.log(`Attempting to kill process ${backendPid}...`);
       const success = await killProcess(backendPid);
       if (!success) {
         console.error(`Failed to free port ${config.backendPort}. Please close the application manually.`);

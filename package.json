@@ -18,10 +18,12 @@
         "start": "node server.js",
         "build": "cd app && npm run build",
         "dev": "concurrently \"nodemon server.js\" \"cd app && npm run dev\"",
+        "dev:safe": "node start-app.js --auto",
         "start:safe": "node start-app.js",
+        "kill-ports": "npx kill-port 3000 3001",
         "postinstall": "node -e \"try { require('fs').chmodSync('./start-app.js', '755') } catch(e) { console.log(e) }\"",
         "docker:build": "docker build -t drewclark-portfolio .",
-        "docker:run": "docker run -p 3001:3001 -e OPENAI_API_KEY=${OPENAI_API_KEY} drewclark-portfolio",
+        "docker:run": "docker run -p 3001:3001 -e OPENAI_API_KEY=${OPENAI_API_KEY} -e DOCKER_CONTAINER=true -e PORT=3001 drewclark-portfolio",
         "docker:dev": "docker-compose up dev",
         "docker:prod": "docker-compose up app"
     }

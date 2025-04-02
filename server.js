@@ -63,9 +63,10 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'app/dist', 'index.html'))
 })
 
-// Start the server
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`)
+// Start the server - bind to 0.0.0.0 in container environments to allow external connections
+const HOST = process.env.DOCKER_CONTAINER ? '0.0.0.0' : 'localhost'
+app.listen(PORT, HOST, () => {
+    console.log(`Server running on ${HOST}:${PORT}`)
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`)
     console.log(
         `OpenAI API Key: ${config.openAiApiKey ? 'Configured' : 'Missing'}`
