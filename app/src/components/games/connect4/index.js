@@ -1,20 +1,17 @@
-// Export Connect4 components from the new implementation
-// This approach allows us to keep the old files for reference 
-// but use the new optimized implementations
+// Export Connect4 components from original implementation
+// To ensure consistency until full migration is complete
 
-import Connect4Game from './Connect4Game.new';
-import Connect4Board from './Connect4Board.new';
-import Connect4Cell from './Connect4Cell.new';
-import Connect4Column from './Connect4Column.new';
-import Connect4Controls from './Connect4Controls.new';
-import { useConnect4Game } from './useConnect4Game.new';
-import { useConnect4AI } from './useConnect4AI.new';
-import * as connect4Logic from './connect4Logic.new';
+import Connect4Game from './Connect4Game';
+import Connect4Board from './Connect4Board';
+import Connect4Column from './Connect4Column';
+import Connect4Controls from './Connect4Controls';
+import { useConnect4Game } from './useConnect4Game';
+import { useConnect4AI } from './useConnect4AI';
+import * as connect4Logic from './connect4Logic';
 
 export {
   Connect4Game,
   Connect4Board,
-  Connect4Cell,
   Connect4Column,
   Connect4Controls,
   useConnect4Game,

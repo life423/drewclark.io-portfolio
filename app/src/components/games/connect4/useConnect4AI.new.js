@@ -174,11 +174,24 @@ export function useConnect4AI(gameState, isAITurn) {
       console.log('AI thinking started');
       
       try {
-        // Try using the built-in AI strategy first (faster response)
-        // 50% chance of using fallback AI for easy difficulty
-        if (difficulty === 'easy' && Math.random() < 0.5) {
-          const column = gameLogic.findBestMove(board, gameLogic.AI, gameLogic.PLAYER);
-          setCommentary("I think I'll try this move!");
+        // Use deterministic strategy for specific situations to reduce API calls:
+        
+        // 1. Always use local AI for first few moves to save API calls
+        if (moveHistory.length < 3) {
+          const column = moveHistory.length === 0
+            ? 3 // Always start in the center column for optimal play
+            : gameLogic.findBestMove(board, gameLogic.AI, gameLogic.PLAYER);
+          
+          let commentary = "";
+          if (moveHistory.length === 0) {
+            commentary = "I'll start in the center column for better control.";
+          } else if (moveHistory.length === 1) {
+            commentary = "Let me respond to your first move.";
+          } else {
+            commentary = "I'm developing my strategy...";
+          }
+          
+          setCommentary(commentary);
           
           // Small delay for natural feeling
           await new Promise(resolve => setTimeout(resolve, 700));
@@ -189,6 +202,76 @@ export function useConnect4AI(gameState, isAITurn) {
           
           return;
         }
+        
+        // 2. Always use local AI for easy difficulty (no need to waste API calls)
+        if (difficulty === 'easy') {
+          // For easy mode, occasionally make non-optimal moves
+          const availableColumns = getAvailableColumns();
+          let column;
+          
+          // 30% chance of random move in easy mode
+          if (Math.random() < 0.3) {
+            column = availableColumns[Math.floor(Math.random() * availableColumns.length)];
+            setCommentary("I'll try this move!");
+          } else {
+            column = gameLogic.findBestMove(board, gameLogic.AI, gameLogic.PLAYER);
+            setCommentary("This looks like a good move.");
+          }
+          
+          // Small delay for natural feeling
+          await new Promise(resolve => setTimeout(resolve, 700));
+          
+          if (isMounted) {
+            makeAIMove(column);
+          }
+          
+          return;
+        }
+        
+        // 3. Check for immediate win conditions locally before API call
+        const availableColumns = getAvailableColumns();
+        
+        // Check if AI can win in one move
+        for (const col of availableColumns) {
+          const testBoard = JSON.parse(JSON.stringify(board)); // Deep copy
+          const { board: updatedBoard } = gameLogic.dropDisc(testBoard, col, gameLogic.AI);
+          const { winner } = gameLogic.checkWin(updatedBoard);
+          
+          if (winner === gameLogic.AI) {
+            setCommentary("I see a winning move!");
+            
+            // Small delay for natural feeling
+            await new Promise(resolve => setTimeout(resolve, 600));
+            
+            if (isMounted) {
+              makeAIMove(col);
+            }
+            
+            return;
+          }
+        }
+        
+        // 4. Check if player can win in one move and block (medium and hard difficulties)
+        for (const col of availableColumns) {
+          const testBoard = JSON.parse(JSON.stringify(board)); // Deep copy
+          const { board: updatedBoard } = gameLogic.dropDisc(testBoard, col, gameLogic.PLAYER);
+          const { winner } = gameLogic.checkWin(updatedBoard);
+          
+          if (winner === gameLogic.PLAYER) {
+            setCommentary("I need to block your winning move!");
+            
+            // Small delay for natural feeling
+            await new Promise(resolve => setTimeout(resolve, 600));
+            
+            if (isMounted) {
+              makeAIMove(col);
+            }
+            
+            return;
+          }
+        }
+        
+        // Only use OpenAI API for medium/hard difficulty in non-trivial positions
         
         // Cancel any previous request
         if (abortControllerRef.current) {

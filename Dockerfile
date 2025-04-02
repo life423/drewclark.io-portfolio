@@ -1,33 +1,64 @@
 # Build stage for frontend
 FROM node:18-alpine AS build-frontend
 WORKDIR /app
+
+# Add metadata labels
+LABEL maintainer="Drew Clark <contact@drewclark.io>"
+LABEL description="Portfolio website for Drew Clark"
+LABEL version="1.0.0"
+
+# Install dependencies - leverage cache layers
 COPY app/package*.json ./
-RUN npm install
+RUN npm ci --no-audit --no-fund
+
+# Copy source files and build
 COPY app/ ./
 RUN npm run build
 
-# Final production image
-FROM node:18-alpine
+# Backend dependencies stage - separate to optimize caching
+FROM node:18-alpine AS build-backend
 WORKDIR /app
 
-# Copy package.json and install dependencies
-COPY package.json ./
-RUN npm install --production
+# Install backend dependencies
+COPY package*.json ./
+RUN npm ci --no-audit --no-fund --production
 
-# Copy server.js and API code
-COPY server.js ./
-COPY api/ ./api/
+# Final production image (smaller)
+FROM node:18-alpine AS production
+WORKDIR /app
 
-# Copy built frontend assets
-COPY --from=build-frontend /app/dist ./app/dist
-
-# Expose port
-EXPOSE 3001
+# Add metadata labels
+LABEL maintainer="Drew Clark <contact@drewclark.io>"
+LABEL description="Portfolio website for Drew Clark"
+LABEL version="1.0.0"
 
 # Set environment variables
 ENV NODE_ENV=production
 ENV DOCKER_CONTAINER=true
 ENV PORT=3001
 
-# Command to run
-CMD ["node", "server.js"]
+# Create and use non-root user for security
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+USER appuser
+
+# Copy only the necessary files
+COPY --from=build-backend /app/node_modules ./node_modules
+COPY --from=build-frontend /app/dist ./app/dist
+COPY server.js ./
+COPY api/ ./api/
+COPY start-app.js ./
+
+# Set proper permissions
+USER root
+RUN chmod +x ./start-app.js && chown -R appuser:appgroup /app
+USER appuser
+
+# Set up healthcheck - checks server response every 30s
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget --quiet --tries=1 --spider http://localhost:$PORT/api || exit 1
+
+# Expose port
+EXPOSE 3001
+
+# Use proper entrypoint script for signal handling
+ENTRYPOINT ["node", "server.js"]
