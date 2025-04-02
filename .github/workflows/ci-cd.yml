@@ -40,7 +40,7 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/portfolio:latest,${{ secrets.DOCKERHUB_USERNAME }}/portfolio:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
- - The error in your CI/CD pipeline is due to a missing node_modules directory during the Docker build process.
+
 
 Here are the steps to fix this issue:
 
