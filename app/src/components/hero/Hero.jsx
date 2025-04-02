@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react'
 import useScrollPosition from '../../hooks/useScrollPosition'
-import useViewport from '../../hooks/useViewport'
+
 import sproutMobile from '../../assets/sprout-mobile.jpg'
 import largeSprout from '../../assets/large-sprout.jpg'
 import PrimaryButton from '../utils/PrimaryButton'
