@@ -34,55 +34,92 @@ export default function ProjectCard({
     const [previousQuestions, setPreviousQuestions] = useState([])
     // Track when we need to auto-adjust the card height based on content
     const [autoHeight, setAutoHeight] = useState(false)
+    // Track if we've initialized from localStorage
+    const [chatInitialized, setChatInitialized] = useState(false)
     // Track the user's current UI state
     const [uiContext, setUiContext] = useState({
         activeSection: 'overview',
         interactionState: 'browsing',
         scrollPosition: 0,
-        customContext: ''
+        customContext: '',
     })
 
     const chatInputRef = useRef(null)
     const chatContainerRef = useRef(null)
+    // Track previous project number to detect changes
+    const prevProjectNumberRef = useRef(projectNumber)
 
     // Get scroll info from useScrollPosition
-    const { y: scrollY, direction: scrollDirection, percent: scrollPercent, forceRecalculation } = useScrollPosition()
+    const {
+        y: scrollY,
+        direction: scrollDirection,
+        percent: scrollPercent,
+        forceRecalculation,
+    } = useScrollPosition()
+
+    // Load chat history from localStorage on initial render
+    useEffect(() => {
+        if (!chatInitialized) {
+            const storageKey = `project_chat_${projectNumber}`
+            const savedMessages = localStorage.getItem(storageKey)
+
+            if (savedMessages) {
+                try {
+                    setMessages(JSON.parse(savedMessages))
+                    setChatInitialized(true)
+                } catch (e) {
+                    console.error('Error parsing saved chat history:', e)
+                    setChatInitialized(true)
+                }
+            } else {
+                setChatInitialized(true)
+            }
+        }
+    }, [chatInitialized, projectNumber])
+
+    // Save chat history to localStorage when messages change
+    useEffect(() => {
+        if (chatInitialized && messages.length > 0) {
+            const storageKey = `project_chat_${projectNumber}`
+            localStorage.setItem(storageKey, JSON.stringify(messages))
+        }
+    }, [messages, projectNumber, chatInitialized])
 
     // Update UI context when scroll position changes in the main window
     useEffect(() => {
         if (scrollPercent > 0) {
-            let activeSection = 'overview';
-            
+            let activeSection = 'overview'
+
             // Determine which section is in view based on scroll percentage
             if (scrollPercent < 30) {
-                activeSection = 'project header';
+                activeSection = 'project header'
             } else if (scrollPercent < 70) {
-                activeSection = 'project details';
+                activeSection = 'project details'
             } else {
-                activeSection = 'project innovations';
+                activeSection = 'project innovations'
             }
-            
+
             setUiContext(prev => ({
                 ...prev,
                 scrollPosition: scrollPercent,
                 activeSection,
                 interactionState: `scrolling ${scrollDirection}`,
-                customContext: `User is viewing the ${activeSection} section`
-            }));
+                customContext: `User is viewing the ${activeSection} section`,
+            }))
         }
-    }, [scrollPercent, scrollDirection]);
+    }, [scrollPercent, scrollDirection])
 
     const toggleChat = () => {
         const newChatVisible = !chatVisible
         setChatVisible(newChatVisible)
-        
+
         // Update UI context when chat visibility changes
         setUiContext(prev => ({
             ...prev,
             activeSection: newChatVisible ? 'chat' : 'overview',
-            interactionState: newChatVisible ? 'asking questions' : 'browsing'
+            interactionState: newChatVisible ? 'asking questions' : 'browsing',
         }))
-        
+
         if (newChatVisible) {
             // Focus the input when chat becomes visible
             setTimeout(() => {
@@ -95,32 +132,34 @@ export default function ProjectCard({
             forceRecalculation()
         }, 300)
     }
-    
+
     // Update UI context based on scroll position
     useEffect(() => {
         const handleScroll = () => {
             if (!chatContainerRef.current) return
-            
+
             const scrollTop = chatContainerRef.current.scrollTop
             const scrollHeight = chatContainerRef.current.scrollHeight
             const clientHeight = chatContainerRef.current.clientHeight
-            const scrollPosition = Math.round((scrollTop / (scrollHeight - clientHeight)) * 100)
-            
+            const scrollPosition = Math.round(
+                (scrollTop / (scrollHeight - clientHeight)) * 100
+            )
+
             // Only update if there's a significant change
             if (Math.abs(scrollPosition - uiContext.scrollPosition) > 10) {
                 setUiContext(prev => ({
                     ...prev,
                     scrollPosition,
-                    interactionState: 'scrolling chat history'
+                    interactionState: 'scrolling chat history',
                 }))
             }
         }
-        
+
         const chatContainer = chatContainerRef.current
         if (chatContainer) {
             chatContainer.addEventListener('scroll', handleScroll)
         }
-        
+
         return () => {
             if (chatContainer) {
                 chatContainer.removeEventListener('scroll', handleScroll)
@@ -133,27 +172,71 @@ export default function ProjectCard({
         if (chatContainerRef.current && messages.length > 0) {
             chatContainerRef.current.scrollTop =
                 chatContainerRef.current.scrollHeight
-            
+
             // Enable auto-height after messages are added
             if (messages.length > 1) {
                 setAutoHeight(true)
             }
         }
     }, [messages])
-    
+
     // Measure content height and adjust card height if needed
     const cardRef = useRef(null)
     const contentRef = useRef(null)
-    
+
     useEffect(() => {
         if (autoHeight && cardRef.current && contentRef.current) {
             // Get the current content height
             const contentHeight = contentRef.current.scrollHeight
-            
+
             // Force layout recalculation to ensure accurate measurements
             forceRecalculation()
         }
     }, [autoHeight, messages, forceRecalculation])
+
+    // Project transition detection effect
+    useEffect(() => {
+        // Skip on initial render
+        if (prevProjectNumberRef.current !== projectNumber && prevProjectNumberRef.current !== undefined) {
+            // This runs when projectNumber changes (navigating to a new project)
+            
+            // If chat is visible, add a transition message
+            if (chatVisible) {
+                // Clear previous questions for new context
+                setPreviousQuestions([])
+                
+                // Add a transition message for the new project
+                setMessages(prevMessages => [
+                    { 
+                        role: 'assistant', 
+                        content: `You're now viewing ${title}. This project uses ${stack.join(', ')}. What would you like to know about it?`,
+                        isTransition: true // Special flag for transition styling
+                    },
+                    // Keep previous messages for continuity
+                    ...prevMessages
+                ])
+                
+                // Auto-scroll to see the new message
+                setTimeout(() => {
+                    if (chatContainerRef.current) {
+                        chatContainerRef.current.scrollTop = 0
+                    }
+                }, 100)
+            }
+            
+            // Update UI context to reflect new project context
+            setUiContext(prev => ({
+                ...prev,
+                activeSection: 'overview',
+                interactionState: 'viewing new project',
+                customContext: `User has navigated to project ${projectNumber}: ${title}`
+            }))
+        }
+        
+        // Update ref with current project number for next comparison
+        prevProjectNumberRef.current = projectNumber
+        
+    }, [projectNumber, title, stack, chatVisible])
 
     const handleQuestionSubmit = async e => {
         e.preventDefault()
@@ -165,15 +248,15 @@ export default function ProjectCard({
 
         // Store the current question before clearing the input
         const currentQuestion = userQuestion
-        
+
         // Update previous questions for context
         setPreviousQuestions(prev => [...prev, currentQuestion])
-        
+
         // Update UI context to reflect that a question was asked
         setUiContext(prev => ({
             ...prev,
             interactionState: 'asked a question',
-            customContext: `User just asked: "${currentQuestion}"`
+            customContext: `User just asked: "${currentQuestion}"`,
         }))
 
         // Clear the input field immediately for better UX
@@ -199,24 +282,27 @@ export default function ProjectCard({
                     interactionState: uiContext.interactionState,
                     scrollPosition: uiContext.scrollPosition,
                     customContext: uiContext.customContext,
-                    previousQuestions: previousQuestions
-                }
+                    previousQuestions: previousQuestions,
+                },
             }
 
             // Display a subtle indicator that context-aware answering is active
             setMessages(prev => {
                 // Only add the indicator if it doesn't exist yet
-                const hasIndicator = prev.some(msg => 
-                    msg.role === 'system' && msg.content.includes('context-aware'))
-                
+                const hasIndicator = prev.some(
+                    msg =>
+                        msg.role === 'system' &&
+                        msg.content.includes('context-aware')
+                )
+
                 if (!hasIndicator && prev.length > 0) {
                     return [
                         ...prev,
-                        { 
-                            role: 'system', 
+                        {
+                            role: 'system',
                             content: 'Using context-aware answering...',
-                            isIndicator: true
-                        }
+                            isIndicator: true,
+                        },
                     ]
                 }
                 return prev
@@ -231,10 +317,7 @@ export default function ProjectCard({
             // Remove the indicator before adding the actual response
             setMessages(prev => {
                 const filtered = prev.filter(msg => !msg.isIndicator)
-                return [
-                    ...filtered,
-                    { role: 'assistant', content: response }
-                ]
+                return [...filtered, { role: 'assistant', content: response }]
             })
         } catch (error) {
             console.error('Error generating AI response:', error)
@@ -261,13 +344,13 @@ export default function ProjectCard({
     // Set up ref and use the intersection hook for title animation
     const headerRef = useRef(null)
     const headerInView = useIntersection(headerRef, { threshold: 0.2 })
-    
+
     return (
-        <div 
+        <div
             ref={cardRef}
             className={clsx(
-                'my-4 @container overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transform transition-all duration-300 flex flex-col h-auto min-h-[600px] @sm:min-h-[650px] @md:min-h-[670px] @lg:min-h-[700px]',
-                isActive ? 'shadow-xl border-brandGreen-600/50' : 'hover:shadow-lg hover:border-brandGray-600',
+                'my-4 @container overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transition-all duration-300 flex flex-col h-[700px]',
+                isActive ? 'ring-2 ring-brandGreen-500/50 shadow-xl' : 'hover:shadow-lg hover:border-brandGray-600',
                 onClick && 'cursor-pointer'
             )}
             onClick={() => onClick && onClick()}
@@ -298,18 +381,20 @@ export default function ProjectCard({
                     </button>
                 </div>
 
-                <h2 
+                <h2
                     ref={headerRef}
                     className='text-xl @sm:text-2xl font-bold text-brandGreen-300 mb-1 min-h-[1.75rem] @sm:min-h-[2rem]'
                 >
                     {headerInView ? (
-                        <TypedTextEffect 
-                            phrases={[title]} 
-                            typingSpeed={40} 
+                        <TypedTextEffect
+                            phrases={[title]}
+                            typingSpeed={40}
                             deletingSpeed={30}
                             pauseTime={30000} // Very long pause so it doesn't loop
                         />
-                    ) : title}
+                    ) : (
+                        title
+                    )}
                 </h2>
                 <div className='flex flex-wrap gap-1 @sm:gap-2 mt-2 @sm:mt-3'>
                     {stack.map((tech, index) => (
@@ -324,7 +409,10 @@ export default function ProjectCard({
             </div>
 
             {/* Project Content */}
-            <div ref={contentRef} className='p-3 @sm:p-4 @md:p-5 flex-1 flex flex-col'>
+            <div
+                ref={contentRef}
+                className='p-3 @sm:p-4 @md:p-5 flex-1 flex flex-col'
+            >
                 <div
                     className={clsx(
                         'prose prose-sm prose-invert max-w-none',
@@ -389,13 +477,13 @@ export default function ProjectCard({
                 ) : (
                     <div
                         className='bg-brandGray-900 rounded-lg p-2 @sm:p-3 @md:p-4 animate-fade-in relative z-50 shadow-md will-change-transform'
-                        style={{ 
+                        style={{
                             zIndex: 50,
                             backfaceVisibility: 'hidden', // Prevent blurriness
                             WebkitBackfaceVisibility: 'hidden',
                             transform: 'translateZ(0)', // Force GPU acceleration to fix blurriness
                             WebkitFontSmoothing: 'antialiased',
-                            MozOsxFontSmoothing: 'grayscale'
+                            MozOsxFontSmoothing: 'grayscale',
                         }}
                         onTransitionEnd={() => forceRecalculation()}
                     >
@@ -406,7 +494,7 @@ export default function ProjectCard({
                             <button
                                 onClick={toggleChat}
                                 className='text-brandGray-400 hover:text-brandGreen-400'
-                                aria-label="Close chat"
+                                aria-label='Close chat'
                             >
                                 <svg
                                     xmlns='http://www.w3.org/2000/svg'
@@ -439,7 +527,7 @@ export default function ProjectCard({
                                         WebkitBackfaceVisibility: 'hidden',
                                         transform: 'translateZ(0)',
                                         WebkitFontSmoothing: 'antialiased',
-                                        MozOsxFontSmoothing: 'grayscale'
+                                        MozOsxFontSmoothing: 'grayscale',
                                     }}
                                     maxLength={140}
                                 />
@@ -460,7 +548,7 @@ export default function ProjectCard({
                                         WebkitBackfaceVisibility: 'hidden',
                                         transform: 'translateZ(0)',
                                         WebkitFontSmoothing: 'antialiased',
-                                        MozOsxFontSmoothing: 'grayscale'
+                                        MozOsxFontSmoothing: 'grayscale',
                                     }}
                                 >
                                     {/* Shine effect for filled state */}
@@ -502,7 +590,9 @@ export default function ProjectCard({
                                 ref={chatContainerRef}
                                 className={clsx(
                                     'overflow-y-auto mb-3 space-y-2 pr-1 scrollbar-thin scrollbar-thumb-brandGray-700 scrollbar-track-transparent',
-                                    !autoHeight ? 'max-h-[200px]' : 'max-h-[400px]'
+                                    !autoHeight
+                                        ? 'max-h-[200px]'
+                                        : 'max-h-[400px]'
                                 )}
                             >
                                 {messages.map((msg, index) => (
@@ -518,7 +608,7 @@ export default function ProjectCard({
                                         )}
                                     >
                                         {msg.role === 'system' ? (
-                                            <div className="text-xs text-brandGray-400 italic px-2 py-1 bg-brandGray-800/50 rounded-md inline-block">
+                                            <div className='text-xs text-brandGray-400 italic px-2 py-1 bg-brandGray-800/50 rounded-md inline-block'>
                                                 {msg.content}
                                             </div>
                                         ) : (
@@ -527,9 +617,19 @@ export default function ProjectCard({
                                                     'rounded-lg p-2 @sm:p-3 text-xs @sm:text-sm',
                                                     msg.role === 'user'
                                                         ? 'bg-brandGray-700 text-brandGreen-200 border-r-2 border-r-brandGreen-500'
+                                                        : msg.isTransition
+                                                        ? 'bg-gradient-to-r from-brandGray-850 to-brandGray-800 text-brandGray-200 border-t border-b border-brandGray-700 shadow-sm'
                                                         : 'bg-brandGray-800 bg-opacity-80 border-l-2 border-l-brandOrange-500 shadow-inner shadow-brandGray-900/50 text-brandGray-200'
                                                 )}
                                             >
+                                                {msg.isTransition && (
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-brandGreen-400" viewBox="0 0 20 20" fill="currentColor">
+                                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clipRule="evenodd" />
+                                                        </svg>
+                                                        <span className="text-xs font-medium text-brandGreen-400">Project Context Changed</span>
+                                                    </div>
+                                                )}
                                                 {msg.content}
                                             </div>
                                         )}
@@ -568,7 +668,9 @@ export default function ProjectCard({
                     <ProjectProgressIndicator
                         currentProject={projectNumber}
                         totalProjects={totalProjects}
-                        onProjectClick={index => onNavigateToProject?.(index + 1)}
+                        onProjectClick={index =>
+                            onNavigateToProject?.(index + 1)
+                        }
                     />
                 </div>
             )}
