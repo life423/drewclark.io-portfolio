@@ -22,10 +22,12 @@ COPY api/ ./api/
 COPY --from=build-frontend /app/dist ./app/dist
 
 # Expose port
-EXPOSE 3000
+EXPOSE 3001
 
 # Set environment variables
 ENV NODE_ENV=production
+ENV DOCKER_CONTAINER=true
+ENV PORT=3001
 
 # Command to run
 CMD ["node", "server.js"]
