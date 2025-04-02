@@ -2,6 +2,10 @@ import React, { useState, useRef, useEffect } from 'react'
 import clsx from 'clsx'
 import PrimaryButton from '../utils/PrimaryButton'
 import { answerMultiProjectQuestion } from '../../services/aiGenerationService'
+import { config } from '../../config'
+
+// Log environment for debugging deployment issues
+console.log('UnifiedProjectChat loaded with environment:', config.environment);
 
 /**
  * UnifiedProjectChat - A component that allows users to ask questions about any project

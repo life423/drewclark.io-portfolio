@@ -7,9 +7,9 @@ LABEL maintainer="Drew Clark <contact@drewclark.io>"
 LABEL description="Portfolio website for Drew Clark"
 LABEL version="1.0.0"
 
-# Install dependencies - leverage cache layers
+# Install dependencies - always use npm install to handle mismatches between package.json and lock file
 COPY app/package*.json ./
-RUN if [ -f ./package-lock.json ]; then npm ci --no-audit --no-fund --legacy-peer-deps; else npm install --no-audit --no-fund --legacy-peer-deps; fi
+RUN npm install --no-audit --no-fund --legacy-peer-deps
 
 # Copy source files and build
 COPY app/ ./
@@ -25,8 +25,8 @@ COPY start-app.js ./
 # Copy backend package files for better caching
 COPY package*.json ./
 
-# Install backend dependencies
-RUN if [ -f package-lock.json ]; then npm ci --no-audit --no-fund --legacy-peer-deps --production; else npm install --no-audit --no-fund --legacy-peer-deps --production; fi
+# Install backend dependencies with more robust approach
+RUN npm install --no-audit --no-fund --legacy-peer-deps --omit=dev
 RUN mkdir -p node_modules && echo "Made sure node_modules directory exists"
 
 # Copy remaining backend files
@@ -38,7 +38,7 @@ FROM node:18-alpine AS production
 WORKDIR /app
 
 # Add metadata labels
-LABEL maintainer="Drew Clark <contact@drewclark.io>"
+LABEL maintainer="Drew Clark drew@drewlcark.io"
 LABEL description="Portfolio website for Drew Clark"
 LABEL version="1.0.0"
 
@@ -57,6 +57,12 @@ COPY --from=build-frontend /app/dist ./app/dist
 COPY --from=build-backend /app/server.js ./
 COPY --from=build-backend /app/api/ ./api/
 COPY --from=build-backend /app/start-app.js ./
+
+# Debug output to help diagnose build issues
+RUN echo "Checking files in container:" && \
+    ls -la && \
+    echo "Dist folder contents:" && \
+    ls -la ./app/dist || echo "app/dist not found"
 
 # Set proper permissions
 USER root

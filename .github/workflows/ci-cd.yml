@@ -20,31 +20,18 @@ jobs:
           sudo apt-get install -y docker-compose
 
       - name: Build and test
-        run: |
-          docker-compose -f docker-compose.yml -f docker-compose.test.yml build
-          docker-compose -f docker-compose.yml -f docker-compose.test.yml run app npm test
+        run: docker-compose -f docker-compose.yml -f docker-compose.test.yml run app npm test
 
+      # (Optional) Log in to Docker Hub
       - name: Log in to Docker Hub
-        if: github.event_name != 'pull_request'
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '18'  # Using Node 18 to match Dockerfile
-          
-      - name: Install dependencies
-        run: npm install
-      
+      # Build and push your Docker image to Docker Hub
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
-          context: .
-          file: ./Dockerfile
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: aiandrew631/portfolio:latest,aiandrew631/portfolio:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/portfolio:latest

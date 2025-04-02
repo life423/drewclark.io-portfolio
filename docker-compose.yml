@@ -7,9 +7,10 @@ services:
       dockerfile: Dockerfile
     ports:
       - '3001:3001'
-    volumes:
-      - /app/node_modules
-      - .:/app
+    # Remove volume mapping for production container to prevent overrides
+    # volumes:
+    #   - /app/node_modules
+    #   - .:/app
     environment:
       - NODE_ENV=production
       - DOCKER_CONTAINER=true

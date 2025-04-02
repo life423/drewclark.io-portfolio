@@ -124,12 +124,58 @@ app.use((req, res, next) => {
 // API routes
 app.use('/api', apiRoutes)
 
-// Serve static frontend assets
-app.use(express.static(path.join(__dirname, 'app/dist')))
+// Serve static frontend assets - improve path resolution
+const distPath = path.join(__dirname, 'app/dist');
+console.log(`Serving static files from: ${distPath}`);
 
-// Catch-all route to serve index.html for client-side routing
+app.use(express.static(distPath));
+
+// Catch-all route to serve index.html for client-side routing with environment injection
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'app/dist', 'index.html'))
+    const indexPath = path.join(distPath, 'index.html');
+    console.log(`Serving index.html from: ${indexPath}`);
+    
+    // Check if the file exists before serving
+    if (require('fs').existsSync(indexPath)) {
+        // Read the file so we can modify it
+        const fs = require('fs');
+        let html = fs.readFileSync(indexPath, 'utf8');
+        
+        // Create an environment script to inject into the HTML
+        const envScript = `
+            <script>
+                // Inject environment variables into window
+                window.ENV_DOCKER_CONTAINER = ${process.env.DOCKER_CONTAINER === 'true' ? 'true' : 'false'};
+                window.ENV_NODE_ENV = "${process.env.NODE_ENV || 'development'}";
+                window.ENV_DEPLOYED_VERSION = "${process.env.npm_package_version || '1.0.0'}";
+                window.ENV_SERVER_PORT = "${process.env.PORT || '3000'}";
+                console.log("Server-injected environment:", {
+                    ENV_DOCKER_CONTAINER: window.ENV_DOCKER_CONTAINER,
+                    ENV_NODE_ENV: window.ENV_NODE_ENV,
+                    ENV_DEPLOYED_VERSION: window.ENV_DEPLOYED_VERSION,
+                    ENV_SERVER_PORT: window.ENV_SERVER_PORT
+                });
+            </script>
+        `;
+        
+        // Inject our script before the closing </head> tag
+        html = html.replace('</head>', `${envScript}</head>`);
+        
+        // Send the modified HTML
+        res.send(html);
+    } else {
+        res.status(404).send(`
+            <h1>Configuration Error</h1>
+            <p>Cannot find index.html at ${indexPath}</p>
+            <p>Current directory: ${__dirname}</p>
+            <p>Files in current directory: ${require('fs').readdirSync(__dirname).join(', ')}</p>
+            <p>Files in app directory (if exists): ${
+                require('fs').existsSync(path.join(__dirname, 'app')) 
+                    ? require('fs').readdirSync(path.join(__dirname, 'app')).join(', ') 
+                    : 'app directory not found'
+            }</p>
+        `);
+    }
 })
 
 // Start the server - bind to 0.0.0.0 in container environments to allow external connections

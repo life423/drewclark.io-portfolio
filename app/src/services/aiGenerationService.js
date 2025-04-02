@@ -6,9 +6,13 @@
  */
 import { sharedApiService, CATEGORY, PRIORITY } from './sharedApiService';
 import logger from '../utils/logger';
+import { config, withEnvironmentInfo } from '../config';
 
 // Module-specific logger
 const log = logger.getLogger('AIGenerationService');
+
+// Log environment details on service initialization
+log.info('AIGenerationService initialized with environment:', config.environment);
 
 /**
  * Extracts GitHub repository URL from project data

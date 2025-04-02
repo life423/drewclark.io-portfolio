@@ -64,6 +64,10 @@ class SharedApiService {
       timeout = 30000 // Default 30s timeout
     } = options;
     
+    // Debug deployment environment
+    console.log(`API Request Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`API Endpoint: ${endpoint}`);
+    
     return new Promise((resolve, reject) => {
       try {
         // Generate a request ID with better uniqueness
@@ -210,24 +214,45 @@ class SharedApiService {
           // Increment rate limit counter
           this.rateLimits[category].count++;
           
-          // Make the request
+          // Add request start time for debugging
+          const requestStartTime = Date.now();
+          console.log(`Starting API request to ${request.endpoint} at ${new Date(requestStartTime).toISOString()}`);
+          
+          // Make the request with detailed error handling
           const response = await fetch(request.endpoint, {
             method: request.method,
             headers: { 
               'Content-Type': 'application/json',
-              'X-API-Feature': category // Useful if backend implements feature-based rate limiting
+              'X-API-Feature': category, // Useful if backend implements feature-based rate limiting
+              'X-Request-ID': request.id // For tracing in server logs
             },
             body: JSON.stringify(request.body),
             signal: request.signal
           });
           
+          // Log response details for debugging
+          const requestDuration = Date.now() - requestStartTime;
+          console.log(`Response received for ${request.id} in ${requestDuration}ms, status: ${response.status}`);
+          
           if (!response.ok) {
-            throw new Error(`API error: ${response.status}`);
+            // Log more details about error responses
+            const errorText = await response.text().catch(e => 'Unable to get response text');
+            console.error(`API error response details for ${request.id}:`, {
+              status: response.status,
+              statusText: response.statusText,
+              responseText: errorText.substring(0, 500) // Limit the size for logging
+            });
+            throw new Error(`API error: ${response.status} - ${response.statusText || 'Unknown error'}`);
           }
           
-          const data = await response.json();
-          console.log(`Request ${request.id} completed successfully`);
-          request.resolve(data);
+          try {
+            const data = await response.json();
+            console.log(`Request ${request.id} completed successfully`);
+            request.resolve(data);
+          } catch (jsonError) {
+            console.error(`JSON parsing error for ${request.id}:`, jsonError);
+            throw new Error(`Failed to parse JSON response: ${jsonError.message}`);
+          }
         } catch (error) {
           console.log(`Request ${request.id} failed: ${error.message}`);
           
