@@ -111,8 +111,11 @@ function confirm(question) {
 function startDevServer() {
   console.log('\nStarting development server...\n');
   
-  // Use npm run dev (which uses concurrently)
-  const devProcess = spawn('npm', ['run', 'dev'], {
+  // Start backend and frontend concurrently
+  const devProcess = spawn('concurrently', [
+    `nodemon server.js`,
+    `cd app && npm run dev`
+  ], {
     stdio: 'inherit',
     shell: true
   });
