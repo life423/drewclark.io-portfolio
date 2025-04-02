@@ -49,4 +49,4 @@ jobs:
           registryPassword: ${{ secrets.PORTFOLIO_REGISTRY_PASSWORD }}
           containerAppName: portfolio
           resourceGroup: DefaultResourceGroup-EUS
-          imageToBuild: aiandrew631/portfolio:${{ github.sha }}
+          imageToBuild: aiandrew631/portfolio:latest
