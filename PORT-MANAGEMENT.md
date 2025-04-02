@@ -2,27 +2,21 @@
 
 This guide explains how to run the application while avoiding port conflicts.
 
-## Recommended Startup Method
+## Starting the Application
 
-- **Automatic Development Mode**:
-  ```
-  npm run dev:safe
-  ```
-  This starts the application with automatic port conflict detection and cleanup. It will automatically kill any processes using ports 3001 or 5173.
-
-## Other Available Commands
-
-- **Standard Development Mode**:
+- **Development Mode**:
   ```
   npm run dev
   ```
-  This starts the application without any port conflict detection. Use this only if you're sure the required ports are available.
+  This starts the application with automatic port conflict detection and cleanup. It will automatically kill any processes using ports 3000 or 5173.
+
+## Additional Commands
 
 - **Manual Port Cleanup**:
   ```
   npm run kill-ports
   ```
-  This manually kills any processes using ports 3001 or 5173 without starting the application.
+  This manually kills any processes using ports 3000 or 5173 without starting the application.
 
 ## Docker Commands
 
@@ -42,8 +36,16 @@ This guide explains how to run the application while avoiding port conflicts.
 
 The application uses the following ports:
 
-- **Backend**: Port 3001 (configurable via .env PORT variable)
+- **Backend**: Port 3000 (configurable via .env PORT variable)
 - **Frontend**: Port 5173 (Vite's default port)
+
+## API Connectivity
+
+The frontend makes API calls to the backend through the following endpoints:
+- Connect4 AI: `/api/askGPT/connect4`
+- Project information: `/api/askGPT/projects`
+
+Vite is configured to proxy these requests to the backend when running in development mode.
 
 ## Environment Variables
 
@@ -57,7 +59,6 @@ Port configuration can be customized using environment variables in the `.env` f
 
 If you encounter EADDRINUSE errors:
 
-1. Use `npm run dev:safe` which automatically handles port conflicts
-2. Alternatively, run `npm run kill-ports` to free the required ports
-3. Check if Docker containers are running with `docker ps`
-4. If Docker is using the ports, stop containers with `docker-compose down`
+1. Run `npm run kill-ports` to free the required ports
+2. Check if Docker containers are running with `docker ps`
+3. If Docker is using the ports, stop containers with `docker-compose down`
