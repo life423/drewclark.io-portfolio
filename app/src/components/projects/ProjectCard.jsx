@@ -350,7 +350,9 @@ export default function ProjectCard({
             ref={cardRef}
             className={clsx(
                 'my-4 @container overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transition-all duration-300 flex flex-col h-[700px]',
-                isActive ? 'ring-2 ring-brandGreen-500/50 shadow-xl' : 'hover:shadow-lg hover:border-brandGray-600',
+                isActive 
+                    ? 'ring-2 ring-brandGreen-500/50 shadow-xl border-brandGreen-600/30 bg-gradient-to-b from-brandGray-800 to-brandGray-850' 
+                    : 'hover:shadow-lg hover:border-brandGray-600 hover:translate-y-[-2px]',
                 onClick && 'cursor-pointer'
             )}
             onClick={() => onClick && onClick()}
@@ -361,9 +363,10 @@ export default function ProjectCard({
                     <span className='text-sm font-semibold text-white px-2 py-1 rounded-md bg-gradient-to-r from-brandOrange-700 to-brandOrange-600 shadow-sm'>
                         Project {projectNumber}
                     </span>
+                    {/* Overview button - only visible on mobile/tablet */}
                     <button
                         onClick={() => onNavigateToProject?.(-1)}
-                        className='group flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm text-brandGray-400 hover:text-brandGreen-400 transition-all duration-300'
+                        className='lg:hidden group flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm text-brandGray-400 hover:text-brandGreen-400 transition-all duration-300'
                     >
                         <svg
                             xmlns='http://www.w3.org/2000/svg'
