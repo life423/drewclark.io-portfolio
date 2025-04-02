@@ -22,7 +22,7 @@ setCacheTTL(config.cacheTtlMs)
 
 // Initialize Express app
 const app = express()
-const PORT = process.env.PORT || 3001 // Changed from 3000 to 3001
+const PORT = process.env.PORT || 3000
 
 // Security middleware
 const helmet = require('helmet');
@@ -46,11 +46,24 @@ app.use(helmet({
 
 // Enhanced CORS middleware with proper security
 app.use((req, res, next) => {
+<<<<<<< Updated upstream
     // Production domains (add your actual production domains)
     const productionDomains = [
         'https://drewclark.io',
         'https://www.drewclark.io'
     ];
+=======
+    // Allow specific origins in development
+    const allowedOrigins = [
+        'http://localhost:5173', 
+        'http://127.0.0.1:5173', 
+        'http://localhost:5174', 
+        'http://127.0.0.1:5174', 
+        'http://localhost:3000', 
+        'http://127.0.0.1:3000'
+    ]
+    const origin = req.headers.origin
+>>>>>>> Stashed changes
     
     // Local development domains
     const developmentDomains = [

@@ -162,12 +162,17 @@ async function handlePostRequest(req, createResponse, headers, { logInfo, logErr
   const userQuestion = sanitizeInput(req.body.question.trim());
   logInfo(`Question: "${userQuestion.substring(0, 50)}${userQuestion.length > 50 ? '...' : ''}"`);
 
-  // Rate limiting check (implement more robust solution in production)
+  // Determine which feature is making the request
+  const feature = req.feature || 'default';
+  
+  // Rate limiting check with feature-specific bucket
   const clientIp = req.headers['x-forwarded-for'] || req.ip || 'unknown';
-  if (isRateLimited(clientIp)) {
-    logWarn(`Rate limit exceeded for IP: ${clientIp}`);
+  if (isRateLimited(clientIp, feature)) {
+    logWarn(`Rate limit exceeded for IP: ${clientIp} on feature: ${feature}`);
     return createResponse(429, headers, {
-      error: 'Too many requests. Please try again later.'
+      error: 'Too many requests. Please try again later.',
+      feature: feature,
+      recommendedWait: '10 seconds'
     });
   }
 
@@ -367,31 +372,66 @@ function isValidModel(model) {
   return config.allowedModels.includes(model);
 }
 
-// Simple in-memory rate limiting
+// Enhanced rate limiting with feature-specific buckets
 const rateLimitMap = new Map();
-function isRateLimited(clientIp) {
+
+/**
+ * Check if a request is rate limited
+ * @param {string} clientIp - Client IP address
+ * @param {string} feature - Feature identifier (connect4, projects, default)
+ * @returns {boolean} Whether the request is rate limited
+ */
+function isRateLimited(clientIp, feature = 'default') {
   const now = Date.now();
-  const limit = config.rateLimitRequests;
-  const window = config.rateLimitWindowMs;
-
-  // Initialize or update rate limit tracking
+  
+  // Get global limit and window
+  const globalLimit = config.rateLimitRequests;
+  const globalWindow = config.rateLimitWindowMs;
+  
+  // Get feature-specific limit and window if available
+  const featureConfig = config.featureRateLimits[feature];
+  const featureLimit = featureConfig ? featureConfig.requests : globalLimit;
+  const featureWindow = featureConfig ? featureConfig.windowMs : globalWindow;
+  
+  // Create a client-specific key in the map if it doesn't exist
   if (!rateLimitMap.has(clientIp)) {
-    rateLimitMap.set(clientIp, []);
+    rateLimitMap.set(clientIp, {
+      global: [],
+      connect4: [],
+      projects: [],
+      default: []
+    });
   }
-
-  // Get request history and filter out old requests
-  let requests = rateLimitMap.get(clientIp);
-  requests = requests.filter(timestamp => now - timestamp < window);
-
-  // Check if limit is exceeded
-  if (requests.length >= limit) {
+  
+  const clientData = rateLimitMap.get(clientIp);
+  
+  // Initialize feature bucket if it doesn't exist
+  if (!clientData[feature]) {
+    clientData[feature] = [];
+  }
+  
+  // Update global request history
+  let globalRequests = clientData.global;
+  globalRequests = globalRequests.filter(timestamp => now - timestamp < globalWindow);
+  
+  // Update feature-specific request history
+  let featureRequests = clientData[feature];
+  featureRequests = featureRequests.filter(timestamp => now - timestamp < featureWindow);
+  
+  // Check if either limit is exceeded
+  if (globalRequests.length >= globalLimit || featureRequests.length >= featureLimit) {
     return true; // Rate limited
   }
-
-  // Record this request
-  requests.push(now);
-  rateLimitMap.set(clientIp, requests);
-
+  
+  // Record this request in both global and feature-specific buckets
+  globalRequests.push(now);
+  featureRequests.push(now);
+  
+  // Update the client data in the map
+  clientData.global = globalRequests;
+  clientData[feature] = featureRequests;
+  rateLimitMap.set(clientIp, clientData);
+  
   return false; // Not rate limited
 }
 
@@ -405,5 +445,6 @@ function cacheResponse(key, data) {
 }
 
 module.exports = {
-  handleRequest
+  handleRequest,
+  isRateLimited
 };

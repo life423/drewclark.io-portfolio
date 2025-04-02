@@ -23,9 +23,10 @@ export default defineConfig(({ command, mode }) => {
         publicDir: '../public', // Specify the public directory at project root
         base: './', // Use relative paths
         server: {
+            port: 5173, // Explicit Vite port to avoid conflicts
             proxy: {
                 '/api': {
-                    target: 'http://localhost:3001',
+                    target: 'http://localhost:3000',
                     changeOrigin: true
                 }
             }

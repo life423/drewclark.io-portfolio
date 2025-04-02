@@ -2,13 +2,13 @@
 
 This guide explains how to start the portfolio application and avoid common issues like port conflicts and CORS errors.
 
-## 🔄 Changes Made
+## 🔄 Current Configuration
 
-The application startup has been improved with the following changes:
+The application architecture uses the following configuration:
 
-1. **Separated Backend and Frontend Ports**:
-   - Backend API: Now uses port `3001` (previously 3000)
-   - Frontend dev server: Remains on port `3000`
+1. **Port Configuration**:
+   - Backend Express API: Port `3000` (main application port)
+   - Frontend Vite Dev Server: Port `5173` (development only)
 
 2. **Enhanced CORS Configuration**:
    - Explicitly allows frontend origins in development
@@ -50,13 +50,13 @@ This still works but doesn't handle port conflicts automatically.
 The application now runs with:
 
 - **Backend API Server**: 
-  - Port: 3001
+  - Port: 3000
   - Serves API endpoints and static assets
-  - Improved CORS to accept requests from localhost:3000
+  - Improved CORS to accept requests from Vite dev server
 
 - **Frontend Development Server**: 
-  - Port: 3000
-  - Proxies API requests to Backend (localhost:3001)
+  - Port: 5173 (Vite default)
+  - Proxies API requests to Backend (localhost:3000)
   - Development-only server for hot reloading
 
 ## 🛠️ Troubleshooting
@@ -81,8 +81,8 @@ If you see an error like `EADDRINUSE: address already in use :::3000` or `:::300
 
 If you see CORS errors in the browser console:
 
-1. Ensure the backend is running on port 3001
-2. Check that frontend is making requests to the correct URL
+1. Ensure the backend is running on port 3000
+2. Check that frontend is making requests to the correct URL (/api/* should be proxied to the backend)
 3. Restart both servers if the issue persists
 
 ## 🐳 Docker Usage
