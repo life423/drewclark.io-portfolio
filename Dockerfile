@@ -19,6 +19,9 @@ RUN npm run build
 FROM node:18-alpine AS build-backend
 WORKDIR /app
 
+# Copy start-app.js FIRST to avoid the error in postinstall script
+COPY start-app.js ./
+
 # Install backend dependencies
 COPY package*.json ./
 RUN if [ -f package-lock.json ]; then npm ci --no-audit --no-fund --legacy-peer-deps --production; else npm install --no-audit --no-fund --legacy-peer-deps --production; fi
