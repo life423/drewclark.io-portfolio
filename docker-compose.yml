@@ -4,9 +4,9 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     ports:
-      - '3001:3001'  # Production app runs on port 3001
+      - '3001:3001'
     volumes:
       - /app/node_modules
       - .:/app
@@ -17,21 +17,20 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     restart: unless-stopped
 
-  # Development configuration
   dev:
     build:
       context: .
       dockerfile: Dockerfile.dev
     ports:
-      - '3001:3001'  # Use consistent port mapping
+      - '3001:3001'
     environment:
       - NODE_ENV=development
       - DOCKER_CONTAINER=true
       - PORT=3001
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     volumes:
+      - /app/node_modules
       - ./app:/app/app
       - ./api:/app/api
       - ./server.js:/app/server.js
-      - /app/node_modules
     command: npm run dev
