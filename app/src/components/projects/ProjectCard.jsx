@@ -411,13 +411,12 @@ export default function ProjectCard({
             {/* Project Content */}
             <div
                 ref={contentRef}
-                className='p-3 @sm:p-4 @md:p-5 flex-1 flex flex-col'
+                className='p-3 @sm:p-4 @md:p-5 flex-1 flex flex-col overflow-y-auto'
             >
                 <div
                     className={clsx(
                         'prose prose-sm prose-invert max-w-none',
-                        'prose-headings:text-brandGreen-300 prose-strong:text-brandGreen-400',
-                        'transition-all duration-500 ease-in-out'
+                        'prose-headings:text-brandGreen-300 prose-strong:text-brandGreen-400'
                     )}
                     onTransitionEnd={() => {
                         // Force recalculation when the transition completes
