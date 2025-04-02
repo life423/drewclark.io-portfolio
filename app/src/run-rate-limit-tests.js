@@ -19,7 +19,6 @@ const jestConfig = {
   projects: [__dirname],
   testMatch: [
     '**/__tests__/utils/rateLimit.test.js',
-    '**/__tests__/components/games/connect4/useConnect4AI.test.js',
     '**/__tests__/integration/feature-interactions.test.js'
   ],
   verbose: true,
@@ -29,8 +28,7 @@ const jestConfig = {
 console.log('Running rate limiting tests...');
 console.log('Testing:');
 console.log('1. Feature-specific rate limits');
-console.log('2. Connect4 AI exponential backoff');
-console.log('3. Feature interaction independence');
+console.log('2. Feature interaction independence');
 console.log('----------------------------------------');
 
 // Run the tests

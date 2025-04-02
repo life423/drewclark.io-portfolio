@@ -14,7 +14,6 @@ export const PRIORITY = {
 
 // Request categories for separate rate limiting
 export const CATEGORY = {
-  CONNECT4: 'connect4',
   PROJECT_CARDS: 'project_cards',
   OTHER: 'other'
 };
@@ -23,14 +22,12 @@ class SharedApiService {
   constructor() {
     // Separate queues per category to prevent feature starvation
     this.requestQueues = {
-      [CATEGORY.CONNECT4]: [],
       [CATEGORY.PROJECT_CARDS]: [],
       [CATEGORY.OTHER]: []
     };
     
     // Separate rate limits per category
     this.rateLimits = {
-      [CATEGORY.CONNECT4]: { count: 0, lastReset: Date.now(), maxPerMinute: 6 },
       [CATEGORY.PROJECT_CARDS]: { count: 0, lastReset: Date.now(), maxPerMinute: 10 },
       [CATEGORY.OTHER]: { count: 0, lastReset: Date.now(), maxPerMinute: 5 }
     };

@@ -25,14 +25,14 @@ describe('Feature-specific rate limiting', () => {
     // Mock successful response
     fetchMock.mockResponseOnce(JSON.stringify({ answer: 'Test response' }));
     
-    // Make connect4 request
-    const connect4Response = await fetch('/api/askGPT/connect4', {
+    // Make a standard request
+    const otherResponse = await fetch('/api/askGPT/other', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question: 'Make a move' })
+      body: JSON.stringify({ question: 'Test question' })
     });
     
-    expect(connect4Response.ok).toBe(true);
+    expect(otherResponse.ok).toBe(true);
     expect(fetchMock).toHaveBeenCalledTimes(1);
     
     // Reset and mock successful projects response
@@ -50,7 +50,7 @@ describe('Feature-specific rate limiting', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
   
-  test('Connect4 requests should be rate limited after exceeding limit', async () => {
+  test('API requests should be rate limited after exceeding limit', async () => {
     // Mock 20 successful responses and then a rate limit
     for (let i = 0; i < 20; i++) {
       fetchMock.mockResponseOnce(JSON.stringify({ answer: `Response ${i}` }));
@@ -59,41 +59,41 @@ describe('Feature-specific rate limiting', () => {
       error: 'Too many requests' 
     }), { status: 429 });
     
-    // Make 21 connect4 requests (should hit limit on last request)
+    // Make 21 other requests (should hit limit on last request)
     for (let i = 0; i < 20; i++) {
-      const response = await fetch('/api/askGPT/connect4', {
+      const response = await fetch('/api/askGPT/other', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: `Move ${i}` })
+        body: JSON.stringify({ question: `Request ${i}` })
       });
       expect(response.ok).toBe(true);
     }
     
     // This request should be rate limited
-    const limitedResponse = await fetch('/api/askGPT/connect4', {
+    const limitedResponse = await fetch('/api/askGPT/other', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question: 'Over limit move' })
+      body: JSON.stringify({ question: 'Over limit request' })
     });
     
     expect(limitedResponse.status).toBe(429);
     expect(fetchMock).toHaveBeenCalledTimes(21);
   });
   
-  test('Projects requests should still work after Connect4 hits rate limit', async () => {
-    // Set up mocks - Connect4 rate limited but Projects still available
+  test('Projects requests should still work after other feature hits rate limit', async () => {
+    // Set up mocks - Other feature rate limited but Projects still available
     fetchMock.mockResponseOnce(JSON.stringify({ 
       error: 'Too many requests' 
     }), { status: 429 });
     
-    // Make rate-limited connect4 request
-    const connect4Response = await fetch('/api/askGPT/connect4', {
+    // Make rate-limited other request
+    const otherResponse = await fetch('/api/askGPT/other', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question: 'Rate limited move' })
+      body: JSON.stringify({ question: 'Rate limited request' })
     });
     
-    expect(connect4Response.status).toBe(429);
+    expect(otherResponse.status).toBe(429);
     
     // Reset mock and set up projects response
     fetchMock.resetMocks();
