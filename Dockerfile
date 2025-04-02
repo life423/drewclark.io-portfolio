@@ -19,9 +19,19 @@ RUN npm run build
 FROM node:18-alpine AS build-backend
 WORKDIR /app
 
-# Install backend dependencies
+# Copy start-app.js first to ensure it exists when the postinstall script runs
+COPY start-app.js ./
+
+# Copy backend package files for better caching
 COPY package*.json ./
+
+# Install backend dependencies
 RUN if [ -f package-lock.json ]; then npm ci --no-audit --no-fund --legacy-peer-deps --production; else npm install --no-audit --no-fund --legacy-peer-deps --production; fi
+RUN ls -la node_modules && echo "Backend node_modules built successfully"
+
+# Copy remaining backend files
+COPY server.js ./
+COPY api/ ./api/
 
 # Final production image (smaller)
 FROM node:18-alpine AS production
@@ -44,9 +54,9 @@ USER appuser
 # Copy only the necessary files
 COPY --from=build-backend /app/node_modules ./node_modules
 COPY --from=build-frontend /app/dist ./app/dist
-COPY server.js ./
-COPY api/ ./api/
-COPY start-app.js ./
+COPY --from=build-backend /app/server.js ./
+COPY --from=build-backend /app/api/ ./api/
+COPY --from=build-backend /app/start-app.js ./
 
 # Set proper permissions
 USER root

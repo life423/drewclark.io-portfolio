@@ -1,5 +1,7 @@
-import React, { useRef, useState, useEffect } from 'react'
+import React, { useRef, useState, useEffect, useCallback } from 'react'
 import useScrollPosition from '../../hooks/useScrollPosition'
+import useIsInViewport from '../../hooks/useIsInViewport'
+import { generateHeroText } from '../../services/aiGenerationService'
 
 import sproutMobile from '../../assets/sprout-mobile.jpg'
 import largeSprout from '../../assets/large-sprout.jpg'
@@ -11,8 +13,37 @@ import TypedTextEffect from './TypedTextEffect'
 export default function Hero() {
     const heroRef = useRef(null)
     const spotlightRef = useRef(null)
-    const { y: scrollY } = useScrollPosition()
+    const { y: scrollY, direction: scrollDirection, percent: scrollPercent } = useScrollPosition()
     const [isLoaded, setIsLoaded] = useState(false)
+    
+    // Track if hero is visible in viewport
+    const [heroIsInView, setHeroIsInView] = useState(true)
+    
+    // Track mouse position and zone (3x3 grid)
+    const [mousePosition, setMousePosition] = useState({ 
+        x: 0, 
+        y: 0, 
+        zone: 'center-middle'
+    })
+    
+    // Track AI-generated text
+    const [heroText, setHeroText] = useState("Building elegant solutions to complex problems")
+    const [isGenerating, setIsGenerating] = useState(false)
+
+    // Using useIsInViewport hook to detect when hero is visible
+    const [viewportRef, isInViewport] = useIsInViewport({ threshold: 0.3 })
+    
+    // Set refs
+    useEffect(() => {
+        if (heroRef.current) {
+            viewportRef.current = heroRef.current
+        }
+    }, [viewportRef])
+    
+    // Update heroIsInView when isInViewport changes
+    useEffect(() => {
+        setHeroIsInView(isInViewport)
+    }, [isInViewport])
 
     // Set loaded state after initial animations
     useEffect(() => {
@@ -22,23 +53,83 @@ export default function Hero() {
         return () => clearTimeout(timer)
     }, [])
 
-    // Mouse-follow spotlight effect
-    const handleMouseMove = e => {
+    // Mouse-follow spotlight effect with zone tracking
+    const handleMouseMove = useCallback(e => {
         if (!heroRef.current || !spotlightRef.current) return
 
         const rect = heroRef.current.getBoundingClientRect()
         const x = e.clientX - rect.left
         const y = e.clientY - rect.top
 
-        // Update spotlight position - only highlight near current focus
-        spotlightRef.current.style.background = `radial-gradient(
-        circle at ${x}px ${y}px,
-        rgba(16, 185, 129, 0.15) 0%,
-        rgba(16, 185, 129, 0.08) 25%,
-        transparent 60%
-      )`
-    }
+        // Calculate position as percentage of hero area
+        const xPercent = (x / rect.width) * 100
+        const yPercent = (y / rect.height) * 100
+        
+        // Determine zone (3x3 grid)
+        const horizontalZone = xPercent < 33 ? 'left' : xPercent < 66 ? 'center' : 'right'
+        const verticalZone = yPercent < 33 ? 'top' : yPercent < 66 ? 'middle' : 'bottom'
+        const zone = `${horizontalZone}-${verticalZone}`
+        
+        // Update mouse position state, but only if zone changed
+        // This prevents unnecessary re-renders and AI calls
+        setMousePosition(prev => 
+            prev.zone !== zone ? { x, y, zone } : prev
+        )
 
+        // Update spotlight position
+        spotlightRef.current.style.background = `radial-gradient(
+            circle at ${x}px ${y}px,
+            rgba(16, 185, 129, 0.15) 0%,
+            rgba(16, 185, 129, 0.08) 25%,
+            transparent 60%
+        )`
+    }, [])
+
+    // Generate new hero text when context changes AND hero is in viewport
+    useEffect(() => {
+        // Skip if hero is not in viewport or if already generating
+        if (!heroIsInView || isGenerating) return
+        
+        // Debounce to avoid too many API calls
+        const timerId = setTimeout(async () => {
+            setIsGenerating(true)
+            
+            try {
+                // Prepare context data for AI
+                const contextData = {
+                    mousePosition,
+                    scrollInfo: {
+                        position: scrollY,
+                        direction: scrollDirection,
+                        percent: scrollPercent
+                    },
+                    viewportInfo: {
+                        isVisible: heroIsInView
+                    }
+                }
+                
+                // Get new text from AI service
+                const text = await generateHeroText(contextData)
+                setHeroText(text)
+            } catch (error) {
+                console.error('Error generating hero text:', error)
+                // Fallback handled by the service
+            } finally {
+                setIsGenerating(false)
+            }
+        }, 800) // Debounce delay
+        
+        return () => clearTimeout(timerId)
+    }, [
+        heroIsInView, 
+        mousePosition.zone, 
+        scrollDirection, 
+        // Only re-trigger when scroll percent changes by at least 10%
+        Math.floor(scrollPercent / 10), 
+        isGenerating,
+        scrollY
+    ])
+    
     // Calculate transform based on scroll position for parallax effect
     const calculateTransform = () => {
         const maxScroll = window.innerHeight * 0.7
@@ -179,21 +270,27 @@ export default function Hero() {
                         {/* Background layer - removed backdrop blur */}
                         <div className='absolute inset-0 bg-brandGray-900/40 rounded-lg border-l-2 border-brandGreen-500/40 pointer-events-none'></div>
 
-                        {/* AI-Powered Text layer with dynamic typing effect */}
+                        {/* AI-Powered Text layer with dynamic typing effect based on user interaction */}
                         <p className='relative px-3 py-2 text-lg text-white font-medium leading-relaxed'>
-                            <TypedTextEffect 
-                                phrases={[
-                                    "Creating elegant solutions to complex problems with a focus on user experience and performance.",
-                                    "Building AI-powered applications that deliver real business value.",
-                                    "Architecting scalable cloud systems with security and performance in mind.",
-                                    "Developing intuitive interfaces backed by robust full-stack technology.",
-                                    "Optimizing machine learning models for production environments.",
-                                    "Transforming concepts into responsive, accessible web experiences."
-                                ]}
-                                typingSpeed={40}
-                                deletingSpeed={30}
-                                pauseTime={3000}
-                            />
+                            {isGenerating ? (
+                                <span className="flex items-center">
+                                    <span className="mr-2">Crafting a response</span>
+                                    <span className="flex space-x-1">
+                                        <span className="w-2 h-2 bg-brandGreen-500 rounded-full animate-pulse"></span>
+                                        <span className="w-2 h-2 bg-brandGreen-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></span>
+                                        <span className="w-2 h-2 bg-brandGreen-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></span>
+                                    </span>
+                                </span>
+                            ) : (
+                                <TypedTextEffect 
+                                    phrases={[heroText]}
+                                    typingSpeed={40}
+                                    deletingSpeed={30}
+                                    pauseTime={5000}
+                                    active={heroIsInView && !isGenerating}
+                                    className="transition-opacity duration-300"
+                                />
+                            )}
                         </p>
                     </div>
                 </ProgressiveElement>

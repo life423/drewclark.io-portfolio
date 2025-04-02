@@ -1,5 +1,6 @@
  import React, { useState, useEffect } from 'react'
 import ProjectCard from './ProjectCard'
+import UnifiedProjectChat from './UnifiedProjectChat'
 import clsx from 'clsx'
 import PrimaryButton from '../utils/PrimaryButton'
 
@@ -175,82 +176,81 @@ export default function ProjectsContainer() {
             ></div>
             
             <div className='max-w-7xl mx-auto'>
-                <div className='flex flex-col lg:flex-row'>
-                    {/* Sidebar TOC for large screens */}
-                    <div className='hidden lg:block w-64 pr-6 flex-shrink-0'>
-                        <div className='sticky top-24 bg-brandGray-800/95 backdrop-blur-sm rounded-xl p-4 border border-brandGray-700 shadow-lg'>
-                            <h3 className='text-lg font-bold text-brandGreen-300 mb-4'>
-                                Projects Overview
-                            </h3>
-                            
-                            <div className='space-y-4'>
-                                {PROJECTS.map((project, index) => (
-                                    <div 
-                                        key={index}
-                                        className={clsx(
-                                            'transition-all duration-300 cursor-pointer',
-                                            'p-3 rounded-lg border',
-                                            activeProjectIndex === index 
-                                                ? 'bg-brandGray-700 border-brandGreen-500/40 shadow-sm' 
-                                                : 'bg-brandGray-800 border-brandGray-700 hover:border-brandGray-600'
-                                        )}
-                                        onClick={() => navigateToProject(index)}
+                <div className='flex flex-col'>
+                    {/* Projects Grid */}
+                    <div className='w-full'>
+                        {/* On mobile and tablet - show the sidebar TOC and one active project with navigation */}
+                        <div className='block lg:hidden'>
+                            {/* Mobile sidebar TOC */}
+                            <div className='mb-6 bg-brandGray-800/95 backdrop-blur-sm rounded-xl p-4 border border-brandGray-700 shadow-lg flex flex-col'>
+                                <h3 className='text-lg font-bold text-brandGreen-300 mb-4'>
+                                    Projects Overview
+                                </h3>
+                                
+                                <div className='space-y-4'>
+                                    {PROJECTS.map((project, index) => (
+                                        <div 
+                                            key={index}
+                                            className={clsx(
+                                                'transition-all duration-300 cursor-pointer',
+                                                'p-3 rounded-lg border',
+                                                activeProjectIndex === index 
+                                                    ? 'bg-brandGray-700 border-brandGreen-500/40 shadow-sm' 
+                                                    : 'bg-brandGray-800 border-brandGray-700 hover:border-brandGray-600'
+                                            )}
+                                            onClick={() => navigateToProject(index)}
+                                        >
+                                            <div className='flex items-center justify-between'>
+                                                <span className='text-xs font-semibold text-brandOrange-400 px-2 py-0.5 rounded-md bg-brandOrange-900/30 border border-brandOrange-800/30'>
+                                                    #{index + 1}
+                                                </span>
+                                                {activeProjectIndex === index && (
+                                                    <span className='inline-block w-2 h-2 rounded-full bg-brandGreen-500'></span>
+                                                )}
+                                            </div>
+                                            <h4 className='font-medium text-white mt-2 text-sm'>
+                                                {project.title}
+                                            </h4>
+                                            <div className='flex flex-wrap gap-1 mt-2'>
+                                                {project.stack.slice(0, 2).map((tech, techIndex) => (
+                                                    <span
+                                                        key={techIndex}
+                                                        className='text-[10px] font-medium text-brandGray-400 px-1.5 py-0.5 rounded-full bg-brandGray-700/50'
+                                                    >
+                                                        {tech}
+                                                    </span>
+                                                ))}
+                                                {project.stack.length > 2 && (
+                                                    <span className='text-[10px] font-medium text-brandGray-400 px-1.5 py-0.5 rounded-full bg-brandGray-700/50'>
+                                                        +{project.stack.length - 2}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                
+                                <button
+                                    onClick={() => setStarted(false)}
+                                    className='mt-6 w-full flex items-center justify-center gap-2 px-4 py-2 bg-brandGray-700 hover:bg-brandGray-600 text-white rounded-lg text-sm transition-colors duration-200'
+                                >
+                                    <svg
+                                        xmlns='http://www.w3.org/2000/svg'
+                                        className='h-4 w-4'
+                                        viewBox='0 0 20 20'
+                                        fill='currentColor'
                                     >
-                                        <div className='flex items-center justify-between'>
-                                            <span className='text-xs font-semibold text-brandOrange-400 px-2 py-0.5 rounded-md bg-brandOrange-900/30 border border-brandOrange-800/30'>
-                                                #{index + 1}
-                                            </span>
-                                            {activeProjectIndex === index && (
-                                                <span className='inline-block w-2 h-2 rounded-full bg-brandGreen-500'></span>
-                                            )}
-                                        </div>
-                                        <h4 className='font-medium text-white mt-2 text-sm'>
-                                            {project.title}
-                                        </h4>
-                                        <div className='flex flex-wrap gap-1 mt-2'>
-                                            {project.stack.slice(0, 2).map((tech, techIndex) => (
-                                                <span
-                                                    key={techIndex}
-                                                    className='text-[10px] font-medium text-brandGray-400 px-1.5 py-0.5 rounded-full bg-brandGray-700/50'
-                                                >
-                                                    {tech}
-                                                </span>
-                                            ))}
-                                            {project.stack.length > 2 && (
-                                                <span className='text-[10px] font-medium text-brandGray-400 px-1.5 py-0.5 rounded-full bg-brandGray-700/50'>
-                                                    +{project.stack.length - 2}
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
-                                ))}
+                                        <path
+                                            fillRule='evenodd'
+                                            d='M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z'
+                                            clipRule='evenodd'
+                                        />
+                                    </svg>
+                                    Back to Overview
+                                </button>
                             </div>
                             
-                            <button
-                                onClick={() => setStarted(false)}
-                                className='mt-6 w-full flex items-center justify-center gap-2 px-4 py-2 bg-brandGray-700 hover:bg-brandGray-600 text-white rounded-lg text-sm transition-colors duration-200'
-                            >
-                                <svg
-                                    xmlns='http://www.w3.org/2000/svg'
-                                    className='h-4 w-4'
-                                    viewBox='0 0 20 20'
-                                    fill='currentColor'
-                                >
-                                    <path
-                                        fillRule='evenodd'
-                                        d='M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z'
-                                        clipRule='evenodd'
-                                    />
-                                </svg>
-                                Back to Overview
-                            </button>
-                        </div>
-                    </div>
-                    
-                    {/* Projects Grid */}
-                    <div className='flex-1'>
-                        {/* On mobile and tablet - show one active project with navigation */}
-                        <div className='block lg:hidden'>
+                            {/* Mobile active project card */}
                             <div
                                 className={clsx(
                                     'transition-all duration-500',
@@ -288,65 +288,127 @@ export default function ProjectsContainer() {
                             </div>
                         </div>
                         
-                        {/* On desktop - show all projects in a grid with animation */}
-                        <div className='hidden lg:grid grid-cols-3 gap-6 relative'>
-                            {PROJECTS.map((project, index) => {
-                                const isActive = activeProjectIndex === index;
-                                
-                                return (
-                                    <div 
-                                        key={project.id}
-                                        className={clsx(
-                                            'container-type-inline-size transition-all duration-700',
-                                            isActive ? 'z-10 col-span-2 scale-105 origin-left' : 'z-0',
-                                            // Only apply transformations if any card is active
-                                            activeProjectIndex !== null && !isActive && (
-                                                index < activeProjectIndex 
-                                                    ? 'transform -translate-x-[150%] opacity-0 scale-95' 
-                                                    : 'transform translate-x-[100%] opacity-0 scale-95'
-                                            )
-                                        )}
-                                        style={{
-                                            transitionDelay: `${Math.abs(index - (activeProjectIndex !== null ? activeProjectIndex : 0)) * 50}ms`,
-                                            gridColumn: isActive ? 'span 2' : 'span 1'
-                                        }}
-                                    >
-                                        <ProjectCard
-                                            projectNumber={index + 1}
-                                            title={project.title}
-                                            summary={project.summary}
-                                            stack={project.stack}
-                                            initialDescription={project.initialDescription}
-                                            detailedDescription={project.detailedDescription}
-                                            technicalDetails={project.technicalDetails}
-                                            challenges={project.challenges}
-                                            readme={project.readme}
-                                            totalProjects={PROJECTS.length}
-                                            onNavigateToProject={(newIndex) => {
-                                                // If clicking on the active card, toggle it off
-                                                if (isActive && newIndex === -1) {
-                                                    // Instead of setting to null, set to first project
-                                                    setActiveProjectIndex(0);
-                                                } else if (newIndex >= 0) {
-                                                    navigateToProject(newIndex);
-                                                }
-                                            }}
-                                            hideToc={true}
-                                            isActive={isActive}
-                                            onClick={() => {
-                                                // Toggle active state when clicking on a card
-                                                if (isActive) {
-                                                    // Instead of setting to null, set to first project
-                                                    setActiveProjectIndex(0);
-                                                } else {
-                                                    setActiveProjectIndex(index);
-                                                }
-                                            }}
-                                        />
+                        {/* On desktop - show overview card and all projects in a fixed-size grid */}
+                        <div className='hidden lg:grid grid-cols-4 gap-6 relative'>
+                            {/* Overview Card - styled like project cards */}
+                            <div className='my-4 overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transition-all duration-300 hover:shadow-lg hover:border-brandGray-600 flex flex-col h-[700px]'>
+                                <div className='p-4 border-b border-brandGray-700 bg-gradient-to-r from-brandGray-800 via-brandGray-800 to-brandBlue-900/10'>
+                                    <div className='flex items-center justify-between mb-2'>
+                                        <span className='text-sm font-semibold text-white px-2 py-1 rounded-md bg-gradient-to-r from-brandOrange-700 to-brandOrange-600 shadow-sm'>
+                                            Overview
+                                        </span>
                                     </div>
-                                );
-                            })}
+                                    <h2 className='text-xl font-bold mb-1 text-transparent bg-clip-text bg-gradient-to-r from-brandGreen-300 via-brandGreen-200 to-brandGreen-300'>
+                                        My Portfolio Projects
+                                    </h2>
+                                </div>
+                                
+                                <div className='p-4 flex-1 flex flex-col'>
+                                    <div className='prose prose-sm prose-invert max-w-none mb-4'>
+                                        <p>
+                                            Explore these key projects from my portfolio. Each demonstrates different skills and technologies.
+                                        </p>
+                                    </div>
+                                    
+                                    {/* Project boxes - evenly distributed with flex */}
+                                    <div className='flex flex-col flex-1 justify-evenly overflow-y-auto pr-1 py-4 scrollbar-thin scrollbar-thumb-brandGray-700 scrollbar-track-transparent'>
+                                        {PROJECTS.map((project, index) => (
+                                            <div 
+                                                key={index}
+                                                className={clsx(
+                                                    'transition-all duration-300 cursor-pointer p-4 rounded-lg border',
+                                                    activeProjectIndex === index 
+                                                        ? 'bg-brandGray-700 border-brandGreen-500/40 shadow-sm' 
+                                                        : 'bg-brandGray-800 border-brandGray-700 hover:border-brandGray-600 hover:translate-y-[-2px]'
+                                                )}
+                                                onClick={() => navigateToProject(index)}
+                                            >
+                                                <div className='flex items-center justify-between'>
+                                                    <span className='text-xs font-semibold text-brandOrange-400 px-2 py-0.5 rounded-md bg-brandOrange-900/30 border border-brandOrange-800/30'>
+                                                        #{index + 1}
+                                                    </span>
+                                                    {activeProjectIndex === index && (
+                                                        <span className='inline-block w-2 h-2 rounded-full bg-brandGreen-500'></span>
+                                                    )}
+                                                </div>
+                                                <h4 className='font-medium text-white mt-2 text-base'>
+                                                    {project.title}
+                                                </h4>
+                                                <div className='flex flex-wrap gap-1 mt-2'>
+                                                    {project.stack.slice(0, 2).map((tech, techIndex) => (
+                                                        <span
+                                                            key={techIndex}
+                                                            className='text-xs font-medium text-brandGray-300 px-2 py-0.5 rounded-full bg-brandGray-700/50'
+                                                        >
+                                                            {tech}
+                                                        </span>
+                                                    ))}
+                                                    {project.stack.length > 2 && (
+                                                        <span className='text-xs font-medium text-brandGray-300 px-2 py-0.5 rounded-full bg-brandGray-700/50'>
+                                                            +{project.stack.length - 2}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    
+                                    <button
+                                        onClick={() => setStarted(false)}
+                                        className='mt-6 w-full lg:hidden flex items-center justify-center gap-2 px-4 py-2 bg-brandGray-700 hover:bg-brandGray-600 text-white rounded-lg text-sm transition-colors duration-200'
+                                    >
+                                        <svg
+                                            xmlns='http://www.w3.org/2000/svg'
+                                            className='h-4 w-4'
+                                            viewBox='0 0 20 20'
+                                            fill='currentColor'
+                                        >
+                                            <path
+                                                fillRule='evenodd'
+                                                d='M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z'
+                                                clipRule='evenodd'
+                                            />
+                                        </svg>
+                                        Back to Overview
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            {/* Project Cards */}
+                            {PROJECTS.map((project, index) => (
+                                <div 
+                                    key={project.id}
+                                    className={clsx(
+                                        'container-type-inline-size transition-duration-300'
+                                    )}
+                                >
+                                    <ProjectCard
+                                        projectNumber={index + 1}
+                                        title={project.title}
+                                        summary={project.summary}
+                                        stack={project.stack}
+                                        initialDescription={project.initialDescription}
+                                        detailedDescription={project.detailedDescription}
+                                        technicalDetails={project.technicalDetails}
+                                        challenges={project.challenges}
+                                        readme={project.readme}
+                                        totalProjects={PROJECTS.length}
+                                        onNavigateToProject={(newIndex) => {
+                                            if (newIndex === -1) {
+                                                setStarted(false);
+                                            } else if (newIndex >= 0) {
+                                                navigateToProject(newIndex);
+                                            }
+                                        }}
+                                        hideToc={true}
+                                        isActive={activeProjectIndex === index}
+                                        onClick={() => setActiveProjectIndex(index)}
+                                    />
+                                </div>
+                            ))}
                         </div>
+
+                        {/* No desktop navigation buttons as per requirements */}
 
                         {/* Mobile/Tablet Navigation Controls */}
                         <div className='flex lg:hidden justify-between mt-6'>
@@ -406,6 +468,11 @@ export default function ProjectsContainer() {
                                     />
                                 </svg>
                             </button>
+                        </div>
+                        
+                        {/* Unified Project Chat - shown on all screen sizes */}
+                        <div className='mt-8 lg:mt-12'>
+                            <UnifiedProjectChat projectsData={PROJECTS} />
                         </div>
                     </div>
                 </div>
