@@ -397,7 +397,6 @@ function isRateLimited(clientIp, feature = 'default') {
   if (!rateLimitMap.has(clientIp)) {
     rateLimitMap.set(clientIp, {
       global: [],
-      connect4: [],
       projects: [],
       default: []
     });
