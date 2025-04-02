@@ -8,6 +8,26 @@ import { LuX, LuGamepad2 } from 'react-icons/lu'
 import clsx from 'clsx'
 import useLockBodyScroll from '../../hooks/useLockBodyScroll'
 
+/**
+ * Enhanced mobile navigation drawer component
+ * Optimized for cross-platform compatibility including iOS, Android, and Edge
+ * Follows accessibility best practices for modal dialogs
+ */
+import React, { useEffect, useRef, useCallback, memo, useState, lazy, Suspense } from 'react'
+import { LuX, LuGamepad2 } from 'react-icons/lu'
+import clsx from 'clsx'
+import useLockBodyScroll from '../../hooks/useLockBodyScroll'
+
+/**
+ * Enhanced mobile navigation drawer component
+ * Optimized for cross-platform compatibility including iOS, Android, and Edge
+ * Follows accessibility best practices for modal dialogs
+ */
+import React, { useEffect, useRef, useCallback, memo, useState, lazy, Suspense } from 'react'
+import { LuX, LuGamepad2 } from 'react-icons/lu'
+import clsx from 'clsx'
+import useLockBodyScroll from '../../hooks/useLockBodyScroll'
+
 // Lazy load the Connect4Game component to avoid impacting initial load time
 const Connect4Game = lazy(() => import('../games/connect4/Connect4Game'))
 
