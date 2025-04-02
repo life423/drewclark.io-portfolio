@@ -1,5 +1,6 @@
  import React, { useState, useEffect } from 'react'
 import ProjectCard from './ProjectCard'
+import UnifiedProjectChat from './UnifiedProjectChat'
 import clsx from 'clsx'
 import PrimaryButton from '../utils/PrimaryButton'
 
@@ -383,6 +384,11 @@ export default function ProjectsContainer() {
                                     />
                                 </svg>
                             </button>
+                        </div>
+                        
+                        {/* Unified Project Chat - shown on all screen sizes */}
+                        <div className='mt-8 lg:mt-12'>
+                            <UnifiedProjectChat projectsData={PROJECTS} />
                         </div>
                     </div>
                 </div>

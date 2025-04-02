@@ -232,3 +232,212 @@ export async function mockAnswerProjectQuestion(projectData, question) {
   
   return response;
 }
+
+/**
+ * Creates context for the AI based on multiple projects data
+ * Used for the unified chat that can discuss any/all projects
+ * 
+ * @param {Array<Object>} projectsData - Array of project data objects
+ * @param {string} question - User question
+ * @returns {string} - Formatted context with all projects
+ */
+function createMultiProjectAIPrompt(projectsData, question) {
+  if (!projectsData || !Array.isArray(projectsData) || projectsData.length === 0) {
+    log.error('Invalid or empty projectsData array');
+    return `Question: ${question}`;
+  }
+
+  // Build context for each project
+  const projectContexts = projectsData.map((project, index) => {
+    const projectNum = index + 1;
+    
+    return `PROJECT ${projectNum}: ${project.title}
+Tech Stack: ${project.stack ? project.stack.join(', ') : 'N/A'}
+Summary: ${project.summary || ''}
+Basic Description: ${project.initialDescription || ''}
+${project.detailedDescription ? `Detailed Description: ${project.detailedDescription}` : ''}
+${project.technicalDetails ? `Technical Implementation: ${project.technicalDetails}` : ''}
+${project.challenges ? `Challenges & Solutions: ${project.challenges}` : ''}`;
+  }).join('\n\n');
+
+  // Instruction prompt for handling multi-project questions
+  const instructions = `
+You are a knowledgeable AI assistant that can discuss multiple projects at once.
+When responding to questions, consider all the projects above and their details.
+If a question refers to specific projects by number or name, focus on those projects.
+If a question asks for comparisons between projects, highlight similarities and differences.
+If the question is general, consider which projects are most relevant to the answer.
+Always mention which project(s) you're referring to by number (e.g., "Project 1", "Project 2").
+`;
+
+  // Combine everything into the final prompt
+  return `${projectContexts}\n\n${instructions}\n\nQuestion: ${question}`;
+}
+
+/**
+ * Handles questions that can span multiple projects
+ * Used by the unified project chat interface
+ * 
+ * @param {Array<Object>} projectsData - Array of project data objects
+ * @param {string} question - User question about any/all projects
+ * @param {Object} [options] - Additional options (same as answerProjectQuestion)
+ * @returns {Promise<string>} - AI response that can reference multiple projects
+ */
+export async function answerMultiProjectQuestion(projectsData, question, options = {}) {
+  const { timeout = 30000, useMock = false } = options;
+  
+  // Use mock implementation if specified or in test environment
+  if (useMock || process.env.NODE_ENV === 'test') {
+    log.debug('Using mock implementation for multi-project question');
+    return mockAnswerMultiProjectQuestion(projectsData, question);
+  }
+  
+  // Check for required data
+  if (!projectsData || !Array.isArray(projectsData) || projectsData.length === 0 || !question) {
+    log.error('Missing required projects data or question');
+    return 'Error: Insufficient information to answer your question about the projects.';
+  }
+  
+  log.info(`Processing multi-project question across ${projectsData.length} projects`);
+  
+  try {
+    // Create the multi-project AI prompt
+    const prompt = createMultiProjectAIPrompt(projectsData, question);
+    
+    // Check if prompt is too long and truncate if necessary
+    const MAX_PROMPT_LENGTH = 10000; // Increased for multi-project context
+    const promptLength = prompt.length;
+    log.debug(`Multi-project prompt length: ${promptLength} characters`);
+    
+    const truncatedPrompt = promptLength > MAX_PROMPT_LENGTH 
+      ? prompt.substring(0, MAX_PROMPT_LENGTH) + '... [content truncated due to length]'
+      : prompt;
+    
+    if (promptLength > MAX_PROMPT_LENGTH) {
+      log.warn(`Multi-project prompt truncated from ${promptLength} to ${MAX_PROMPT_LENGTH} characters`);
+    }
+    
+    // Prepare the request body - similar to single project
+    const requestBody = {
+      question: truncatedPrompt,
+      maxTokens: 500, // Increased token limit for multi-project responses
+      temperature: 0.7,
+      model: "gpt-4o-mini"
+    };
+    
+    // Create an abort controller for request cancellation
+    const abortController = new AbortController();
+    
+    // Set timeout to abort request if it takes too long
+    const timeoutId = setTimeout(() => {
+      log.warn(`Multi-project request timeout after ${timeout}ms`);
+      abortController.abort();
+    }, timeout);
+    
+    try {
+      // Call the backend API using the shared service with HIGH priority
+      log.debug('Sending multi-project request to AI API');
+      const startTime = performance.now();
+      
+      const data = await sharedApiService.enqueueRequest({
+        body: requestBody,
+        category: CATEGORY.PROJECT_CARDS,
+        priority: PRIORITY.HIGH,
+        signal: abortController.signal,
+        timeout
+      });
+      
+      const duration = Math.round(performance.now() - startTime);
+      log.info(`Multi-project AI response received in ${duration}ms`);
+      
+      // Cleanup timeout
+      clearTimeout(timeoutId);
+      
+      // Return the answer or a fallback message
+      return data.answer || 'Sorry, I could not generate a response about the projects at this time.';
+    } finally {
+      clearTimeout(timeoutId); // Ensure timeout is cleared
+    }
+  } catch (error) {
+    // Handle errors - similar to single project
+    if (error.name === 'AbortError') {
+      log.warn('Multi-project request was aborted', error);
+      return 'The request was cancelled or timed out. Please try asking your question again.';
+    }
+    
+    log.error('Error in multi-project AI generation', error);
+    
+    // Generic error message
+    return 'There was a problem connecting to the AI service. Please try again later.';
+  }
+}
+
+/**
+ * Mock implementation for multi-project questions
+ * 
+ * @param {Array<Object>} projectsData - Array of project data
+ * @param {string} question - User question
+ * @returns {Promise<string>} - Mock response
+ */
+export async function mockAnswerMultiProjectQuestion(projectsData, question) {
+  log.debug('Using mock AI implementation for multi-project question');
+  
+  // Simulate network delay
+  const delay = process.env.NODE_ENV === 'test' ? 100 : 1500;
+  await new Promise(resolve => setTimeout(resolve, delay));
+  
+  // Check for project-specific references in the question
+  const projectReferences = question.match(/project\s*[1-3]|first project|second project|third project/gi) || [];
+  
+  // Check for comparison keywords
+  const isComparison = /compar|vs|versus|different|similar|better|between/i.test(question);
+  
+  let response;
+  if (isComparison) {
+    // Handle comparison questions
+    const project1 = projectsData[0]?.title || 'Project 1';
+    const project2 = projectsData[1]?.title || 'Project 2';
+    const tech1 = projectsData[0]?.stack?.join(', ') || 'various technologies';
+    const tech2 = projectsData[1]?.stack?.join(', ') || 'various technologies';
+    
+    response = `Comparing **${project1}** and **${project2}**: 
+
+The first project uses ${tech1}, while the second uses ${tech2}. 
+
+Both projects demonstrate different technical approaches and challenges. Project 1 focuses more on AI and game development aspects, whereas Project 2 emphasizes security and encryption techniques.`;
+  } 
+  else if (projectReferences.length > 0) {
+    // Try to determine which project is being referenced
+    let projectIndex = 0;
+    if (/project\s*2|second project/i.test(question)) {
+      projectIndex = 1;
+    } else if (/project\s*3|third project/i.test(question)) {
+      projectIndex = 2;
+    }
+    
+    // Get information about the referenced project
+    const project = projectsData[projectIndex] || projectsData[0];
+    const title = project?.title || `Project ${projectIndex + 1}`;
+    const tech = project?.stack?.join(', ') || 'various technologies';
+    
+    response = `Regarding **${title}** (Project ${projectIndex + 1}):
+
+This project focuses on ${tech}. ${project?.initialDescription || ''}
+
+It's one of three projects in my portfolio, each highlighting different skills and technologies.`;
+  } 
+  else {
+    // General response about all projects
+    response = `I can discuss all three portfolio projects:
+
+**Project 1: ${projectsData[0]?.title || 'AI Platform Trainer'}** - Focused on ${projectsData[0]?.stack?.[0] || 'Python'} and game development.
+
+**Project 2: ${projectsData[1]?.title || 'Cryptography Toolkit'}** - Exploring ${projectsData[1]?.stack?.[0] || 'Python'} and security concepts.
+
+**Project 3: ${projectsData[2]?.title || 'Ascend-Avoid'}** - Built with ${projectsData[2]?.stack?.[0] || 'JavaScript'} for web platforms.
+
+What would you like to know about these projects? You can ask about specific projects or how they compare.`;
+  }
+  
+  return response;
+}
