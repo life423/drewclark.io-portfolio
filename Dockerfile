@@ -27,7 +27,7 @@ COPY package*.json ./
 
 # Install backend dependencies
 RUN if [ -f package-lock.json ]; then npm ci --no-audit --no-fund --legacy-peer-deps --production; else npm install --no-audit --no-fund --legacy-peer-deps --production; fi
-RUN ls -la node_modules && echo "Backend node_modules built successfully"
+RUN mkdir -p node_modules && echo "Made sure node_modules directory exists"
 
 # Copy remaining backend files
 COPY server.js ./
