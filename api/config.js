@@ -47,8 +47,20 @@ const config = {
   githubToken: process.env.GITHUB_TOKEN,
   
   // Rate Limiting
-  rateLimitRequests: 10,
+  rateLimitRequests: 30, // Increased global limit
   rateLimitWindowMs: 60000, // 1 minute
+  
+  // Feature-specific rate limits
+  featureRateLimits: {
+    connect4: {
+      requests: 20,
+      windowMs: 60000 // 1 minute
+    },
+    projects: {
+      requests: 15,
+      windowMs: 60000 // 1 minute
+    }
+  },
   
   // Response Caching
   cacheTtlMs: 3600000, // 1 hour

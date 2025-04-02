@@ -1,5 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+<<<<<<< Updated upstream
 import { sharedApiService, CATEGORY, PRIORITY } from '../../../services/sharedApiService';
+=======
+>>>>>>> Stashed changes
 import * as gameLogic from './connect4Logic';
 
 /**
@@ -61,6 +64,7 @@ export function useConnect4AI(gameState, isAITurn) {
   const [aiCommentary, setAiCommentary] = useState('');
   const [error, setError] = useState(null);
   
+<<<<<<< Updated upstream
   // Track current request to allow cancellation
   const abortControllerRef = useRef(null);
   
@@ -75,6 +79,16 @@ export function useConnect4AI(gameState, isAITurn) {
   const [retryTimeout, setRetryTimeout] = useState(null);
   
   // Function to get AI move using the shared API service
+=======
+  // Cache for API responses based on board state to avoid duplicate requests
+  const responseCache = useRef(new Map());
+  
+  // Track retry attempts for exponential backoff
+  const [retryCount, setRetryCount] = useState(0);
+  const [lastRetryTime, setLastRetryTime] = useState(0);
+  
+  // Function to get AI move with exponential backoff
+>>>>>>> Stashed changes
   const getAIMove = useCallback(async () => {
     console.log("getAIMove called, checking game state");
     
@@ -103,6 +117,7 @@ export function useConnect4AI(gameState, isAITurn) {
     setIsThinking(true);
     setError(null);
     
+<<<<<<< Updated upstream
   // Cancel any in-flight request
   if (abortControllerRef.current) {
     console.log("Aborting previous request");
@@ -115,8 +130,39 @@ export function useConnect4AI(gameState, isAITurn) {
     console.log("Setting new requestId:", currentRequestId);
     setRequestId(currentRequestId);
     abortControllerRef.current = new AbortController();
+=======
+    // Create a board state signature for caching
+    const boardSignature = board.map(row => 
+      row.map(cell => cell === null ? '0' : cell === gameLogic.PLAYER ? '1' : '2').join('')
+    ).join('|');
+    
+    // Check cache first - only use cache if difficulty hasn't changed
+    const cacheKey = `${boardSignature}|${difficulty}`;
+    if (responseCache.current.has(cacheKey)) {
+      console.log('Using cached AI move');
+      const cachedDecision = responseCache.current.get(cacheKey);
+      
+      // Verify the cached move is still valid
+      if (availableColumns.includes(cachedDecision.column)) {
+        setIsThinking(false);
+        return cachedDecision;
+      }
+    }
+>>>>>>> Stashed changes
     
     try {
+      // Calculate backoff delay based on retry count (exponential backoff with jitter)
+      const now = Date.now();
+      const minDelay = retryCount > 0 ? Math.min(1000 * Math.pow(2, retryCount - 1), 10000) : 0;
+      const jitter = retryCount > 0 ? Math.random() * 1000 : 0;
+      const backoffDelay = Math.max(0, minDelay + jitter - (now - lastRetryTime));
+      
+      // Wait for backoff if needed
+      if (backoffDelay > 0) {
+        console.log(`Backing off for ${backoffDelay}ms before retrying`);
+        await new Promise(resolve => setTimeout(resolve, backoffDelay));
+      }
+      
       // Create the prompt for the AI
       const prompt = `
 You are playing Connect 4 against a human player. You are playing with yellow discs (🟡).
@@ -137,10 +183,20 @@ Respond with ONLY a JSON object in this exact format:
 }
 `;
 
+<<<<<<< Updated upstream
       console.log("Sending request to AI service");
       // Use the shared API service instead of direct fetch
       const data = await sharedApiService.enqueueRequest({
         body: {
+=======
+      // Use a separate endpoint for Connect4 to avoid rate limits with other features
+      const response = await fetch('/api/askGPT/connect4', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+>>>>>>> Stashed changes
           question: prompt,
           maxTokens: 150,
           temperature: 0.7,
@@ -151,7 +207,42 @@ Respond with ONLY a JSON object in this exact format:
         signal: abortControllerRef.current.signal
       });
       
+<<<<<<< Updated upstream
       console.log("Got response from AI service:", data);
+=======
+      // Handle rate limiting with proper backoff
+      if (response.status === 429) {
+        console.warn(`Rate limited (attempt ${retryCount + 1})`);
+        setRetryCount(prev => prev + 1);
+        setLastRetryTime(Date.now());
+        
+        // If we have too many retries, fall back to local AI
+        if (retryCount >= 3) {
+          throw new Error("Rate limit exceeded after multiple retries. Using local AI strategy.");
+        }
+        
+        // Add more specific error message
+        setError(
+          `API rate limit reached (retry ${retryCount + 1}/3). Will retry automatically...`
+        );
+        
+        // Wait for backoff delay before returning
+        const retryDelay = Math.min(2000 * Math.pow(2, retryCount), 10000);
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+        
+        // Retry recursively (will use exponential backoff)
+        return getAIMove();
+      }
+      
+      // Reset retry count on success
+      if (retryCount > 0) {
+        setRetryCount(0);
+      }
+      
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+>>>>>>> Stashed changes
       
       // Check if this is still the most recent request or if component unmounted
       if (currentRequestId !== requestId) {
@@ -159,6 +250,7 @@ Respond with ONLY a JSON object in this exact format:
         processingTurnRef.current = false; // Reset processing flag even for discarded requests
         return null;
       }
+      
       
       // Parse the AI's response to extract column choice and commentary
       try {

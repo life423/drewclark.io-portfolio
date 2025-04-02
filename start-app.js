@@ -23,8 +23,13 @@ const autoMode = args.includes('--auto');
 
 // Configuration
 const config = {
+<<<<<<< Updated upstream
   backendPort: process.env.PORT || 3001,
   frontendPort: 3000,
+=======
+  backendPort: 3000,
+  frontendPort: 5173,
+>>>>>>> Stashed changes
   checkCommand: process.platform === 'win32' 
     ? 'netstat -ano | findstr /R ":%PORT%\\s"'
     : 'lsof -i :%PORT% -t',

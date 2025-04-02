@@ -89,6 +89,7 @@ When responding, acknowledge the user's current context and tailor your answer t
       model: "gpt-4o-mini"
     };
     
+<<<<<<< Updated upstream
     // Create an abort controller for request cancellation if needed
     const abortController = new AbortController();
     
@@ -98,6 +99,15 @@ When responding, acknowledge the user's current context and tailor your answer t
       category: CATEGORY.PROJECT_CARDS,
       priority: PRIORITY.HIGH, // User-initiated questions get higher priority
       signal: abortController.signal
+=======
+    // Call the backend API with projects-specific endpoint
+    const response = await fetch('/api/askGPT/projects', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+>>>>>>> Stashed changes
     });
     
     return data.answer || 'Sorry, I could not generate a response at this time.';

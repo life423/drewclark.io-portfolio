@@ -4,7 +4,11 @@ services:
             context: .
             dockerfile: Dockerfile.dev
         ports:
+<<<<<<< Updated upstream
             - '3001:3001'  # Production app runs on port 3001
+=======
+            - '3000:3000'  # Production app runs on port 3000
+>>>>>>> Stashed changes
         volumes:
             - /app/node_modules
             - .:/app

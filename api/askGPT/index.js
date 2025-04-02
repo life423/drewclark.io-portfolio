@@ -1,5 +1,5 @@
 const { OpenAI } = require('openai');
-const { handleRequest } = require('../unified-server');
+const { handleRequest, isRateLimited } = require('../unified-server');
 const config = require('../config');
 const githubUtils = require('../github-utils');
 
@@ -98,14 +98,36 @@ async function handlePostRequest(context, req, headers) {
         }"`
     )
 
-    // Rate limiting check (implement more robust solution in production)
-    const clientIp = req.headers['x-forwarded-for'] || req.ip || 'unknown'
-    if (isRateLimited(clientIp)) {
-        context.log.warn(`Rate limit exceeded for IP: ${clientIp}`)
-        return createResponse(context, 429, headers, {
-            error: 'Too many requests. Please try again later.',
-        })
+  // Determine which feature is making the request
+  let feature = 'default';
+  // Check request URL path or body to identify feature
+  if (req.url && req.url.includes('/connect4')) {
+    feature = 'connect4';
+  } else if (req.url && req.url.includes('/projects')) {
+    feature = 'projects';
+  } else {
+    // Try to detect from the question content
+    const questionLower = req.body.question.toLowerCase();
+    if (questionLower.includes('connect4') || questionLower.includes('connect 4') || 
+        questionLower.includes('game') || questionLower.includes('ai move')) {
+      feature = 'connect4';
+    } else if (questionLower.includes('project') || questionLower.includes('portfolio')) {
+      feature = 'projects';
     }
+  }
+  
+  context.log.info(`Request detected as feature: ${feature}`);
+  
+  // Rate limiting check with feature-specific bucket
+  const clientIp = req.headers['x-forwarded-for'] || req.ip || 'unknown'
+  if (isRateLimited(clientIp, feature)) {
+    context.log.warn(`Rate limit exceeded for IP: ${clientIp} on feature: ${feature}`)
+    return createResponse(context, 429, headers, {
+      error: 'Too many requests. Please try again later.',
+      feature: feature,
+      recommendedWait: '10 seconds'
+    })
+  }
 
     // Extract configuration from request or use defaults
     const modelName =
@@ -435,33 +457,8 @@ function isValidModel(model) {
     return allowedModels.includes(model)
 }
 
-// Simple in-memory rate limiting
-const rateLimitMap = new Map()
-function isRateLimited(clientIp) {
-    const now = Date.now()
-    const limit = 10 // 10 requests
-    const window = 60000 // per minute
-
-    // Initialize or update rate limit tracking
-    if (!rateLimitMap.has(clientIp)) {
-        rateLimitMap.set(clientIp, [])
-    }
-
-    // Get request history and filter out old requests
-    let requests = rateLimitMap.get(clientIp)
-    requests = requests.filter(timestamp => now - timestamp < window)
-
-    // Check if limit is exceeded
-    if (requests.length >= limit) {
-        return true // Rate limited
-    }
-
-    // Record this request
-    requests.push(now)
-    rateLimitMap.set(clientIp, requests)
-
-    return false // Not rate limited
-}
+// Use the isRateLimited function from unified-server
+// This is now imported at the top level and used in the handlePostRequest function
 
 // Cache helpers
 function checkCache(key) {

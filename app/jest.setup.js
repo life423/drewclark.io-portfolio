@@ -1,36 +1,33 @@
-// Add Jest-DOM matchers
-import '@testing-library/jest-dom';
+/**
+ * Jest Setup File
+ * 
+ * This file runs before all tests to set up the testing environment.
+ */
 
-// Mock ResizeObserver
-global.ResizeObserver = class {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
-};
+// Set up fetch mock
+import 'jest-fetch-mock';
 
-// Mock Intersection Observer
-global.IntersectionObserver = class {
-  constructor(callback) {
-    this.callback = callback;
-  }
-  observe() {
-    this.callback([{ isIntersecting: true, intersectionRatio: 1 }]);
-  }
-  unobserve() {}
-  disconnect() {}
-};
+// Enable fetch mocks
+global.fetch = require('jest-fetch-mock');
 
-// Additional global mocks
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: jest.fn().mockImplementation(query => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
-  })),
-});
+// Set up mocks for browser globals
+global.console.error = jest.fn();
+global.console.warn = jest.fn();
+
+// Mock timing functions
+jest.useFakeTimers();
+
+// Make a dummy React implementation for tests
+jest.mock('react', () => ({
+  ...jest.requireActual('react'),
+  useState: jest.fn((init) => [init, jest.fn()]),
+  useEffect: jest.fn((fn) => fn()),
+  useCallback: jest.fn((fn) => fn),
+  useRef: jest.fn((value) => ({ 
+    current: value,
+    // Add the Map methods to make the cache work
+    has: jest.fn(() => false),
+    get: jest.fn(() => null),
+    set: jest.fn(),
+  }))
+}));
