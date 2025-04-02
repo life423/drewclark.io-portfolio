@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Connect4Board from './Connect4Board';
 import Connect4Controls from './Connect4Controls';
 import { useConnect4Game } from './useConnect4Game';
@@ -14,11 +14,18 @@ export default function Connect4Game() {
   // Game state from custom hook
   const gameState = useConnect4Game();
   
+  // Create memoized props with only essential data to avoid unnecessary rerenders
+  const aiProps = useMemo(() => ({
+    board: gameState.board,
+    moveHistory: gameState.moveHistory,
+    difficulty: gameState.difficulty,
+    getAvailableColumns: gameState.getAvailableColumns
+  }), [gameState.board, gameState.moveHistory, gameState.difficulty, gameState.getAvailableColumns]);
+  
   // AI integration
   const { isThinking, aiCommentary, error } = useConnect4AI(
     gameState,
-    gameState.currentPlayer === AI,
-    gameState.difficulty
+    gameState.currentPlayer === AI
   );
   
   return (
