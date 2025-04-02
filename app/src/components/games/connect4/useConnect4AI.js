@@ -76,29 +76,42 @@ export function useConnect4AI(gameState, isAITurn) {
   
   // Function to get AI move using the shared API service
   const getAIMove = useCallback(async () => {
-    // Extract only the properties we need from gameState to avoid
-    // unnecessary re-renders on other property changes
-    const board = gameState.board;
-    const moveHistory = gameState.moveHistory;
-    const difficulty = gameState.difficulty;
-    const availableColumns = gameState.getAvailableColumns();
+    console.log("getAIMove called, checking game state");
     
-    if (availableColumns.length === 0) return null;
+    // Extract properties from gameState
+    const { board, moveHistory, difficulty, getAvailableColumns, gameStatus } = gameState;
+    const availableColumns = getAvailableColumns();
+    
+    // Log board state for debugging
+    console.log("Current board state:", board);
+    console.log("Available columns:", availableColumns);
+    
+    if (availableColumns.length === 0 || gameStatus !== 'playing') {
+      console.log("No available columns or game not playing, skipping AI move");
+      return null;
+    }
     
     // Skip if already processing (prevents double execution in React StrictMode)
-    if (processingTurnRef.current) return null;
-    processingTurnRef.current = true;
+    if (processingTurnRef.current) {
+      console.log("Already processing an AI move, skipping");
+      return null;
+    }
     
+    // Set processing flag and thinking state
+    console.log("Setting processingTurnRef to true");
+    processingTurnRef.current = true;
     setIsThinking(true);
     setError(null);
     
     // Cancel any in-flight request
     if (abortControllerRef.current) {
+      console.log("Aborting previous request");
       abortControllerRef.current.abort();
     }
     
     // Create new abort controller and increment request ID
     const currentRequestId = requestId + 1;
+    console.log("Setting new requestId:", currentRequestId);
     setRequestId(currentRequestId);
     abortControllerRef.current = new AbortController();
     
@@ -123,6 +136,7 @@ Respond with ONLY a JSON object in this exact format:
 }
 `;
 
+      console.log("Sending request to AI service");
       // Use the shared API service instead of direct fetch
       const data = await sharedApiService.enqueueRequest({
         body: {
@@ -136,9 +150,12 @@ Respond with ONLY a JSON object in this exact format:
         signal: abortControllerRef.current.signal
       });
       
-      // Check if this is still the most recent request
+      console.log("Got response from AI service:", data);
+      
+      // Check if this is still the most recent request or if component unmounted
       if (currentRequestId !== requestId) {
-        // A newer request has been made, discard this response
+        console.log("This is not the most recent request, discarding response");
+        processingTurnRef.current = false; // Reset processing flag even for discarded requests
         return null;
       }
       
@@ -147,6 +164,8 @@ Respond with ONLY a JSON object in this exact format:
         // Safety: extract just the JSON part from response
         const jsonMatch = data.answer.match(/\{[\s\S]*\}/);
         const result = jsonMatch ? JSON.parse(jsonMatch[0]) : null;
+        
+        console.log("Parsed AI response:", result);
         
         // Reset retry count on successful requests
         if (retryCount > 0) {
@@ -158,12 +177,14 @@ Respond with ONLY a JSON object in this exact format:
             result.column >= 0 && 
             result.column < gameLogic.COLS &&
             availableColumns.includes(result.column)) {
+          console.log("AI chose valid column:", result.column);
           return {
             column: result.column,
             commentary: result.commentary || "Let me think about this move..."
           };
         } else {
           // If parsing fails or invalid column, use a random available column
+          console.log("AI returned invalid column, using fallback");
           const fallbackColumn = availableColumns[Math.floor(Math.random() * availableColumns.length)];
           return {
             column: fallbackColumn,
@@ -183,6 +204,7 @@ Respond with ONLY a JSON object in this exact format:
       // Ignore aborted requests
       if (error.name === 'AbortError') {
         console.log('Request was cancelled');
+        processingTurnRef.current = false; // Reset processing flag for aborted requests
         return null;
       }
       
@@ -199,9 +221,13 @@ Respond with ONLY a JSON object in this exact format:
         // Set up retry with exponential backoff
         const timeoutId = setTimeout(() => {
           if (gameState.gameStatus === 'playing' && isAITurn) {
+            console.log("Retrying AI move after backoff");
             setRetryCount(prev => prev + 1);
             processingTurnRef.current = false; // Allow the next attempt
             getAIMove();
+          } else {
+            console.log("Game state changed during backoff, not retrying");
+            processingTurnRef.current = false;
           }
         }, backoffTime);
         
@@ -211,6 +237,7 @@ Respond with ONLY a JSON object in this exact format:
       }
       
       // Use a more intelligent fallback strategy
+      console.log("Using intelligent fallback strategy");
       const availableColumns = gameState.getAvailableColumns();
       let fallbackColumn;
       let commentary = "";
@@ -267,8 +294,9 @@ Respond with ONLY a JSON object in this exact format:
         commentary: commentary
       };
     } finally {
+      console.log("AI move processing complete, setting thinking to false");
       setIsThinking(false);
-      processingTurnRef.current = false;
+      // Don't reset processingTurnRef here - it will be reset after the move is made
     }
   }, [
     // Only depend on the specific properties we use
@@ -285,26 +313,64 @@ Respond with ONLY a JSON object in this exact format:
   
   // Handle AI turns
   useEffect(() => {
+    console.log("AI turn effect running, isAITurn:", isAITurn, "gameStatus:", gameState.gameStatus);
+    
     let isMounted = true;
     let moveTimeoutId = null;
     
     async function handleAITurn() {
-      // Skip if already processing (prevents double execution in React StrictMode)
-      if (processingTurnRef.current) return;
+      // Skip if already processing
+      if (processingTurnRef.current) {
+        console.log("Skip handleAITurn - already processing");
+        return;
+      }
       
       if (isAITurn && gameState.gameStatus === 'playing') {
+        console.log("It's AI's turn and game is playing - getting AI move");
         const aiDecision = await getAIMove();
         
-        if (!isMounted || !aiDecision) return;
+        if (!isMounted) {
+          console.log("Component unmounted during AI processing");
+          return;
+        }
         
+        if (!aiDecision) {
+          console.log("No AI decision received");
+          processingTurnRef.current = false; // Reset processing flag if no decision was made
+          return;
+        }
+        
+        console.log("Setting AI commentary:", aiDecision.commentary);
         setAiCommentary(aiDecision.commentary);
         
         // Small delay before making the move for a more natural feel
+        console.log("Scheduling AI move in 600ms to column:", aiDecision.column);
         moveTimeoutId = setTimeout(() => {
-          if (isMounted && gameState.gameStatus === 'playing') {
-            gameState.dropDisc(aiDecision.column);
+          if (!isMounted) {
+            console.log("Component unmounted during move timeout");
+            return;
           }
+          
+          if (gameState.gameStatus !== 'playing') {
+            console.log("Game no longer playing, skipping AI move");
+            processingTurnRef.current = false; // Reset processing flag
+            return;
+          }
+          
+          console.log("Executing AI move to column:", aiDecision.column);
+          // Use the dropDisc function from the props
+          gameState.dropDisc(aiDecision.column);
+          
+          // Reset the processing flag AFTER the move is made
+          console.log("Resetting processingTurnRef to false after move");
+          processingTurnRef.current = false;
         }, 600);
+      } else {
+        // Not AI's turn or game not playing, ensure flag is reset
+        if (processingTurnRef.current) {
+          console.log("Not AI's turn but processing flag is true - resetting");
+          processingTurnRef.current = false;
+        }
       }
     }
     
@@ -312,6 +378,7 @@ Respond with ONLY a JSON object in this exact format:
     
     // Proper cleanup
     return () => {
+      console.log("Cleaning up AI turn effect");
       isMounted = false;
       
       // Cancel any pending API requests
@@ -327,6 +394,9 @@ Respond with ONLY a JSON object in this exact format:
       if (retryTimeout) {
         clearTimeout(retryTimeout);
       }
+      
+      // Always reset the processing flag on cleanup
+      processingTurnRef.current = false;
     };
   }, [isAITurn, gameState.gameStatus, getAIMove]);
   

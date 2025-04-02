@@ -19,12 +19,15 @@ export default function Connect4Game() {
     board: gameState.board,
     moveHistory: gameState.moveHistory,
     difficulty: gameState.difficulty,
-    getAvailableColumns: gameState.getAvailableColumns
-  }), [gameState.board, gameState.moveHistory, gameState.difficulty, gameState.getAvailableColumns]);
+    getAvailableColumns: gameState.getAvailableColumns,
+    gameStatus: gameState.gameStatus,
+    dropDisc: gameState.dropDisc // Add the dropDisc function for the AI to use
+  }), [gameState.board, gameState.moveHistory, gameState.difficulty, 
+       gameState.getAvailableColumns, gameState.gameStatus, gameState.dropDisc]);
   
-  // AI integration
+  // AI integration - use the memoized props
   const { isThinking, aiCommentary, error } = useConnect4AI(
-    gameState,
+    aiProps, // Use the memoized props here
     gameState.currentPlayer === AI
   );
   

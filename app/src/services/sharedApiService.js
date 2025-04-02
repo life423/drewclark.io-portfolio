@@ -93,72 +93,112 @@ class SharedApiService {
   async processQueues() {
     const categories = Object.values(CATEGORY);
     let categoryIndex = 0;
+    let isProcessing = false;
+    
+    // Logging for debugging
+    console.log("Starting queue processor");
     
     const processNext = async () => {
-      // Get next category in round-robin fashion
-      const category = categories[categoryIndex];
-      categoryIndex = (categoryIndex + 1) % categories.length;
-      
-      // Check rate limits
-      this.updateRateLimits(category);
-      if (this.isRateLimited(category)) {
-        console.log(`Rate limit for ${category} reached, skipping`);
-        setTimeout(processNext, 100);
-        return;
-      }
-      
-      // Get next request from this category's queue
-      const queue = this.requestQueues[category];
-      if (queue.length === 0) {
+      // Avoid concurrent processing
+      if (isProcessing) {
         setTimeout(processNext, 50);
         return;
       }
       
-      const request = queue.shift();
-      
-      // Check if request was cancelled
-      if (request.signal && request.signal.aborted) {
-        console.log(`Request ${request.id} was cancelled`);
-        setTimeout(processNext, 50);
-        return;
-      }
+      isProcessing = true;
       
       try {
-        // Track in-flight request
-        this.pendingRequests.set(request.id, request);
+        // Get next category in round-robin fashion
+        const category = categories[categoryIndex];
+        categoryIndex = (categoryIndex + 1) % categories.length;
         
-        // Increment rate limit counter
-        this.rateLimits[category].count++;
-        
-        // Make the request
-        const response = await fetch(request.endpoint, {
-          method: request.method,
-          headers: { 
-            'Content-Type': 'application/json',
-            'X-API-Feature': category // Useful if backend implements feature-based rate limiting
-          },
-          body: JSON.stringify(request.body),
-          signal: request.signal
-        });
-        
-        if (!response.ok) {
-          throw new Error(`API error: ${response.status}`);
+        // Log queue sizes periodically
+        if (categoryIndex === 0) {
+          console.log("Queue sizes:", Object.entries(this.requestQueues).map(
+            ([cat, queue]) => `${cat}: ${queue.length}`
+          ).join(', '));
         }
         
-        const data = await response.json();
-        request.resolve(data);
-        console.log(`Request ${request.id} completed successfully`);
-      } catch (error) {
-        // Only reject if not aborted
-        if (error.name !== 'AbortError') {
-          request.reject(error);
+        // Check rate limits
+        this.updateRateLimits(category);
+        if (this.isRateLimited(category)) {
+          console.log(`Rate limit for ${category} reached, skipping`);
+          setTimeout(processNext, 100);
+          isProcessing = false;
+          return;
         }
-        console.log(`Request ${request.id} failed: ${error.message}`);
-      } finally {
-        this.pendingRequests.delete(request.id);
         
-        // Continue processing
-        setTimeout(processNext, 50);
+        // Get next request from this category's queue
+        const queue = this.requestQueues[category];
+        if (queue.length === 0) {
+          setTimeout(processNext, 50);
+          isProcessing = false;
+          return;
+        }
+        
+        // Get the next request without removing it yet
+        const request = queue[0];
+        
+        // Check if request was cancelled
+        if (request.signal && request.signal.aborted) {
+          console.log(`Request ${request.id} was cancelled, removing from queue`);
+          queue.shift(); // Now remove it from the queue
+          setTimeout(processNext, 50);
+          isProcessing = false;
+          return;
+        }
+        
+        console.log(`Processing request ${request.id} from ${category} queue`);
+        
+        try {
+          // Track in-flight request
+          this.pendingRequests.set(request.id, request);
+          
+          // Remove from queue
+          queue.shift();
+          
+          // Increment rate limit counter
+          this.rateLimits[category].count++;
+          
+          // Make the request
+          const response = await fetch(request.endpoint, {
+            method: request.method,
+            headers: { 
+              'Content-Type': 'application/json',
+              'X-API-Feature': category // Useful if backend implements feature-based rate limiting
+            },
+            body: JSON.stringify(request.body),
+            signal: request.signal
+          });
+          
+          if (!response.ok) {
+            throw new Error(`API error: ${response.status}`);
+          }
+          
+          const data = await response.json();
+          console.log(`Request ${request.id} completed successfully`);
+          request.resolve(data);
+        } catch (error) {
+          console.log(`Request ${request.id} failed: ${error.message}`);
+          
+          // Only reject if not aborted
+          if (error.name !== 'AbortError') {
+            request.reject(error);
+          } else {
+            console.log(`Request ${request.id} was aborted during processing`);
+          }
+        } finally {
+          this.pendingRequests.delete(request.id);
+          
+          // Continue processing
+          setTimeout(processNext, 50);
+          isProcessing = false;
+        }
+      } catch (unexpectedError) {
+        // Catch any unexpected errors in the processNext function itself
+        console.error("Unexpected error in queue processor:", unexpectedError);
+        setTimeout(processNext, 100); // Still try to continue
+        isProcessing = false;
       }
     };
     

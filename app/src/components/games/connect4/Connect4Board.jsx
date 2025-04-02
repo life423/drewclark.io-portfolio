@@ -17,18 +17,22 @@ export default function Connect4Board({
   // Transform the board data for easier column-based rendering
   // Our connect4Logic stores data in row-major order, but we render in columns
   const columnData = useMemo(() => {
+    // Log the original board for debugging
+    console.log("Original board:", JSON.stringify(board));
+    
     const columns = [];
     
     for (let col = 0; col < COLS; col++) {
-      const columnCells = [];
+      // Create array with all cells explicitly set to null initially
+      const columnCells = Array(ROWS).fill(null);
       
       for (let row = 0; row < ROWS; row++) {
-        if (board[row][col] !== null) {
-          columnCells[row] = board[row][col];
-        }
+        // Always set the value, whether null or a player value
+        columnCells[row] = board[row][col];
       }
       
       columns.push(columnCells);
+      console.log(`Column ${col} data:`, columnCells);
     }
     
     return columns;

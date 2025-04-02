@@ -15,14 +15,19 @@ export default function Connect4Column({
   lastMove = null,
   winningCells = []
 }) {
+  // Log column state for debugging
+  console.log(`Rendering column ${columnIndex} with state:`, columnState);
   const [isHovered, setIsHovered] = useState(false);
   
   // Whether this column can accept another disc
-  const isColumnAvailable = isActive && columnState.length < ROWS;
+  const isColumnAvailable = isActive && columnState.filter(cell => cell !== null).length < ROWS;
+  console.log(`Column ${columnIndex} available:`, isColumnAvailable, `Active: ${isActive}, Filled cells: ${columnState.filter(cell => cell !== null).length}`);
   
   // Handlers for column interaction
   const handleClick = () => {
+    console.log(`Column ${columnIndex} clicked, isColumnAvailable:`, isColumnAvailable);
     if (isColumnAvailable && onDiscDrop) {
+      console.log(`Dropping disc in column ${columnIndex}`);
       onDiscDrop(columnIndex);
     }
   };
@@ -81,18 +86,25 @@ export default function Connect4Column({
       
       {/* Render cells for this column */}
       {Array(ROWS).fill().map((_, rowIndex) => {
+        // Explicitly check the value at this position
         const discValue = columnState[rowIndex];
+        console.log(`Rendering disc at column ${columnIndex}, row ${rowIndex}, value:`, discValue);
+        
+        // Determine if this is the newest disc
+        const isNewest = isNewestDisc(rowIndex, columnIndex);
+        console.log(`Is newest disc at (${rowIndex},${columnIndex}):`, isNewest);
+        
         return (
           <div 
             key={`cell-${rowIndex}`} 
             className="aspect-square flex justify-center items-center p-0.5"
           >
             <Connect4Disc
-              player={discValue}
+              player={discValue} // Will be null, 'player', or 'ai'
               row={rowIndex}
               col={columnIndex}
               isWinning={isWinningCell(rowIndex, columnIndex)}
-              isNewest={isNewestDisc(rowIndex, columnIndex)}
+              isNewest={isNewest}
             />
           </div>
         );
