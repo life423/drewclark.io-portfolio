@@ -1,17 +1,17 @@
-FROM node:18
+# FROM node:18
 
-WORKDIR /app
+# WORKDIR /app
 
-COPY package.json ./
-RUN npm install
+# COPY package.json ./
+# RUN npm install
 
-COPY . ./
+# COPY . ./
 
-# Set environment variables
-ENV DOCKER_CONTAINER=true
-ENV PORT=3001
+# # Set environment variables
+# ENV DOCKER_CONTAINER=true
+# ENV PORT=3001
 
-# Expose the port
-EXPOSE 3001
+# # Expose the port
+# EXPOSE 3001
 
-CMD ["npm", "start"]
+# CMD ["npm", "start"]
