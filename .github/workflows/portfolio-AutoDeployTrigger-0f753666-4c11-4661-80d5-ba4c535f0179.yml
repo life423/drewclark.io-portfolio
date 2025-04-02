@@ -35,14 +35,10 @@ jobs:
         uses: azure/container-apps-deploy-action@v2
         with:
           appSourcePath: ${{ github.workspace }}
-          _dockerfilePathKey_: _dockerfilePath_
+          dockerfilePath: Dockerfile
           registryUrl: docker.io
           registryUsername: ${{ secrets.PORTFOLIO_REGISTRY_USERNAME }}
           registryPassword: ${{ secrets.PORTFOLIO_REGISTRY_PASSWORD }}
           containerAppName: portfolio
           resourceGroup: DefaultResourceGroup-EUS
           imageToBuild: aiandrew631/portfolio:${{ github.sha }}
-          _buildArgumentsKey_: |
-            _buildArgumentsValues_
-
-
