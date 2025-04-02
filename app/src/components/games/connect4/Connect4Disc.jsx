@@ -10,7 +10,8 @@ export default function Connect4Disc({
   row = 0,
   col = 0,
   isWinning = false,
-  isNewest = false
+  isNewest = false,
+  isAnimating = false
 }) {
   // Generate custom delay for drop animation based on row
   const animationDelay = useMemo(() => {
