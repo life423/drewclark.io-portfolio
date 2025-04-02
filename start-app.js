@@ -21,15 +21,17 @@ const readline = require('readline');
 const args = process.argv.slice(2);
 const autoMode = args.includes('--auto');
 
+// Load environment variables if dotenv is available
+try {
+  require('dotenv').config();
+} catch (err) {
+  // dotenv is not required, fallback to default ports
+}
+
 // Configuration
 const config = {
-<<<<<<< Updated upstream
-  backendPort: process.env.PORT || 3001,
-  frontendPort: 3000,
-=======
-  backendPort: 3000,
+  backendPort: process.env.PORT || 3000,
   frontendPort: 5173,
->>>>>>> Stashed changes
   checkCommand: process.platform === 'win32' 
     ? 'netstat -ano | findstr /R ":%PORT%\\s"'
     : 'lsof -i :%PORT% -t',
@@ -136,7 +138,7 @@ async function main() {
   console.log('===================');
   console.log(`Mode: ${config.autoMode ? 'Automatic' : 'Interactive'}`);
   
-  // Check frontend port (3000)
+  // Check frontend port
   const frontendPid = await checkPort(config.frontendPort);
   if (frontendPid) {
     console.log(`Frontend port ${config.frontendPort} is in use by process ${frontendPid}.`);
@@ -158,7 +160,7 @@ async function main() {
     }
   }
   
-  // Check backend port (3001)
+  // Check backend port
   const backendPid = await checkPort(config.backendPort);
   if (backendPid) {
     console.log(`Backend port ${config.backendPort} is in use by process ${backendPid}.`);
