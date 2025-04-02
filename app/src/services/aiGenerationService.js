@@ -441,3 +441,241 @@ What would you like to know about these projects? You can ask about specific pro
   
   return response;
 }
+
+// Cache for hero text generation to avoid excessive API calls
+const heroTextCache = new Map();
+
+/**
+ * Creates a prompt for hero text generation based on user interaction
+ * 
+ * @param {Object} contextData - Information about user interaction
+ * @returns {string} - Formatted prompt for AI
+ */
+function createHeroTextPrompt(contextData) {
+  const { mousePosition, scrollInfo, viewportInfo } = contextData;
+  
+  // Determine focus areas based on mouse position
+  const mouseFocus = mousePosition ? `
+The user's cursor is currently in the ${mousePosition.zone} zone of the screen (${mousePosition.x}, ${mousePosition.y}).
+` : '';
+
+  // Add scroll context if available
+  const scrollContext = scrollInfo ? `
+The user is scrolling ${scrollInfo.direction || 'not scrolling'} at ${Math.round(scrollInfo.percent || 0)}% of the page.
+` : '';
+
+  // Add viewport visibility context
+  const viewportContext = viewportInfo ? `
+The hero section is ${viewportInfo.isVisible ? 'visible' : 'not visible'} in the viewport.
+` : '';
+
+  // Build the complete prompt
+  return `
+Generate a single engaging sentence for a software engineer's portfolio hero section that would be dynamically displayed as the user interacts with the page.
+${mouseFocus}${scrollContext}${viewportContext}
+Focus the content on software engineering, AI, cloud technologies, or web development based on where the user's attention is.
+For example, if they're hovering near the top-right, focus on AI and machine learning concepts.
+If they're at the bottom of the section looking to scroll down, mention project exploration or innovation.
+
+The text should be:
+- Concise (under 100 characters)
+- Professional but conversational
+- Related to software engineering skills and innovation
+- Free of hashtags, emoji, and typical portfolio clichés like "Welcome to my portfolio"
+
+Respond with just the sentence, no additional formatting or explanation.
+`;
+}
+
+/**
+ * Generates contextual hero text based on user interaction
+ * 
+ * @param {Object} contextData - Information about user interaction
+ * @param {Object} contextData.mousePosition - Mouse position info (x, y, zone)
+ * @param {Object} contextData.scrollInfo - Scroll position and direction
+ * @param {Object} contextData.viewportInfo - Information about visibility
+ * @param {Object} [options={}] - Additional options
+ * @param {boolean} [options.useMock=false] - Whether to use mock implementation
+ * @returns {Promise<string>} - AI-generated contextual text
+ */
+export async function generateHeroText(contextData, options = {}) {
+  const { useMock = false } = options;
+  
+  // Use mock implementation in test environment or when specified
+  if (useMock || process.env.NODE_ENV === 'test') {
+    log.debug('Using mock implementation for hero text generation');
+    return mockGenerateHeroText(contextData);
+  }
+  
+  try {
+    // Create cache key from context data
+    // Only use significant values to avoid too many variations
+    const cacheKey = `${contextData.mousePosition?.zone || 'no-mouse'}-${
+      contextData.scrollInfo?.direction || 'no-scroll'}-${
+      Math.floor((contextData.scrollInfo?.percent || 0) / 10)}-${
+      contextData.viewportInfo?.isVisible ? 'visible' : 'hidden'
+    }`;
+    
+    // Check cache first
+    if (heroTextCache.has(cacheKey)) {
+      log.debug(`Hero text cache hit for key: ${cacheKey}`);
+      return heroTextCache.get(cacheKey);
+    }
+    
+    // Create the hero text prompt
+    const prompt = createHeroTextPrompt(contextData);
+    
+    // Prepare the request body - using MEDIUM priority since this is UI enhancement
+    const requestBody = {
+      question: prompt,
+      maxTokens: 100, // Small token limit since we only need a short sentence
+      temperature: 0.8, // Higher temperature for more variety
+      model: "gpt-4o-mini"
+    };
+    
+    // Using shorter timeout since this is not critical functionality
+    const timeout = 5000;
+    
+    // Create an abort controller for request cancellation
+    const abortController = new AbortController();
+    
+    // Set timeout to abort request if it takes too long
+    const timeoutId = setTimeout(() => {
+      log.warn(`Hero text request timeout after ${timeout}ms`);
+      abortController.abort();
+    }, timeout);
+    
+    try {
+      // Call the backend API using the shared service with MEDIUM priority
+      log.debug('Sending hero text request to AI API');
+      const startTime = performance.now();
+      
+      const data = await sharedApiService.enqueueRequest({
+        body: requestBody,
+        category: CATEGORY.OTHER, // Use separate category from project chats
+        priority: PRIORITY.MEDIUM, // Medium priority as it's not critical
+        signal: abortController.signal,
+        timeout
+      });
+      
+      const duration = Math.round(performance.now() - startTime);
+      log.info(`Hero text response received in ${duration}ms`);
+      
+      // Cleanup timeout
+      clearTimeout(timeoutId);
+      
+      const response = data.answer || "Building elegant solutions to complex problems";
+      
+      // Cache the response before returning
+      heroTextCache.set(cacheKey, response);
+      
+      // If cache gets too large, remove oldest entries
+      if (heroTextCache.size > 50) {
+        // Remove oldest entry (simple LRU implementation)
+        const oldestKey = heroTextCache.keys().next().value;
+        heroTextCache.delete(oldestKey);
+      }
+      
+      return response;
+    } finally {
+      clearTimeout(timeoutId); // Ensure timeout is cleared
+    }
+  } catch (error) {
+    log.error('Error generating hero text:', error);
+    // Return a default fallback in case of error
+    return "Crafting innovative solutions at the intersection of design and technology";
+  }
+}
+
+/**
+ * Mock implementation for hero text generation
+ * 
+ * @param {Object} contextData - Context data for hero text
+ * @returns {Promise<string>} - Mock hero text
+ */
+async function mockGenerateHeroText(contextData) {
+  log.debug('Using mock implementation for hero text');
+  
+  // Simulate network delay (shorter in testing)
+  const delay = process.env.NODE_ENV === 'test' ? 50 : 300;
+  await new Promise(resolve => setTimeout(resolve, delay));
+  
+  // Array of potential responses based on different zones and contexts
+  const responses = {
+    // Mouse position zones
+    'left-top': [
+      "Architecting scalable solutions with a focus on user experience",
+      "Building ambitious systems that solve real-world problems"
+    ],
+    'center-top': [
+      "Crafting elegant code that brings powerful ideas to life",
+      "Developing future-proof applications with best practices at heart"
+    ],
+    'right-top': [
+      "Integrating AI to create intelligent, responsive applications",
+      "Leveraging machine learning to deliver transformative experiences"
+    ],
+    'left-middle': [
+      "Bridging design and functionality for seamless user experiences",
+      "Blending creativity with technical precision in every project"
+    ],
+    'center-middle': [
+      "Engineering robust solutions to today's complex challenges",
+      "Transforming concepts into reality through clean, efficient code"
+    ],
+    'right-middle': [
+      "Optimizing systems for performance, security, and scalability",
+      "Fine-tuning cloud infrastructure for maximum reliability"
+    ],
+    'left-bottom': [
+      "Creating responsive, accessible interfaces for all users",
+      "Designing intuitive experiences that feel natural and effortless"
+    ],
+    'center-bottom': [
+      "Explore my work and discover innovative approaches to tough problems",
+      "See how technical expertise meets creative problem-solving below"
+    ],
+    'right-bottom': [
+      "Check out my projects showcasing full-stack development expertise",
+      "Scroll down to view my portfolio of sophisticated solutions"
+    ],
+    
+    // Scroll directions
+    'down': [
+      "Discovering new possibilities with every line of code written",
+      "Continuously pushing the boundaries of what's technically possible"
+    ],
+    'up': [
+      "Revisiting fundamentals with modern approaches and fresh ideas",
+      "Strengthening core concepts through practical application"
+    ],
+    
+    // Default responses
+    'default': [
+      "Translating complex requirements into elegant technical solutions",
+      "Building the future one commit at a time",
+      "Turning innovative ideas into production-ready applications",
+      "Solving tomorrow's problems with today's best practices"
+    ]
+  };
+  
+  // Determine which response set to use
+  let responseSet;
+  if (contextData.mousePosition?.zone) {
+    responseSet = responses[contextData.mousePosition.zone];
+  }
+  
+  // If no match by zone or no responses in that zone, try scroll direction
+  if (!responseSet && contextData.scrollInfo?.direction) {
+    responseSet = responses[contextData.scrollInfo.direction];
+  }
+  
+  // Fall back to default if no match
+  if (!responseSet) {
+    responseSet = responses.default;
+  }
+  
+  // Pick a random response from the set
+  const randomIndex = Math.floor(Math.random() * responseSet.length);
+  return responseSet[randomIndex];
+}

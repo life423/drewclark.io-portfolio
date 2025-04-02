@@ -177,9 +177,9 @@ export default function ProjectsContainer() {
             
             <div className='max-w-7xl mx-auto'>
                 <div className='flex flex-col lg:flex-row'>
-                    {/* Sidebar TOC for large screens */}
+                    {/* Sidebar TOC for large screens - matching height with project cards */}
                     <div className='hidden lg:block w-64 pr-6 flex-shrink-0'>
-                        <div className='sticky top-24 bg-brandGray-800/95 backdrop-blur-sm rounded-xl p-4 border border-brandGray-700 shadow-lg'>
+                        <div className='sticky top-24 bg-brandGray-800/95 backdrop-blur-sm rounded-xl p-4 border border-brandGray-700 shadow-lg h-[700px] flex flex-col overflow-hidden'>
                             <h3 className='text-lg font-bold text-brandGreen-300 mb-4'>
                                 Projects Overview
                             </h3>
