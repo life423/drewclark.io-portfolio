@@ -52,10 +52,6 @@ const config = {
   
   // Feature-specific rate limits
   featureRateLimits: {
-    connect4: {
-      requests: 20,
-      windowMs: 60000 // 1 minute
-    },
     projects: {
       requests: 15,
       windowMs: 60000 // 1 minute

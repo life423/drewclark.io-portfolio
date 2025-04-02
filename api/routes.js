@@ -32,25 +32,6 @@ router.all('/askGPT', async (req, res) => {
     })
 })
 
-// Connect4-specific endpoint
-router.all('/askGPT/connect4', async (req, res) => {
-    const createResponse = createResponseAdapter(res)
-    const logInfo = message => console.log(`[INFO][Connect4] ${message}`)
-    const logError = message => console.error(`[ERROR][Connect4] ${message}`)
-    const logWarn = message => console.warn(`[WARN][Connect4] ${message}`)
-
-    // Set feature flag for rate limiting
-    req.feature = 'connect4'
-    
-    // Call the unified handler
-    await handleRequest({
-        req,
-        createResponse,
-        logInfo,
-        logError,
-        logWarn,
-    })
-})
 
 // Projects-specific endpoint
 router.all('/askGPT/projects', async (req, res) => {

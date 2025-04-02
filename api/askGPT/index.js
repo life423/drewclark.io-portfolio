@@ -101,17 +101,12 @@ async function handlePostRequest(context, req, headers) {
   // Determine which feature is making the request
   let feature = 'default';
   // Check request URL path or body to identify feature
-  if (req.url && req.url.includes('/connect4')) {
-    feature = 'connect4';
-  } else if (req.url && req.url.includes('/projects')) {
+  if (req.url && req.url.includes('/projects')) {
     feature = 'projects';
   } else {
     // Try to detect from the question content
     const questionLower = req.body.question.toLowerCase();
-    if (questionLower.includes('connect4') || questionLower.includes('connect 4') || 
-        questionLower.includes('game') || questionLower.includes('ai move')) {
-      feature = 'connect4';
-    } else if (questionLower.includes('project') || questionLower.includes('portfolio')) {
+    if (questionLower.includes('project') || questionLower.includes('portfolio')) {
       feature = 'projects';
     }
   }
