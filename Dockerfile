@@ -9,7 +9,7 @@ LABEL version="1.0.0"
 
 # Install dependencies - leverage cache layers
 COPY app/package*.json ./
-RUN if [ -f package-lock.json ]; then npm ci --no-audit --no-fund; else npm install --no-audit --no-fund; fi
+RUN if [ -f ./package-lock.json ]; then npm ci --no-audit --no-fund; else npm install --no-audit --no-fund; fi
 
 # Copy source files and build
 COPY app/ ./

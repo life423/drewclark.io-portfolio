@@ -21,9 +21,7 @@ jobs:
 
             - name: Build and test
               run: |
-                  # Install dependencies - leverage cache layers
-                  COPY app/package*.json ./
-                  RUN if [ -f package-lock.json ]; then npm ci --no-audit --no-fund --legacy-peer-deps; else npm install --no-audit --no-fund --legacy-peer-deps; fi
+                  docker-compose -f docker-compose.yml -f docker-compose.test.yml build
                   docker-compose -f docker-compose.yml -f docker-compose.test.yml run app npm test
 
             # (Optional) Log in to Docker Hub
