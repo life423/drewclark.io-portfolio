@@ -355,7 +355,7 @@ export default function ProjectsContainer() {
                                     
                                     <button
                                         onClick={() => setStarted(false)}
-                                        className='mt-6 w-full flex items-center justify-center gap-2 px-4 py-2 bg-brandGray-700 hover:bg-brandGray-600 text-white rounded-lg text-sm transition-colors duration-200'
+                                        className='mt-6 w-full lg:hidden flex items-center justify-center gap-2 px-4 py-2 bg-brandGray-700 hover:bg-brandGray-600 text-white rounded-lg text-sm transition-colors duration-200'
                                     >
                                         <svg
                                             xmlns='http://www.w3.org/2000/svg'
