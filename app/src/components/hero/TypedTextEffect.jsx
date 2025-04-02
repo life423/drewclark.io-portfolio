@@ -5,6 +5,7 @@ import useIntersection from '../../hooks/useIntersection';
 /**
  * A component that creates a typing animation effect for multiple phrases
  * Automatically cycles through phrases continuously, and pauses when not visible
+ * Now supports dynamic changes to phrases for AI-generated content
  * 
  * @param {Object} props
  * @param {string[]} props.phrases - Array of phrases to cycle through
@@ -12,13 +13,15 @@ import useIntersection from '../../hooks/useIntersection';
  * @param {number} props.deletingSpeed - Speed of deleting in milliseconds
  * @param {number} props.pauseTime - Time to pause between phrases in milliseconds
  * @param {string} props.className - Optional CSS classes
+ * @param {boolean} props.active - Whether the typing animation should be active
  */
 const TypedTextEffect = ({
   phrases = [],
   typingSpeed = 60,
   deletingSpeed = 40,
   pauseTime = 2000,
-  className = ""
+  className = "",
+  active = true // New prop to control animation
 }) => {
   const [currentText, setCurrentText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
@@ -28,13 +31,31 @@ const TypedTextEffect = ({
   // References
   const elementRef = useRef(null);
   const currentPhrase = phrases[currentPhraseIndex];
+  const prevPhrasesRef = useRef(phrases);
   
   // Use intersection observer to pause animation when not in view
   const isVisible = useIntersection(elementRef, { threshold: 0.1 });
 
+  // Reset animation when phrases array changes (for AI-generated content)
   useEffect(() => {
-    // Stop animation if not visible or no phrases
-    if (!phrases.length || !isVisible) return;
+    // Check if the phrases array actually changed - important for AI-generated content
+    const phrasesChanged = JSON.stringify(prevPhrasesRef.current) !== JSON.stringify(phrases);
+    
+    if (phrasesChanged) {
+      // When phrases change, reset to the first phrase and start typing
+      setCurrentPhraseIndex(0);
+      setCurrentText('');
+      setIsDeleting(false);
+      setIsPaused(false);
+      
+      // Update the reference
+      prevPhrasesRef.current = phrases;
+    }
+  }, [phrases]);
+
+  useEffect(() => {
+    // Stop animation if not visible, not active, or no phrases
+    if (!phrases.length || !isVisible || !active) return;
     
     // Delay to use based on current state
     let delay = typingSpeed;
@@ -85,7 +106,8 @@ const TypedTextEffect = ({
     pauseTime, 
     phrases, 
     currentPhraseIndex,
-    isVisible // Added so animation pauses when not visible
+    isVisible, // Added so animation pauses when not visible
+    active // Added to pause animation when component is not active
   ]);
 
   return (
@@ -101,7 +123,8 @@ TypedTextEffect.propTypes = {
   typingSpeed: PropTypes.number,
   deletingSpeed: PropTypes.number,
   pauseTime: PropTypes.number,
-  className: PropTypes.string
+  className: PropTypes.string,
+  active: PropTypes.bool
 };
 
 export default TypedTextEffect;

@@ -3,37 +3,139 @@ name: CI/CD Pipeline
 on: [push, pull_request]
 
 jobs:
-    build-and-push:
-        runs-on: ubuntu-latest
-        env:
-            OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v3
+  build-and-push:
+    runs-on: ubuntu-latest
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-            - name: Set up Docker Buildx
-              uses: docker/setup-buildx-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-            - name: Install Docker Compose
-              run: |
-                  sudo apt-get update
-                  sudo apt-get install -y docker-compose
+      - name: Install Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
 
-            - name: Build and test
-              run: |
-                  docker-compose -f docker-compose.yml -f docker-compose.test.yml build
-                  docker-compose -f docker-compose.yml -f docker-compose.test.yml run app npm test
+      - name: Build and test
+        run: |
+          docker-compose -f docker-compose.yml -f docker-compose.test.yml build
+          docker-compose -f docker-compose.yml -f docker-compose.test.yml run app npm test
 
-            # (Optional) Log in to Docker Hub
-            - name: Log in to Docker Hub
-              uses: docker/login-action@v2
-              with:
-                  username: ${{ secrets.DOCKERHUB_USERNAME }}
-                  password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Log in to Docker Hub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-            # Build and push your Docker image to Docker Hub
-            - name: Build and push
-              uses: docker/build-push-action@v4
-              with:
-                  push: true
-                  tags: ${{ secrets.DOCKERHUB_USERNAME }}/portfolio:latest
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/portfolio:latest,${{ secrets.DOCKERHUB_USERNAME }}/portfolio:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+
+Here are the steps to fix this issue:
+
+Ensure node_modules is built before copying: Modify your Dockerfile to ensure node_modules is created during the build process.
+
+Adjust the docker-compose.yml: Make sure the node_modules directory is correctly mounted and exists in the correct place.
+
+Here's an example of how to adjust your Dockerfile:
+
+Dockerfile
+# Dockerfile.dev
+FROM node:14 AS build
+WORKDIR /app
+
+# Install dependencies
+COPY package*.json ./
+RUN npm install
+
+# Copy the rest of the application code
+COPY . .
+
+# Build the application
+RUN npm run build
+
+# Use a different stage to run the application
+FROM node:14
+WORKDIR /app
+
+# Copy node_modules from the build stage
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/dist ./dist
+COPY server.js ./
+
+# Define the command to run the application
+CMD ["node", "server.js"]
+Make sure the docker-compose.yml references the correct Dockerfile:
+
+YAML
+version: '3'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - '3001:3001'
+    volumes:
+      - .:/app
+    environment:
+      - NODE_ENV=production
+      - DOCKER_CONTAINER=true
+      - PORT=3001
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    restart: unless-stopped
+ 1 vulnerability detected
+Update the CI/CD pipeline: Ensure the Docker build step in your .github/workflows/ci-cd.yml is correctly set up to use the updated Dockerfile.
+Here’s how to adjust the relevant part of your .github/workflows/ci-cd.yml:
+
+YAML
+name: CI/CD Pipeline
+
+on: [push, pull_request]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      
+      - name: Install Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
+      
+      - name: Build and test
+        run: |
+          docker-compose -f docker-compose.yml -f docker-compose.test.yml build
+          docker-compose -f docker-compose.yml -f docker-compose.test.yml run app npm test
+      
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}
