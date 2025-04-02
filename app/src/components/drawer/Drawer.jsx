@@ -3,21 +3,21 @@
  * Optimized for cross-platform compatibility including iOS, Android, and Edge
  * Follows accessibility best practices for modal dialogs
  */
-import React, { useEffect, useRef, useCallback, memo, useState, lazy, Suspense } from 'react'
-import { LuX, LuGamepad2 } from 'react-icons/lu'
+import React, { useEffect, useRef, useCallback, memo, useState } from 'react'
+import { LuX } from 'react-icons/lu'
 import clsx from 'clsx'
 import useLockBodyScroll from '../../hooks/useLockBodyScroll'
 
-/**
- * Enhanced mobile navigation drawer component
- * Optimized for cross-platform compatibility including iOS, Android, and Edge
- * Follows accessibility best practices for modal dialogs
- */
-import React, { useEffect, useRef, useCallback, memo, useState, lazy, Suspense } from 'react'
-import { LuX, LuGamepad2 } from 'react-icons/lu'
-import clsx from 'clsx'
-import useLockBodyScroll from '../../hooks/useLockBodyScroll'
+// Navigation links without icons for now
+const navigationLinks = [
+    { id: 'home', label: 'Home', href: '#' },
+    { id: 'projects', label: 'Projects', href: '#projects' },
+    { id: 'contact', label: 'Contact', href: '#contact' }
+]
 
+// Memoize the Drawer for performance
+const Drawer = memo(function Drawer({ isOpen, onClose }) {
+    const drawerRef = useRef(null)
 /**
  * Enhanced mobile navigation drawer component
  * Optimized for cross-platform compatibility including iOS, Android, and Edge
