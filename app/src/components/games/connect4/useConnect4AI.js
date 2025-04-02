@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { sharedApiService, CATEGORY, PRIORITY } from '../../../services/sharedApiService';
 import * as gameLogic from './connect4Logic';
 
 /**
@@ -60,15 +61,46 @@ export function useConnect4AI(gameState, isAITurn) {
   const [aiCommentary, setAiCommentary] = useState('');
   const [error, setError] = useState(null);
   
-  // Function to get AI move using OpenAI API
+  // Track current request to allow cancellation
+  const abortControllerRef = useRef(null);
+  
+  // Track if we're already processing in this render cycle
+  const processingTurnRef = useRef(false);
+  
+  // Track request ID for the current AI turn
+  const [requestId, setRequestId] = useState(0);
+  
+  // Track retry state
+  const [retryCount, setRetryCount] = useState(0);
+  const [retryTimeout, setRetryTimeout] = useState(null);
+  
+  // Function to get AI move using the shared API service
   const getAIMove = useCallback(async () => {
-    const { board, moveHistory, difficulty } = gameState;
+    // Extract only the properties we need from gameState to avoid
+    // unnecessary re-renders on other property changes
+    const board = gameState.board;
+    const moveHistory = gameState.moveHistory;
+    const difficulty = gameState.difficulty;
     const availableColumns = gameState.getAvailableColumns();
     
     if (availableColumns.length === 0) return null;
     
+    // Skip if already processing (prevents double execution in React StrictMode)
+    if (processingTurnRef.current) return null;
+    processingTurnRef.current = true;
+    
     setIsThinking(true);
     setError(null);
+    
+    // Cancel any in-flight request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    
+    // Create new abort controller and increment request ID
+    const currentRequestId = requestId + 1;
+    setRequestId(currentRequestId);
+    abortControllerRef.current = new AbortController();
     
     try {
       // Create the prompt for the AI
@@ -91,31 +123,35 @@ Respond with ONLY a JSON object in this exact format:
 }
 `;
 
-      // Call the backend API
-      const response = await fetch('/api/askGPT', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      // Use the shared API service instead of direct fetch
+      const data = await sharedApiService.enqueueRequest({
+        body: {
           question: prompt,
           maxTokens: 150,
           temperature: 0.7,
           model: "gpt-4o-mini"
-        }),
+        },
+        category: CATEGORY.CONNECT4,
+        priority: PRIORITY.MEDIUM,
+        signal: abortControllerRef.current.signal
       });
       
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
+      // Check if this is still the most recent request
+      if (currentRequestId !== requestId) {
+        // A newer request has been made, discard this response
+        return null;
       }
-      
-      const data = await response.json();
       
       // Parse the AI's response to extract column choice and commentary
       try {
         // Safety: extract just the JSON part from response
         const jsonMatch = data.answer.match(/\{[\s\S]*\}/);
         const result = jsonMatch ? JSON.parse(jsonMatch[0]) : null;
+        
+        // Reset retry count on successful requests
+        if (retryCount > 0) {
+          setRetryCount(0);
+        }
         
         if (result && 
             typeof result.column === 'number' && 
@@ -144,7 +180,35 @@ Respond with ONLY a JSON object in this exact format:
         };
       }
     } catch (error) {
+      // Ignore aborted requests
+      if (error.name === 'AbortError') {
+        console.log('Request was cancelled');
+        return null;
+      }
+      
       console.error("Error getting AI move:", error);
+      
+      if (error.message && error.message.includes("Rate limit")) {
+        const backoffTime = Math.min(1000 * Math.pow(2, retryCount), 10000); // Max 10 seconds
+        console.log(`Rate limited. Retrying in ${backoffTime/1000} seconds`);
+        
+        if (retryTimeout) {
+          clearTimeout(retryTimeout);
+        }
+        
+        // Set up retry with exponential backoff
+        const timeoutId = setTimeout(() => {
+          if (gameState.gameStatus === 'playing' && isAITurn) {
+            setRetryCount(prev => prev + 1);
+            processingTurnRef.current = false; // Allow the next attempt
+            getAIMove();
+          }
+        }, backoffTime);
+        
+        setRetryTimeout(timeoutId);
+        setError(`Rate limit reached. Retrying in ${backoffTime/1000} seconds...`);
+        return null;
+      }
       
       // Use a more intelligent fallback strategy
       const availableColumns = gameState.getAvailableColumns();
@@ -204,14 +268,30 @@ Respond with ONLY a JSON object in this exact format:
       };
     } finally {
       setIsThinking(false);
+      processingTurnRef.current = false;
     }
-  }, [gameState]);
+  }, [
+    // Only depend on the specific properties we use
+    gameState.board, 
+    gameState.moveHistory, 
+    gameState.difficulty, 
+    gameState.getAvailableColumns,
+    gameState.gameStatus,
+    isAITurn,
+    requestId,
+    retryCount,
+    retryTimeout
+  ]);
   
   // Handle AI turns
   useEffect(() => {
     let isMounted = true;
+    let moveTimeoutId = null;
     
     async function handleAITurn() {
+      // Skip if already processing (prevents double execution in React StrictMode)
+      if (processingTurnRef.current) return;
+      
       if (isAITurn && gameState.gameStatus === 'playing') {
         const aiDecision = await getAIMove();
         
@@ -220,7 +300,7 @@ Respond with ONLY a JSON object in this exact format:
         setAiCommentary(aiDecision.commentary);
         
         // Small delay before making the move for a more natural feel
-        setTimeout(() => {
+        moveTimeoutId = setTimeout(() => {
           if (isMounted && gameState.gameStatus === 'playing') {
             gameState.dropDisc(aiDecision.column);
           }
@@ -230,10 +310,25 @@ Respond with ONLY a JSON object in this exact format:
     
     handleAITurn();
     
+    // Proper cleanup
     return () => {
       isMounted = false;
+      
+      // Cancel any pending API requests
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      
+      // Clear timeouts
+      if (moveTimeoutId) {
+        clearTimeout(moveTimeoutId);
+      }
+      
+      if (retryTimeout) {
+        clearTimeout(retryTimeout);
+      }
     };
-  }, [isAITurn, gameState, getAIMove]);
+  }, [isAITurn, gameState.gameStatus, getAIMove]);
   
   return {
     isThinking,

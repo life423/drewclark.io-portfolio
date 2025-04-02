@@ -4,6 +4,7 @@
  * This service handles communication with the OpenAI API through our backend.
  * It's used to generate AI responses to questions about projects.
  */
+import { sharedApiService, CATEGORY, PRIORITY } from './sharedApiService';
 
 /**
  * Extracts GitHub repository URL from project data
@@ -88,23 +89,32 @@ When responding, acknowledge the user's current context and tailor your answer t
       model: "gpt-4o-mini"
     };
     
-    // Call the backend API
-    const response = await fetch('/api/askGPT', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestBody),
+    // Create an abort controller for request cancellation if needed
+    const abortController = new AbortController();
+    
+    // Call the backend API using the shared service with HIGH priority
+    const data = await sharedApiService.enqueueRequest({
+      body: requestBody,
+      category: CATEGORY.PROJECT_CARDS,
+      priority: PRIORITY.HIGH, // User-initiated questions get higher priority
+      signal: abortController.signal
     });
     
-    if (!response.ok) {
-      throw new Error(`API responded with status: ${response.status}`);
-    }
-    
-    const data = await response.json();
     return data.answer || 'Sorry, I could not generate a response at this time.';
   } catch (error) {
+    // Handle aborted requests differently
+    if (error.name === 'AbortError') {
+      console.log('Project question request was cancelled');
+      return 'The request was cancelled. Please try asking your question again.';
+    }
+    
     console.error('Error in AI generation service:', error);
+    
+    // Better error handling with rate limit detection
+    if (error.message && error.message.includes('Rate limit')) {
+      return 'The AI service is currently experiencing high demand. Please try again in a moment.';
+    }
+    
     return 'There was a problem connecting to the AI service. Please try again later.';
   }
 }
