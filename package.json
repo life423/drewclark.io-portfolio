@@ -1,29 +1,16 @@
 {
-    "name": "drewclark-portfolio",
-    "version": "1.0.0",
-    "description": "Drew Clark's portfolio website",
-    "dependencies": {
-        "dotenv": "^16.4.7",
-        "express": "^4.18.2",
-        "helmet": "^7.2.0",
-        "nprogress": "^0.2.0",
-        "openai": "^4.24.1",
-        "prop-types": "^15.8.1"
-    },
-    "devDependencies": {
-        "concurrently": "^9.1.2",
-        "nodemon": "^3.1.9"
-    },
-    "scripts": {
-        "test": "echo \"No tests defined\" && exit 0",
-        "start": "node server.js",
-        "build": "cd app && npm run build",
-        "dev": "node start-app.js --auto",
-        "kill-ports": "npx kill-port 3000 5173",
-        "postinstall": "node -e \"try { require('fs').chmodSync('./start-app.js', '755') } catch(e) { console.log(e) }\"",
-        "docker:build": "docker build -t drewclark-portfolio .",
-        "docker:run": "docker run -p 3000:3000 -e OPENAI_API_KEY=${OPENAI_API_KEY} -e DOCKER_CONTAINER=true -e PORT=3000 drewclark-portfolio",
-        "docker:dev": "docker-compose up dev",
-        "docker:prod": "docker-compose up app"
-    }
+  "name": "drewclark.io-portfolio",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "echo \"No tests defined\" && exit 0",
+    "start": "node server.js",
+    "build": "cd app && npm run build",
+    "dev": "npm run kill-ports && concurrently \"nodemon server.js\" \"cd app && npm run dev\"",
+    "kill-ports": "npx kill-port 3000 5173",
+    "postinstall": "node -e \"try { require('fs').chmodSync('./start-app.js', '755') } catch(e) { console.log(e) }\"",
+    "docker:build": "docker build -t drewclark-portfolio .",
+    "docker:run": "docker run -p 3000:3000 -e OPENAI_API_KEY=${OPENAI_API_KEY} -e DOCKER_CONTAINER=true -e PORT=3000 drewclark-portfolio",
+    "docker:dev": "docker-compose up dev",
+    "docker:prod": "docker-compose up app"
+  }
 }

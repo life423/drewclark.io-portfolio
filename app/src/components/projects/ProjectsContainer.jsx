@@ -288,64 +288,109 @@ export default function ProjectsContainer() {
                             </div>
                         </div>
                         
-                        {/* On desktop - show all projects in a grid with animation */}
+                        {/* On desktop - show all projects in a fixed-size grid */}
                         <div className='hidden lg:grid grid-cols-3 gap-6 relative'>
-                            {PROJECTS.map((project, index) => {
-                                const isActive = activeProjectIndex === index;
-                                
-                                return (
-                                    <div 
-                                        key={project.id}
-                                        className={clsx(
-                                            'container-type-inline-size transition-all duration-700',
-                                            isActive ? 'z-10 col-span-2 scale-105 origin-left' : 'z-0',
-                                            // Only apply transformations if any card is active
-                                            activeProjectIndex !== null && !isActive && (
-                                                index < activeProjectIndex 
-                                                    ? 'transform -translate-x-[150%] opacity-0 scale-95' 
-                                                    : 'transform translate-x-[100%] opacity-0 scale-95'
-                                            )
-                                        )}
-                                        style={{
-                                            transitionDelay: `${Math.abs(index - (activeProjectIndex !== null ? activeProjectIndex : 0)) * 50}ms`,
-                                            gridColumn: isActive ? 'span 2' : 'span 1'
+                            {PROJECTS.map((project, index) => (
+                                <div 
+                                    key={project.id}
+                                    className={clsx(
+                                        'container-type-inline-size transition-duration-300'
+                                    )}
+                                >
+                                    <ProjectCard
+                                        projectNumber={index + 1}
+                                        title={project.title}
+                                        summary={project.summary}
+                                        stack={project.stack}
+                                        initialDescription={project.initialDescription}
+                                        detailedDescription={project.detailedDescription}
+                                        technicalDetails={project.technicalDetails}
+                                        challenges={project.challenges}
+                                        readme={project.readme}
+                                        totalProjects={PROJECTS.length}
+                                        onNavigateToProject={(newIndex) => {
+                                            if (newIndex === -1) {
+                                                setStarted(false);
+                                            } else if (newIndex >= 0) {
+                                                navigateToProject(newIndex);
+                                            }
                                         }}
-                                    >
-                                        <ProjectCard
-                                            projectNumber={index + 1}
-                                            title={project.title}
-                                            summary={project.summary}
-                                            stack={project.stack}
-                                            initialDescription={project.initialDescription}
-                                            detailedDescription={project.detailedDescription}
-                                            technicalDetails={project.technicalDetails}
-                                            challenges={project.challenges}
-                                            readme={project.readme}
-                                            totalProjects={PROJECTS.length}
-                                            onNavigateToProject={(newIndex) => {
-                                                // If clicking on the active card, toggle it off
-                                                if (isActive && newIndex === -1) {
-                                                    // Instead of setting to null, set to first project
-                                                    setActiveProjectIndex(0);
-                                                } else if (newIndex >= 0) {
-                                                    navigateToProject(newIndex);
-                                                }
-                                            }}
-                                            hideToc={true}
-                                            isActive={isActive}
-                                            onClick={() => {
-                                                // Toggle active state when clicking on a card
-                                                if (isActive) {
-                                                    // Instead of setting to null, set to first project
-                                                    setActiveProjectIndex(0);
-                                                } else {
-                                                    setActiveProjectIndex(index);
-                                                }
-                                            }}
-                                        />
-                                    </div>
-                                );
-                            })}
+                                        hideToc={true}
+                                        isActive={activeProjectIndex === index}
+                                        onClick={() => setActiveProjectIndex(index)}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Desktop Navigation Controls */}
+                        <div className='hidden lg:flex justify-center mt-8 space-x-4'>
+                            <button
+                                onClick={() => navigateToProject(Math.max(0, activeProjectIndex - 1))}
+                                disabled={activeProjectIndex === 0}
+                                className={clsx(
+                                    'px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-2',
+                                    'focus:outline-none focus:ring-2 focus:ring-brandGreen-500/50',
+                                    activeProjectIndex === 0
+                                        ? 'bg-brandGray-800 text-brandGray-600 cursor-not-allowed'
+                                        : 'bg-brandGray-800 text-white hover:bg-brandGray-700 active:bg-brandGray-800 active:text-white'
+                                )}
+                            >
+                                <svg
+                                    xmlns='http://www.w3.org/2000/svg'
+                                    className='h-5 w-5'
+                                    viewBox='0 0 20 20'
+                                    fill='currentColor'
+                                >
+                                    <path
+                                        fillRule='evenodd'
+                                        d='M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z'
+                                        clipRule='evenodd'
+                                    />
+                                </svg>
+                                Previous Project
+                            </button>
+
+                            <button
+                                onClick={() => setStarted(false)}
+                                className='px-4 py-2 bg-brandGray-700 hover:bg-brandGray-600 text-white rounded-lg text-sm transition-colors duration-200 flex items-center gap-2'
+                            >
+                                <svg
+                                    xmlns='http://www.w3.org/2000/svg'
+                                    className='h-4 w-4'
+                                    viewBox='0 0 20 20'
+                                    fill='currentColor'
+                                >
+                                    <path d='M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L10 4.414l6.293 6.293a1 1 0 001.414-1.414l-7-7z' />
+                                </svg>
+                                Overview
+                            </button>
+
+                            <button
+                                onClick={() => navigateToProject(Math.min(PROJECTS.length - 1, activeProjectIndex + 1))}
+                                disabled={activeProjectIndex === PROJECTS.length - 1}
+                                className={clsx(
+                                    'px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-2',
+                                    'focus:outline-none focus:ring-2 focus:ring-brandGreen-500/50',
+                                    activeProjectIndex === PROJECTS.length - 1
+                                        ? 'bg-brandGray-800 text-brandGray-600 cursor-not-allowed'
+                                        : 'bg-brandGray-800 text-white hover:bg-brandGray-700 active:bg-brandGray-800 active:text-white'
+                                )}
+                            >
+                                Next Project
+                                <svg
+                                    xmlns='http://www.w3.org/2000/svg'
+                                    className='h-5 w-5'
+                                    viewBox='0 0 20 20'
+                                    fill='currentColor'
+                                >
+                                    <path
+                                        fillRule='evenodd'
+                                        d='M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z'
+                                        clipRule='evenodd'
+                                    />
+                                </svg>
+                            </button>
                         </div>
 
                         {/* Mobile/Tablet Navigation Controls */}
