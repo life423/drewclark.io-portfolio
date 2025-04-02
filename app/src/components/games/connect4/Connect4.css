@@ -1,0 +1,83 @@
+.connect4-game {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.connect4-board {
+  display: flex;
+  background-color: #0066cc;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.connect4-column {
+  display: flex;
+  flex-direction: column-reverse; /* To match Connect4 where pieces fall from bottom */
+  position: relative;
+  cursor: pointer;
+}
+
+.connect4-column:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.connect4-cell {
+  width: 50px;
+  height: 50px;
+  background-color: #003366;
+  border-radius: 50%;
+  margin: 5px;
+  position: relative;
+  z-index: 1;
+}
+
+.connect4-cell.player1 {
+  background-color: #ff3333; /* Red */
+}
+
+.connect4-cell.player2 {
+  background-color: #ffff33; /* Yellow */
+}
+
+.connect4-piece {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+}
+
+.connect4-piece.player1 {
+  background-color: #ff3333; /* Red */
+}
+
+.connect4-piece.player2 {
+  background-color: #ffff33; /* Yellow */
+}
+
+.connect4-piece.dropping {
+  animation-name: drop;
+  animation-timing-function: ease-in;
+  animation-fill-mode: forwards;
+}
+
+@keyframes drop {
+  0% {
+    top: -50px;
+  }
+  100% {
+    top: calc(var(--final-position, 0) * 50px);
+  }
+}
+
+.connect4-status {
+  margin-top: 20px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: white;
+}
