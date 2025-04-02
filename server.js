@@ -46,31 +46,22 @@ app.use(helmet({
 
 // Enhanced CORS middleware with proper security
 app.use((req, res, next) => {
-<<<<<<< Updated upstream
-    // Production domains (add your actual production domains)
+    // Production domains
     const productionDomains = [
         'https://drewclark.io',
         'https://www.drewclark.io'
     ];
-=======
-    // Allow specific origins in development
-    const allowedOrigins = [
-        'http://localhost:5173', 
-        'http://127.0.0.1:5173', 
-        'http://localhost:5174', 
-        'http://127.0.0.1:5174', 
-        'http://localhost:3000', 
-        'http://127.0.0.1:3000'
-    ]
-    const origin = req.headers.origin
->>>>>>> Stashed changes
     
-    // Local development domains
+    // Development domains (including Vite's default port 5173)
     const developmentDomains = [
         'http://localhost:3000',
         'http://127.0.0.1:3000',
         'http://localhost:3001',
-        'http://127.0.0.1:3001'
+        'http://127.0.0.1:3001',
+        'http://localhost:5173', 
+        'http://127.0.0.1:5173', 
+        'http://localhost:5174', 
+        'http://127.0.0.1:5174'
     ];
     
     // Determine allowed origins based on environment
