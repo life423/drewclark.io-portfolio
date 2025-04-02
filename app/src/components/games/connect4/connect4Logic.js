@@ -26,10 +26,15 @@ export function createEmptyBoard() {
  */
 export function isValidMove(board, col) {
   // Column is invalid if out of bounds
-  if (col < 0 || col >= COLS) return false;
+  if (col < 0 || col >= COLS) {
+    console.log(`Column ${col} is out of bounds`);
+    return false;
+  }
   
-  // Column is valid if the top cell is empty
-  return board[ROWS - 1][col] === EMPTY;
+  // Column is valid if the top cell is empty (row 0 is the top in our representation)
+  const isValid = board[0][col] === EMPTY;
+  console.log(`Column ${col} validity check: ${isValid ? 'valid' : 'invalid'}`);
+  return isValid;
 }
 
 /**
@@ -58,22 +63,30 @@ export function dropDisc(board, col, player) {
   // Create a deep copy of the board to avoid mutation
   const newBoard = board.map(row => [...row]);
   
-  // Find the lowest empty row in the column
-  let row = 0;
-  while (row < ROWS && newBoard[row][col] === EMPTY) {
-    row++;
+  // Log initial state for debugging
+  console.log(`Dropping disc in column ${col} for player ${player}`);
+  console.log("Current board state:", boardToString(board));
+  
+  // Find the lowest empty row in the column (starting from the bottom)
+  // Connect 4 pieces drop to the lowest available slot
+  let row = ROWS - 1;
+  while (row >= 0 && newBoard[row][col] !== EMPTY) {
+    row--;
   }
   
-  // Place the disc in the row above the last filled row (or the bottom row if empty)
-  const targetRow = row - 1;
-  
-  // If targetRow is valid, place the disc
-  if (targetRow >= 0) {
-    newBoard[targetRow][col] = player;
-    return { board: newBoard, row: targetRow };
+  // If we found an empty cell, place the disc
+  if (row >= 0) {
+    console.log(`Placing disc at row ${row}, column ${col}`);
+    newBoard[row][col] = player;
+    
+    // Log the new board state
+    console.log("New board state:", boardToString(newBoard));
+    
+    return { board: newBoard, row: row };
   }
   
   // Return original board if move is invalid
+  console.log(`Column ${col} is full, move invalid`);
   return { board, row: -1 };
 }
 

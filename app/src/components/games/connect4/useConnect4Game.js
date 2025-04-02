@@ -78,25 +78,43 @@ export function useConnect4Game({ onGameStateChange } = {}) {
   
   // Drop a disc in a column
   const dropDisc = useCallback((col) => {
-    if (gameStatus !== 'playing') return false;
+    console.log(`dropDisc called for column ${col}, gameStatus: ${gameStatus}, currentPlayer: ${currentPlayer}`);
+    
+    if (gameStatus !== 'playing') {
+      console.log('Game not in playing state, ignoring move');
+      return false;
+    }
     
     setBoard(currentBoard => {
       // Check if move is valid
-      if (!gameLogic.isValidMove(currentBoard, col)) return currentBoard;
+      if (!gameLogic.isValidMove(currentBoard, col)) {
+        console.log(`Move to column ${col} is invalid`);
+        return currentBoard;
+      }
+      
+      console.log(`Move to column ${col} is valid, dropping disc`);
       
       // Drop the disc and get the new board state
       const { board: newBoard, row } = gameLogic.dropDisc(currentBoard, col, currentPlayer);
       
       // Track the move
       if (row !== -1) {
+        console.log(`Disc placed at row ${row}, column ${col}`);
         const move = { player: currentPlayer, column: col, row };
+        
+        console.log('Setting lastMove:', move);
         setLastMove(move);
+        
+        console.log('Updating moveHistory');
         setMoveHistory(prev => [...prev, move]);
         
         // Switch players
+        console.log(`Switching player from ${currentPlayer} to ${currentPlayer === gameLogic.PLAYER ? gameLogic.AI : gameLogic.PLAYER}`);
         setCurrentPlayer(current => 
           current === gameLogic.PLAYER ? gameLogic.AI : gameLogic.PLAYER
         );
+      } else {
+        console.log('Failed to place disc, possibly column is full');
       }
       
       return newBoard;

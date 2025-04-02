@@ -1,7 +1,4 @@
-// Export Connect4 components from the new implementation
-// This approach allows us to keep the old files for reference 
-// but use the new optimized implementations
-
+// Export Connect4 components
 import Connect4Game from './Connect4Game.new';
 import Connect4Board from './Connect4Board.new';
 import Connect4Cell from './Connect4Cell.new';
