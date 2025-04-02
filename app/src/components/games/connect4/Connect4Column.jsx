@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import clsx from 'clsx';
 import Connect4Disc from './Connect4Disc';
-import { ROWS, isValidMove } from './connect4Logic';
+import { ROWS, isValidMove, PLAYER } from './connect4Logic';
 
 /**
  * Represents a single column of the Connect 4 board
@@ -19,16 +19,37 @@ export default function Connect4Column({
   console.log(`Rendering column ${columnIndex} with state:`, columnState);
   const [isHovered, setIsHovered] = useState(false);
   
+  // Simple animation state
+  const [isDroppingDisc, setIsDroppingDisc] = useState(false);
+  const animationTimeoutRef = useRef(null);
+  
   // Whether this column can accept another disc
-  const isColumnAvailable = isActive && columnState.filter(cell => cell !== null).length < ROWS;
+  const isColumnAvailable = isActive && columnState.filter(cell => cell !== null).length < ROWS && !isDroppingDisc;
   console.log(`Column ${columnIndex} available:`, isColumnAvailable, `Active: ${isActive}, Filled cells: ${columnState.filter(cell => cell !== null).length}`);
+  
+  // Clean up animation timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+      }
+    };
+  }, []);
   
   // Handlers for column interaction
   const handleClick = () => {
     console.log(`Column ${columnIndex} clicked, isColumnAvailable:`, isColumnAvailable);
     if (isColumnAvailable && onDiscDrop) {
-      console.log(`Dropping disc in column ${columnIndex}`);
-      onDiscDrop(columnIndex);
+      // Start simple drop animation
+      setIsDroppingDisc(true);
+      
+      // Wait a short time for the animation to complete
+      animationTimeoutRef.current = setTimeout(() => {
+        // Reset animation state
+        setIsDroppingDisc(false);
+        // Actually update the game state
+        onDiscDrop(columnIndex);
+      }, 450); // Animation duration
     }
   };
   
@@ -80,6 +101,23 @@ export default function Connect4Column({
             <div className="absolute inset-0 flex justify-center items-center text-brandOrange-300 text-lg">
               ↓
             </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Simple dropping disc animation */}
+      {isDroppingDisc && (
+        <div className="absolute inset-x-0 top-0 h-full overflow-hidden z-20 pointer-events-none">
+          <div className="animate-disc flex justify-center items-center"
+               style={{
+                 position: 'absolute',
+                 top: 0,
+                 left: 0,
+                 right: 0,
+                 height: '40px',
+                 animation: 'simple-drop 400ms ease-in forwards',
+               }}>
+            <div className="w-10 h-10 rounded-full bg-brandOrange-600 shadow-lg" />
           </div>
         </div>
       )}

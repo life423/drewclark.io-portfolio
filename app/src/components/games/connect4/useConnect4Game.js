@@ -108,11 +108,13 @@ export function useConnect4Game({ onGameStateChange } = {}) {
         console.log('Updating moveHistory');
         setMoveHistory(prev => [...prev, move]);
         
-        // Switch players
-        console.log(`Switching player from ${currentPlayer} to ${currentPlayer === gameLogic.PLAYER ? gameLogic.AI : gameLogic.PLAYER}`);
-        setCurrentPlayer(current => 
-          current === gameLogic.PLAYER ? gameLogic.AI : gameLogic.PLAYER
-        );
+        // Switch players - do this OUTSIDE the setBoard callback to ensure it happens
+        setTimeout(() => {
+          console.log(`Switching player from ${currentPlayer} to ${currentPlayer === gameLogic.PLAYER ? gameLogic.AI : gameLogic.PLAYER}`);
+          setCurrentPlayer(current => 
+            current === gameLogic.PLAYER ? gameLogic.AI : gameLogic.PLAYER
+          );
+        }, 10);
       } else {
         console.log('Failed to place disc, possibly column is full');
       }

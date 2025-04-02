@@ -1,39 +1,37 @@
-services:
-    app:
-        build:
-            context: .
-            dockerfile: Dockerfile.dev
-        ports:
-<<<<<<< Updated upstream
-            - '3001:3001'  # Production app runs on port 3001
-=======
-            - '3000:3000'  # Production app runs on port 3000
->>>>>>> Stashed changes
-        volumes:
-            - /app/node_modules
-            - .:/app
-        environment:
-            - NODE_ENV=production
-            - DOCKER_CONTAINER=true
-            - PORT=3001
-            - OPENAI_API_KEY=${OPENAI_API_KEY}
-        restart: unless-stopped
+version: '3'
 
-    # Development configuration
-    dev:
-        build:
-            context: .
-            dockerfile: Dockerfile.dev
-        ports:
-            - '3001:3001'  # Use consistent port mapping
-        environment:
-            - NODE_ENV=development
-            - DOCKER_CONTAINER=true
-            - PORT=3001
-            - OPENAI_API_KEY=${OPENAI_API_KEY}
-        volumes:
-            - ./app:/app/app
-            - ./api:/app/api
-            - ./server.js:/app/server.js
-            - /app/node_modules
-        command: npm run dev
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - '3001:3001'  # Production app runs on port 3001
+    volumes:
+      - /app/node_modules
+      - .:/app
+    environment:
+      - NODE_ENV=production
+      - DOCKER_CONTAINER=true
+      - PORT=3001
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    restart: unless-stopped
+
+  # Development configuration
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - '3001:3001'  # Use consistent port mapping
+    environment:
+      - NODE_ENV=development
+      - DOCKER_CONTAINER=true
+      - PORT=3001
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - ./app:/app/app
+      - ./api:/app/api
+      - ./server.js:/app/server.js
+      - /app/node_modules
+    command: npm run dev
