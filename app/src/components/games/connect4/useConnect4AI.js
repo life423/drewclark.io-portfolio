@@ -1,17 +1,17 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-<<<<<<< Updated upstream
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { sharedApiService, CATEGORY, PRIORITY } from '../../../services/sharedApiService';
-=======
->>>>>>> Stashed changes
 import * as gameLogic from './connect4Logic';
 
 /**
- * Format the board state for AI prompt
+ * Format the board for AI prompt
  * @param {Array<Array<string|null>>} board - Current board state
  * @returns {string} Formatted board representation
  */
 function formatBoardForAI(board) {
-  return board.map(row => 
+  // Create a copy and reverse it for prettier display (bottom row at the bottom)
+  const displayBoard = [...board].reverse();
+  
+  return displayBoard.map(row => 
     row.map(cell => 
       cell === gameLogic.EMPTY ? '⚪' : 
       cell === gameLogic.PLAYER ? '🔴' : '🟡'
@@ -21,79 +21,141 @@ function formatBoardForAI(board) {
 
 /**
  * Format move history for AI context
- * @param {Array<Object>} history - Game move history
+ * @param {Array<{player: string, column: number, row: number}>} history - Game move history
  * @returns {string} Formatted move history
  */
 function formatMoveHistory(history) {
-  if (!history.length) return 'No moves yet.';
+  if (!history || history.length === 0) return 'No moves played yet.';
   
-  return history.map((move, i) => 
-    `Move ${i+1}: ${move.player === gameLogic.PLAYER ? 'Human' : 'AI'} placed in column ${move.column}`
+  return history.map((move, index) => 
+    `Move ${index + 1}: ${move.player === gameLogic.PLAYER ? 'Human' : 'AI'} placed in column ${move.column + 1}`
   ).join('\n');
 }
 
 /**
- * Get commentary based on difficulty level
- * @param {string} difficulty - Game difficulty level
- * @returns {string} Prompt addition for commentary
+ * Get difficulty-specific prompt text
+ * @param {string} difficulty - Difficulty level ('easy', 'medium', 'hard')
+ * @returns {string} Difficulty prompt text
  */
 function getDifficultyPrompt(difficulty) {
   switch(difficulty) {
     case 'easy':
-      return `You are playing at an EASY difficulty level. Make suboptimal moves occasionally,
-      but still try to block obvious winning moves by the human. Keep commentary friendly and encouraging.`;
+      return `You are playing at an EASY difficulty level. Make suboptimal moves occasionally
+and don't always block the player's winning moves. Keep commentary simple and encouraging.`;
+    
     case 'hard':
-      return `You are playing at a HARD difficulty level. Make the optimal move to win whenever possible,
-      and always block the human's winning moves. Use more advanced strategy. 
-      Commentary should reflect strategic thinking.`;
+      return `You are playing at a HARD difficulty level. Make the optimal move to win whenever possible
+and always block the player's winning moves. Use more advanced strategy such as setting up
+multiple threats. Commentary should reflect strategic thinking.`;
+    
     case 'medium':
     default:
-      return `You are playing at a MEDIUM difficulty level. Make reasonably good moves, 
-      but occasionally miss complex strategies. Commentary should be helpful but not too advanced.`;
+      return `You are playing at a MEDIUM difficulty level. Make reasonably good moves
+but occasionally miss complex strategies. Commentary should be helpful but not too advanced.`;
+  }
+}
+
+/**
+ * Create AI prompt for current game state
+ * @param {Array<Array<string|null>>} board - Current board state
+ * @param {Array} moveHistory - Game move history
+ * @param {string} difficulty - Difficulty level
+ * @returns {string} AI prompt
+ */
+function createAIPrompt(board, moveHistory, difficulty) {
+  return `
+You are playing Connect 4 against a human player. You are playing with yellow discs (🟡).
+Current board state (bottom row is row 1, top row is row 6):
+${formatBoardForAI(board)}
+
+Game move history:
+${formatMoveHistory(moveHistory)}
+
+${getDifficultyPrompt(difficulty)}
+
+Respond with ONLY a JSON object in this exact format:
+{
+  "column": [chosen column number 0-6],
+  "commentary": "[brief strategic thinking]"
+}
+`;
+}
+
+/**
+ * Extract valid move from AI response
+ * @param {Object} response - API response
+ * @param {Array<Array<string|null>>} board - Current board state
+ * @returns {Object} Parsed AI move
+ */
+function parseAIResponse(response, board) {
+  try {
+    // Extract JSON from response
+    const jsonMatch = response.answer.match(/\{[\s\S]*\}/);
+    const result = jsonMatch ? JSON.parse(jsonMatch[0]) : null;
+    
+    // Validate the result
+    if (result && 
+        typeof result.column === 'number' && 
+        result.column >= 0 && 
+        result.column < gameLogic.COLS &&
+        gameLogic.isValidMove(board, result.column)) {
+      
+      return {
+        column: result.column,
+        commentary: result.commentary || "Let me think about this move..."
+      };
+    }
+    
+    // If invalid, use fallback
+    throw new Error('Invalid AI response format');
+  } catch (error) {
+    console.error('Failed to parse AI response:', error);
+    
+    // Use fallback strategy
+    const availableColumns = gameLogic.getAvailableColumns(board);
+    const column = availableColumns[Math.floor(Math.random() * availableColumns.length)];
+    return {
+      column,
+      commentary: "I'll try this move."
+    };
   }
 }
 
 /**
  * Custom hook for Connect 4 AI integration
- * @param {Object} gameState - Current game state from useConnect4Game
- * @param {boolean} isAITurn - Whether it's currently the AI's turn
- * @returns {Object} AI state and functions
+ * @param {Object} gameState - Game state from useConnect4Game
+ * @param {boolean} isAITurn - Whether it's the AI's turn
+ * @returns {Object} AI state and methods
  */
 export function useConnect4AI(gameState, isAITurn) {
+  // Extract values from game state
+  const { 
+    board, 
+    dropDisc,
+    gameStatus,
+    difficulty,
+    moveHistory,
+    getAvailableColumns
+  } = gameState;
+  
+  // AI state
   const [isThinking, setIsThinking] = useState(false);
   const [aiCommentary, setAiCommentary] = useState('');
   const [error, setError] = useState(null);
   
-<<<<<<< Updated upstream
-  // Track current request to allow cancellation
+  // References for request management
   const abortControllerRef = useRef(null);
-  
-  // Track if we're already processing in this render cycle
   const processingTurnRef = useRef(false);
+  const requestIdRef = useRef(0);
   
-  // Track request ID for the current AI turn
-  const [requestId, setRequestId] = useState(0);
-  
-  // Track retry state
+  // Retry state
   const [retryCount, setRetryCount] = useState(0);
   const [retryTimeout, setRetryTimeout] = useState(null);
   
-  // Function to get AI move using the shared API service
-=======
-  // Cache for API responses based on board state to avoid duplicate requests
-  const responseCache = useRef(new Map());
-  
-  // Track retry attempts for exponential backoff
-  const [retryCount, setRetryCount] = useState(0);
-  const [lastRetryTime, setLastRetryTime] = useState(0);
-  
-  // Function to get AI move with exponential backoff
->>>>>>> Stashed changes
+  // Function to get AI move
   const getAIMove = useCallback(async () => {
     console.log("getAIMove called, checking game state");
     
-    // Extract properties from gameState
-    const { board, moveHistory, difficulty, getAvailableColumns, gameStatus } = gameState;
     const availableColumns = getAvailableColumns();
     
     // Log board state for debugging
@@ -117,86 +179,27 @@ export function useConnect4AI(gameState, isAITurn) {
     setIsThinking(true);
     setError(null);
     
-<<<<<<< Updated upstream
-  // Cancel any in-flight request
-  if (abortControllerRef.current) {
-    console.log("Aborting previous request");
-    abortControllerRef.current.abort();
-    abortControllerRef.current = null; // Immediately nullify to prevent memory leaks
-  }
-    
-    // Create new abort controller and increment request ID
-    const currentRequestId = requestId + 1;
-    console.log("Setting new requestId:", currentRequestId);
-    setRequestId(currentRequestId);
-    abortControllerRef.current = new AbortController();
-=======
-    // Create a board state signature for caching
-    const boardSignature = board.map(row => 
-      row.map(cell => cell === null ? '0' : cell === gameLogic.PLAYER ? '1' : '2').join('')
-    ).join('|');
-    
-    // Check cache first - only use cache if difficulty hasn't changed
-    const cacheKey = `${boardSignature}|${difficulty}`;
-    if (responseCache.current.has(cacheKey)) {
-      console.log('Using cached AI move');
-      const cachedDecision = responseCache.current.get(cacheKey);
-      
-      // Verify the cached move is still valid
-      if (availableColumns.includes(cachedDecision.column)) {
-        setIsThinking(false);
-        return cachedDecision;
-      }
+    // Cancel any in-flight request
+    if (abortControllerRef.current) {
+      console.log("Aborting previous request");
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null; // Immediately nullify to prevent memory leaks
     }
->>>>>>> Stashed changes
+      
+    // Create new abort controller and increment request ID
+    const currentRequestId = requestIdRef.current + 1;
+    console.log("Setting new requestId:", currentRequestId);
+    requestIdRef.current = currentRequestId;
+    abortControllerRef.current = new AbortController();
     
     try {
-      // Calculate backoff delay based on retry count (exponential backoff with jitter)
-      const now = Date.now();
-      const minDelay = retryCount > 0 ? Math.min(1000 * Math.pow(2, retryCount - 1), 10000) : 0;
-      const jitter = retryCount > 0 ? Math.random() * 1000 : 0;
-      const backoffDelay = Math.max(0, minDelay + jitter - (now - lastRetryTime));
-      
-      // Wait for backoff if needed
-      if (backoffDelay > 0) {
-        console.log(`Backing off for ${backoffDelay}ms before retrying`);
-        await new Promise(resolve => setTimeout(resolve, backoffDelay));
-      }
-      
       // Create the prompt for the AI
-      const prompt = `
-You are playing Connect 4 against a human player. You are playing with yellow discs (🟡).
-Current board state (bottom row is row 0):
-${formatBoardForAI(board)}
-
-Game move history:
-${formatMoveHistory(moveHistory)}
-
-${getDifficultyPrompt(difficulty)}
-
-Available columns: ${availableColumns.join(', ')}
-
-Respond with ONLY a JSON object in this exact format:
-{
-  "column": [chosen column number 0-6],
-  "commentary": "[brief strategic thinking]"
-}
-`;
-
-<<<<<<< Updated upstream
+      const prompt = createAIPrompt(board, moveHistory, difficulty);
+      
       console.log("Sending request to AI service");
-      // Use the shared API service instead of direct fetch
+      // Use the shared API service
       const data = await sharedApiService.enqueueRequest({
         body: {
-=======
-      // Use a separate endpoint for Connect4 to avoid rate limits with other features
-      const response = await fetch('/api/askGPT/connect4', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
->>>>>>> Stashed changes
           question: prompt,
           maxTokens: 150,
           temperature: 0.7,
@@ -207,92 +210,26 @@ Respond with ONLY a JSON object in this exact format:
         signal: abortControllerRef.current.signal
       });
       
-<<<<<<< Updated upstream
       console.log("Got response from AI service:", data);
-=======
-      // Handle rate limiting with proper backoff
-      if (response.status === 429) {
-        console.warn(`Rate limited (attempt ${retryCount + 1})`);
-        setRetryCount(prev => prev + 1);
-        setLastRetryTime(Date.now());
-        
-        // If we have too many retries, fall back to local AI
-        if (retryCount >= 3) {
-          throw new Error("Rate limit exceeded after multiple retries. Using local AI strategy.");
-        }
-        
-        // Add more specific error message
-        setError(
-          `API rate limit reached (retry ${retryCount + 1}/3). Will retry automatically...`
-        );
-        
-        // Wait for backoff delay before returning
-        const retryDelay = Math.min(2000 * Math.pow(2, retryCount), 10000);
-        await new Promise(resolve => setTimeout(resolve, retryDelay));
-        
-        // Retry recursively (will use exponential backoff)
-        return getAIMove();
-      }
-      
-      // Reset retry count on success
-      if (retryCount > 0) {
-        setRetryCount(0);
-      }
-      
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
-      }
->>>>>>> Stashed changes
       
       // Check if this is still the most recent request or if component unmounted
-      if (currentRequestId !== requestId) {
+      if (currentRequestId !== requestIdRef.current) {
         console.log("This is not the most recent request, discarding response");
         processingTurnRef.current = false; // Reset processing flag even for discarded requests
         return null;
       }
       
+      // Parse the AI's response
+      const aiDecision = parseAIResponse(data, board);
       
-      // Parse the AI's response to extract column choice and commentary
-      try {
-        // Safety: extract just the JSON part from response
-        const jsonMatch = data.answer.match(/\{[\s\S]*\}/);
-        const result = jsonMatch ? JSON.parse(jsonMatch[0]) : null;
-        
-        console.log("Parsed AI response:", result);
-        
-        // Reset retry count on successful requests
-        if (retryCount > 0) {
-          setRetryCount(0);
-        }
-        
-        if (result && 
-            typeof result.column === 'number' && 
-            result.column >= 0 && 
-            result.column < gameLogic.COLS &&
-            availableColumns.includes(result.column)) {
-          console.log("AI chose valid column:", result.column);
-          return {
-            column: result.column,
-            commentary: result.commentary || "Let me think about this move..."
-          };
-        } else {
-          // If parsing fails or invalid column, use a random available column
-          console.log("AI returned invalid column, using fallback");
-          const fallbackColumn = availableColumns[Math.floor(Math.random() * availableColumns.length)];
-          return {
-            column: fallbackColumn,
-            commentary: "I'll try this move."
-          };
-        }
-      } catch (parseError) {
-        console.error("Failed to parse AI response:", parseError);
-        // Fallback to a random strategy
-        const fallbackColumn = availableColumns[Math.floor(Math.random() * availableColumns.length)];
-        return {
-          column: fallbackColumn, 
-          commentary: "I'll make this move."
-        };
+      console.log("Parsed AI response:", aiDecision);
+      
+      // Reset retry count on successful requests
+      if (retryCount > 0) {
+        setRetryCount(0);
       }
+      
+      return aiDecision;
     } catch (error) {
       // Ignore aborted requests
       if (error.name === 'AbortError') {
@@ -313,7 +250,7 @@ Respond with ONLY a JSON object in this exact format:
         
         // Set up retry with exponential backoff
         const timeoutId = setTimeout(() => {
-          if (gameState.gameStatus === 'playing' && isAITurn) {
+          if (gameStatus === 'playing' && isAITurn) {
             console.log("Retrying AI move after backoff");
             setRetryCount(prev => prev + 1);
             processingTurnRef.current = false; // Allow the next attempt
@@ -329,9 +266,9 @@ Respond with ONLY a JSON object in this exact format:
         return null;
       }
       
-      // Use a more intelligent fallback strategy
-      console.log("Using intelligent fallback strategy");
-      const availableColumns = gameState.getAvailableColumns();
+      // Use a fallback strategy
+      console.log("Using fallback strategy");
+      const availableColumns = getAvailableColumns();
       let fallbackColumn;
       let commentary = "";
       
@@ -392,21 +329,19 @@ Respond with ONLY a JSON object in this exact format:
       // Don't reset processingTurnRef here - it will be reset after the move is made
     }
   }, [
-    // Only depend on the specific properties we use
-    gameState.board, 
-    gameState.moveHistory, 
-    gameState.difficulty, 
-    gameState.getAvailableColumns,
-    gameState.gameStatus,
+    board, 
+    moveHistory, 
+    difficulty, 
+    getAvailableColumns,
+    gameStatus,
     isAITurn,
-    requestId,
     retryCount,
     retryTimeout
   ]);
   
   // Handle AI turns
   useEffect(() => {
-    console.log("AI turn effect running, isAITurn:", isAITurn, "gameStatus:", gameState.gameStatus);
+    console.log("AI turn effect running, isAITurn:", isAITurn, "gameStatus:", gameStatus);
     
     let isMounted = true;
     let moveTimeoutId = null;
@@ -418,7 +353,7 @@ Respond with ONLY a JSON object in this exact format:
         return;
       }
       
-      if (isAITurn && gameState.gameStatus === 'playing') {
+      if (isAITurn && gameStatus === 'playing') {
         console.log("It's AI's turn and game is playing - getting AI move");
         const aiDecision = await getAIMove();
         
@@ -444,7 +379,7 @@ Respond with ONLY a JSON object in this exact format:
             return;
           }
           
-          if (gameState.gameStatus !== 'playing') {
+          if (gameStatus !== 'playing') {
             console.log("Game no longer playing, skipping AI move");
             processingTurnRef.current = false; // Reset processing flag
             return;
@@ -452,7 +387,7 @@ Respond with ONLY a JSON object in this exact format:
           
           console.log("Executing AI move to column:", aiDecision.column);
           // Use the dropDisc function from the props
-          gameState.dropDisc(aiDecision.column);
+          dropDisc(aiDecision.column);
           
           // Reset the processing flag AFTER the move is made
           console.log("Resetting processingTurnRef to false after move");
@@ -494,7 +429,7 @@ Respond with ONLY a JSON object in this exact format:
       // Always reset the processing flag on cleanup
       processingTurnRef.current = false;
     };
-  }, [isAITurn, gameState.gameStatus, getAIMove]);
+  }, [isAITurn, gameStatus, getAIMove, dropDisc]);
   
   return {
     isThinking,

@@ -32,7 +32,7 @@ export function isValidMove(board, col) {
   }
   
   // Column is valid if the top cell is empty (row 0 is the top in our representation)
-  const isValid = board[0][col] === EMPTY;
+  const isValid = board[ROWS - 1][col] === EMPTY;
   console.log(`Column ${col} validity check: ${isValid ? 'valid' : 'invalid'}`);
   return isValid;
 }
