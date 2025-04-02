@@ -6,6 +6,8 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { FocusProvider } from './contexts/FocusContext';
 import { ANIMATION } from './styles/constants';
 import logger from './utils/logger';
+import { config } from './config';
+import debugUtils from './utils/debug-utils';
 
 // Lazy load ProjectsContainer for better code splitting
 const ProjectsContainer = lazy(() => import('./components/projects/ProjectsContainer'));
@@ -79,6 +81,32 @@ export default function App() {
             clearTimeout(timer);
             appLogger.debug('App unmounting, cleared timer');
         };
+    }, [appLogger]);
+    
+    // Set up debug environment for development and deployment debugging
+    useEffect(() => {
+        // Log environment information when app starts
+        const envInfo = debugUtils.logEnvironmentInfo('App', { 
+            version: process.env.VERSION || 'dev',
+            initialLoadTime: new Date().toISOString()
+        });
+        
+        appLogger.debug('Environment details:', envInfo);
+        
+        // Set up debug keyboard shortcut (Ctrl+Shift+D)
+        debugUtils.setupDebugShortcut();
+        
+        // Show debug panel in development or if URL contains debug parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const showDebug = urlParams.has('debug') || 
+                          config.environment.envType === 'development';
+        
+        if (showDebug) {
+            debugUtils.createDebugPanel({ 
+                autoHide: config.environment.isProduction,
+                detailed: urlParams.get('debug') === 'detailed'
+            });
+        }
     }, [appLogger]);
 
     // Calculate whether to show progress indicators based on app state
