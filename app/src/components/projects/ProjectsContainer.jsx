@@ -323,75 +323,7 @@ export default function ProjectsContainer() {
                             ))}
                         </div>
 
-                        {/* Desktop Navigation Controls */}
-                        <div className='hidden lg:flex justify-center mt-8 space-x-4'>
-                            <button
-                                onClick={() => navigateToProject(Math.max(0, activeProjectIndex - 1))}
-                                disabled={activeProjectIndex === 0}
-                                className={clsx(
-                                    'px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-2',
-                                    'focus:outline-none focus:ring-2 focus:ring-brandGreen-500/50',
-                                    activeProjectIndex === 0
-                                        ? 'bg-brandGray-800 text-brandGray-600 cursor-not-allowed'
-                                        : 'bg-brandGray-800 text-white hover:bg-brandGray-700 active:bg-brandGray-800 active:text-white'
-                                )}
-                            >
-                                <svg
-                                    xmlns='http://www.w3.org/2000/svg'
-                                    className='h-5 w-5'
-                                    viewBox='0 0 20 20'
-                                    fill='currentColor'
-                                >
-                                    <path
-                                        fillRule='evenodd'
-                                        d='M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z'
-                                        clipRule='evenodd'
-                                    />
-                                </svg>
-                                Previous Project
-                            </button>
-
-                            <button
-                                onClick={() => setStarted(false)}
-                                className='px-4 py-2 bg-brandGray-700 hover:bg-brandGray-600 text-white rounded-lg text-sm transition-colors duration-200 flex items-center gap-2'
-                            >
-                                <svg
-                                    xmlns='http://www.w3.org/2000/svg'
-                                    className='h-4 w-4'
-                                    viewBox='0 0 20 20'
-                                    fill='currentColor'
-                                >
-                                    <path d='M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L10 4.414l6.293 6.293a1 1 0 001.414-1.414l-7-7z' />
-                                </svg>
-                                Overview
-                            </button>
-
-                            <button
-                                onClick={() => navigateToProject(Math.min(PROJECTS.length - 1, activeProjectIndex + 1))}
-                                disabled={activeProjectIndex === PROJECTS.length - 1}
-                                className={clsx(
-                                    'px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-2',
-                                    'focus:outline-none focus:ring-2 focus:ring-brandGreen-500/50',
-                                    activeProjectIndex === PROJECTS.length - 1
-                                        ? 'bg-brandGray-800 text-brandGray-600 cursor-not-allowed'
-                                        : 'bg-brandGray-800 text-white hover:bg-brandGray-700 active:bg-brandGray-800 active:text-white'
-                                )}
-                            >
-                                Next Project
-                                <svg
-                                    xmlns='http://www.w3.org/2000/svg'
-                                    className='h-5 w-5'
-                                    viewBox='0 0 20 20'
-                                    fill='currentColor'
-                                >
-                                    <path
-                                        fillRule='evenodd'
-                                        d='M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z'
-                                        clipRule='evenodd'
-                                    />
-                                </svg>
-                            </button>
-                        </div>
+                        {/* No desktop navigation buttons as per requirements */}
 
                         {/* Mobile/Tablet Navigation Controls */}
                         <div className='flex lg:hidden justify-between mt-6'>
