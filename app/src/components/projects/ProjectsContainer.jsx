@@ -287,54 +287,6 @@ export default function ProjectsContainer() {
                                         </h2>
                                     </div>
                                     
-                                    {/* Integrated Project Overview Section */}
-                                    <div className='p-3 sm:p-4 md:p-5 border-b border-brandGray-700/50 bg-gradient-to-r from-brandGray-800 to-brandGray-800/95'>
-                                        <h3 className='text-sm font-semibold text-brandGreen-400 mb-3'>
-                                            Projects Overview
-                                        </h3>
-                                        
-                                        <div className='grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3'>
-                                            {PROJECTS.map((project, index) => (
-                                                <div 
-                                                    key={index}
-                                                    className={clsx(
-                                                        'transition-all duration-300 cursor-pointer p-2 sm:p-3 rounded-lg border',
-                                                        activeProjectIndex === index 
-                                                            ? 'bg-brandGray-700 border-brandGreen-500/40 shadow-sm' 
-                                                            : 'bg-brandGray-800 border-brandGray-700 hover:border-brandGray-600'
-                                                    )}
-                                                    onClick={() => navigateToProject(index)}
-                                                >
-                                                    <div className='flex items-center justify-between'>
-                                                        <span className='text-xs font-semibold text-brandOrange-400 px-2 py-0.5 rounded-md bg-brandOrange-900/30 border border-brandOrange-800/30'>
-                                                            #{index + 1}
-                                                        </span>
-                                                        {activeProjectIndex === index && (
-                                                            <span className='inline-block w-2 h-2 rounded-full bg-brandGreen-500'></span>
-                                                        )}
-                                                    </div>
-                                                    <h4 className='font-medium text-white mt-2 text-sm truncate'>
-                                                        {project.title}
-                                                    </h4>
-                                                    <div className='flex flex-wrap gap-1 mt-2'>
-                                                        {project.stack.slice(0, 2).map((tech, techIndex) => (
-                                                            <span
-                                                                key={techIndex}
-                                                                className='text-[10px] font-medium text-brandGray-300 px-1.5 py-0.5 rounded-full bg-brandGray-700/50'
-                                                            >
-                                                                {tech}
-                                                            </span>
-                                                        ))}
-                                                        {project.stack.length > 2 && (
-                                                            <span className='text-[10px] font-medium text-brandGray-300 px-1.5 py-0.5 rounded-full bg-brandGray-700/50'>
-                                                                +{project.stack.length - 2}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
                                     
                                     {/* Project Content */}
                                     <div className='p-3 sm:p-4 md:p-5'>
