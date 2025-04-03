@@ -1,17 +1,28 @@
-# FROM node:18
+FROM --platform=linux/amd64 node:18
 
-# WORKDIR /app
+WORKDIR /app
 
-# COPY package.json ./
-# RUN npm install
+# First install root dependencies
+COPY package.json ./
+RUN npm install --no-optional --legacy-peer-deps
 
-# COPY . ./
+# Install frontend app dependencies
+COPY app/package.json ./app/package.json
+RUN cd app && npm install --no-optional --legacy-peer-deps
 
-# # Set environment variables
-# ENV DOCKER_CONTAINER=true
-# ENV PORT=3001
+# Fix for Rollup on Apple Silicon/ARM64 via amd64 emulation
+RUN cd app && npm uninstall rollup && npm install rollup --no-optional --legacy-peer-deps
 
-# # Expose the port
-# EXPOSE 3001
+# Copy the rest of the application
+COPY . ./
 
-# CMD ["npm", "start"]
+# Set environment variables
+ENV DOCKER_CONTAINER=true
+ENV PORT=3000
+ENV NODE_ENV=development
+
+# Expose the port
+EXPOSE 3000
+EXPOSE 5173
+
+CMD ["npm", "run", "dev"]
