@@ -81,7 +81,7 @@ export default function ProjectsContainer() {
         }
     }, [transitionDirection])
 
-    if (!started) {
+        if (!started) {
         return (
             <section className='relative py-16 px-4 bg-gradient-to-b from-brandGreen-950/90 via-brandGreen-900/95 to-brandGreen-900 overflow-x-hidden'>
                 {}
@@ -93,9 +93,9 @@ export default function ProjectsContainer() {
                     }}
                 ></div>
                 <div className='max-w-3xl mx-auto'>
-                    <div className='my-4 sm:my-6 md:my-8 overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transform transition-all duration-300 hover:shadow-xl hover:border-brandGray-600 flex flex-col h-[600px] sm:h-[650px] md:h-[670px] lg:h-[700px]'>
+                    <div className='my-4 sm:my-6 md:my-8 overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transform transition-all duration-300 hover:shadow-xl hover:border-brandGray-600 flex flex-col min-h-[500px] lg:h-[700px]'>
                         {}
-                        <div className='sm:p-4 md:p-5 border-b border-brandGray-700 bg-gradient-to-r from-brandGray-800 via-brandGray-800 to-brandBlue-900/10'>
+                        <div className='p-3 sm:p-4 md:p-5 border-b border-brandGray-700 bg-gradient-to-r from-brandGray-800 via-brandGray-800 to-brandBlue-900/10'>
                             <div className='flex items-center justify-between mb-2'>
                                 <span className='text-sm font-semibold text-white px-2 py-1 rounded-md bg-gradient-to-r from-brandOrange-700 to-brandOrange-600 shadow-sm'>
                                     Overview
@@ -108,6 +108,7 @@ export default function ProjectsContainer() {
                         </div>
 
                         <div className='p-3 sm:p-4 md:p-5 flex-1 flex flex-col'>
+                            {/* Welcome text - shown on all screen sizes */}
                             <div className='prose prose-sm prose-invert max-w-none mb-3 sm:mb-4 md:mb-6'>
                                 <p>
                                     Welcome to an interactive journey through my
@@ -124,22 +125,104 @@ export default function ProjectsContainer() {
                                 </p>
                             </div>
 
-                            {}
-                            <div className='space-y-1 sm:space-y-2 mb-4 sm:mb-6 md:mb-8 text-xs sm:text-sm'>
-                                <h3 className='text-brandGray-400 uppercase text-xs tracking-wider mb-2 md:mb-3'>
-                                    Coming Up
+                            {/* Project list - displayed differently based on screen size */}
+                            <div className='lg:block hidden'>
+                                {/* On desktop: Simple vertical list */}
+                                <div className='space-y-1 sm:space-y-2 mb-4 sm:mb-6 md:mb-8 text-xs sm:text-sm'>
+                                    <h3 className='text-brandGray-400 uppercase text-xs tracking-wider mb-2 md:mb-3'>
+                                        Coming Up
+                                    </h3>
+                                    {PROJECTS.map((project, index) => (
+                                        <div
+                                            key={index}
+                                            className='flex items-center text-brandGray-300 hover:text-brandGreen-400 transition-colors duration-200'
+                                        >
+                                            <span className='text-brandOrange-500 font-semibold mr-2'>
+                                                Project {index + 1}:
+                                            </span>
+                                            <span>{project.title}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* On tablet and mobile: Premium card-style projects similar to desktop project overview */}
+                            <div className='lg:hidden block'>
+                                <h3 className='text-brandGray-400 uppercase text-xs tracking-wider mb-2 font-medium'>
+                                    Projects Overview
                                 </h3>
-                                {PROJECTS.map((project, index) => (
-                                    <div
-                                        key={index}
-                                        className='flex items-center text-brandGray-300 hover:text-brandGreen-400 transition-colors duration-200'
-                                    >
-                                        <span className='text-brandOrange-500 font-semibold mr-2'>
-                                            Project {index + 1}:
-                                        </span>
-                                        <span>{project.title}</span>
-                                    </div>
-                                ))}
+                                
+                                {/* On tablets - show 3 cards in a row */}
+                                <div className='hidden sm:grid sm:grid-cols-3 gap-3 mb-4'>
+                                    {PROJECTS.map((project, index) => (
+                                        <div 
+                                            key={index}
+                                            className='transition-all duration-300 cursor-pointer p-3 rounded-lg border bg-gradient-to-br from-brandGray-800 to-brandGray-800/90 border-brandGray-700 hover:border-brandGray-600 hover:shadow-[0_4px_12px_-2px_rgba(11,163,112,0.12)] hover:translate-y-[-1px]'
+                                        >
+                                            <div className='flex items-center justify-between'>
+                                                <span className='text-xs font-semibold text-brandOrange-400 px-2 py-0.5 rounded-md bg-brandOrange-900/30 border border-brandOrange-800/30 shadow-sm'>
+                                                    #{index + 1}
+                                                </span>
+                                                <div className='w-2 h-2 rounded-full bg-gradient-to-r from-brandGreen-500 to-brandGreen-400 opacity-60'></div>
+                                            </div>
+                                            <h4 className='font-medium text-white mt-2 text-sm truncate'>
+                                                {project.title}
+                                            </h4>
+                                            <div className='flex flex-wrap gap-1 mt-2'>
+                                                {project.stack.slice(0, 2).map((tech, techIndex) => (
+                                                    <span
+                                                        key={techIndex}
+                                                        className='text-[10px] font-medium text-brandGray-300 px-1.5 py-0.5 rounded-full bg-brandGray-700/70 border border-brandGray-700'
+                                                    >
+                                                        {tech}
+                                                    </span>
+                                                ))}
+                                                {project.stack.length > 2 && (
+                                                    <span className='text-[10px] font-medium text-brandGray-300 px-1.5 py-0.5 rounded-full bg-brandGray-700/70 border border-brandGray-700'>
+                                                        +{project.stack.length - 2}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                
+                                {/* On mobile - show more compact horizontal cards */}
+                                <div className='sm:hidden grid grid-cols-1 gap-2 mb-4'>
+                                    {PROJECTS.map((project, index) => (
+                                        <div 
+                                            key={index}
+                                            className='transition-all duration-300 cursor-pointer p-2 rounded-lg border bg-gradient-to-r from-brandGray-800 to-brandGray-800/90 border-brandGray-700 hover:border-brandGray-600'
+                                        >
+                                            <div className='flex items-center justify-between'>
+                                                <div className='flex items-center gap-2'>
+                                                    <span className='text-xs font-semibold text-brandOrange-400 px-2 py-0.5 rounded-md bg-brandOrange-900/30 border border-brandOrange-800/30 shadow-sm'>
+                                                        #{index + 1}
+                                                    </span>
+                                                    <h4 className='font-medium text-white text-sm'>
+                                                        {project.title}
+                                                    </h4>
+                                                </div>
+                                                <div className='w-2 h-2 rounded-full bg-gradient-to-r from-brandGreen-500 to-brandGreen-400 opacity-60 flex-shrink-0'></div>
+                                            </div>
+                                            <div className='flex flex-wrap gap-1 mt-2 ml-7'>
+                                                {project.stack.slice(0, 2).map((tech, techIndex) => (
+                                                    <span
+                                                        key={techIndex}
+                                                        className='text-[10px] font-medium text-brandGray-300 px-1.5 py-0.5 rounded-full bg-brandGray-700/70 border border-brandGray-700'
+                                                    >
+                                                        {tech}
+                                                    </span>
+                                                ))}
+                                                {project.stack.length > 2 && (
+                                                    <span className='text-[10px] font-medium text-brandGray-300 px-1.5 py-0.5 rounded-full bg-brandGray-700/70 border border-brandGray-700'>
+                                                        +{project.stack.length - 2}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
 
                             <div className='mt-auto'>
@@ -179,78 +262,10 @@ export default function ProjectsContainer() {
                 <div className='flex flex-col'>
                     {/* Projects Grid */}
                     <div className='w-full'>
-                        {/* On mobile and tablet - show the sidebar TOC and one active project with navigation */}
+                        {/* On mobile and tablet - show the active project with navigation */}
                         <div className='block lg:hidden'>
-                            {/* Mobile sidebar TOC */}
-                            <div className='mb-6 bg-brandGray-800/95 backdrop-blur-sm rounded-xl p-4 border border-brandGray-700 shadow-lg flex flex-col'>
-                                <h3 className='text-lg font-bold text-brandGreen-300 mb-4'>
-                                    Projects Overview
-                                </h3>
-                                
-                                <div className='space-y-4'>
-                                    {PROJECTS.map((project, index) => (
-                                        <div 
-                                            key={index}
-                                            className={clsx(
-                                                'transition-all duration-300 cursor-pointer',
-                                                'p-3 rounded-lg border',
-                                                activeProjectIndex === index 
-                                                    ? 'bg-brandGray-700 border-brandGreen-500/40 shadow-sm' 
-                                                    : 'bg-brandGray-800 border-brandGray-700 hover:border-brandGray-600'
-                                            )}
-                                            onClick={() => navigateToProject(index)}
-                                        >
-                                            <div className='flex items-center justify-between'>
-                                                <span className='text-xs font-semibold text-brandOrange-400 px-2 py-0.5 rounded-md bg-brandOrange-900/30 border border-brandOrange-800/30'>
-                                                    #{index + 1}
-                                                </span>
-                                                {activeProjectIndex === index && (
-                                                    <span className='inline-block w-2 h-2 rounded-full bg-brandGreen-500'></span>
-                                                )}
-                                            </div>
-                                            <h4 className='font-medium text-white mt-2 text-sm'>
-                                                {project.title}
-                                            </h4>
-                                            <div className='flex flex-wrap gap-1 mt-2'>
-                                                {project.stack.slice(0, 2).map((tech, techIndex) => (
-                                                    <span
-                                                        key={techIndex}
-                                                        className='text-[10px] font-medium text-brandGray-400 px-1.5 py-0.5 rounded-full bg-brandGray-700/50'
-                                                    >
-                                                        {tech}
-                                                    </span>
-                                                ))}
-                                                {project.stack.length > 2 && (
-                                                    <span className='text-[10px] font-medium text-brandGray-400 px-1.5 py-0.5 rounded-full bg-brandGray-700/50'>
-                                                        +{project.stack.length - 2}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                                
-                                <button
-                                    onClick={() => setStarted(false)}
-                                    className='mt-6 w-full flex items-center justify-center gap-2 px-4 py-2 bg-brandGray-700 hover:bg-brandGray-600 text-white rounded-lg text-sm transition-colors duration-200'
-                                >
-                                    <svg
-                                        xmlns='http://www.w3.org/2000/svg'
-                                        className='h-4 w-4'
-                                        viewBox='0 0 20 20'
-                                        fill='currentColor'
-                                    >
-                                        <path
-                                            fillRule='evenodd'
-                                            d='M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z'
-                                            clipRule='evenodd'
-                                        />
-                                    </svg>
-                                    Back to Overview
-                                </button>
-                            </div>
                             
-                            {/* Mobile active project card */}
+                            {/* Mobile Project Card with Integrated Project Overview */}
                             <div
                                 className={clsx(
                                     'transition-all duration-500',
@@ -259,32 +274,126 @@ export default function ProjectsContainer() {
                                     transitionDirection === 'prev' && 'translate-x-[40px] opacity-0'
                                 )}
                             >
-                                <ProjectCard
-                                    projectNumber={activeProjectIndex + 1}
-                                    title={PROJECTS[activeProjectIndex].title}
-                                    summary={PROJECTS[activeProjectIndex].summary}
-                                    stack={PROJECTS[activeProjectIndex].stack}
-                                    initialDescription={
-                                        PROJECTS[activeProjectIndex].initialDescription
-                                    }
-                                    detailedDescription={
-                                        PROJECTS[activeProjectIndex].detailedDescription
-                                    }
-                                    technicalDetails={
-                                        PROJECTS[activeProjectIndex].technicalDetails
-                                    }
-                                    challenges={PROJECTS[activeProjectIndex].challenges}
-                                    readme={PROJECTS[activeProjectIndex].readme}
-                                    totalProjects={PROJECTS.length}
-                                    onNavigateToProject={index => {
-                                        if (index === -1) {
-                                            setStarted(false)
-                                        } else {
-                                            navigateToProject(index)
-                                        }
-                                    }}
-                                    hideToc={true} // Hide the TOC in the card since we have the sidebar
-                                />
+                                <div className='overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transition-all duration-300'>
+                                    {/* Card Header */}
+                                    <div className='p-3 sm:p-4 md:p-5 border-b border-brandGray-700 bg-gradient-to-r from-brandGray-800 via-brandGray-800 to-brandBlue-900/10'>
+                                        <div className='flex items-center justify-between mb-2'>
+                                            <span className='text-sm font-semibold text-white px-2 py-1 rounded-md bg-gradient-to-r from-brandOrange-700 to-brandOrange-600 shadow-sm'>
+                                                Project {activeProjectIndex + 1}/{PROJECTS.length}
+                                            </span>
+                                        </div>
+                                        <h2 className='text-xl font-bold mb-1 text-transparent bg-clip-text bg-gradient-to-r from-brandGreen-300 via-brandGreen-200 to-brandGreen-300'>
+                                            {PROJECTS[activeProjectIndex].title}
+                                        </h2>
+                                    </div>
+                                    
+                                    {/* Integrated Project Overview Section */}
+                                    <div className='p-3 sm:p-4 md:p-5 border-b border-brandGray-700/50 bg-gradient-to-r from-brandGray-800 to-brandGray-800/95'>
+                                        <h3 className='text-sm font-semibold text-brandGreen-400 mb-3'>
+                                            Projects Overview
+                                        </h3>
+                                        
+                                        <div className='grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3'>
+                                            {PROJECTS.map((project, index) => (
+                                                <div 
+                                                    key={index}
+                                                    className={clsx(
+                                                        'transition-all duration-300 cursor-pointer p-2 sm:p-3 rounded-lg border',
+                                                        activeProjectIndex === index 
+                                                            ? 'bg-brandGray-700 border-brandGreen-500/40 shadow-sm' 
+                                                            : 'bg-brandGray-800 border-brandGray-700 hover:border-brandGray-600'
+                                                    )}
+                                                    onClick={() => navigateToProject(index)}
+                                                >
+                                                    <div className='flex items-center justify-between'>
+                                                        <span className='text-xs font-semibold text-brandOrange-400 px-2 py-0.5 rounded-md bg-brandOrange-900/30 border border-brandOrange-800/30'>
+                                                            #{index + 1}
+                                                        </span>
+                                                        {activeProjectIndex === index && (
+                                                            <span className='inline-block w-2 h-2 rounded-full bg-brandGreen-500'></span>
+                                                        )}
+                                                    </div>
+                                                    <h4 className='font-medium text-white mt-2 text-sm truncate'>
+                                                        {project.title}
+                                                    </h4>
+                                                    <div className='flex flex-wrap gap-1 mt-2'>
+                                                        {project.stack.slice(0, 2).map((tech, techIndex) => (
+                                                            <span
+                                                                key={techIndex}
+                                                                className='text-[10px] font-medium text-brandGray-300 px-1.5 py-0.5 rounded-full bg-brandGray-700/50'
+                                                            >
+                                                                {tech}
+                                                            </span>
+                                                        ))}
+                                                        {project.stack.length > 2 && (
+                                                            <span className='text-[10px] font-medium text-brandGray-300 px-1.5 py-0.5 rounded-full bg-brandGray-700/50'>
+                                                                +{project.stack.length - 2}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Project Content */}
+                                    <div className='p-3 sm:p-4 md:p-5'>
+                                        {/* Project Summary and Stack */}
+                                        <div className='mb-4'>
+                                            <h3 className='text-base sm:text-lg font-medium text-white mb-2'>Summary</h3>
+                                            <p className='text-sm text-brandGray-300 mb-3'>{PROJECTS[activeProjectIndex].summary}</p>
+                                            
+                                            <div className='flex flex-wrap gap-2 mt-3'>
+                                                {PROJECTS[activeProjectIndex].stack.map((tech, techIndex) => (
+                                                    <span
+                                                        key={techIndex}
+                                                        className='text-xs font-medium text-brandGray-200 px-2 py-1 rounded-full bg-brandGray-700'
+                                                    >
+                                                        {tech}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Project Description */}
+                                        <div className='mb-4'>
+                                            <h3 className='text-base sm:text-lg font-medium text-white mb-2'>Description</h3>
+                                            <div className='prose prose-sm prose-invert max-w-none'>
+                                                <p>{PROJECTS[activeProjectIndex].initialDescription}</p>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Project Details */}
+                                        <div className='mb-4'>
+                                            <h3 className='text-base sm:text-lg font-medium text-white mb-2'>Details</h3>
+                                            <div className='prose prose-sm prose-invert max-w-none'>
+                                                <p>{PROJECTS[activeProjectIndex].detailedDescription}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Back Button */}
+                                    <div className='p-3 sm:p-4 md:p-5 border-t border-brandGray-700/30'>
+                                        <button
+                                            onClick={() => setStarted(false)}
+                                            className='w-full flex items-center justify-center gap-2 px-4 py-2 bg-brandGray-700 hover:bg-brandGray-600 text-white rounded-lg text-sm transition-colors duration-200'
+                                        >
+                                            <svg
+                                                xmlns='http://www.w3.org/2000/svg'
+                                                className='h-4 w-4'
+                                                viewBox='0 0 20 20'
+                                                fill='currentColor'
+                                            >
+                                                <path
+                                                    fillRule='evenodd'
+                                                    d='M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z'
+                                                    clipRule='evenodd'
+                                                />
+                                            </svg>
+                                            Back to Overview
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         
