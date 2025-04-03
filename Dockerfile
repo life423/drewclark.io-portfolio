@@ -1,5 +1,5 @@
 # Build stage for frontend
-FROM node:18-alpine AS build-frontend
+FROM --platform=linux/amd64 node:18-alpine AS build-frontend
 WORKDIR /app
 
 # Add metadata labels
@@ -16,7 +16,7 @@ COPY app/ ./
 RUN npm run build
 
 # Backend dependencies stage - separate to optimize caching
-FROM node:18-alpine AS build-backend
+FROM --platform=linux/amd64 node:18-alpine AS build-backend
 WORKDIR /app
 
 # Copy start-app.js first to ensure it exists when the postinstall script runs
@@ -34,7 +34,7 @@ COPY server.js ./
 COPY api/ ./api/
 
 # Final production image (smaller)
-FROM node:18-alpine AS production
+FROM --platform=linux/amd64 node:18-alpine AS production
 WORKDIR /app
 
 # Add metadata labels
@@ -45,7 +45,7 @@ LABEL version="1.0.0"
 # Set environment variables
 ENV NODE_ENV=production
 ENV DOCKER_CONTAINER=true
-ENV PORT=3001
+ENV PORT=3000
 
 # Create and use non-root user for security
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
@@ -74,7 +74,7 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD wget --quiet --tries=1 --spider http://localhost:$PORT/api || exit 1
 
 # Expose port
-EXPOSE 3001
+EXPOSE 3000
 
 # Use proper entrypoint script for signal handling
 ENTRYPOINT ["node", "server.js"]

@@ -5,8 +5,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
     ports:
-      - '3001:3001'
+      - '3000:3000'
     # Remove volume mapping for production container to prevent overrides
     # volumes:
     #   - /app/node_modules
@@ -14,7 +16,7 @@ services:
     environment:
       - NODE_ENV=production
       - DOCKER_CONTAINER=true
-      - PORT=3001
+      - PORT=3000
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     restart: unless-stopped
 
@@ -22,15 +24,19 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
+      platforms:
+        - linux/amd64
     ports:
-      - '3001:3001'
+      - '3000:3000'
+      - '5173:5173'
     environment:
       - NODE_ENV=development
       - DOCKER_CONTAINER=true
-      - PORT=3001
+      - PORT=3000
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     volumes:
       - /app/node_modules
+      - /app/app/node_modules
       - ./app:/app/app
       - ./api:/app/api
       - ./server.js:/app/server.js
