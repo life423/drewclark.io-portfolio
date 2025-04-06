@@ -1,34 +1,35 @@
 {
-    "name": "drewclark.io-portfolio",
-    "version": "1.0.0",
-    "scripts": {
-        "test": "echo \"No tests defined\" && exit 0",
-        "start": "node server.js",
-        "start:dev": "concurrently \"node server.js\" \"cd app && npm run dev\"",
-        "build": "cd app && npm run build",
-        "dev": "npm run kill-ports && concurrently \"nodemon server.js\" \"cd app && npm run dev\"",
-        "kill-ports": "npx kill-port 3000 5173",
-        "postinstall": "node -e \"try { if (require('fs').existsSync('./start-app.js')) { require('fs').chmodSync('./start-app.js', '755'); }} catch(e) { console.log('Warning: ' + e.message); }\"",
-        "docker:build": "docker build -t drewclark-portfolio .",
-        "docker:run": "docker run -p 3000:3000 -e OPENAI_API_KEY=${OPENAI_API_KEY} -e DOCKER_CONTAINER=true -e PORT=3000 drewclark-portfolio",
-        "docker:dev": "docker-compose up dev",
-        "docker:prod": "docker-compose up app"
-    },
-    "dependencies": {
-        "compression": "^1.7.4",
-        "concurrently": "^8.2.2",
-        "cors": "^2.8.5",
-        "dotenv": "^16.4.7",
-        "express": "^4.18.2",
-        "helmet": "^7.1.0",
-        "openai": "^4.91.1",
-        "path": "^0.12.7"
-    },
-    "devDependencies": {
-        "kill-port": "^2.0.1",
-        "nodemon": "^3.0.3"
-    },
-    "engines": {
-        "node": ">=18.0.0"
-    }
+  "name": "drewclark.io-portfolio",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "echo \"No tests defined\" && exit 0",
+    "start": "node server.js",
+    "start:dev": "concurrently \"node server.js\" \"cd app && npm run dev\"",
+    "build": "cd app && npm run build",
+    "dev": "npm run kill-ports && concurrently \"nodemon server.js\" \"cd app && npm run dev\"",
+    "kill-ports": "npx kill-port 3000 5173",
+    "postinstall": "node -e \"try { if (require('fs').existsSync('./start-app.js')) { require('fs').chmodSync('./start-app.js', '755'); }} catch(e) { console.log('Warning: ' + e.message); }\"",
+    "setup": "npm install && cd app && npm install --legacy-peer-deps && cd ../api && npm install",
+    "docker:build": "docker build -t drewclark-portfolio .",
+    "docker:run": "docker run -p 3000:3000 -e OPENAI_API_KEY=${OPENAI_API_KEY} -e DOCKER_CONTAINER=true -e PORT=3000 drewclark-portfolio",
+    "docker:dev": "docker-compose up dev",
+    "docker:prod": "docker-compose up app"
+  },
+  "dependencies": {
+    "compression": "^1.7.4",
+    "concurrently": "^8.2.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.18.2",
+    "helmet": "^7.1.0",
+    "openai": "^4.91.1",
+    "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "kill-port": "^2.0.1",
+    "nodemon": "^3.0.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }
