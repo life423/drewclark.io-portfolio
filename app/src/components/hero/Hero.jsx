@@ -85,14 +85,45 @@ export default function Hero() {
         )`
     }, [])
 
+    // Cached text options to reduce unnecessary API calls
+    const staticHeroTexts = {
+        'left-top': "Architecting scalable solutions with clean, maintainable code",
+        'center-top': "Transforming complex ideas into elegant implementations",
+        'right-top': "Pushing the boundaries of what's possible with modern tech",
+        'left-middle': "Building software that solves real-world challenges",
+        'center-middle': "Creating innovative solutions through thoughtful engineering",
+        'right-middle': "Engineering systems that scale with precision and reliability",
+        'left-bottom': "Turning ideas into production-ready applications",
+        'center-bottom': "Crafting digital experiences that make a difference",
+        'right-bottom': "Bringing technical vision to life through code and creativity",
+        'default': "Building elegant solutions to complex problems"
+    };
+    
+    // Use cache tracker to avoid too many API calls
+    const [lastUpdateTime, setLastUpdateTime] = useState(0);
+    const MIN_UPDATE_INTERVAL = 10000; // 10 seconds between text updates
+    
     // Generate new hero text when context changes AND hero is in viewport
     useEffect(() => {
         // Skip if hero is not in viewport or if already generating
         if (!heroIsInView || isGenerating) return
         
+        const now = Date.now();
+        const timeSinceLastUpdate = now - lastUpdateTime;
+        
+        // Check if we should use cache instead of making API call
+        if (timeSinceLastUpdate < MIN_UPDATE_INTERVAL) {
+            // Use static text based on mouse position zone
+            const zoneText = staticHeroTexts[mousePosition.zone] || staticHeroTexts.default;
+            if (heroText !== zoneText) {
+                setHeroText(zoneText);
+            }
+            return;
+        }
+        
         // Debounce to avoid too many API calls
         const timerId = setTimeout(async () => {
-            setIsGenerating(true)
+            setIsGenerating(true);
             
             try {
                 // Prepare context data for AI
@@ -106,29 +137,40 @@ export default function Hero() {
                     viewportInfo: {
                         isVisible: heroIsInView
                     }
-                }
+                };
+                
+                // Use the useMock option to avoid actual API calls during development
+                // or when API is not responding well
+                const useMockImplementation = process.env.NODE_ENV !== 'production';
                 
                 // Get new text from AI service
-                const text = await generateHeroText(contextData)
-                setHeroText(text)
+                const text = await generateHeroText(contextData, { useMock: useMockImplementation });
+                setHeroText(text);
+                setLastUpdateTime(Date.now());
             } catch (error) {
-                console.error('Error generating hero text:', error)
-                // Fallback handled by the service
+                console.error('Error generating hero text:', error);
+                // Use the static text as fallback
+                const fallbackText = staticHeroTexts[mousePosition.zone] || staticHeroTexts.default;
+                setHeroText(fallbackText);
             } finally {
-                setIsGenerating(false)
+                setIsGenerating(false);
             }
-        }, 800) // Debounce delay
+        }, 2000) // Increased debounce delay to 2 seconds
         
-        return () => clearTimeout(timerId)
+        return () => clearTimeout(timerId);
     }, [
-        heroIsInView, 
-        mousePosition.zone, 
-        scrollDirection, 
-        // Only re-trigger when scroll percent changes by at least 10%
-        Math.floor(scrollPercent / 10), 
+        heroIsInView,
+        // Only care about zone changes, not exact position
+        mousePosition.zone,
+        // Only re-trigger on significant scroll direction changes
+        scrollDirection,
+        // Only re-trigger when scroll percent changes by at least 20% (reduced sensitivity)
+        Math.floor(scrollPercent / 20),
         isGenerating,
-        scrollY
-    ])
+        // Remove scrollY from dependencies as it changes too frequently
+        lastUpdateTime,
+        heroText
+    ]);
     
     // Calculate transform based on scroll position for parallax effect
     const calculateTransform = () => {
