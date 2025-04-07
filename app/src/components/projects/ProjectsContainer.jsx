@@ -387,47 +387,6 @@ export default function ProjectsContainer() {
                                 
                                 {/* Stacked projects (1/3 width) */}
                                 <div className='flex flex-col gap-6'>
-                                    {/* Overview Card */}
-                                    <div className='overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transition-all duration-300 hover:shadow-lg hover:border-brandGray-600'>
-                                        <div className='p-4 border-b border-brandGray-700 bg-gradient-to-r from-brandGray-800 via-brandGray-800 to-brandBlue-900/10'>
-                                            <div className='flex items-center justify-between mb-2'>
-                                                <span className='text-sm font-semibold text-white px-2 py-1 rounded-md bg-gradient-to-r from-brandOrange-700 to-brandOrange-600 shadow-sm'>
-                                                    Overview
-                                                </span>
-                                            </div>
-                                            <h2 className='text-lg font-bold mb-1 text-transparent bg-clip-text bg-gradient-to-r from-brandGreen-300 via-brandGreen-200 to-brandGreen-300'>
-                                                My Portfolio
-                                            </h2>
-                                        </div>
-                                        
-                                        <div className='p-4'>
-                                            <div className='prose prose-sm prose-invert max-w-none'>
-                                                <p>
-                                                    Explore my key projects. Click any project to feature it in detail.
-                                                </p>
-                                            </div>
-                                            
-                                            <button
-                                                onClick={() => setStarted(false)}
-                                                className='mt-4 w-full flex items-center justify-center gap-2 px-4 py-2 bg-brandGray-700 hover:bg-brandGray-600 text-white rounded-lg text-sm transition-colors duration-200'
-                                            >
-                                                <svg
-                                                    xmlns='http://www.w3.org/2000/svg'
-                                                    className='h-4 w-4'
-                                                    viewBox='0 0 20 20'
-                                                    fill='currentColor'
-                                                >
-                                                    <path
-                                                        fillRule='evenodd'
-                                                        d='M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z'
-                                                        clipRule='evenodd'
-                                                    />
-                                                </svg>
-                                                Back to Start
-                                            </button>
-                                        </div>
-                                    </div>
-                                    
                                     {/* Stacked Project Cards - show only projects that aren't featured */}
                                     {PROJECTS.map((project, index) => 
                                         index !== featuredProjectIndex && (
