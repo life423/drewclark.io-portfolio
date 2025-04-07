@@ -1,10 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react'
 import clsx from 'clsx'
 import { answerProjectQuestion } from '../../services/aiGenerationService'
-import PrimaryButton from '../utils/PrimaryButton'
 import { ProjectProgressIndicator } from './progress'
 import useScrollPosition from '../../hooks/useScrollPosition'
-
 import TypedTextEffect from '../hero/TypedTextEffect'
 import useIntersection from '../../hooks/useIntersection'
 
@@ -18,25 +16,16 @@ export default function ProjectCard({
     technicalDetails,
     challenges,
     readme,
-    onAskQuestion,
     onNavigateToProject,
     totalProjects = 3,
-    hideToc = false, // New prop to hide the table of contents in the card
+    hideToc = false, // Prop to hide the table of contents in the card
     isActive = false, // Whether this card is the active one
     onClick = null, // Click handler for the card
 }) {
-    const [expanded, setExpanded] = useState(true) // Always start expanded
-    const [chatVisible, setChatVisible] = useState(false)
-    const [userQuestion, setUserQuestion] = useState('')
-    const [isGenerating, setIsGenerating] = useState(false)
-    const [messages, setMessages] = useState([])
-    // Track previous questions to provide context
-    const [previousQuestions, setPreviousQuestions] = useState([])
-    // Track when we need to auto-adjust the card height based on content
-    const [autoHeight, setAutoHeight] = useState(false)
-    // Track if we've initialized from localStorage
-    const [chatInitialized, setChatInitialized] = useState(false)
-    // Track the user's current UI state
+    // Track previous project number to detect changes
+    const prevProjectNumberRef = useRef(projectNumber)
+    
+    // Track the user's current UI state (for analytics and context)
     const [uiContext, setUiContext] = useState({
         activeSection: 'overview',
         interactionState: 'browsing',
@@ -44,46 +33,12 @@ export default function ProjectCard({
         customContext: '',
     })
 
-    const chatInputRef = useRef(null)
-    const chatContainerRef = useRef(null)
-    // Track previous project number to detect changes
-    const prevProjectNumberRef = useRef(projectNumber)
-
     // Get scroll info from useScrollPosition
     const {
-        y: scrollY,
         direction: scrollDirection,
         percent: scrollPercent,
         forceRecalculation,
     } = useScrollPosition()
-
-    // Load chat history from localStorage on initial render
-    useEffect(() => {
-        if (!chatInitialized) {
-            const storageKey = `project_chat_${projectNumber}`
-            const savedMessages = localStorage.getItem(storageKey)
-
-            if (savedMessages) {
-                try {
-                    setMessages(JSON.parse(savedMessages))
-                    setChatInitialized(true)
-                } catch (e) {
-                    console.error('Error parsing saved chat history:', e)
-                    setChatInitialized(true)
-                }
-            } else {
-                setChatInitialized(true)
-            }
-        }
-    }, [chatInitialized, projectNumber])
-
-    // Save chat history to localStorage when messages change
-    useEffect(() => {
-        if (chatInitialized && messages.length > 0) {
-            const storageKey = `project_chat_${projectNumber}`
-            localStorage.setItem(storageKey, JSON.stringify(messages))
-        }
-    }, [messages, projectNumber, chatInitialized])
 
     // Update UI context when scroll position changes in the main window
     useEffect(() => {
@@ -109,120 +64,15 @@ export default function ProjectCard({
         }
     }, [scrollPercent, scrollDirection])
 
-    const toggleChat = () => {
-        const newChatVisible = !chatVisible
-        setChatVisible(newChatVisible)
-
-        // Update UI context when chat visibility changes
-        setUiContext(prev => ({
-            ...prev,
-            activeSection: newChatVisible ? 'chat' : 'overview',
-            interactionState: newChatVisible ? 'asking questions' : 'browsing',
-        }))
-
-        if (newChatVisible) {
-            // Focus the input when chat becomes visible
-            setTimeout(() => {
-                chatInputRef.current?.focus()
-            }, 100)
-        }
-
-        // Force recalculation after toggling chat
-        setTimeout(() => {
-            forceRecalculation()
-        }, 300)
-    }
-
-    // Update UI context based on scroll position
-    useEffect(() => {
-        const handleScroll = () => {
-            if (!chatContainerRef.current) return
-
-            const scrollTop = chatContainerRef.current.scrollTop
-            const scrollHeight = chatContainerRef.current.scrollHeight
-            const clientHeight = chatContainerRef.current.clientHeight
-            const scrollPosition = Math.round(
-                (scrollTop / (scrollHeight - clientHeight)) * 100
-            )
-
-            // Only update if there's a significant change
-            if (Math.abs(scrollPosition - uiContext.scrollPosition) > 10) {
-                setUiContext(prev => ({
-                    ...prev,
-                    scrollPosition,
-                    interactionState: 'scrolling chat history',
-                }))
-            }
-        }
-
-        const chatContainer = chatContainerRef.current
-        if (chatContainer) {
-            chatContainer.addEventListener('scroll', handleScroll)
-        }
-
-        return () => {
-            if (chatContainer) {
-                chatContainer.removeEventListener('scroll', handleScroll)
-            }
-        }
-    }, [chatContainerRef, uiContext.scrollPosition])
-
-    // Auto-scroll to the bottom of the chat when new messages are added
-    useEffect(() => {
-        if (chatContainerRef.current && messages.length > 0) {
-            chatContainerRef.current.scrollTop =
-                chatContainerRef.current.scrollHeight
-
-            // Enable auto-height after messages are added
-            if (messages.length > 1) {
-                setAutoHeight(true)
-            }
-        }
-    }, [messages])
-
-    // Measure content height and adjust card height if needed
+    // References for DOM elements
     const cardRef = useRef(null)
     const contentRef = useRef(null)
-
-    useEffect(() => {
-        if (autoHeight && cardRef.current && contentRef.current) {
-            // Get the current content height
-            const contentHeight = contentRef.current.scrollHeight
-
-            // Force layout recalculation to ensure accurate measurements
-            forceRecalculation()
-        }
-    }, [autoHeight, messages, forceRecalculation])
 
     // Project transition detection effect
     useEffect(() => {
         // Skip on initial render
         if (prevProjectNumberRef.current !== projectNumber && prevProjectNumberRef.current !== undefined) {
             // This runs when projectNumber changes (navigating to a new project)
-            
-            // If chat is visible, add a transition message
-            if (chatVisible) {
-                // Clear previous questions for new context
-                setPreviousQuestions([])
-                
-                // Add a transition message for the new project
-                setMessages(prevMessages => [
-                    { 
-                        role: 'assistant', 
-                        content: `You're now viewing ${title}. This project uses ${stack.join(', ')}. What would you like to know about it?`,
-                        isTransition: true // Special flag for transition styling
-                    },
-                    // Keep previous messages for continuity
-                    ...prevMessages
-                ])
-                
-                // Auto-scroll to see the new message
-                setTimeout(() => {
-                    if (chatContainerRef.current) {
-                        chatContainerRef.current.scrollTop = 0
-                    }
-                }, 100)
-            }
             
             // Update UI context to reflect new project context
             setUiContext(prev => ({
@@ -236,110 +86,7 @@ export default function ProjectCard({
         // Update ref with current project number for next comparison
         prevProjectNumberRef.current = projectNumber
         
-    }, [projectNumber, title, stack, chatVisible])
-
-    const handleQuestionSubmit = async e => {
-        e.preventDefault()
-
-        if (!userQuestion.trim()) return
-
-        // Add user question to the messages array
-        setMessages(prev => [...prev, { role: 'user', content: userQuestion }])
-
-        // Store the current question before clearing the input
-        const currentQuestion = userQuestion
-
-        // Update previous questions for context
-        setPreviousQuestions(prev => [...prev, currentQuestion])
-
-        // Update UI context to reflect that a question was asked
-        setUiContext(prev => ({
-            ...prev,
-            interactionState: 'asked a question',
-            customContext: `User just asked: "${currentQuestion}"`,
-        }))
-
-        // Clear the input field immediately for better UX
-        setUserQuestion('')
-
-        setIsGenerating(true)
-
-        try {
-            // Create a comprehensive project data object with all available context
-            const projectData = {
-                id: `project-${projectNumber}`,
-                title,
-                summary,
-                stack,
-                initialDescription,
-                detailedDescription,
-                technicalDetails,
-                challenges,
-                readme,
-                // Add UI context information
-                uiContext: {
-                    activeSection: uiContext.activeSection,
-                    interactionState: uiContext.interactionState,
-                    scrollPosition: uiContext.scrollPosition,
-                    customContext: uiContext.customContext,
-                    previousQuestions: previousQuestions,
-                },
-            }
-
-            // Display a subtle indicator that context-aware answering is active
-            setMessages(prev => {
-                // Only add the indicator if it doesn't exist yet
-                const hasIndicator = prev.some(
-                    msg =>
-                        msg.role === 'system' &&
-                        msg.content.includes('context-aware')
-                )
-
-                if (!hasIndicator && prev.length > 0) {
-                    return [
-                        ...prev,
-                        {
-                            role: 'system',
-                            content: 'Using context-aware answering...',
-                            isIndicator: true,
-                        },
-                    ]
-                }
-                return prev
-            })
-
-            // Call the AI service to generate a response
-            const response = await answerProjectQuestion(
-                projectData,
-                currentQuestion
-            )
-
-            // Remove the indicator before adding the actual response
-            setMessages(prev => {
-                const filtered = prev.filter(msg => !msg.isIndicator)
-                return [...filtered, { role: 'assistant', content: response }]
-            })
-        } catch (error) {
-            console.error('Error generating AI response:', error)
-
-            // Add error message to the messages array
-            setMessages(prev => [
-                ...prev,
-                {
-                    role: 'assistant',
-                    content:
-                        "I'm sorry, I couldn't generate a response at this time. Please try again later.",
-                },
-            ])
-        } finally {
-            setIsGenerating(false)
-
-            // Force recalculation after the AI response is displayed
-            setTimeout(() => {
-                forceRecalculation()
-            }, 100)
-        }
-    }
+    }, [projectNumber, title])
 
     // Set up ref and use the intersection hook for title animation
     const headerRef = useRef(null)

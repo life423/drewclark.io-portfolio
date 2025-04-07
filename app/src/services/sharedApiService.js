@@ -8,7 +8,7 @@
 // Request priorities
 export const PRIORITY = {
   HIGH: 'high',     // User-initiated actions (card questions)
-  MEDIUM: 'medium', // Interactive features (Connect4 game)
+  MEDIUM: 'medium', // Interactive features (UI animations, dynamic content)
   LOW: 'low'        // Background tasks
 };
 

@@ -10,9 +10,7 @@
         "test:watch": "jest --watch",
         "test:coverage": "jest --coverage",
         "test:rate-limit": "node src/run-rate-limit-tests.js",
-        "test:ratelimit": "node run-single-test.cjs src/__tests__/utils/rateLimit.test.js",
-        "test:connect4": "node run-single-test.cjs src/__tests__/components/games/connect4/useConnect4AI.test.js",
-        "test:interactions": "node run-single-test.cjs src/__tests__/integration/feature-interactions.test.js"
+        "test:ratelimit": "node run-single-test.cjs src/__tests__/utils/rateLimit.test.js"
     },
     "dependencies": {
         "@heroicons/react": "^2.2.0",

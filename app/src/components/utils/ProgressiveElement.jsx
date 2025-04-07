@@ -10,8 +10,6 @@ export default function ProgressiveElement({
   className = '',
   appearOnScroll = false,
   appearDelay = 0,
-  // TODO: Implement or remove unused prop
-  focusStage = 0,
   dimWhenInactive = true,
   transitionDuration = ANIMATION.STANDARD,
   transitionEasing = EASING.SMOOTH
@@ -37,9 +35,7 @@ export default function ProgressiveElement({
     }
   }, [appearOnScroll, isIntersecting])
   
-  // Determine the state-based classes
-  // Note: Despite the comment below, there is no 'wasActive' tracking in the current implementation
-  // The dimming logic is solely based on current active state, visibility, and the dimWhenInactive prop
+  // Determine the state-based classes based on visibility, focus state, and dimming preference
   const stateClasses = clsx(
     visible ? 'pe-visible' : 'pe-hidden',
     isActive(id) ? 'pe-focused' : 'pe-unfocused',
