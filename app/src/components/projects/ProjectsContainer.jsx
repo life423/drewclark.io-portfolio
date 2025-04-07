@@ -133,7 +133,7 @@ export default function ProjectsContainer() {
                                 </h3>
                                 
                                 {/* Show grid of cards on all screen sizes except small mobile */}
-                                <div className='hidden sm:grid sm:grid-cols-3 lg:grid-cols-1 gap-3 lg:gap-2 mb-4'>
+                                <div className='hidden sm:grid sm:grid-cols-3 lg:grid-cols-1 gap-3 lg:gap-2 mb-4 lg:mb-1'>
                                     {PROJECTS.map((project, index) => (
                                         <div 
                                             key={index}
@@ -215,7 +215,7 @@ export default function ProjectsContainer() {
                                 </div>
                             </div>
 
-                            <div className='mt-auto'>
+                            <div className='mt-auto lg:mt-4'>
                                 <button
                                     onClick={handleStart}
                                     className='w-full px-4 py-2 bg-brandGreen-600 hover:bg-brandGreen-500 text-white rounded-md font-medium transition-colors duration-200 will-change-transform'
