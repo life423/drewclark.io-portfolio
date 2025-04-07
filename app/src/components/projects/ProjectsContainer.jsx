@@ -110,7 +110,7 @@ export default function ProjectsContainer() {
 
                         <div className='p-3 sm:p-4 md:p-5 flex-1 flex flex-col'>
                             {/* Welcome text - shown on all screen sizes */}
-                            <div className='prose prose-sm prose-invert max-w-none mb-3 sm:mb-4 md:mb-6'>
+                            <div className='prose prose-sm prose-invert max-w-none mb-3 sm:mb-4 md:mb-6 lg:mb-3'>
                                 <p>
                                     Welcome to an interactive journey through my
                                     portfolio projects. Rather than a simple
@@ -127,13 +127,13 @@ export default function ProjectsContainer() {
                             </div>
 
                             {/* Project list - consistent card style across all screen sizes */}
-                            <div className='block'>
+                            <div className='block lg:flex-grow'>
                                 <h3 className='text-brandGray-400 uppercase text-xs tracking-wider mb-2 font-medium'>
                                     Projects Overview
                                 </h3>
                                 
                                 {/* Show grid of cards on all screen sizes except small mobile */}
-                                <div className='hidden sm:grid sm:grid-cols-3 lg:grid-cols-3 gap-3 mb-4'>
+                                <div className='hidden sm:grid sm:grid-cols-3 lg:grid-cols-1 gap-3 lg:gap-2 mb-4'>
                                     {PROJECTS.map((project, index) => (
                                         <div 
                                             key={index}
@@ -142,7 +142,7 @@ export default function ProjectsContainer() {
                                                 setActiveProjectIndex(index);
                                                 setFeaturedProjectIndex(index);
                                             }}
-                                            className='transition-all duration-300 cursor-pointer p-3 rounded-lg border bg-gradient-to-br from-brandGray-800 to-brandGray-800/90 border-brandGray-700 hover:border-brandGray-600 hover:shadow-[0_4px_12px_-2px_rgba(11,163,112,0.12)] hover:translate-y-[-1px]'
+                                            className='transition-all duration-300 cursor-pointer p-3 lg:p-2.5 rounded-lg border bg-gradient-to-br from-brandGray-800 to-brandGray-800/90 border-brandGray-700 hover:border-brandGray-600 hover:shadow-[0_4px_12px_-2px_rgba(11,163,112,0.12)] hover:translate-y-[-1px]'
                                         >
                                             <div className='flex items-center justify-between'>
                                                 <span className='text-xs font-semibold text-brandOrange-400 px-2 py-0.5 rounded-md bg-brandOrange-900/30 border border-brandOrange-800/30 shadow-sm'>
