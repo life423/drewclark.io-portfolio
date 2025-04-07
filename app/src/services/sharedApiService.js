@@ -152,6 +152,9 @@ class SharedApiService {
     // Logging for debugging
     console.log("Starting queue processor");
     
+    // Clean up queue automatically every 10 seconds
+    this.cleanupInterval = setInterval(() => this.cleanupQueues(), 10000);
+    
     const processNext = async () => {
       // Avoid concurrent processing
       if (isProcessing) {
@@ -166,11 +169,25 @@ class SharedApiService {
         const category = categories[categoryIndex];
         categoryIndex = (categoryIndex + 1) % categories.length;
         
-        // Log queue sizes periodically
+        // Log queue sizes periodically, but only if they're non-empty to reduce noise
         if (categoryIndex === 0) {
-          console.log("Queue sizes:", Object.entries(this.requestQueues).map(
+          const queueInfo = Object.entries(this.requestQueues).map(
             ([cat, queue]) => `${cat}: ${queue.length}`
-          ).join(', '));
+          ).join(', ');
+          
+          // Only log if at least one queue has items
+          if (Object.values(this.requestQueues).some(queue => queue.length > 0)) {
+            console.log("Queue sizes:", queueInfo);
+            
+            // Add warning if queues are getting large
+            const totalQueueSize = Object.values(this.requestQueues)
+              .reduce((sum, queue) => sum + queue.length, 0);
+            
+            if (totalQueueSize > 20) {
+              console.warn(`Large queue size detected (${totalQueueSize} items). Performing emergency cleanup.`);
+              this.cleanupQueues(true); // Force aggressive cleanup
+            }
+          }
         }
         
         // Check rate limits
@@ -192,6 +209,17 @@ class SharedApiService {
         
         // Get the next request without removing it yet
         const request = queue[0];
+        
+        // Check if request is too old (5 minutes max wait time)
+        const now = Date.now();
+        if (now - request.createdAt > 300000) {
+          console.warn(`Request ${request.id} is too old (${Math.round((now - request.createdAt)/1000)}s), removing from queue`);
+          queue.shift(); // Remove it
+          request.reject(new Error('Request expired in queue'));
+          setTimeout(processNext, 50);
+          isProcessing = false;
+          return;
+        }
         
         // Check if request was cancelled
         if (request.signal && request.signal.aborted) {
@@ -295,6 +323,47 @@ class SharedApiService {
   isRateLimited(category) {
     const limit = this.rateLimits[category];
     return limit.count >= limit.maxPerMinute;
+  }
+  
+  /**
+   * Clean up the request queues by removing expired or stale requests
+   * @param {boolean} [aggressive=false] - Whether to perform aggressive cleanup (for emergency situations)
+   */
+  cleanupQueues(aggressive = false) {
+    const now = Date.now();
+    const maxAge = aggressive ? 10000 : 60000; // 10 seconds in aggressive mode, 1 minute otherwise
+    let cleanedCount = 0;
+    
+    // Go through each category queue
+    Object.keys(this.requestQueues).forEach(category => {
+      const queue = this.requestQueues[category];
+      const initialLength = queue.length;
+      
+      // Remove old requests
+      this.requestQueues[category] = queue.filter(request => {
+        const age = now - request.createdAt;
+        const isExpired = age > maxAge;
+        
+        if (isExpired) {
+          // Clear the timeout to prevent memory leaks
+          if (request.queueTimeoutId) {
+            clearTimeout(request.queueTimeoutId);
+          }
+          
+          // Reject the request with appropriate message
+          request.reject(new Error(`Request expired after ${Math.round(age/1000)}s in queue during cleanup`));
+          cleanedCount++;
+          return false;
+        }
+        
+        return true;
+      });
+    });
+    
+    // Only log if we actually cleaned something
+    if (cleanedCount > 0) {
+      console.log(`Queue cleanup: removed ${cleanedCount} expired requests`);
+    }
   }
   
   // Cancel a specific request if needed
