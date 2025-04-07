@@ -234,7 +234,15 @@ export async function mockAnswerProjectQuestion(projectData, question) {
     response = `This is a mock response about ${title}. You asked: "${question}". The project used ${technologies} and was designed to solve complex problems in an elegant way.`;
   }
   
-  return response;
+  // Ensure response has proper punctuation
+  let formattedResponse = response.trim();
+  
+  // Add period if missing and the text doesn't already end with punctuation
+  if (formattedResponse && !formattedResponse.match(/[.!?]$/)) {
+    formattedResponse += '.';
+  }
+  
+  return formattedResponse;
 }
 
 /**
@@ -568,7 +576,15 @@ export async function generateHeroText(contextData, options = {}) {
       // Cleanup timeout
       clearTimeout(timeoutId);
       
-      const response = data.answer || "Building elegant solutions to complex problems";
+      let response = data.answer || "Building elegant solutions to complex problems";
+      
+      // Ensure response has proper punctuation
+      response = response.trim();
+      
+      // Add period if missing and the text doesn't already end with punctuation
+      if (response && !response.match(/[.!?]$/)) {
+        response += '.';
+      }
       
       // Cache the response before returning
       heroTextCache.set(cacheKey, response);
