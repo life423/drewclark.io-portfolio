@@ -58,6 +58,7 @@ const PROJECTS = [
 export default function ProjectsContainer() {
     const [started, setStarted] = useState(false)
     const [activeProjectIndex, setActiveProjectIndex] = useState(0)
+    const [featuredProjectIndex, setFeaturedProjectIndex] = useState(0) // For magazine-style desktop layout
     const [transitionDirection, setTransitionDirection] = useState(null)
 
     const handleStart = () => {
@@ -242,6 +243,11 @@ export default function ProjectsContainer() {
                             </div>
                         </div>
                     </div>
+
+                    {/* Add chat component to welcome screen - shown below the welcome card */}
+                    <div className='mt-8 max-w-3xl mx-auto'>
+                        <UnifiedProjectChat projectsData={PROJECTS} />
+                    </div>
                 </div>
             </section>
         )
@@ -349,124 +355,100 @@ export default function ProjectsContainer() {
                             </div>
                         </div>
                         
-                        {/* On desktop - show overview card and all projects in a fixed-size grid */}
-                        <div className='hidden lg:grid grid-cols-4 gap-6 relative'>
-                            {/* Overview Card - styled like project cards */}
-                            <div className='my-4 overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transition-all duration-300 hover:shadow-lg hover:border-brandGray-600 flex flex-col h-[700px]'>
-                                <div className='p-4 border-b border-brandGray-700 bg-gradient-to-r from-brandGray-800 via-brandGray-800 to-brandBlue-900/10'>
-                                    <div className='flex items-center justify-between mb-2'>
-                                        <span className='text-sm font-semibold text-white px-2 py-1 rounded-md bg-gradient-to-r from-brandOrange-700 to-brandOrange-600 shadow-sm'>
-                                            Overview
-                                        </span>
-                                    </div>
-                                    <h2 className='text-xl font-bold mb-1 text-transparent bg-clip-text bg-gradient-to-r from-brandGreen-300 via-brandGreen-200 to-brandGreen-300'>
-                                        My Portfolio Projects
-                                    </h2>
-                                </div>
-                                
-                                <div className='p-4 flex-1 flex flex-col'>
-                                    <div className='prose prose-sm prose-invert max-w-none mb-4'>
-                                        <p>
-                                            Explore these key projects from my portfolio. Each demonstrates different skills and technologies.
-                                        </p>
-                                    </div>
-                                    
-                                    {/* Project boxes - evenly distributed with flex */}
-                                    <div className='flex flex-col flex-1 justify-evenly overflow-y-auto pr-1 py-4 scrollbar-thin scrollbar-thumb-brandGray-700 scrollbar-track-transparent'>
-                                        {PROJECTS.map((project, index) => (
-                                            <div 
-                                                key={index}
-                                                className={clsx(
-                                                    'transition-all duration-300 cursor-pointer p-4 rounded-lg border',
-                                                    activeProjectIndex === index 
-                                                        ? 'bg-brandGray-700 border-brandGreen-500/40 shadow-sm' 
-                                                        : 'bg-brandGray-800 border-brandGray-700 hover:border-brandGray-600 hover:translate-y-[-2px]'
-                                                )}
-                                                onClick={() => navigateToProject(index)}
-                                            >
-                                                <div className='flex items-center justify-between'>
-                                                    <span className='text-xs font-semibold text-brandOrange-400 px-2 py-0.5 rounded-md bg-brandOrange-900/30 border border-brandOrange-800/30'>
-                                                        #{index + 1}
-                                                    </span>
-                                                    {activeProjectIndex === index && (
-                                                        <span className='inline-block w-2 h-2 rounded-full bg-brandGreen-500'></span>
-                                                    )}
-                                                </div>
-                                                <h4 className='font-medium text-white mt-2 text-base'>
-                                                    {project.title}
-                                                </h4>
-                                                <div className='flex flex-wrap gap-1 mt-2'>
-                                                    {project.stack.slice(0, 2).map((tech, techIndex) => (
-                                                        <span
-                                                            key={techIndex}
-                                                            className='text-xs font-medium text-brandGray-300 px-2 py-0.5 rounded-full bg-brandGray-700/50'
-                                                        >
-                                                            {tech}
-                                                        </span>
-                                                    ))}
-                                                    {project.stack.length > 2 && (
-                                                        <span className='text-xs font-medium text-brandGray-300 px-2 py-0.5 rounded-full bg-brandGray-700/50'>
-                                                            +{project.stack.length - 2}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    
-                                    <button
-                                        onClick={() => setStarted(false)}
-                                        className='mt-6 w-full lg:hidden flex items-center justify-center gap-2 px-4 py-2 bg-brandGray-700 hover:bg-brandGray-600 text-white rounded-lg text-sm transition-colors duration-200'
-                                    >
-                                        <svg
-                                            xmlns='http://www.w3.org/2000/svg'
-                                            className='h-4 w-4'
-                                            viewBox='0 0 20 20'
-                                            fill='currentColor'
-                                        >
-                                            <path
-                                                fillRule='evenodd'
-                                                d='M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z'
-                                                clipRule='evenodd'
-                                            />
-                                        </svg>
-                                        Back to Overview
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            {/* Project Cards */}
-                            {PROJECTS.map((project, index) => (
-                                <div 
-                                    key={project.id}
-                                    className={clsx(
-                                        'container-type-inline-size transition-duration-300'
-                                    )}
-                                >
+                        {/* On desktop - implement magazine-style layout with 2/3 + 1/3 split */}
+                        <div className='hidden lg:block relative'>
+                            {/* Magazine-style layout with featured project (2/3) and stacked projects (1/3) */}
+                            <div className='grid grid-cols-3 gap-6'>
+                                {/* Featured project (2/3 width) */}
+                                <div className='col-span-2 transition-all duration-300'>
                                     <ProjectCard
-                                        projectNumber={index + 1}
-                                        title={project.title}
-                                        summary={project.summary}
-                                        stack={project.stack}
-                                        initialDescription={project.initialDescription}
-                                        detailedDescription={project.detailedDescription}
-                                        technicalDetails={project.technicalDetails}
-                                        challenges={project.challenges}
-                                        readme={project.readme}
+                                        projectNumber={featuredProjectIndex + 1}
+                                        title={PROJECTS[featuredProjectIndex].title}
+                                        summary={PROJECTS[featuredProjectIndex].summary}
+                                        stack={PROJECTS[featuredProjectIndex].stack}
+                                        initialDescription={PROJECTS[featuredProjectIndex].initialDescription}
+                                        detailedDescription={PROJECTS[featuredProjectIndex].detailedDescription}
+                                        technicalDetails={PROJECTS[featuredProjectIndex].technicalDetails}
+                                        challenges={PROJECTS[featuredProjectIndex].challenges}
+                                        readme={PROJECTS[featuredProjectIndex].readme}
                                         totalProjects={PROJECTS.length}
                                         onNavigateToProject={(newIndex) => {
                                             if (newIndex === -1) {
                                                 setStarted(false);
                                             } else if (newIndex >= 0) {
-                                                navigateToProject(newIndex);
+                                                setFeaturedProjectIndex(newIndex);
                                             }
                                         }}
                                         hideToc={true}
-                                        isActive={activeProjectIndex === index}
-                                        onClick={() => setActiveProjectIndex(index)}
+                                        isActive={true}
+                                        isExpanded={true}
                                     />
                                 </div>
-                            ))}
+                                
+                                {/* Stacked projects (1/3 width) */}
+                                <div className='flex flex-col gap-6'>
+                                    {/* Overview Card */}
+                                    <div className='overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transition-all duration-300 hover:shadow-lg hover:border-brandGray-600'>
+                                        <div className='p-4 border-b border-brandGray-700 bg-gradient-to-r from-brandGray-800 via-brandGray-800 to-brandBlue-900/10'>
+                                            <div className='flex items-center justify-between mb-2'>
+                                                <span className='text-sm font-semibold text-white px-2 py-1 rounded-md bg-gradient-to-r from-brandOrange-700 to-brandOrange-600 shadow-sm'>
+                                                    Overview
+                                                </span>
+                                            </div>
+                                            <h2 className='text-lg font-bold mb-1 text-transparent bg-clip-text bg-gradient-to-r from-brandGreen-300 via-brandGreen-200 to-brandGreen-300'>
+                                                My Portfolio
+                                            </h2>
+                                        </div>
+                                        
+                                        <div className='p-4'>
+                                            <div className='prose prose-sm prose-invert max-w-none'>
+                                                <p>
+                                                    Explore my key projects. Click any project to feature it in detail.
+                                                </p>
+                                            </div>
+                                            
+                                            <button
+                                                onClick={() => setStarted(false)}
+                                                className='mt-4 w-full flex items-center justify-center gap-2 px-4 py-2 bg-brandGray-700 hover:bg-brandGray-600 text-white rounded-lg text-sm transition-colors duration-200'
+                                            >
+                                                <svg
+                                                    xmlns='http://www.w3.org/2000/svg'
+                                                    className='h-4 w-4'
+                                                    viewBox='0 0 20 20'
+                                                    fill='currentColor'
+                                                >
+                                                    <path
+                                                        fillRule='evenodd'
+                                                        d='M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z'
+                                                        clipRule='evenodd'
+                                                    />
+                                                </svg>
+                                                Back to Start
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Stacked Project Cards - show only projects that aren't featured */}
+                                    {PROJECTS.map((project, index) => 
+                                        index !== featuredProjectIndex && (
+                                            <div 
+                                                key={project.id}
+                                                className="transition-all duration-300 cursor-pointer h-[320px]"
+                                                onClick={() => setFeaturedProjectIndex(index)}
+                                            >
+                                                <ProjectCard
+                                                    projectNumber={index + 1}
+                                                    title={project.title}
+                                                    summary={project.summary}
+                                                    stack={project.stack}
+                                                    hideToc={true}
+                                                    isCompact={true}
+                                                />
+                                            </div>
+                                        )
+                                    )}
+                                </div>
+                            </div>
                         </div>
 
                         {/* No desktop navigation buttons as per requirements */}

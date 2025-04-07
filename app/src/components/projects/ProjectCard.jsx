@@ -20,6 +20,8 @@ export default function ProjectCard({
     totalProjects = 3,
     hideToc = false, // Prop to hide the table of contents in the card
     isActive = false, // Whether this card is the active one
+    isExpanded = false, // Whether this card should show expanded content (for magazine layout)
+    isCompact = false, // Whether this card should show compact content (for magazine layout)
     onClick = null, // Click handler for the card
 }) {
     // Track previous project number to detect changes
@@ -96,10 +98,14 @@ export default function ProjectCard({
         <div
             ref={cardRef}
             className={clsx(
-                'my-4 @container overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transition-all duration-300 flex flex-col h-[700px]',
+                'my-4 @container overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transition-all duration-300 flex flex-col',
+                // Adjust height based on mode
+                isCompact ? 'h-full' : isExpanded ? 'h-[700px]' : 'h-[700px]',
+                // Card styles based on state
                 isActive 
                     ? 'ring-2 ring-brandGreen-500/50 shadow-xl border-brandGreen-600/30 bg-gradient-to-b from-brandGray-800 to-brandGray-850' 
                     : 'hover:shadow-lg hover:border-brandGray-600 hover:translate-y-[-2px]',
+                // Cursor if clickable
                 onClick && 'cursor-pointer'
             )}
             onClick={() => onClick && onClick()}
@@ -151,7 +157,7 @@ export default function ProjectCard({
                 </div>
             </div>
 
-            {/* Project Content */}
+            {/* Project Content - conditionally render based on mode */}
             <div
                 ref={contentRef}
                 className='p-3 @sm:p-4 @md:p-5 flex-1 flex flex-col overflow-y-auto'
@@ -168,27 +174,43 @@ export default function ProjectCard({
                         setTimeout(() => forceRecalculation(), 200)
                     }}
                 >
-                    <p>{initialDescription}</p>
+                    {/* Compact mode just shows summary */}
+                    {isCompact ? (
+                        <div>
+                            <p className="text-sm">{summary}</p>
+                            <div className="mt-4 text-xs text-brandGreen-400">
+                                Click to view detailed project information
+                            </div>
+                        </div>
+                    ) : (
+                        /* Normal/expanded mode shows full content */
+                        <>
+                            <p>{initialDescription}</p>
 
-                    <>
-                        <h3>The Challenge</h3>
-                        <p>
-                            This project presented numerous technical and design
-                            challenges that pushed our team to innovate.
-                        </p>
+                            {/* Full project details for expanded/normal cards */}
+                            {(isExpanded || !isCompact) && (
+                                <>
+                                    <h3>The Challenge</h3>
+                                    <p>{challenges || "This project presented numerous technical and design challenges that pushed our team to innovate."}</p>
 
-                        <h3>Key Innovations</h3>
-                        <ul>
-                            <li>
-                                Implemented real-time data processing pipelines
-                            </li>
-                            <li>
-                                Designed an intuitive interface for complex
-                                information
-                            </li>
-                            <li>Optimized performance for mobile devices</li>
-                        </ul>
-                    </>
+                                    <h3>Technical Details</h3>
+                                    <p>{technicalDetails || "This project showcases a variety of technical skills and innovative approaches."}</p>
+
+                                    <h3>Key Innovations</h3>
+                                    <ul>
+                                        <li>
+                                            Implemented real-time data processing pipelines
+                                        </li>
+                                        <li>
+                                            Designed an intuitive interface for complex
+                                            information
+                                        </li>
+                                        <li>Optimized performance for mobile devices</li>
+                                    </ul>
+                                </>
+                            )}
+                        </>
+                    )}
                 </div>
             </div>
 

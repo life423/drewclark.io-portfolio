@@ -24,13 +24,27 @@ export default function UnifiedProjectChat({ projectsData }) {
     const [messages, setMessages] = useState([])
     // Track if we've initialized from localStorage
     const [chatInitialized, setChatInitialized] = useState(false)
-    // Track if the chat is minimized/collapsed
-    const [isCollapsed, setIsCollapsed] = useState(false)
+    // Track if the chat is minimized/collapsed - default based on screen size
+    const [isCollapsed, setIsCollapsed] = useState(() => window.innerWidth < 1024)
+    // Track if user has manually toggled the chat state
+    const [userHasInteracted, setUserHasInteracted] = useState(false)
     // Track if clear confirmation is showing
     const [showClearConfirm, setShowClearConfirm] = useState(false)
 
     const chatInputRef = useRef(null)
     const chatContainerRef = useRef(null)
+    
+    // Update collapse state on resize if user hasn't interacted
+    useEffect(() => {
+        const handleResize = () => {
+            if (!userHasInteracted) {
+                setIsCollapsed(window.innerWidth < 1024);
+            }
+        };
+        
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, [userHasInteracted]);
 
     // Load chat history from localStorage on initial render
     useEffect(() => {
@@ -66,6 +80,7 @@ export default function UnifiedProjectChat({ projectsData }) {
     // Toggle chat collapse state
     const toggleCollapse = () => {
         setIsCollapsed(!isCollapsed)
+        setUserHasInteracted(true) // Mark that user has manually toggled the state
     }
 
     // Function to clear chat history
@@ -187,7 +202,13 @@ export default function UnifiedProjectChat({ projectsData }) {
                     transform: 'translateZ(0)',
                 }}
             >
-                <div className='flex justify-between items-center mb-4'>
+                {/* Make header clickable to toggle collapse */}
+                <div 
+                    className='flex justify-between items-center mb-4 cursor-pointer'
+                    onClick={() => {
+                        toggleCollapse();
+                    }}
+                >
                     <h3 className='text-lg font-semibold text-brandGreen-400 tracking-wide flex items-center'>
                         <svg
                             xmlns='http://www.w3.org/2000/svg'
@@ -204,7 +225,10 @@ export default function UnifiedProjectChat({ projectsData }) {
                         {/* Clear button */}
                         {messages.length > 0 && !showClearConfirm && (
                             <button
-                                onClick={() => setShowClearConfirm(true)}
+                                onClick={(e) => {
+                                    e.stopPropagation(); // Prevent toggling collapse
+                                    setShowClearConfirm(true);
+                                }}
                                 className='text-brandGray-400 hover:text-brandOrange-400 transition-colors duration-200'
                                 aria-label='Clear chat history'
                                 title='Clear chat history'
@@ -245,9 +269,12 @@ export default function UnifiedProjectChat({ projectsData }) {
                             </div>
                         )}
 
-                        {/* Collapse/Expand button */}
+                        {/* Collapse/Expand button - prevent event propagation to parent click handler */}
                         <button
-                            onClick={toggleCollapse}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                toggleCollapse();
+                            }}
                             className='text-brandGray-400 hover:text-brandGreen-400 transition-colors duration-200'
                             aria-label={
                                 isCollapsed ? 'Expand chat' : 'Collapse chat'
