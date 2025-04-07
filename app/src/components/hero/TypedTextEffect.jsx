@@ -83,9 +83,47 @@ const TypedTextEffect = ({
       const newFirstPhrase = phrases[0] || '';
       const oldFirstPhrase = prevPhrasesRef.current[0] || '';
       
-      // Compare core content (ignoring punctuation, etc)
-      const normalizePhrase = (p) => p.trim().toLowerCase().replace(/[^\w\s]/g, '');
-      const isSameContent = normalizePhrase(newFirstPhrase) === normalizePhrase(oldFirstPhrase);
+      // Enhanced similarity detection to catch near-identical phrases
+      // This handles cases where words might be hyphenated differently or minor variations
+      const normalizePhrase = (p) => {
+        // Convert to lowercase, remove punctuation, extra spaces, and standardize spacing
+        return p.trim().toLowerCase()
+          .replace(/[^\w\s]/g, '') // Remove non-alphanumeric chars (including hyphens)
+          .replace(/\s+/g, ' ')    // Standardize spacing
+          .split(' ')              // Split into words
+          .filter(w => w.length > 2 && !['the', 'and', 'that', 'this', 'with', 'for'].includes(w)) // Remove common words
+          .sort()                  // Sort words to catch reordering
+          .join(' ');              // Join back with spaces
+      };
+
+      // Check for phrase similarity
+      const calculateSimilarity = (a, b) => {
+        // Simple case: exact match after normalization
+        if (a === b) return 1.0;
+        
+        // Empty strings edge case
+        if (a.length === 0 && b.length === 0) return 1.0;
+        if (a.length === 0 || b.length === 0) return 0.0;
+        
+        // Calculate Jaccard similarity (intersection over union for words)
+        const aWords = new Set(a.split(' '));
+        const bWords = new Set(b.split(' '));
+        
+        // Find intersection and union
+        const intersection = new Set([...aWords].filter(x => bWords.has(x)));
+        const union = new Set([...aWords, ...bWords]);
+        
+        // Calculate similarity score
+        return intersection.size / union.size;
+      };
+      
+      // Normalize both phrases
+      const normalizedNew = normalizePhrase(newFirstPhrase);
+      const normalizedOld = normalizePhrase(oldFirstPhrase);
+      
+      // Calculate similarity between normalized phrases - threshold at 0.7 (70%)
+      const similarityScore = calculateSimilarity(normalizedNew, normalizedOld);
+      const isSameContent = similarityScore > 0.7; // Phrases are considered the same if 70%+ similar
       
       if (!isSameContent) {
         setCurrentPhraseIndex(0);
@@ -162,10 +200,66 @@ const TypedTextEffect = ({
           if (phrases.length <= 1) {
             setCurrentPhraseIndex(0);
           } else {
-            // Choose next phrase (avoiding the same one we just showed)
+            // Choose next phrase (avoiding similar phrases)
             setCurrentPhraseIndex(prevIndex => {
-              // If more than two phrases, avoid repeating the same one
+              // Helper functions for phrase similarity detection
+              const normalizePhrase = (p) => {
+                // Convert to lowercase, remove punctuation, extra spaces, and standardize spacing
+                return p.trim().toLowerCase()
+                  .replace(/[^\w\s]/g, '') // Remove non-alphanumeric chars (including hyphens)
+                  .replace(/\s+/g, ' ')    // Standardize spacing
+                  .split(' ')              // Split into words
+                  .filter(w => w.length > 2 && !['the', 'and', 'that', 'this', 'with', 'for'].includes(w)) // Remove common words
+                  .sort()                  // Sort words to catch reordering
+                  .join(' ');              // Join back with spaces
+              };
+
+              const calculateSimilarity = (a, b) => {
+                // Simple case: exact match after normalization
+                if (a === b) return 1.0;
+                
+                // Empty strings edge case
+                if (a.length === 0 && b.length === 0) return 1.0;
+                if (a.length === 0 || b.length === 0) return 0.0;
+                
+                // Calculate Jaccard similarity (intersection over union for words)
+                const aWords = new Set(a.split(' '));
+                const bWords = new Set(b.split(' '));
+                
+                // Find intersection and union
+                const intersection = new Set([...aWords].filter(x => bWords.has(x)));
+                const union = new Set([...aWords, ...bWords]);
+                
+                // Calculate similarity score
+                return intersection.size / union.size;
+              };
+              
+              // If more than two phrases, try to find a dissimilar one
               if (phrases.length > 2) {
+                const currentPhrase = phrases[prevIndex] || '';
+                const normalizedCurrent = normalizePhrase(currentPhrase);
+                
+                // Try up to 10 random selections to find a dissimilar phrase
+                for (let attempt = 0; attempt < 10; attempt++) {
+                  const newIndex = Math.floor(Math.random() * phrases.length);
+                  
+                  // Skip if it's the same index
+                  if (newIndex === prevIndex) continue;
+                  
+                  const candidatePhrase = phrases[newIndex] || '';
+                  const normalizedCandidate = normalizePhrase(candidatePhrase);
+                  
+                  // Calculate similarity
+                  const similarityScore = calculateSimilarity(normalizedCurrent, normalizedCandidate);
+                  
+                  // If similarity is below 70%, use this phrase
+                  if (similarityScore < 0.7) {
+                    return newIndex;
+                  }
+                }
+                
+                // If we couldn't find a dissimilar phrase after multiple attempts,
+                // just use a different index
                 let newIndex;
                 do {
                   newIndex = Math.floor(Math.random() * phrases.length);
