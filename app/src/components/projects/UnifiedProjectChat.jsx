@@ -109,6 +109,10 @@ export default function UnifiedProjectChat({ projectsData }) {
         e.preventDefault()
 
         if (!userQuestion.trim()) return
+        
+        // Ensure chat is expanded when user submits a question
+        setIsCollapsed(false)
+        setUserHasInteracted(true)
 
         // Add user question to the messages array
         setMessages(prev => [...prev, { role: 'user', content: userQuestion }])
