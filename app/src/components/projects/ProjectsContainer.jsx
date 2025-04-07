@@ -126,38 +126,22 @@ export default function ProjectsContainer() {
                                 </p>
                             </div>
 
-                            {/* Project list - displayed differently based on screen size */}
-                            <div className='lg:block hidden'>
-                                {/* On desktop: Simple vertical list */}
-                                <div className='space-y-1 sm:space-y-2 mb-4 sm:mb-6 md:mb-8 text-xs sm:text-sm'>
-                                    <h3 className='text-brandGray-400 uppercase text-xs tracking-wider mb-2 md:mb-3'>
-                                        Coming Up
-                                    </h3>
-                                    {PROJECTS.map((project, index) => (
-                                        <div
-                                            key={index}
-                                            className='flex items-center text-brandGray-300 hover:text-brandGreen-400 transition-colors duration-200'
-                                        >
-                                            <span className='text-brandOrange-500 font-semibold mr-2'>
-                                                Project {index + 1}:
-                                            </span>
-                                            <span>{project.title}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* On tablet and mobile: Premium card-style projects similar to desktop project overview */}
-                            <div className='lg:hidden block'>
+                            {/* Project list - consistent card style across all screen sizes */}
+                            <div className='block'>
                                 <h3 className='text-brandGray-400 uppercase text-xs tracking-wider mb-2 font-medium'>
                                     Projects Overview
                                 </h3>
                                 
-                                {/* On tablets - show 3 cards in a row */}
-                                <div className='hidden sm:grid sm:grid-cols-3 gap-3 mb-4'>
+                                {/* Show grid of cards on all screen sizes except small mobile */}
+                                <div className='hidden sm:grid sm:grid-cols-3 lg:grid-cols-3 gap-3 mb-4'>
                                     {PROJECTS.map((project, index) => (
                                         <div 
                                             key={index}
+                                            onClick={() => {
+                                                setStarted(true);
+                                                setActiveProjectIndex(index);
+                                                setFeaturedProjectIndex(index);
+                                            }}
                                             className='transition-all duration-300 cursor-pointer p-3 rounded-lg border bg-gradient-to-br from-brandGray-800 to-brandGray-800/90 border-brandGray-700 hover:border-brandGray-600 hover:shadow-[0_4px_12px_-2px_rgba(11,163,112,0.12)] hover:translate-y-[-1px]'
                                         >
                                             <div className='flex items-center justify-between'>
@@ -193,6 +177,11 @@ export default function ProjectsContainer() {
                                     {PROJECTS.map((project, index) => (
                                         <div 
                                             key={index}
+                                            onClick={() => {
+                                                setStarted(true);
+                                                setActiveProjectIndex(index);
+                                                setFeaturedProjectIndex(index);
+                                            }}
                                             className='transition-all duration-300 cursor-pointer p-2 rounded-lg border bg-gradient-to-r from-brandGray-800 to-brandGray-800/90 border-brandGray-700 hover:border-brandGray-600'
                                         >
                                             <div className='flex items-center justify-between'>
