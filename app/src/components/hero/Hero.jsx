@@ -331,6 +331,8 @@ export default function Hero() {
                                     pauseTime={5000}
                                     active={heroIsInView && !isGenerating}
                                     className="transition-opacity duration-300"
+                                    stableViewingPeriod={10000} // 10 seconds of stable viewing before changing
+                                    scrollIdlePeriod={3000} // 3 seconds of scroll inactivity before change
                                 />
                             )}
                         </p>
