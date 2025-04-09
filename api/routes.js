@@ -272,8 +272,14 @@ router.post('/admin/repositories/process', async (req, res) => {
     }
 });
 
-// Health check endpoint for diagnosing deployment issues
-router.get('/health', (req, res) => {
+// Import health check routes
+const healthRoutes = require('./routes/health');
+
+// Mount health check routes
+router.use('/health', healthRoutes);
+
+// Legacy health check endpoint (simple version, kept for backward compatibility)
+router.get('/health/legacy', (req, res) => {
     try {
         // Collect basic system info
         const uptime = process.uptime()
