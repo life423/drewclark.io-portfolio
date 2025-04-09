@@ -7,6 +7,7 @@
 
 const OpenAI = require('openai');
 const config = require('./config');
+const codeContextService = require('./services/codeContext/codeContextService');
 
 /**
  * Enhanced LRU cache implementation with size limits
@@ -139,11 +140,38 @@ function handleGetRequest(createResponse, headers, logInfo) {
   logInfo('Handling GET request (health check)');
   return createResponse(200, headers, {
     message: 'askGPT is alive! Use POST with a JSON body containing a "question" field.',
-    version: '1.1.0',
+    version: '1.2.0',
     environment: process.env.NODE_ENV || 'unknown',
     timestamp: new Date().toISOString(),
     openAiInitError: openAiInitError // Will be null if no initialization errors occurred
   });
+}
+
+/**
+ * Extract GitHub repository URL from a question
+ * @param {string} question - User question
+ * @returns {string|null} GitHub repository URL or null if not found
+ */
+function extractRepositoryUrl(question) {
+  // Simple pattern to extract GitHub URLs
+  const githubUrlPattern = /(https:\/\/github\.com\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9_.-]+)/g;
+  const matches = question.match(githubUrlPattern);
+  
+  if (matches && matches.length > 0) {
+    return matches[0]; // Return the first match
+  }
+  
+  // Always include portfolio repo URL if not explicitly mentioned
+  // This ensures we have context about our own app
+  if (question.toLowerCase().includes('portfolio') || 
+      question.toLowerCase().includes('drewclark.io') || 
+      question.toLowerCase().includes('this project') || 
+      question.toLowerCase().includes('this app') ||
+      question.toLowerCase().includes('this website')) {
+    return 'https://github.com/life423/drewclark.io-portfolio';
+  }
+  
+  return null;
 }
 
 // Handle POST request (main functionality)
@@ -195,14 +223,50 @@ async function handlePostRequest(req, createResponse, headers, { logInfo, logErr
 
   logInfo(`Using model: ${modelName}, temperature: ${temperature}, maxTokens: ${maxTokens}`);
 
+  // Enhanced with repository context if available
+  let enhancedQuestion = userQuestion;
+  let repositoryUrl = req.body.repositoryUrl;
+  let usingRepoContext = false;
+
+  // Check if a repository URL was provided or can be extracted from the question
+  if (!repositoryUrl) {
+    repositoryUrl = extractRepositoryUrl(userQuestion);
+  }
+
+  // For the projects endpoint, we always want to check for repository context
+  if (feature === 'projects' && repositoryUrl) {
+    try {
+      logInfo(`Enhancing question with context from repository: ${repositoryUrl}`);
+      
+      // This will add code context to the question
+      const questionWithContext = await codeContextService.enhanceQuestionWithCodeContext(
+        userQuestion,
+        repositoryUrl,
+        3 // Limit to 3 code snippets
+      );
+      
+      if (questionWithContext !== userQuestion) {
+        enhancedQuestion = questionWithContext;
+        usingRepoContext = true;
+        logInfo('Successfully enhanced question with repository code context');
+      } else {
+        logInfo('No relevant code context found for this question');
+      }
+    } catch (error) {
+      logWarn(`Failed to enhance question with code context: ${error.message}`);
+      // Continue with the original question if enhancement fails
+    }
+  }
+
   // Check cache for identical questions (with same parameters)
-  const cacheKey = `${userQuestion}|${modelName}|${temperature}|${maxTokens}`;
+  const cacheKey = `${userQuestion}|${modelName}|${temperature}|${maxTokens}|${repositoryUrl || ''}`;
   const cachedResponse = checkCache(cacheKey);
   if (cachedResponse) {
     logInfo('Cache hit for question');
     return createResponse(200, headers, {
       answer: cachedResponse,
-      cached: true
+      cached: true,
+      repositoryContext: usingRepoContext ? repositoryUrl : undefined
     });
   }
 
@@ -221,7 +285,8 @@ async function handlePostRequest(req, createResponse, headers, { logInfo, logErr
       debug: {
         environment: process.env.NODE_ENV || 'not set',
         hasApiKey: !!apiKey,
-        error: errorMsg
+        error: errorMsg,
+        usingRepoContext: usingRepoContext
       }
     });
   }
@@ -267,16 +332,21 @@ async function handlePostRequest(req, createResponse, headers, { logInfo, logErr
     let response;
 
     try {
+      // Create system prompt based on whether we're using repository context
+      const systemPrompt = usingRepoContext 
+        ? "You are a helpful assistant answering questions for Drew Clark's portfolio website visitors. You have been provided with relevant code snippets from the repository to help answer questions about the code. Refer to these code snippets when answering questions about how the code works. Keep responses concise, informative, and friendly."
+        : "You are a helpful assistant answering questions for Drew Clark's portfolio website visitors. Keep responses concise, informative, and friendly.";
+
       response = await openai.chat.completions.create({
         model: modelName,
         messages: [
           {
             role: 'system',
-            content: "You are a helpful assistant answering questions for Drew Clark's portfolio website visitors. Keep responses concise, informative, and friendly."
+            content: systemPrompt
           },
           {
             role: 'user',
-            content: userQuestion
+            content: enhancedQuestion
           }
         ],
         max_tokens: maxTokens,
@@ -314,8 +384,10 @@ async function handlePostRequest(req, createResponse, headers, { logInfo, logErr
     // Return the answer
     return createResponse(200, headers, {
       answer,
+      repositoryContext: usingRepoContext ? repositoryUrl : undefined,
       metrics: {
-        apiCallDurationMs: apiCallDuration
+        apiCallDurationMs: apiCallDuration,
+        enhancedPrompt: usingRepoContext
       }
     });
   } catch (error) {
