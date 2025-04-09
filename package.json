@@ -25,6 +25,7 @@
     "helmet": "^7.1.0",
     "openai": "^4.93.0",
     "path": "^0.12.7",
+    "rimraf": "^6.0.1",
     "simple-git": "^3.27.0"
   },
   "devDependencies": {
