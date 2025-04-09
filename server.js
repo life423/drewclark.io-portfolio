@@ -186,4 +186,10 @@ app.listen(PORT, HOST, () => {
     console.log(
         `OpenAI API Key: ${config.openAiApiKey ? 'Configured' : 'Missing'}`
     )
+    
+    // Log environment variables for debugging
+    console.log('Environment variables:')
+    console.log('ADMIN_ACCESS_TOKEN:', process.env.ADMIN_ACCESS_TOKEN ? `Configured (${process.env.ADMIN_ACCESS_TOKEN.length} chars)` : 'Missing')
+    console.log('NODE_ENV:', process.env.NODE_ENV)
+    console.log('PORT:', process.env.PORT)
 })

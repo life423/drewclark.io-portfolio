@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import logger from './utils/logger';
+import ContactMessagesAdmin from './components/admin/ContactMessagesAdmin';
 
 // Create a module-specific logger
 const log = logger.getLogger('Main');
@@ -86,11 +87,31 @@ const OfflineNotification = () => {
   );
 };
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
+// Simple routing to determine which component to render
+function Root() {
+  const path = window.location.pathname;
+  
+  // Check if we're on the admin messages page
+  if (path === '/admin-messages') {
+    return (
+      <>
+        <ContactMessagesAdmin />
+        <OfflineNotification />
+      </>
+    );
+  }
+  
+  // Otherwise render the main app
+  return (
     <>
       <App />
       <OfflineNotification />
     </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <Root />
   </React.StrictMode>
 );

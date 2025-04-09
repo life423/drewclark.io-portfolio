@@ -59,7 +59,7 @@ export default function EmailContactModal({ isOpen, onClose }) {
     };
 
     // Handle form submission
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         
         if (!isEmailValid(email)) {
@@ -69,17 +69,27 @@ export default function EmailContactModal({ isOpen, onClose }) {
 
         setIsSubmitting(true);
         
-        // Simulate email sending (in a real app, this would be an API call)
-        setTimeout(() => {
-            // Create a mailto link and click it
-            const mailtoLink = `mailto:drew@drewclark.io?subject=Portfolio Contact from ${encodeURIComponent(name)}&body=${encodeURIComponent(message)}%0A%0AFrom: ${encodeURIComponent(name)}%0AEmail: ${encodeURIComponent(email)}`;
+        try {
+            // Submit to our API endpoint
+            const response = await fetch('/api/contact', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name,
+                    email,
+                    message
+                })
+            });
             
-            // Create and click a temporary link
-            const tempLink = document.createElement('a');
-            tempLink.href = mailtoLink;
-            tempLink.target = '_blank';
-            tempLink.click();
+            const data = await response.json();
             
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to send message');
+            }
+            
+            // Success!
             setIsSubmitting(false);
             setSubmitStatus('success');
             
@@ -87,7 +97,13 @@ export default function EmailContactModal({ isOpen, onClose }) {
             setTimeout(() => {
                 onClose();
             }, 2000);
-        }, 1000);
+        } catch (error) {
+            console.error('Error sending message:', error);
+            setIsSubmitting(false);
+            setSubmitStatus('error');
+            // Display a more detailed error if available
+            alert(`Failed to send message: ${error.message}`);
+        }
     };
 
     if (!isOpen) return null;
@@ -144,7 +160,7 @@ export default function EmailContactModal({ isOpen, onClose }) {
                                     </svg>
                                 </div>
                                 <h3 className="text-lg font-medium text-white mb-2">Message Sent!</h3>
-                                <p className="text-brandGray-300">Your email client should be opening now. Thanks for reaching out!</p>
+                                <p className="text-brandGray-300">Thank you for your message! I'll get back to you soon.</p>
                             </div>
                         ) : (
                             <form onSubmit={handleSubmit} className="space-y-4">
@@ -236,7 +252,7 @@ export default function EmailContactModal({ isOpen, onClose }) {
                                 ) : "Send Message"}
                             </button>
                             <p className="text-xs text-center text-brandGray-400 mt-2">
-                                This will open your default email app
+                                Your message will be saved securely
                             </p>
                         </div>
                     )}
