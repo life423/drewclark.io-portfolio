@@ -74,6 +74,29 @@ const config = {
   // CORS settings
   corsOrigins: process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : ['*'],
   
+  // Vector Database Configuration
+  vectorDb: {
+    url: process.env.VECTOR_DB_URL || 'http://localhost:6333',
+    embeddingModel: 'text-embedding-ada-002',
+    collections: {
+      codeEmbeddings: 'code_embeddings',
+      documentEmbeddings: 'document_embeddings',
+      commitEmbeddings: 'commit_embeddings'
+    },
+    dimensions: 1536, // OpenAI Ada embedding dimension
+    updateIntervalMs: 3600000, // How often to check for repository updates (1 hour)
+  },
+  
+  // Repository Storage Configuration
+  repositories: {
+    // Default repositories to always include
+    defaultRepos: [
+      'https://github.com/life423/drewclark.io-portfolio'
+    ],
+    // How often to sync repositories with GitHub (1 hour)
+    syncIntervalMs: 3600000,
+  },
+  
   // Logging
   isDevelopment: process.env.NODE_ENV !== 'production',
   logLevel: process.env.NODE_ENV === 'production' ? 'info' : 'debug',

@@ -4,6 +4,7 @@ const os = require('os')
 const path = require('path')
 const { handleRequest } = require('./unified-server')
 const contactHandler = require('./contact-handler')
+const { updateAllRepositories, processRepository } = require('./services/scheduler/repositoryUpdateService')
 
 // Helper function to create response adapter
 const createResponseAdapter = (res) => {
@@ -194,6 +195,81 @@ router.get('/admin/generate-token', (req, res) => {
         message: 'Store this token securely and add it to your environment variables as ADMIN_ACCESS_TOKEN',
         token
     });
+});
+
+// Repository management endpoints
+router.post('/admin/repositories/update', async (req, res) => {
+    try {
+        const { token } = req.body;
+        
+        // Verify admin token
+        if (!contactHandler.verifyAdminToken(token)) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+        
+        console.log('Manually triggering repository update...');
+        
+        // Start the update process
+        updateAllRepositories()
+            .then(results => {
+                console.log('Repository update job completed.');
+            })
+            .catch(error => {
+                console.error('Error in repository update:', error);
+            });
+        
+        // Return immediate success since this is a long-running operation
+        res.status(200).json({ 
+            success: true, 
+            message: 'Repository update job started. Check server logs for progress.'
+        });
+    } catch (error) {
+        console.error('Repository update error:', error);
+        res.status(500).json({ 
+            error: 'Server error updating repositories',
+            message: error.message
+        });
+    }
+});
+
+// Process a specific repository
+router.post('/admin/repositories/process', async (req, res) => {
+    try {
+        const { token, repositoryUrl } = req.body;
+        
+        // Validate input
+        if (!repositoryUrl) {
+            return res.status(400).json({ error: 'Missing repository URL' });
+        }
+        
+        // Verify admin token
+        if (!contactHandler.verifyAdminToken(token)) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+        
+        console.log(`Manually processing repository: ${repositoryUrl}`);
+        
+        // Process the specified repository
+        processRepository(repositoryUrl)
+            .then(result => {
+                console.log(`Repository processing completed: ${result.success ? 'Success' : 'Failed'}`);
+            })
+            .catch(error => {
+                console.error(`Error processing repository ${repositoryUrl}:`, error);
+            });
+        
+        // Return immediate success since this is a long-running operation
+        res.status(200).json({ 
+            success: true, 
+            message: `Processing of repository ${repositoryUrl} started. Check server logs for progress.`
+        });
+    } catch (error) {
+        console.error('Repository processing error:', error);
+        res.status(500).json({ 
+            error: 'Server error processing repository',
+            message: error.message
+        });
+    }
 });
 
 // Health check endpoint for diagnosing deployment issues
