@@ -4,21 +4,25 @@
  * Follows accessibility best practices for modal dialogs
  */
 import React, { useEffect, useRef, useCallback, memo, useState } from 'react'
-import { LuX } from 'react-icons/lu'
+import { LuX, LuMail } from 'react-icons/lu'
 import clsx from 'clsx'
 import useLockBodyScroll from '../../hooks/useLockBodyScroll'
+import EmailContactModal from './EmailContactModal'
 
-// Navigation links without icons for now
-const navigationLinks = [
-    { id: 'home', label: 'Home', href: '#' },
-    { id: 'projects', label: 'Projects', href: '#projects' },
-    { id: 'contact', label: 'Contact', href: '#contact' }
+// Suggested questions for AI assistant (removed navigationLinks as requested)
+
+// Suggested questions for AI assistant
+const suggestedQuestions = [
+    { id: 'site-built', icon: '🔎', question: 'How was this site built?' },
+    { id: 'ai-project', icon: '🪴', question: 'What project uses AI?' },
+    { id: 'coolest-design', icon: '👾', question: 'Which project has the coolest design?' }
 ]
 
 // Memoize the Drawer for performance
 const Drawer = memo(function Drawer({ isOpen, onClose }) {
     const drawerRef = useRef(null)
     const closeButtonRef = useRef(null)
+    const [isContactModalOpen, setIsContactModalOpen] = useState(false)
 
     // Use our enhanced hook to lock body scroll - this replaces the manual scroll locking
     useLockBodyScroll(isOpen)
@@ -161,53 +165,100 @@ const Drawer = memo(function Drawer({ isOpen, onClose }) {
                     </p>
                 </div>
 
-                {/* Scrollable Navigation content */}
+                    {/* Main Drawer Content - Ask the Portfolio */}
                 <div className='flex-1 overflow-y-auto overscroll-contain'>
-                    <nav aria-label='Mobile navigation' className='px-4 pb-20'>
-                        <ul className='flex flex-col space-y-3 mt-4'>
-                            {navigationLinks.map((item, index) => (
-                                <li
-                                    key={item.id}
-                                    className='opacity-0'
-                                    style={{
-                                        animation: isOpen
-                                            ? 'fadeIn 0.3s ease-out forwards'
-                                            : 'none',
-                                        animationDelay: isOpen
-                                            ? `${index * 80 + 50}ms`
-                                            : '0ms'
+                    <div className='mt-2 px-4 pb-20'>
+                        <div 
+                            className='p-3 rounded-lg border border-brandGray-700/50 bg-brandGray-800/30'
+                            style={{
+                                animation: isOpen ? 'fadeIn 0.4s ease-out forwards' : 'none',
+                                animationDelay: isOpen ? '280ms' : '0ms',
+                                opacity: 0
+                            }}
+                        >
+                            <h3 className='text-sm font-medium text-brandGreen-300 flex items-center mb-3'>
+                                <span className='mr-2 text-lg'>💬</span>
+                                Ask the Portfolio
+                            </h3>
+                            
+                            <p className='text-xs text-brandGray-300 mb-3'>
+                                Get quick answers about my projects and skills
+                            </p>
+                            
+                            <ul className='space-y-2'>
+                                {suggestedQuestions.map((item, index) => (
+                                    <li key={item.id}>
+                                        <button
+                                            className='block w-full text-left px-3 py-2 text-sm text-white bg-brandGray-700/50 hover:bg-brandGray-700 
+                                                      rounded-md transition-colors border border-brandGray-600/30'
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                // Store the question in sessionStorage for UnifiedProjectChat to pick up
+                                                sessionStorage.setItem('drawer_question', item.question);
+                                                sessionStorage.setItem('drawer_question_timestamp', Date.now().toString());
+                                                
+                                                // Close the drawer
+                                                onClose();
+                                                
+                                                // Wait for drawer close animation, then scroll
+                                                setTimeout(() => {
+                                                    const projectsSection = document.querySelector('#projects');
+                                                    if (projectsSection) {
+                                                        projectsSection.scrollIntoView({ behavior: 'smooth' });
+                                                    }
+                                                }, 350); // Slightly longer than the drawer transition
+                                            }}
+                                        >
+                                            <span className='mr-2'>{item.icon}</span>
+                                            {item.question}
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                            
+                            <div className='mt-3'>
+                                <a
+                                    href='#projects'
+                                    className='flex items-center justify-center text-xs text-brandGreen-400 hover:text-brandGreen-300'
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        onClose();
                                     }}
                                 >
-                                    <a
-                                        href={item.href}
-                                        onClick={onClose}
-                                        className='flex items-center px-4 py-3 text-white hover:bg-brandGray-700/40
-                                                hover:text-brandGreen-300 transition-colors rounded-md'
-                                    >
-                                        {item.label}
-                                    </a>
-                                </li>
-                            ))}
-                        </ul>
-                    </nav>
-
-                    {/* Navigation ends here */}
+                                    <span>Or ask your own question in the chat below</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Footer - Call to action */}
                 <div className='sticky bottom-0 px-4 py-4 border-t border-brandGray-700/30 bg-gradient-to-b from-brandGray-800 to-brandGray-900'>
-                    <a
-                        href='#contact'
-                        onClick={onClose}
+                    <button
+                        onClick={() => setIsContactModalOpen(true)}
                         className='block w-full py-2 px-4 bg-brandGreen-500 hover:bg-brandGreen-600
-                                 text-white text-center rounded-md transition-colors'
+                                 text-white text-center rounded-md transition-colors flex items-center justify-center'
                         style={{
                             paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom, 0px))'
                         }}
                     >
+                        <LuMail className="w-4 h-4 mr-2" />
                         Get in touch
-                    </a>
+                    </button>
                 </div>
+                
+                {/* Email Contact Modal */}
+                <EmailContactModal 
+                    isOpen={isContactModalOpen} 
+                    onClose={() => {
+                        setIsContactModalOpen(false);
+                        // Optional - can also close drawer when modal is closed
+                        // onClose();
+                    }} 
+                />
             </div>
         </>
     )
