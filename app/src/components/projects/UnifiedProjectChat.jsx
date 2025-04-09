@@ -34,6 +34,51 @@ export default function UnifiedProjectChat({ projectsData }) {
     const chatInputRef = useRef(null)
     const chatContainerRef = useRef(null)
     
+    // Check for questions coming from the drawer - using interval for reliability
+    useEffect(() => {
+        const checkDrawerQuestion = () => {
+            const drawerQuestion = sessionStorage.getItem('drawer_question')
+            const timestamp = sessionStorage.getItem('drawer_question_timestamp')
+            
+            if (drawerQuestion && timestamp) {
+                // Only process if timestamp is recent (within last 5 seconds)
+                const now = Date.now()
+                const questionTime = parseInt(timestamp, 10)
+                
+                if (now - questionTime < 5000) {
+                    console.log('Processing drawer question:', drawerQuestion)
+                    
+                    // Clear from session storage
+                    sessionStorage.removeItem('drawer_question')
+                    sessionStorage.removeItem('drawer_question_timestamp')
+                    
+                    // Set the question and expand the chat
+                    setUserQuestion(drawerQuestion)
+                    setIsCollapsed(false)
+                    setUserHasInteracted(true)
+                    
+                    // Submit the question after a short delay to allow UI to update
+                    setTimeout(() => {
+                        if (chatInputRef.current && chatInputRef.current.form) {
+                            const submitEvent = new Event('submit', { cancelable: true, bubbles: true })
+                            chatInputRef.current.form.dispatchEvent(submitEvent)
+                        }
+                    }, 300)
+                }
+            }
+        }
+        
+        // Initial check on mount
+        checkDrawerQuestion()
+        
+        // Set up interval to check periodically
+        const intervalId = setInterval(checkDrawerQuestion, 1000)
+        
+        return () => {
+            clearInterval(intervalId)
+        }
+    }, [])
+    
     // Update collapse state on resize if user hasn't interacted
     useEffect(() => {
         const handleResize = () => {
