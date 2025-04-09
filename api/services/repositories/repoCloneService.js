@@ -4,9 +4,43 @@
  * Handles cloning and updating repositories from GitHub for code analysis.
  */
 const simpleGit = require('simple-git');
+const path = require('path');
 const fs = require('fs').promises;
+const fsSync = require('fs');
+const rimraf = require('rimraf');
 const { getRepositoryPath, ensureRepoStorage, repositoryExists } = require('./repoStorageService');
 const { extractRepoInfo } = require('../../github-utils');
+
+// Timeout for git operations (5 minutes)
+const GIT_OPERATION_TIMEOUT = 300000;
+
+/**
+ * Recursively removes a directory and its contents
+ * @param {string} dirPath - Path to the directory to delete
+ */
+async function cleanDirectory(dirPath) {
+  try {
+    // Check if directory exists first
+    const exists = fsSync.existsSync(dirPath);
+    if (exists) {
+      console.log(`Cleaning up directory: ${dirPath}`);
+      
+      // Use rimraf as a callback function
+      return new Promise((resolve, reject) => {
+        rimraf(dirPath, (err) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve();
+          }
+        });
+      });
+    }
+  } catch (error) {
+    console.error(`Error cleaning directory ${dirPath}:`, error);
+    // Continue execution despite error
+  }
+}
 
 /**
  * Clones or updates a repository from GitHub
@@ -14,9 +48,12 @@ const { extractRepoInfo } = require('../../github-utils');
  * @returns {Promise<{owner: string, repo: string, path: string}>} Repository info
  */
 async function cloneOrUpdateRepository(repoUrl) {
+  let repoInfo = null;
+  let repoPath = null;
+  
   try {
     // Extract repository information from URL
-    const repoInfo = extractRepoInfo(repoUrl);
+    repoInfo = extractRepoInfo(repoUrl);
     if (!repoInfo) {
       throw new Error(`Invalid repository URL: ${repoUrl}`);
     }
@@ -27,7 +64,7 @@ async function cloneOrUpdateRepository(repoUrl) {
     await ensureRepoStorage();
     
     // Get path for this repository
-    const repoPath = getRepositoryPath(owner, repo);
+    repoPath = getRepositoryPath(owner, repo);
     
     // Check if repository already exists
     const exists = await repositoryExists(owner, repo);
@@ -35,7 +72,15 @@ async function cloneOrUpdateRepository(repoUrl) {
     if (exists) {
       console.log(`Updating existing repository: ${owner}/${repo}`);
       // Repository exists, update it
-      const git = simpleGit(repoPath);
+      const git = simpleGit({
+        baseDir: repoPath,
+        binary: 'git',
+        maxConcurrentProcesses: 1,
+        trimmed: false,
+        timeout: {
+          block: GIT_OPERATION_TIMEOUT
+        }
+      });
       
       try {
         // Fetch latest changes
@@ -56,10 +101,34 @@ async function cloneOrUpdateRepository(repoUrl) {
         // Continue with existing repo state
       }
     } else {
+      // If a failed clone left a partial directory, clean it up first
+      await cleanDirectory(repoPath);
+      
       console.log(`Cloning new repository: ${owner}/${repo}`);
       // Repository doesn't exist, clone it
-      await simpleGit().clone(`https://github.com/${owner}/${repo}.git`, repoPath);
-      console.log(`Successfully cloned ${owner}/${repo}`);
+      const git = simpleGit({
+        binary: 'git',
+        maxConcurrentProcesses: 1,
+        trimmed: false,
+        timeout: {
+          block: GIT_OPERATION_TIMEOUT
+        }
+      });
+      
+      try {
+        // Create parent directory if it doesn't exist
+        const parentDir = path.dirname(repoPath);
+        await fs.mkdir(parentDir, { recursive: true });
+        
+        // Clone with timeout
+        await git.clone(`https://github.com/${owner}/${repo}.git`, repoPath);
+        console.log(`Successfully cloned ${owner}/${repo}`);
+      } catch (error) {
+        console.error(`Error cloning repository ${owner}/${repo}:`, error);
+        // Clean up any partial clone
+        await cleanDirectory(repoPath);
+        throw error;
+      }
     }
     
     return {
