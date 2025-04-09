@@ -17,7 +17,7 @@ const config = require('../../config');
  * @param {number} limit - Maximum number of code snippets to include
  * @returns {Promise<string>} - Enhanced question with code context
  */
-async function enhanceQuestionWithCodeContext(question, repoUrl, limit = 3) {
+async function enhanceQuestionWithCodeContext(question, repoUrl, limit = 8) {
   try {
     if (!question || !repoUrl) {
       return question;

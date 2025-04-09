@@ -5,65 +5,17 @@
  * retrieving code embeddings.
  */
 const { QdrantClient } = require('@qdrant/js-client-rest');
-const { v4: uuidv4 } = require('uuid');
 const config = require('../../config');
-
-/**
- * Generate a deterministic ID for a vector point that's consistent for the same input
- * @param {string} repository - Repository identifier
- * @param {string} path - Path or other identifier
- * @returns {string} - MD5 hash string
- */
-function generatePointId(repository, path) {
-  // Use deterministic IDs based on content for consistent incremental updates
-  const crypto = require('crypto');
-  const hash = crypto.createHash('md5').update(`${repository}-${path}`).digest('hex');
-  return hash;
-}
 
 /**
  * Vector Database Service class that handles communication with Qdrant
  */
 class QdrantService {
-  /**
-   * Create a new QdrantService instance
-   */
   constructor() {
-    this.validateConfig();
     this.client = null;
     this.collections = config.vectorDb.collections;
     this.dimensions = config.vectorDb.dimensions;
     this.initialized = false;
-    this.useMock = false;
-    this.maxRetries = config.vectorDb.maxRetries || 3;
-    this.retryDelay = config.vectorDb.retryDelay || 1000;
-  }
-
-  /**
-   * Validate required configuration
-   * @throws {Error} If required configuration is missing
-   */
-  validateConfig() {
-    // Check required vector DB configuration
-    if (!config.vectorDb || !config.vectorDb.url) {
-      console.warn('Missing vector database URL in configuration');
-      return;
-    }
-
-    // Check required collections
-    const required = ['url', 'collections', 'dimensions'];
-    const missing = required.filter(key => !config.vectorDb[key]);
-    
-    if (missing.length > 0) {
-      throw new Error(`Missing required vector database configuration: ${missing.join(', ')}`);
-    }
-
-    // Check collection names
-    if (!config.vectorDb.collections.codeEmbeddings ||
-        !config.vectorDb.collections.documentEmbeddings ||
-        !config.vectorDb.collections.commitEmbeddings) {
-      throw new Error('Missing required vector database collection configurations');
-    }
   }
 
   /**
@@ -80,8 +32,7 @@ class QdrantService {
       
       // Create Qdrant client
       this.client = new QdrantClient({ 
-        url: config.vectorDb.url,
-        timeout: config.vectorDb.timeout || 15000 // 15 second timeout by default
+        url: config.vectorDb.url 
       });
 
       // For development/testing, skip connection test if no Qdrant server is running
@@ -122,162 +73,84 @@ class QdrantService {
 
   /**
    * Test the connection to the Qdrant server
-   * @returns {Promise<boolean>} Connection status
+   * @returns {Promise<void>}
    */
   async testConnection() {
     try {
-      const healthCheck = await this.client.getCollections();
-      if (!healthCheck) throw new Error('No response from Qdrant');
-      return true;
+      // Use a basic API call to test connection
+      // The health endpoint may not be available in all versions
+      await this.client.getCollections();
     } catch (error) {
-      console.error('Qdrant connection test failed:', error.message);
-      if (config.isDevelopment) {
-        console.warn('Falling back to mock implementation in development mode');
-        this.useMock = true;
-        return false;
-      }
-      throw error;
+      console.error('Qdrant connection test failed:', error);
+      throw new Error(`Failed to connect to Qdrant: ${error.message}`);
     }
   }
 
   /**
-   * Ensure all required collections exist with retry logic
+   * Ensure all required collections exist
    * @returns {Promise<void>}
    */
   async ensureCollections() {
-    let attempts = 0;
-
-    while (attempts < this.maxRetries) {
-      try {
-        if (this.useMock) return;
-        
-        // List existing collections
-        const collectionsResponse = await this.client.getCollections();
-        const existingCollections = collectionsResponse.collections.map(c => c.name);
-        
-        console.log('Existing collections:', existingCollections);
-
-        // Define collections to create with their configurations
-        const collectionsToCreate = [
-          {
-            name: this.collections.codeEmbeddings,
-            config: {
-              vectors: {
-                size: this.dimensions,
-                distance: 'Cosine'
-              },
-              optimizers_config: {
-                indexing_threshold: 100 // Index after 100 vectors
-              }
-            }
-          },
-          {
-            name: this.collections.documentEmbeddings,
-            config: {
-              vectors: {
-                size: this.dimensions,
-                distance: 'Cosine'
-              },
-              optimizers_config: {
-                indexing_threshold: 100
-              }
-            }
-          },
-          {
-            name: this.collections.commitEmbeddings,
-            config: {
-              vectors: {
-                size: this.dimensions,
-                distance: 'Cosine'
-              },
-              optimizers_config: {
-                indexing_threshold: 100
-              }
-            }
-          }
-        ];
-
-        // Create any missing collections
-        for (const collection of collectionsToCreate) {
-          if (!existingCollections.includes(collection.name)) {
-            console.log(`Creating ${collection.name} collection`);
-            await this.client.createCollection(collection.name, collection.config);
-          }
-        }
-
-        console.log('All collections created successfully');
-        return;
-      } catch (error) {
-        attempts++;
-        console.error(`Attempt ${attempts} failed to ensure collections:`, error.message);
-        
-        if (attempts === this.maxRetries) {
-          if (config.isDevelopment) {
-            console.warn('Falling back to mock implementation');
-            this.useMock = true;
-            return;
-          }
-          throw new Error(`Failed to ensure collections after ${this.maxRetries} attempts`);
-        }
-        
-        // Wait before retrying with exponential backoff
-        const delay = this.retryDelay * Math.pow(2, attempts - 1);
-        console.log(`Retrying in ${delay}ms...`);
-        await new Promise(resolve => setTimeout(resolve, delay));
-      }
-    }
-  }
-
-  /**
-   * Check health status of the vector database
-   * @returns {Promise<Object>} Health status object
-   */
-  async checkHealth() {
     try {
-      if (!this.initialized) {
-        await this.initialize();
-      }
+      if (this.useMock) return;
       
-      const status = {
-        isHealthy: false,
-        collections: [],
-        connectionStatus: this.useMock ? 'mock' : 'connected',
-        error: null
-      };
+      // List existing collections
+      const collectionsResponse = await this.client.getCollections();
+      const existingCollections = collectionsResponse.collections.map(c => c.name);
+      
+      console.log('Existing collections:', existingCollections);
 
-      if (this.useMock) {
-        status.isHealthy = true;
-        status.collections = Object.values(this.collections);
-        return status;
+      // Ensure code embeddings collection exists
+      if (!existingCollections.includes(this.collections.codeEmbeddings)) {
+        console.log(`Creating ${this.collections.codeEmbeddings} collection`);
+        await this.client.createCollection(this.collections.codeEmbeddings, {
+          vectors: {
+            size: this.dimensions,
+            distance: 'Cosine'
+          },
+          optimizers_config: {
+            indexing_threshold: 100 // Index after 100 vectors
+          }
+        });
       }
 
-      const collections = await this.client.getCollections();
-      status.isHealthy = true;
-      status.collections = collections.collections.map(c => c.name);
-      return status;
-    } catch (error) {
-      return {
-        isHealthy: false,
-        collections: [],
-        connectionStatus: 'error',
-        error: error.message
-      };
-    }
-  }
-
-  /**
-   * Gracefully shut down the vector database connection
-   */
-  async shutdown() {
-    try {
-      if (this.client) {
-        // Perform any cleanup needed
-        console.log('Shutting down Qdrant service...');
-        this.initialized = false;
-        this.client = null;
+      // Ensure document embeddings collection exists
+      if (!existingCollections.includes(this.collections.documentEmbeddings)) {
+        console.log(`Creating ${this.collections.documentEmbeddings} collection`);
+        await this.client.createCollection(this.collections.documentEmbeddings, {
+          vectors: {
+            size: this.dimensions,
+            distance: 'Cosine'
+          },
+          optimizers_config: {
+            indexing_threshold: 100
+          }
+        });
       }
+
+      // Ensure commit embeddings collection exists
+      if (!existingCollections.includes(this.collections.commitEmbeddings)) {
+        console.log(`Creating ${this.collections.commitEmbeddings} collection`);
+        await this.client.createCollection(this.collections.commitEmbeddings, {
+          vectors: {
+            size: this.dimensions,
+            distance: 'Cosine'
+          },
+          optimizers_config: {
+            indexing_threshold: 100
+          }
+        });
+      }
+
+      console.log('All collections created successfully');
     } catch (error) {
-      console.error('Error during Qdrant service shutdown:', error);
+      console.error('Error ensuring collections:', error);
+      if (config.isDevelopment) {
+        console.warn('Continuing with mock implementation in development mode');
+        this.useMock = true;
+      } else {
+        throw error;
+      }
     }
   }
 
@@ -336,7 +209,7 @@ class QdrantService {
     
     for (let i = 0; i < limit; i++) {
       mockResults.push({
-        id: generatePointId("mock/id", "unknown"),
+        id: `mock-id-${i}`,
         score: 0.9 - (i * 0.1),
         payload: {
           owner: filters.owner || 'mock-owner',
@@ -547,8 +420,4 @@ class QdrantService {
 // Create a singleton instance
 const qdrantService = new QdrantService();
 
-// Attach the ID generation function directly to the service instance
-qdrantService.generatePointId = generatePointId;
-
-// Export the service instance
 module.exports = qdrantService;

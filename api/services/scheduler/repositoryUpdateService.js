@@ -135,26 +135,33 @@ async function processRepository(repoUrl) {
           'Embedding generation timed out'
         );
         
-        // Prepare points for vector database
-        const points = chunksWithEmbeddings.map(chunk => ({
-          id: `${repoInfo.owner}-${repoInfo.repo}-${chunk.path}-${chunk.type}-${chunk.name}`.replace(/[^a-zA-Z0-9-]/g, '_'),
-          vector: chunk.embedding,
-          payload: {
-            owner: repoInfo.owner,
-            repo: repoInfo.repo,
-            path: chunk.path,
-            type: chunk.type,
-            name: chunk.name,
-            content: chunk.content,
-            startLine: chunk.startLine,
-            endLine: chunk.endLine,
-            importance: chunk.importance || 1,
-            isPart: chunk.isPart || false,
-            partIndex: chunk.partIndex,
-            partOf: chunk.partOf,
-            lastUpdated: new Date().toISOString() // Add timestamp for tracking
-          }
-        }));
+        // Prepare points for vector database with UUID-based IDs
+        const points = chunksWithEmbeddings.map(chunk => {
+          // Track the original ID for reference (helps with incremental updates)
+          const originalId = `${repoInfo.owner}-${repoInfo.repo}-${chunk.path}-${chunk.type}-${chunk.name}`.replace(/[^a-zA-Z0-9-]/g, '_');
+          
+          return {
+            // Use UUID v4 for Qdrant compatibility (required by Qdrant)
+            id: qdrantService.generatePointId(repoInfo.owner + '/' + repoInfo.repo, chunk.path),
+            vector: chunk.embedding,
+            payload: {
+              owner: repoInfo.owner,
+              repo: repoInfo.repo,
+              path: chunk.path,
+              type: chunk.type,
+              name: chunk.name,
+              content: chunk.content,
+              startLine: chunk.startLine,
+              endLine: chunk.endLine,
+              importance: chunk.importance || 1,
+              isPart: chunk.isPart || false,
+              partIndex: chunk.partIndex,
+              partOf: chunk.partOf,
+              lastUpdated: new Date().toISOString(),
+              originalId: originalId // Store original ID in metadata for reference
+            }
+          };
+        });
         
         // Store in vector database
         if (points.length > 0) {

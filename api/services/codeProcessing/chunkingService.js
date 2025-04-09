@@ -9,7 +9,7 @@
 const MAX_CHUNK_SIZE = 8000; // Characters
 
 // Overlap percentage for sliding window
-const OVERLAP_PERCENTAGE = 10; // 10% overlap
+const OVERLAP_PERCENTAGE = 30; // 30% overlap - increased from 10% to improve context preservation
 
 /**
  * Process code units into semantically meaningful chunks
