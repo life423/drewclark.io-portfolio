@@ -23,3 +23,9 @@ local.settings.json
 # Production build directories
 dist/
 build/
+
+# Contact form submissions
+data/contact/
+
+# Sensitive documentation
+CONTACT-SYSTEM.md

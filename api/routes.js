@@ -3,6 +3,7 @@ const router = express.Router()
 const os = require('os')
 const path = require('path')
 const { handleRequest } = require('./unified-server')
+const contactHandler = require('./contact-handler')
 
 // Helper function to create response adapter
 const createResponseAdapter = (res) => {
@@ -54,6 +55,146 @@ router.all('/askGPT/projects', async (req, res) => {
         logWarn,
     })
 })
+
+// Contact form submission endpoint
+router.post('/contact', (req, res) => {
+    try {
+        const { name, email, message } = req.body;
+        
+        // Validate inputs
+        if (!name || !email || !message) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+        
+        // Simple email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ error: 'Invalid email address' });
+        }
+        
+        // Add the message
+        const result = contactHandler.addMessage(name, email, message);
+        
+        if (!result) {
+            return res.status(500).json({ error: 'Failed to save message' });
+        }
+        
+        // Return success
+        res.status(200).json({ 
+            success: true, 
+            message: 'Contact message saved successfully' 
+        });
+    } catch (error) {
+        console.error('Contact submission error:', error);
+        res.status(500).json({ 
+            error: 'Server error processing contact submission',
+            message: error.message
+        });
+    }
+});
+
+// Admin routes for managing contact messages
+router.get('/admin/messages', (req, res) => {
+    try {
+        const { token } = req.query;
+        
+        // Verify admin token
+        if (!contactHandler.verifyAdminToken(token)) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+        
+        // Get all messages
+        const messages = contactHandler.getMessages();
+        
+        // Return messages
+        res.status(200).json({ messages });
+    } catch (error) {
+        console.error('Admin messages error:', error);
+        res.status(500).json({ 
+            error: 'Server error fetching messages',
+            message: error.message
+        });
+    }
+});
+
+// Mark message as read
+router.put('/admin/messages/:id', (req, res) => {
+    try {
+        const { id } = req.params;
+        const { token, read } = req.body;
+        
+        // Verify admin token
+        if (!contactHandler.verifyAdminToken(token)) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+        
+        // Mark message as read/unread
+        const success = contactHandler.markMessageRead(id, read !== false);
+        
+        if (!success) {
+            return res.status(404).json({ error: 'Message not found' });
+        }
+        
+        // Return success
+        res.status(200).json({ 
+            success: true, 
+            message: 'Message updated successfully' 
+        });
+    } catch (error) {
+        console.error('Update message error:', error);
+        res.status(500).json({ 
+            error: 'Server error updating message',
+            message: error.message
+        });
+    }
+});
+
+// Delete message
+router.delete('/admin/messages/:id', (req, res) => {
+    try {
+        const { id } = req.params;
+        const { token } = req.query;
+        
+        // Verify admin token
+        if (!contactHandler.verifyAdminToken(token)) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+        
+        // Delete message
+        const success = contactHandler.deleteMessage(id);
+        
+        if (!success) {
+            return res.status(404).json({ error: 'Message not found' });
+        }
+        
+        // Return success
+        res.status(200).json({ 
+            success: true, 
+            message: 'Message deleted successfully' 
+        });
+    } catch (error) {
+        console.error('Delete message error:', error);
+        res.status(500).json({ 
+            error: 'Server error deleting message',
+            message: error.message
+        });
+    }
+});
+
+// Admin token generation (development only)
+router.get('/admin/generate-token', (req, res) => {
+    // Only allow in development mode
+    if (process.env.NODE_ENV === 'production') {
+        return res.status(404).json({ error: 'Endpoint not available in production' });
+    }
+    
+    const token = contactHandler.generateAdminToken();
+    
+    res.status(200).json({ 
+        message: 'Store this token securely and add it to your environment variables as ADMIN_ACCESS_TOKEN',
+        token
+    });
+});
 
 // Health check endpoint for diagnosing deployment issues
 router.get('/health', (req, res) => {
