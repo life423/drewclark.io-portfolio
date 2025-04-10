@@ -16,7 +16,10 @@ services:
       - DOCKER_CONTAINER=true
       - PORT=3000
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - VECTOR_DB_URL=http://vector-db:6333
     restart: unless-stopped
+    depends_on:
+      - vector-db
 
   dev:
     build:
@@ -30,6 +33,7 @@ services:
       - DOCKER_CONTAINER=true
       - PORT=3000
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - VECTOR_DB_URL=http://vector-db:6333
     volumes:
       - /app/node_modules
       - /app/app/node_modules
@@ -37,3 +41,17 @@ services:
       - ./api:/app/api
       - ./server.js:/app/server.js
     command: npm run dev
+    depends_on:
+      - vector-db
+
+  vector-db:
+    image: qdrant/qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    restart: always
+
+volumes:
+  qdrant_data:

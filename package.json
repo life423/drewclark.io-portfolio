@@ -1,35 +1,53 @@
 {
-  "name": "drewclark.io-portfolio",
-  "version": "1.0.0",
-  "scripts": {
-    "test": "echo \"No tests defined\" && exit 0",
-    "start": "node server.js",
-    "start:dev": "concurrently \"node server.js\" \"cd app && npm run dev\"",
-    "build": "cd app && npm run build",
-    "dev": "npm run kill-ports && concurrently \"nodemon server.js\" \"cd app && npm run dev\"",
-    "kill-ports": "npx kill-port 3000 5173",
-    "postinstall": "node -e \"try { if (require('fs').existsSync('./start-app.js')) { require('fs').chmodSync('./start-app.js', '755'); }} catch(e) { console.log('Warning: ' + e.message); }\"",
-    "setup": "npm install && cd app && npm install --legacy-peer-deps && cd ../api && npm install",
-    "docker:build": "docker build -t drewclark-portfolio .",
-    "docker:run": "docker run -p 3000:3000 -e OPENAI_API_KEY=${OPENAI_API_KEY} -e DOCKER_CONTAINER=true -e PORT=3000 drewclark-portfolio",
-    "docker:dev": "docker-compose up dev",
-    "docker:prod": "docker-compose up app"
-  },
-  "dependencies": {
-    "compression": "^1.7.4",
-    "concurrently": "^8.2.2",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
-    "express": "^4.18.2",
-    "helmet": "^7.1.0",
-    "openai": "^4.91.1",
-    "path": "^0.12.7"
-  },
-  "devDependencies": {
-    "kill-port": "^2.0.1",
-    "nodemon": "^3.0.3"
-  },
-  "engines": {
-    "node": ">=18.0.0"
-  }
+    "name": "drewclark.io-portfolio",
+    "version": "1.0.0",
+    "scripts": {
+        "setup": "npm-run-all setup:*",
+        "setup:root": "npm install --legacy-peer-deps",
+        "setup:app": "cd app && npm install --legacy-peer-deps",
+        "setup:api": "cd api && npm install --legacy-peer-deps",
+        "clean": "npm-run-all --parallel clean:*",
+        "clean:ports": "npx kill-port 3000 5173",
+        "clean:modules": "rimraf node_modules app/node_modules api/node_modules",
+        "dev:api": "node scripts/start-api-server.js",
+        "dev:frontend": "node scripts/start-frontend.js",
+        "dev:cloud": "npm-run-all clean:ports --parallel dev:api dev:frontend",
+        "dev:minimal": "concurrently \"npm run dev:api\" \"npm run dev:frontend\"",
+        "watch": "concurrently --kill-others-on-fail \"npm run watch:*\"",
+        "watch:api": "nodemon scripts/start-api-server.js",
+        "watch:frontend": "cd app && npm run dev",
+        "build": "npm-run-all build:*",
+        "build:frontend": "cd app && npm run build",
+        "build:prepare": "node scripts/prepare-build.js",
+        "start": "node server.js",
+        "test": "npm-run-all test:*",
+        "test:api": "cd api && npm test",
+        "test:frontend": "cd app && npm test",
+        "reset": "npm-run-all clean setup",
+        "restart": "npm-run-all clean:ports dev",
+        "postinstall": "node scripts/permissions.js"
+    },
+    "dependencies": {
+        "@qdrant/js-client-rest": "^1.13.0",
+        "compression": "^1.7.4",
+        "concurrently": "^8.2.2",
+        "cors": "^2.8.5",
+        "dotenv": "^16.4.7",
+        "express": "^4.18.2",
+        "helmet": "^7.1.0",
+        "openai": "^4.93.0",
+        "path": "^0.12.7",
+        "rimraf": "^6.0.1",
+        "simple-git": "^3.27.0"
+    },
+    "devDependencies": {
+        "cross-env": "^7.0.3",
+        "kill-port": "^2.0.1",
+        "nodemon": "^3.0.3",
+        "npm-run-all": "^4.1.5",
+        "uuid": "^11.1.0"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
 }

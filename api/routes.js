@@ -2,59 +2,13 @@ const express = require('express')
 const router = express.Router()
 const os = require('os')
 const path = require('path')
-const { handleRequest } = require('./unified-server')
 const contactHandler = require('./contact-handler')
+const { updateAllRepositories, processRepository } = require('./services/scheduler/repositoryUpdateService')
+const { defaultHandler, projectsHandler } = require('./routes/askGptAdapter')
 
-// Helper function to create response adapter
-const createResponseAdapter = (res) => {
-    return (status, headers, body) => {
-        Object.entries(headers).forEach(([key, value]) => {
-            res.setHeader(key, value)
-        })
-        return res.status(status).json(body)
-    }
-}
-
-// Legacy endpoint (for backward compatibility)
-router.all('/askGPT', async (req, res) => {
-    const createResponse = createResponseAdapter(res)
-    const logInfo = message => console.log(`[INFO] ${message}`)
-    const logError = message => console.error(`[ERROR] ${message}`)
-    const logWarn = message => console.warn(`[WARN] ${message}`)
-
-    // Use default feature
-    req.feature = 'default'
-    
-    // Call the unified handler
-    await handleRequest({
-        req,
-        createResponse,
-        logInfo,
-        logError,
-        logWarn,
-    })
-})
-
-
-// Projects-specific endpoint
-router.all('/askGPT/projects', async (req, res) => {
-    const createResponse = createResponseAdapter(res)
-    const logInfo = message => console.log(`[INFO][Projects] ${message}`)
-    const logError = message => console.error(`[ERROR][Projects] ${message}`)
-    const logWarn = message => console.warn(`[WARN][Projects] ${message}`)
-
-    // Set feature flag for rate limiting
-    req.feature = 'projects'
-    
-    // Call the unified handler
-    await handleRequest({
-        req,
-        createResponse,
-        logInfo,
-        logError,
-        logWarn,
-    })
-})
+// AskGPT endpoints using the new modular architecture
+router.all('/askGPT', defaultHandler)
+router.all('/askGPT/projects', projectsHandler)
 
 // Contact form submission endpoint
 router.post('/contact', (req, res) => {
@@ -196,8 +150,89 @@ router.get('/admin/generate-token', (req, res) => {
     });
 });
 
-// Health check endpoint for diagnosing deployment issues
-router.get('/health', (req, res) => {
+// Repository management endpoints
+router.post('/admin/repositories/update', async (req, res) => {
+    try {
+        const { token } = req.body;
+        
+        // Verify admin token
+        if (!contactHandler.verifyAdminToken(token)) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+        
+        console.log('Manually triggering repository update...');
+        
+        // Start the update process
+        updateAllRepositories()
+            .then(results => {
+                console.log('Repository update job completed.');
+            })
+            .catch(error => {
+                console.error('Error in repository update:', error);
+            });
+        
+        // Return immediate success since this is a long-running operation
+        res.status(200).json({ 
+            success: true, 
+            message: 'Repository update job started. Check server logs for progress.'
+        });
+    } catch (error) {
+        console.error('Repository update error:', error);
+        res.status(500).json({ 
+            error: 'Server error updating repositories',
+            message: error.message
+        });
+    }
+});
+
+// Process a specific repository
+router.post('/admin/repositories/process', async (req, res) => {
+    try {
+        const { token, repositoryUrl } = req.body;
+        
+        // Validate input
+        if (!repositoryUrl) {
+            return res.status(400).json({ error: 'Missing repository URL' });
+        }
+        
+        // Verify admin token
+        if (!contactHandler.verifyAdminToken(token)) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+        
+        console.log(`Manually processing repository: ${repositoryUrl}`);
+        
+        // Process the specified repository
+        processRepository(repositoryUrl)
+            .then(result => {
+                console.log(`Repository processing completed: ${result.success ? 'Success' : 'Failed'}`);
+            })
+            .catch(error => {
+                console.error(`Error processing repository ${repositoryUrl}:`, error);
+            });
+        
+        // Return immediate success since this is a long-running operation
+        res.status(200).json({ 
+            success: true, 
+            message: `Processing of repository ${repositoryUrl} started. Check server logs for progress.`
+        });
+    } catch (error) {
+        console.error('Repository processing error:', error);
+        res.status(500).json({ 
+            error: 'Server error processing repository',
+            message: error.message
+        });
+    }
+});
+
+// Import health check routes
+const healthRoutes = require('./routes/health');
+
+// Mount health check routes
+router.use('/health', healthRoutes);
+
+// Legacy health check endpoint (simple version, kept for backward compatibility)
+router.get('/health/legacy', (req, res) => {
     try {
         // Collect basic system info
         const uptime = process.uptime()
