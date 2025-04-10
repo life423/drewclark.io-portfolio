@@ -1,23 +1,24 @@
 import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import useNavigationState from './hooks/useNavigationState';
-import Layout from './components/layout/Layout';
-import Hero from './components/hero/Hero';
 import ErrorBoundary from './components/ErrorBoundary';
 import { FocusProvider } from './contexts/FocusContext';
 import { ANIMATION } from './styles/constants';
 import logger from './utils/logger';
 import { config } from './config';
-import debugUtils from './utils/debug-utils';
+
+// Lazy-loaded components
+const Layout = lazy(() => import('./components/layout/Layout'));
+const Hero = lazy(() => import('./components/hero/Hero'));
 
 // Lazy load ProjectsContainer for better code splitting
-const ProjectsContainer = lazy(() => import('./components/projects/ProjectsContainer'));
+const ProjectsContainer = lazy(() => import(/* webpackChunkName: "projects" */ './components/projects/ProjectsContainer'));
 
-// Loading fallback component
+// Optimized loading fallback component with precomputed dimensions to prevent layout shifts
 const LoadingFallback = () => (
-    <div className="p-8 flex justify-center items-center">
-        <div className="animate-pulse text-center">
-            <div className="h-6 w-32 bg-brandGray-700 rounded mb-3 mx-auto"></div>
-            <div className="h-4 w-48 bg-brandGray-700 rounded mx-auto"></div>
+    <div className="p-8 flex justify-center items-center" style={{ minHeight: "200px" }}>
+        <div className="animate-pulse text-center" aria-busy="true" aria-live="polite">
+            <div className="h-6 w-32 bg-brandGray-700 rounded mb-3 mx-auto" style={{ height: "24px", width: "128px" }}></div>
+            <div className="h-4 w-48 bg-brandGray-700 rounded mx-auto" style={{ height: "16px", width: "192px" }}></div>
         </div>
     </div>
 );
@@ -28,11 +29,14 @@ const logError = (error, errorInfo) => {
 };
 
 // Main content component (memoized to prevent unnecessary re-renders)
+// Code split with separate chunks for above-the-fold and below-the-fold content
 const MainContent = React.memo(() => {
     return (
         <main className='flex flex-col min-h-screen'>
             <ErrorBoundary onError={logError}>
-                <Hero />
+                <Suspense fallback={<LoadingFallback />}>
+                    <Hero />
+                </Suspense>
             </ErrorBoundary>
             
             <div id="projects" className='bg-brandGray-900'>
@@ -45,6 +49,7 @@ const MainContent = React.memo(() => {
                         </div>
                     }
                 >
+                    {/* Use an IntersectionObserver-based lazy loading to defer loading until needed */}
                     <Suspense fallback={<LoadingFallback />}>
                         <ProjectsContainer />
                     </Suspense>
@@ -67,7 +72,7 @@ export default function App() {
 
     // Loading state
     const [initialLoading, setInitialLoading] = useState(true);
-
+    
     // Handle initial loading animation
     useEffect(() => {
         appLogger.debug('App mounting, setting initial loading timer');
@@ -85,28 +90,38 @@ export default function App() {
     
     // Set up debug environment for development and deployment debugging
     useEffect(() => {
-        // Log environment information when app starts
-        const envInfo = debugUtils.logEnvironmentInfo('App', { 
-            version: process.env.VERSION || 'dev',
-            initialLoadTime: new Date().toISOString()
-        });
-        
-        appLogger.debug('Environment details:', envInfo);
-        
-        // Set up debug keyboard shortcut (Ctrl+Shift+D)
-        debugUtils.setupDebugShortcut();
-        
-        // Show debug panel in development or if URL contains debug parameter
-        const urlParams = new URLSearchParams(window.location.search);
-        const showDebug = urlParams.has('debug') || 
-                          config.environment.envType === 'development';
-        
-        if (showDebug) {
-            debugUtils.createDebugPanel({ 
-                autoHide: config.environment.isProduction,
-                detailed: urlParams.get('debug') === 'detailed'
+        // Use a small delay to ensure this runs after critical rendering is complete
+        const debugSetupTimer = setTimeout(() => {
+            // Dynamically import debugUtils to reduce initial bundle
+            import('./utils/debug-utils').then(module => {
+                const debugUtils = module.default;
+                
+                // Log environment information when app starts
+                const envInfo = debugUtils.logEnvironmentInfo('App', { 
+                    version: process.env.VERSION || 'dev',
+                    initialLoadTime: new Date().toISOString()
+                });
+                
+                appLogger.debug('Environment details:', envInfo);
+                
+                // Set up debug keyboard shortcut (Ctrl+Shift+D)
+                debugUtils.setupDebugShortcut();
+                
+                // Show debug panel in development or if URL contains debug parameter
+                const urlParams = new URLSearchParams(window.location.search);
+                const showDebug = urlParams.has('debug') || 
+                                config.environment.envType === 'development';
+                
+                if (showDebug) {
+                    debugUtils.createDebugPanel({ 
+                        autoHide: config.environment.isProduction,
+                        detailed: urlParams.get('debug') === 'detailed'
+                    });
+                }
             });
-        }
+        }, 200); // Small delay to prioritize critical content rendering first
+        
+        return () => clearTimeout(debugSetupTimer);
     }, [appLogger]);
 
     // Calculate whether to show progress indicators based on app state
@@ -127,9 +142,11 @@ export default function App() {
     return (
         <ErrorBoundary onError={logError}>
             <FocusProvider>
-                <Layout {...enhancedNavigationState}>
-                    <MainContent />
-                </Layout>
+                <Suspense fallback={<LoadingFallback />}>
+                    <Layout {...enhancedNavigationState}>
+                        <MainContent />
+                    </Layout>
+                </Suspense>
             </FocusProvider>
         </ErrorBoundary>
     );

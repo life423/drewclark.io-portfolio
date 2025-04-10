@@ -3,8 +3,11 @@ import useScrollPosition from '../../hooks/useScrollPosition'
 import useIsInViewport from '../../hooks/useIsInViewport'
 import { generateHeroText } from '../../services/aiGenerationService'
 
+// Import both WebP and JPG versions
 import sproutMobile from '../../assets/sprout-mobile.jpg'
+import sproutMobileWebp from '../../assets/sprout-mobile.webp'
 import largeSprout from '../../assets/large-sprout.jpg'
+import largeSproutWebp from '../../assets/large-sprout.webp'
 import PrimaryButton from '../utils/PrimaryButton'
 import ProgressiveElement from '../utils/ProgressiveElement'
 import NeuralNetworkCanvas from './NeuralNetworkCanvas'
@@ -199,25 +202,55 @@ export default function Hero() {
             <NeuralNetworkCanvas scrollPosition={scrollY} />
 
             {/* Enhanced background with parallax and improved effects */}
-            <div className='absolute inset-0 z-0 bg-brandGray-800 transition-all duration-300 ease-in-out lg:p-[3%_8%]'>
+            <div className='absolute inset-0 z-0 bg-brandGray-800 transition-all duration-300 ease-in-out lg:p-[3%_8%]' 
+                 style={{ contain: 'strict', contentVisibility: 'auto' }}>
                 {/* Base image with parallax scrolling using picture element for responsive images */}
                 <div className='absolute inset-0'>
-                    <picture>
-                        <source
-                            media='(min-width: 1024px)'
-                            srcSet={largeSprout}
-                        />
-                        <img
-                            src={sproutMobile}
-                            alt='Background'
-                            className='w-full h-full object-cover object-center lg:object-[center_40%]'
-                            style={{
-                                filter: 'brightness(0.75)',
-                                transform: `translateY(${scrollY * 0.15}px)`,
-                                transition: 'transform 0.2s ease-out',
-                            }}
-                        />
-                    </picture>
+                        <picture>
+                            {/* WebP format for modern browsers - with optimized sizes and explicit dimensions */}
+                            <source
+                                media='(min-width: 1024px)'
+                                type="image/webp"
+                                srcSet={largeSproutWebp}
+                                sizes="100vw"
+                                width="1600"
+                                height="1069"
+                            />
+                            <source
+                                media='(max-width: 1023px)'
+                                type="image/webp"
+                                srcSet={sproutMobileWebp}
+                                sizes="100vw"
+                                width="900"
+                                height="1601"
+                            />
+                            {/* Fallback formats with explicit dimensions */}
+                            <source
+                                media='(min-width: 1024px)'
+                                type="image/jpeg"
+                                srcSet={largeSprout}
+                                sizes="100vw"
+                                width="1600"
+                                height="1069"
+                            />
+                            <img
+                                src={sproutMobile}
+                                alt='Portfolio background image'
+                                className='w-full h-full object-cover object-center lg:object-[center_40%]'
+                                width="900"
+                                height="1601"
+                                loading="eager"
+                                decoding="async"
+                                fetchpriority="high"
+                                style={{
+                                    filter: 'brightness(0.75)',
+                                    transform: `translateY(${scrollY * 0.15}px)`,
+                                    transition: 'transform 0.2s ease-out',
+                                    aspectRatio: 'auto',
+                                    contentVisibility: 'auto',
+                                }}
+                            />
+                        </picture>
                 </div>
 
                 {/* Improved gradient overlay for better text contrast */}
@@ -313,9 +346,10 @@ export default function Hero() {
                         <div className='absolute inset-0 bg-brandGray-900/40 rounded-lg border-l-2 border-brandGreen-500/40 pointer-events-none'></div>
 
                         {/* AI-Powered Text layer with dynamic typing effect based on user interaction */}
-                        <p className='relative px-3 py-2 text-lg text-white font-medium leading-relaxed'>
+                        <p className='relative px-3 py-2 text-lg text-white font-medium leading-relaxed'
+                           style={{ minHeight: '80px', display: 'flex', alignItems: 'center' }}>
                             {isGenerating ? (
-                                <span className="flex items-center">
+                                <span className="flex items-center w-full">
                                     <span className="mr-2">Crafting a response</span>
                                     <span className="flex space-x-1">
                                         <span className="w-2 h-2 bg-brandGreen-500 rounded-full animate-pulse"></span>
@@ -324,16 +358,18 @@ export default function Hero() {
                                     </span>
                                 </span>
                             ) : (
-                                <TypedTextEffect 
-                                    phrases={[heroText]}
-                                    typingSpeed={40}
-                                    deletingSpeed={30}
-                                    pauseTime={5000}
-                                    active={heroIsInView && !isGenerating}
-                                    className="transition-opacity duration-300"
-                                    stableViewingPeriod={10000} // 10 seconds of stable viewing before changing
-                                    scrollIdlePeriod={3000} // 3 seconds of scroll inactivity before change
-                                />
+                                <span className="min-h-[80px] flex items-center w-full">
+                                    <TypedTextEffect 
+                                        phrases={[heroText]}
+                                        typingSpeed={40}
+                                        deletingSpeed={30}
+                                        pauseTime={5000}
+                                        active={heroIsInView && !isGenerating}
+                                        className="transition-opacity duration-300"
+                                        stableViewingPeriod={10000} // 10 seconds of stable viewing before changing
+                                        scrollIdlePeriod={3000} // 3 seconds of scroll inactivity before change
+                                    />
+                                </span>
                             )}
                         </p>
                     </div>
