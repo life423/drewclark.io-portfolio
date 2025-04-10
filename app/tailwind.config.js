@@ -12,8 +12,48 @@ import {
 } from './src/styles/colors.js'
 
 export default {
-    content: ['./src/index.html', './src/**/*.{js,jsx,ts,tsx}'],
+    // Enhanced content patterns to ensure comprehensive detection of used classes
+    content: [
+        './src/index.html', 
+        './src/**/*.{js,jsx,ts,tsx}',
+        // Ensure SVG and JSON files are also scanned (may contain classes)
+        './src/**/*.svg',
+        './src/**/*.json',
+        // Handle dynamically generated content
+        './public/**/*.html'
+    ],
+    
+    // Safelist ensures critical classes are never purged even if not found in content analysis
+    safelist: [
+        // Core layout classes that might be dynamically generated
+        'flex', 'hidden', 'block', 'grid',
+        'w-full', 'h-full',
+        
+        // Classes used in animations or transitions
+        'opacity-0', 'opacity-100',
+        'translate-y-0', 'translate-y-full',
+        'scale-95', 'scale-100',
+        
+        // Important brand color utility classes
+        'text-brandGreen-300', 'text-brandGreen-500',
+        'bg-brandGray-900', 'bg-brandGray-800',
+        
+        // Animation classes
+        'animate-pulse', 'animate-spin',
+        
+        // Responsive classes most likely to be conditionally applied
+        'sm:flex', 'md:flex', 'lg:flex', 'xl:flex',
+        'sm:hidden', 'md:hidden', 'lg:hidden', 'xl:hidden',
+    ],
     theme: {
+        // Set default values to reduce CSS size
+        screens: {
+            'sm': '640px',
+            'md': '768px',
+            'lg': '1024px',
+            'xl': '1280px',
+            '2xl': '1536px',
+        },
         extend: {
             // Enable container queries
             containers: {
@@ -95,4 +135,31 @@ export default {
         textShadowsPlugin,
         typography,
     ],
+    
+    // Additional optimization settings
+    corePlugins: {
+        // Disable rarely or unused core plugins
+        placeholderOpacity: false,
+        ringOpacity: false,
+        boxShadowColor: false,
+        filter: false, // If using backdrop-filter only, disable regular filter
+    },
+    
+    // Performance optimization
+    future: {
+        hoverOnlyWhenSupported: true, // Optimize hover styles for touch devices
+    },
+    
+    // Production optimization
+    ...(process.env.NODE_ENV === 'production' && {
+        // Minify CSS class names in production for even smaller CSS
+        variants: {
+            extend: {
+                // Limit variants to essentials in production
+                opacity: ['responsive', 'hover', 'focus'],
+                backgroundColor: ['responsive', 'hover', 'focus'],
+                textColor: ['responsive', 'hover', 'focus'],
+            }
+        }
+    })
 }

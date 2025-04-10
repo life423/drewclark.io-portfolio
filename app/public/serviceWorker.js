@@ -13,13 +13,17 @@ const CACHE_NAMES = {
   documents: 'document-resources-v1'
 };
 
-// Resources to cache on install
+// Resources to cache on install - critical path resources
 const STATIC_RESOURCES = [
   '/',
   '/index.html',
   '/assets/index.css',
   '/assets/index.js',
-  // Add other essential static resources
+  // Critical hero images - preload these for faster LCP
+  '/assets/large-sprout.webp',
+  '/assets/sprout-mobile.webp',
+  '/assets/large-sprout.jpg', // Fallback for browsers without WebP support
+  '/assets/sprout-mobile.jpg', // Fallback for browsers without WebP support
 ];
 
 // Resources to cache on first use 
@@ -28,16 +32,48 @@ const CACHE_ON_DEMAND = [
 ];
 
 /**
- * Install event - Pre-cache critical resources
+ * Install event - Pre-cache critical resources with high priority
+ * This helps eliminate render-blocking resources by providing them from cache
  */
 self.addEventListener('install', event => {
   console.log('[ServiceWorker] Installing');
   
   event.waitUntil(
     caches.open(CACHE_NAMES.static)
-      .then(cache => {
+      .then(async cache => {
         console.log('[ServiceWorker] Pre-caching static resources');
-        return cache.addAll(STATIC_RESOURCES);
+        
+        // Use Promise.all to load critical resources in parallel with high priority
+        const criticalResources = STATIC_RESOURCES.slice(0, 4); // First 4 resources are most critical
+        const otherResources = STATIC_RESOURCES.slice(4);
+        
+        // Cache critical resources first
+        await Promise.all(
+          criticalResources.map(url => 
+            fetch(url, { priority: 'high' })
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error(`Failed to fetch ${url}`);
+                }
+                return cache.put(url, response);
+              })
+              .catch(error => console.error('[ServiceWorker] Pre-cache error:', error))
+          )
+        );
+        
+        // Then cache other resources
+        return Promise.all(
+          otherResources.map(url => 
+            fetch(url)
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error(`Failed to fetch ${url}`);
+                }
+                return cache.put(url, response);
+              })
+              .catch(error => console.error('[ServiceWorker] Pre-cache error:', error))
+          )
+        );
       })
       .then(() => {
         console.log('[ServiceWorker] Installation complete');
@@ -144,8 +180,8 @@ async function handleApiRequest(request) {
 }
 
 /**
- * Cache first strategy - Try cache, fall back to network
- * Used for images which don't change frequently
+ * Enhanced cache first strategy - Try cache, fall back to network
+ * Used for images which don't change frequently, with WebP support detection
  */
 async function handleImageRequest(request) {
   // Try cache first
@@ -154,7 +190,31 @@ async function handleImageRequest(request) {
     return cachedResponse;
   }
   
-  // If not in cache, fetch from network and cache
+  // Check if this is a request for a JPG or PNG image that has a WebP version
+  const url = new URL(request.url);
+  const isJpgOrPng = /\.(jpe?g|png)$/i.test(url.pathname);
+  
+  if (isJpgOrPng && request.headers.get('accept')?.includes('image/webp')) {
+    // Try to fetch WebP version instead
+    const webpUrl = request.url.replace(/\.(jpe?g|png)$/i, '.webp');
+    try {
+      const webpResponse = await fetch(webpUrl, { method: request.method, headers: request.headers });
+      if (webpResponse.ok) {
+        // Cache both the original request and the WebP version
+        const clonedResponse = webpResponse.clone();
+        caches.open(CACHE_NAMES.images).then(cache => {
+          cache.put(request, clonedResponse.clone());
+          cache.put(new Request(webpUrl), clonedResponse);
+        });
+        return webpResponse;
+      }
+    } catch (error) {
+      console.log('[ServiceWorker] WebP fallback error:', error);
+      // Proceed with original request if WebP fetch fails
+    }
+  }
+  
+  // If not in cache or WebP not available, fetch from network and cache
   try {
     const networkResponse = await fetch(request);
     
@@ -168,9 +228,23 @@ async function handleImageRequest(request) {
     
     return networkResponse;
   } catch (error) {
-    // If completely offline and not cached, return fallback image
-    // This could be a generic placeholder image
-    return caches.match('/assets/offline-placeholder.jpg');
+    // If completely offline and not cached, return inline SVG fallback image
+    console.log('[ServiceWorker] Image fetch error:', error);
+    
+    // Create an inline SVG as fallback
+    return new Response(
+      `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+        <rect width="400" height="300" fill="#333"/>
+        <text x="50%" y="50%" font-family="Arial" font-size="18" text-anchor="middle" fill="#bbb">Image Unavailable</text>
+      </svg>`,
+      {
+        status: 200,
+        headers: {
+          'Content-Type': 'image/svg+xml',
+          'Cache-Control': 'no-store'
+        }
+      }
+    );
   }
 }
 
