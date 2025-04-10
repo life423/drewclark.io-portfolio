@@ -1,72 +1,53 @@
 {
-  "name": "drewclark.io-portfolio",
-  "version": "1.0.0",
-  "scripts": {
-    "setup": "npm-run-all setup:*",
-    "setup:root": "npm install --legacy-peer-deps",
-    "setup:app": "cd app && npm install --legacy-peer-deps",
-    "setup:api": "cd api && npm install --legacy-peer-deps",
-
-    "clean": "npm-run-all --parallel clean:*",
-    "clean:ports": "npx kill-port 3000 5173",
-    "clean:modules": "rimraf node_modules app/node_modules api/node_modules",
-    
-    "qdrant": "npm-run-all --parallel qdrant:*",
-    "qdrant:start": "node scripts/qdrant/index.js --start",
-    "qdrant:fix-ids": "node scripts/qdrant/index.js --fix-ids",
-    "qdrant:seed": "node scripts/qdrant/index.js --seed",
-    "qdrant:status": "node scripts/qdrant/index.js --status",
-
-    "dev": "npm-run-all --parallel dev:*",
-    "dev:qdrant": "node scripts/qdrant/index.js --start",
-    "dev:api": "node scripts/start-api-server.js",
-    "dev:frontend": "node scripts/start-frontend.js",
-
-    "dev:full": "npm-run-all clean:ports --parallel dev:qdrant dev:api dev:frontend",
-
-    "dev:all": "npm-run-all setup dev:full",
-    
-    "dev:minimal": "concurrently \"npm run dev:api\" \"npm run dev:frontend\"",
-
-    "watch": "concurrently --kill-others-on-fail \"npm run watch:*\"",
-    "watch:api": "nodemon scripts/start-api-server.js",
-    "watch:frontend": "cd app && npm run dev",
-
-    "build": "npm-run-all build:*",
-    "build:frontend": "cd app && npm run build",
-    "build:prepare": "node scripts/prepare-build.js",
-    "start": "node server.js",
-    "test": "npm-run-all test:*",
-    "test:api": "cd api && npm test",
-    "test:frontend": "cd app && npm test",
-    "reset": "npm-run-all clean setup",
-    "restart": "npm-run-all clean:ports dev",
-
-    "first-time": "npm-run-all setup qdrant:start qdrant:seed dev:full",
-    
-    "postinstall": "node scripts/permissions.js"
-  },
-  "dependencies": {
-    "@qdrant/js-client-rest": "^1.13.0",
-    "compression": "^1.7.4",
-    "concurrently": "^8.2.2",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
-    "express": "^4.18.2",
-    "helmet": "^7.1.0",
-    "openai": "^4.93.0",
-    "path": "^0.12.7",
-    "rimraf": "^6.0.1",
-    "simple-git": "^3.27.0"
-  },
-  "devDependencies": {
-    "cross-env": "^7.0.3",
-    "kill-port": "^2.0.1",
-    "nodemon": "^3.0.3",
-    "npm-run-all": "^4.1.5",
-    "uuid": "^11.1.0"
-  },
-  "engines": {
-    "node": ">=18.0.0"
-  }
+    "name": "drewclark.io-portfolio",
+    "version": "1.0.0",
+    "scripts": {
+        "setup": "npm-run-all setup:*",
+        "setup:root": "npm install --legacy-peer-deps",
+        "setup:app": "cd app && npm install --legacy-peer-deps",
+        "setup:api": "cd api && npm install --legacy-peer-deps",
+        "clean": "npm-run-all --parallel clean:*",
+        "clean:ports": "npx kill-port 3000 5173",
+        "clean:modules": "rimraf node_modules app/node_modules api/node_modules",
+        "dev:api": "node scripts/start-api-server.js",
+        "dev:frontend": "node scripts/start-frontend.js",
+        "dev:cloud": "npm-run-all clean:ports --parallel dev:api dev:frontend",
+        "dev:minimal": "concurrently \"npm run dev:api\" \"npm run dev:frontend\"",
+        "watch": "concurrently --kill-others-on-fail \"npm run watch:*\"",
+        "watch:api": "nodemon scripts/start-api-server.js",
+        "watch:frontend": "cd app && npm run dev",
+        "build": "npm-run-all build:*",
+        "build:frontend": "cd app && npm run build",
+        "build:prepare": "node scripts/prepare-build.js",
+        "start": "node server.js",
+        "test": "npm-run-all test:*",
+        "test:api": "cd api && npm test",
+        "test:frontend": "cd app && npm test",
+        "reset": "npm-run-all clean setup",
+        "restart": "npm-run-all clean:ports dev",
+        "postinstall": "node scripts/permissions.js"
+    },
+    "dependencies": {
+        "@qdrant/js-client-rest": "^1.13.0",
+        "compression": "^1.7.4",
+        "concurrently": "^8.2.2",
+        "cors": "^2.8.5",
+        "dotenv": "^16.4.7",
+        "express": "^4.18.2",
+        "helmet": "^7.1.0",
+        "openai": "^4.93.0",
+        "path": "^0.12.7",
+        "rimraf": "^6.0.1",
+        "simple-git": "^3.27.0"
+    },
+    "devDependencies": {
+        "cross-env": "^7.0.3",
+        "kill-port": "^2.0.1",
+        "nodemon": "^3.0.3",
+        "npm-run-all": "^4.1.5",
+        "uuid": "^11.1.0"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
 }
