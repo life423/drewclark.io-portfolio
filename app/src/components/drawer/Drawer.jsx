@@ -105,7 +105,7 @@ const Drawer = memo(function Drawer({ isOpen, onClose }) {
                         : 'opacity-0 pointer-events-none'
                 )}
                 onClick={onClose}
-                aria-hidden='true'
+                inert={true}
             />
 
             {/* Sliding Drawer with improved accessibility */}
@@ -114,7 +114,7 @@ const Drawer = memo(function Drawer({ isOpen, onClose }) {
                 role='dialog'
                 aria-modal='true'
                 aria-labelledby='drawer-title'
-                aria-hidden={!isOpen}
+                inert={!isOpen}
                 tabIndex={-1}
                 className={clsx(
                     'fixed inset-y-0 left-0 z-[999]',
