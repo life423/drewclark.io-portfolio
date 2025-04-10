@@ -7,7 +7,8 @@
     "watch": "func start --watch",
     "test-openai": "node test-api.js",
     "diagnostic": "node api-diagnostic.js",
-    "diag-cors": "node api-diagnostic.js --cors --verbose"
+    "diag-cors": "node api-diagnostic.js --cors --verbose",
+    "test": "echo \"No tests configured for API yet\" && exit 0"
   },
   "dependencies": {
     "axios": "^1.8.4",
