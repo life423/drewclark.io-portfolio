@@ -9,6 +9,10 @@ Welcome to the portfolio of Drew Clark, showcasing projects and skills!
   - [Table of Contents](#table-of-contents)
   - [Getting Started](#getting-started)
   - [Running the Application](#running-the-application)
+  - [AI Code Embedding System](#ai-code-embedding-system)
+    - [System Architecture](#system-architecture)
+    - [Setting Up Repositories](#setting-up-repositories)
+    - [Troubleshooting the Embedding System](#troubleshooting-the-embedding-system)
   - [Running Tests](#running-tests)
   - [Deployment](#deployment)
   - [License](#license)
@@ -42,11 +46,107 @@ npm install
 
 ## Running the Application
 
-To run the application locally:
+The simplest way to run the application is:
 
 ```bash
-npm start
+# Full system with vector search
+npm run dev:full
+
+# Minimal system without vector search
+npm run dev:minimal
 ```
+
+For detailed instructions on starting the development environment, see the [DEV-STARTUP-GUIDE.md](./DEV-STARTUP-GUIDE.md).
+
+## AI Code Embedding System
+
+This portfolio features an advanced AI embedding system that enables semantic understanding of code repositories. The system processes GitHub repositories, creates vector embeddings, and allows the AI to reference specific code sections when answering questions.
+
+### System Architecture
+
+The code embedding system follows this pipeline:
+
+1. **Repository Discovery**: The system reads repositories listed in `git_repos.txt`.
+2. **Repository Cloning**: The system clones repositories to local storage (`data/repositories/`).
+3. **Code Processing**: Code files are parsed into semantic units (functions, classes, etc.).
+4. **Chunking**: Large units are chunked with a 30% overlap to maintain context across chunk boundaries.
+5. **Embedding Generation**: OpenAI embeddings are generated for each chunk.
+6. **Vector Storage**: Embeddings are stored in a Qdrant vector database.
+7. **Context Retrieval**: When users ask questions, the system finds relevant code snippets.
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│                 │     │                 │     │                 │
+│  Repository     │────▶│  Code Parsing   │────▶│  Code Chunking  │
+│  Discovery      │     │  & Processing   │     │                 │
+│                 │     │                 │     │                 │
+└─────────────────┘     └─────────────────┘     └────────┬────────┘
+                                                         │
+                                                         ▼
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│                 │     │                 │     │                 │
+│  AI Response    │◀────│ Context         │◀────│  Embedding      │
+│  Generation     │     │ Retrieval       │     │  Generation     │
+│                 │     │                 │     │                 │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+```
+
+### Setting Up Repositories
+
+To add new repositories to the system:
+
+1. Add the repository URL to `git_repos.txt` in the format:
+   ```
+   username  https://github.com/username/repository.git (fetch)
+   username  https://github.com/username/repository.git (push)
+   ```
+
+2. Restart the application or trigger repository processing:
+   ```bash
+   curl -X POST http://localhost:3000/api/admin/repositories/update \
+     -H "Content-Type: application/json" \
+     -d '{"token": "YOUR_ADMIN_TOKEN"}'
+   ```
+
+3. The system will automatically clone, process, and index the repository.
+
+For more details, see the [REPOSITORY-INTEGRATION-GUIDE.md](./REPOSITORY-INTEGRATION-GUIDE.md).
+
+### Troubleshooting the Embedding System
+
+**Missing References**
+If the system is missing references (e.g., "the missile" in a repository):
+
+1. **Check Repository Processing**: Verify that the repository containing the reference is properly listed in `git_repos.txt`.
+
+2. **Force Reprocessing**: Trigger a reprocessing to regenerate embeddings:
+   ```bash
+   # Clear existing embeddings for the repository
+   curl -X POST http://localhost:3000/api/admin/repositories/process \
+     -H "Content-Type: application/json" \
+     -d '{
+       "token": "YOUR_ADMIN_TOKEN",
+       "repositoryUrl": "https://github.com/username/repository",
+       "force": true
+     }'
+   ```
+
+3. **Check Qdrant Connection**: If references are still missing, ensure Qdrant is working:
+   ```bash
+   curl http://localhost:6333/healthz
+   ```
+
+4. **Fix Vector ID Format**: If you encounter UUID format errors:
+   ```bash
+   npm run qdrant:fix-ids
+   ```
+
+**OpenAI API Issues**
+If embedding generation fails:
+
+1. Verify your OpenAI API key is correctly set in `.env`
+2. Check the server logs for API rate limiting or errors
+3. Temporarily, the system will fall back to mock embeddings for development
 
 ## Running Tests
 
@@ -187,17 +287,23 @@ The application consists of:
 2. **Backend**: Express.js server that:
     - Serves the static frontend assets
     - Provides API endpoints for OpenAI integration
+    - Manages repository cloning and embedding generation
+    - Interfaces with Qdrant vector database
 
 ## API Endpoints
 
 - `GET /api/askGPT`: Health check endpoint
 - `POST /api/askGPT`: Send questions to OpenAI
+- `POST /api/admin/repositories/update`: Trigger repository update
+- `POST /api/admin/repositories/process`: Process a specific repository
+- `GET /api/health`: General health check
 
 Example request:
 
 ```json
 {
     "question": "Tell me about Drew Clark's portfolio",
+    "repositoryUrl": "https://github.com/drewclark/drewclark.io-portfolio", 
     "model": "gpt-3.5-turbo", // optional
     "temperature": 0.7, // optional
     "maxTokens": 500 // optional
@@ -209,6 +315,7 @@ Example request:
 - `Dockerfile`: Production container configuration
 - `Dockerfile.dev`: Development container with hot reloading
 - `docker-compose.yml`: Service definitions for both dev and production
+- `docker-compose-qdrant.yml`: Configuration for the Qdrant vector database
 
 ## Continuous Integration and Deployment (CI/CD)
 

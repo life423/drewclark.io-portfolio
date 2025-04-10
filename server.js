@@ -17,6 +17,9 @@ const apiRoutes = require('./api/routes')
 const { setCacheTTL } = require('./api/utils')
 const config = require('./api/config')
 
+// Repository and code embedding systems
+const { initializeScheduler } = require('./api/services/scheduler/repositoryUpdateService')
+
 // Set cache TTL based on config
 setCacheTTL(config.cacheTtlMs)
 
@@ -192,4 +195,13 @@ app.listen(PORT, HOST, () => {
     console.log('ADMIN_ACCESS_TOKEN:', process.env.ADMIN_ACCESS_TOKEN ? `Configured (${process.env.ADMIN_ACCESS_TOKEN.length} chars)` : 'Missing')
     console.log('NODE_ENV:', process.env.NODE_ENV)
     console.log('PORT:', process.env.PORT)
+    
+    // Initialize the repository update scheduler
+    if (process.env.ENABLE_REPOSITORY_SCHEDULER === 'true' || process.env.NODE_ENV === 'production') {
+        console.log('Initializing repository update scheduler...')
+        initializeScheduler()
+        console.log('Repository update scheduler initialized')
+    } else {
+        console.log('Repository update scheduler disabled. Set ENABLE_REPOSITORY_SCHEDULER=true to enable.')
+    }
 })

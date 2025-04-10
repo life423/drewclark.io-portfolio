@@ -142,11 +142,43 @@ export default function UnifiedProjectChat({ projectsData }) {
         }, 100)
     }
 
-    // Auto-scroll to the bottom of the chat when new messages are added
+    // Advanced scroll management for chat
+    // Keep track of the last message count to detect new messages
+    const prevMessageCountRef = useRef(0);
+    
+    // Improved scrolling behavior to ensure user sees the beginning of new messages
     useEffect(() => {
         if (chatContainerRef.current && messages.length > 0) {
-            chatContainerRef.current.scrollTop =
-                chatContainerRef.current.scrollHeight
+            const container = chatContainerRef.current;
+            
+            // Check if a new message was added
+            if (messages.length > prevMessageCountRef.current) {
+                const newMessageIndex = messages.length - 1;
+                const newMessage = messages[newMessageIndex];
+                
+                // Find the new message element
+                const messageElements = container.querySelectorAll('.message-item');
+                if (messageElements.length > 0) {
+                    const newMessageElement = messageElements[newMessageIndex];
+                    
+                    // For assistant messages (long responses), scroll to show the beginning
+                    if (newMessage.role === 'assistant') {
+                        // Scroll to the top of the new message with a small offset for context
+                        if (newMessageElement) {
+                            newMessageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    } else {
+                        // For user messages, scroll to bottom as before
+                        container.scrollTop = container.scrollHeight;
+                    }
+                } else {
+                    // Fallback behavior if we can't find message elements
+                    container.scrollTop = container.scrollHeight;
+                }
+            }
+            
+            // Update the reference for next check
+            prevMessageCountRef.current = messages.length;
         }
     }, [messages])
 
@@ -423,7 +455,7 @@ export default function UnifiedProjectChat({ projectsData }) {
 
                                                     <div
                                                         className={clsx(
-                                                            'rounded-lg p-3 text-sm shadow-sm',
+                                                            'rounded-lg p-3 text-sm shadow-sm message-item',
                                                             msg.role === 'user'
                                                                 ? 'bg-brandGray-700/80 text-brandGreen-200 border-r-2 border-r-brandGreen-500 rounded-tr-none'
                                                                 : 'bg-brandGray-800/80 text-brandGray-200 border-l-2 border-l-brandOrange-500 rounded-tl-none'
