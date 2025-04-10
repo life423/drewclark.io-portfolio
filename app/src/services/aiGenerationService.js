@@ -294,6 +294,20 @@ If a question asks for comparisons between projects, highlight similarities and 
 If the question is about the chat interface itself, use the CHAT INTERFACE INFORMATION section to explain how the chat works.
 If the question is general, consider which projects are most relevant to the answer.
 Always mention which project(s) you're referring to by number (e.g., "Project 1", "Project 2").
+`;
+
+  // Combine everything into the final prompt
+  return `${projectContexts}\n\n${chatInterfaceInfo}\n\n${instructions}\n\nQuestion: ${question}`;
+}
+
+/**
+ * Handles questions that can span multiple projects
+ * Used by the unified project chat interface
+ * 
+ * @param {Array<Object>} projectsData - Array of project data objects
+ * @param {string} question - User question about any/all projects
+ * @param {Object} [options] - Additional options (same as answerProjectQuestion)
+ * @returns {Promise<string>} - AI response that can reference multiple projects
  */
 export async function answerMultiProjectQuestion(projectsData, question, options = {}) {
   const { timeout = 30000, useMock = false } = options;
