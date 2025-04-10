@@ -12,14 +12,30 @@ const config = require('../../config')
  * Generate a deterministic ID for a vector point that's consistent for the same input
  * @param {string} repository - Repository identifier
  * @param {string} path - Path or other identifier
+ * @param {Object} chunk - Optional chunk object containing additional metadata
  * @returns {string} - MD5 hash string
  */
-function generatePointId(repository, path) {
+function generatePointId(repository, path, chunk = null) {
     // Use deterministic IDs based on content for consistent incremental updates
     const crypto = require('crypto')
+    let idContent = `${repository}-${path}`
+    
+    // Add chunk-specific information if available to prevent collisions
+    // between different chunks of the same file
+    if (chunk) {
+        if (chunk.isPart && chunk.partIndex !== undefined) {
+            idContent += `-part${chunk.partIndex}`
+        } else if (chunk.startLine && chunk.endLine) {
+            idContent += `-lines${chunk.startLine}-${chunk.endLine}`
+        } else if (chunk.name) {
+            // Add name as a fallback identifier
+            idContent += `-${chunk.name}`
+        }
+    }
+    
     const hash = crypto
         .createHash('md5')
-        .update(`${repository}-${path}`)
+        .update(idContent)
         .digest('hex')
     return hash
 }
