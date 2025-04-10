@@ -76,6 +76,18 @@ All changes maintain backward compatibility:
 - Rate limiting still works on a per-feature basis
 - Cache keys are generated consistently with the previous implementation
 
+## UI Improvements
+
+### 5. Enhanced Chat Message Scrolling
+
+Modified the UnifiedProjectChat component to improve user experience with long messages:
+
+- Changed auto-scrolling behavior to ensure users see the beginning of new messages
+- Added smarter logic to distinguish between user messages and AI responses
+- For user messages: continues to scroll to bottom (conventional behavior)
+- For AI responses: scrolls to show the beginning of the message
+- This prevents users from missing the first part of long AI responses
+
 ## Future Improvements
 
 Potential future enhancements:
@@ -84,6 +96,7 @@ Potential future enhancements:
 2. **Documentation & Commit Embedding**: Implement the planned documentEmbeddings and commitEmbeddings collections
 3. **More Advanced Context Selection**: Consider implementing semantic clustering for even better snippet selection
 4. **Performance Monitoring**: Add instrumentation to track context enhancement performance
+5. **Response Summarization**: For very long responses, consider adding an option to see a summary first
 
 ## Related Files
 
