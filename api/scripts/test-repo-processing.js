@@ -66,8 +66,8 @@ async function processRepository(repoUrl) {
         const originalId = `${repoInfo.owner}-${repoInfo.repo}-${chunk.path}-${chunk.type}-${chunk.name}`.replace(/[^a-zA-Z0-9-]/g, '_');
         
         return {
-          // Use UUID v4 for Qdrant compatibility
-          id: qdrantService.generatePointId(repoInfo.owner + '/' + repoInfo.repo, chunk.path),
+          // Generate a unique ID that incorporates chunk information
+          id: qdrantService.generatePointId(repoInfo.owner + '/' + repoInfo.repo, chunk.path, chunk),
           vector: chunk.embedding,
           payload: {
             owner: repoInfo.owner,
