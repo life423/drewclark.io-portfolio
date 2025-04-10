@@ -16,9 +16,13 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         
-        <!-- Optimized font loading with size hints -->
-        <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap&text=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,-%/\:;" />
-        <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap&display=swap&text=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,-%/\:;" rel="stylesheet">
+        <!-- Preload font CSS file with proper onload attribute to avoid render blocking -->
+        <link rel="preload" href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap&text=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,-%/\:;" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        
+        <!-- Fallback in case JavaScript is disabled -->
+        <noscript>
+            <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap&text=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,-%/\:;" rel="stylesheet">
+        </noscript>
         <!-- Critical CSS inlined to prevent render blocking -->
         <style>
             /* Fallback font while Lato is loading */

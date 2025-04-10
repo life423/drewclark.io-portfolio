@@ -294,10 +294,7 @@ export default function Hero() {
                     focusStage={1}
                     className='relative mb-8' /* Increased spacing from mb-2 to mb-8 (32px) */
                 >
-                    <span
-                        className='absolute -inset-x-4 -inset-y-2 bg-gradient-to-r 
-                           from-brandGray-900/85 to-brandGray-900/40 rounded-lg blur-xl'
-                    ></span>
+                    {/* Removed the gray background span element that was causing the horizontal bar */}
                     <h1 className='relative text-4xl md:text-6xl font-bold'>
                         <span
                             className='inline-block bg-clip-text text-transparent bg-gradient-to-r 
