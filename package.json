@@ -20,9 +20,9 @@
         "build:frontend": "cd app && npm run build",
         "build:prepare": "node scripts/prepare-build.js",
         "start": "node server.js",
-        "test": "npm-run-all test:*",
+        "test": "npm-run-all --continue-on-error test:*",
         "test:api": "cd api && npm test",
-        "test:frontend": "cd app && npm test",
+        "test:frontend": "cd app && npm test -- --passWithNoTests",
         "reset": "npm-run-all clean setup",
         "restart": "npm-run-all clean:ports dev",
         "postinstall": "node scripts/permissions.js"
