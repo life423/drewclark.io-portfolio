@@ -28,11 +28,12 @@
 
 /* Apply global font settings */
 @layer base {
-  html {
+  html, body {
     font-family: var(--font-lato);
     font-feature-settings: "kern", "liga", "calt";
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
   }
   
   /* Optimize number rendering */
