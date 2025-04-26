@@ -1,5 +1,5 @@
-import React, { useRef } from 'react'
 import PropTypes from 'prop-types'
+import React, { useRef } from 'react'
 import useResizeObserver from '../../hooks/useResizeObserver'
 
 function HorizontalProgressBar({
@@ -15,7 +15,7 @@ function HorizontalProgressBar({
 
     return (
         <div
-            className='absolute bottom-0 left-1/2 transform -translate-x-1/2 w-screen overflow-hidden z-[51] pointer-events-none'
+            className='absolute bottom-0 left-0 right-0 w-full overflow-hidden z-[51] pointer-events-none'
             ref={containerRef}
         >
             <div
