@@ -15,13 +15,13 @@ function HorizontalProgressBar({
 
     return (
         <div
-            className='absolute bottom-0 left-0 right-0 z-[51] pointer-events-none'
+            className='absolute bottom-0 left-1/2 transform -translate-x-1/2 w-screen overflow-hidden z-[51] pointer-events-none'
             ref={containerRef}
         >
             <div
                 className='h-[3px] transition-all duration-200 ease-out'
                 style={{
-                    width: `${progress}%`,
+                    width: `${Math.min(progress, 100)}%`,
                     backgroundColor: getInterpolatedColor(progress),
                 }}
                 aria-hidden='true'
