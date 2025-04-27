@@ -1,38 +1,55 @@
-FROM node:18-alpine
+# ─── Stage 1: Install, patch & build dependencies ───────────────────
+FROM node:18-alpine AS builder
 
-# Install git and build essentials
+# system tools only needed at build time
 RUN apk add --no-cache git openssh python3 make g++
 
-# Create app directory
 WORKDIR /app
 
-# Copy the scripts directory first to ensure permissions.js is available
-COPY scripts/ ./scripts/
-
-# Copy package files
+# copy manifests
 COPY package*.json ./
-COPY api/package*.json ./api/
-COPY app/package*.json ./app/
+COPY api/package*.json api/
+COPY app/package*.json app/
 
-# Modify permissions.js for Docker compatibility
-RUN sed -i 's/const { spawn } = require(.child_process.);/const { spawn } = require("child_process");\n\n\/\/ Skip PowerShell in Docker\nfunction setWindowsPermissions() { return Promise.resolve(true); }/' ./scripts/permissions.js
+# Copy scripts first so postinstall can find them
+COPY scripts/ scripts/
 
-# Install dependencies
-RUN npm install --legacy-peer-deps
-RUN cd api && npm install
-RUN cd app && npm install --legacy-peer-deps
+# patch Windows permissions script before running npm install
+RUN sed -i 's/const { spawn } = require(.child_process.);/const { spawn } = require("child_process");\
+\n\/\/ Skip PowerShell in Docker\nfunction setWindowsPermissions() { return Promise.resolve(true); }/' \
+  scripts/permissions.js
 
-# Copy all remaining source files
+# install root + api + app deps (incl. devDeps)
+RUN npm install --legacy-peer-deps \
+  && cd api && npm install --legacy-peer-deps \
+  && cd ../app && npm install --legacy-peer-deps
+
+# copy source & build frontend
 COPY . .
-
-# Build the frontend
 RUN cd app && npm run build
 
-# Create required data directories
+# ─── Stage 2: Create minimal prod image ───────────────────────────
+FROM node:18-alpine AS runner
+LABEL maintainer="drew@drewclark.io"
+
+WORKDIR /app
+
+# Copy scripts first so postinstall can find them
+COPY --from=builder /app/scripts      scripts
+
+# install runtime deps
+COPY package*.json ./
+COPY api/package*.json api/
+RUN npm install --production --legacy-peer-deps && \
+    npm install uuid --legacy-peer-deps
+
+# bring in built frontend & server code
+COPY --from=builder /app/app/dist     app/dist
+COPY --from=builder /app/api          api
+COPY --from=builder /app/server.js    server.js
+
+# create runtime dirs
 RUN mkdir -p data/embeddings data/repositories data/contact
 
-# Expose the application port
 EXPOSE 3000
-
-# Start the application
-CMD ["node", "start-app.js"]
+CMD ["node", "server.js"]
