@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 env:
   # Define environment variables that can be reused
@@ -44,6 +45,7 @@ jobs:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
           script: |
             echo "Creating .env file on droplet..."
             cat > /home/${{ secrets.DEPLOY_USER }}/.env <<'EOF'
