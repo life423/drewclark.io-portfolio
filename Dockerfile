@@ -38,6 +38,9 @@ RUN echo "Building with VITE_API_URL=${VITE_API_URL:-/api/askGPT}" && \
 FROM node:18-alpine AS runner
 LABEL maintainer="drew@drewclark.io"
 
+# Install Git
+RUN apk add --no-cache git
+
 WORKDIR /app
 
 # Copy scripts first so postinstall can find them
