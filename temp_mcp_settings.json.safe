@@ -1,0 +1,45 @@
+{
+  "mcpServers": {
+    "github.com/AgentDeskAI/browser-tools-mcp": {
+      "command": "node",
+      "args": [
+        "C:\\Users\\aiand\\OneDrive\\Documentos\\Cline\\MCP\\browser-tools-mcp\\node_modules\\@agentdeskai\\browser-tools-mcp\\dist\\mcp-server.js"
+      ],
+      "disabled": false,
+      "autoApprove": [
+        "getConsoleLogs"
+      ]
+    },
+    "github.com/modelcontextprotocol/servers/tree/main/src/github": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "YOUR_TOKEN_HERE"
+      },
+      "disabled": false,
+      "autoApprove": []
+    },
+    "github.com/modelcontextprotocol/servers/tree/main/src/filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "C:\\Users\\aiand\\Documents\\software-engineering\\polyalphabetic-and-caesar_cipher",
+        "C:\\Users\\aiand\\OneDrive\\Documentos\\Cline\\MCP\\filesystem-mcp"
+      ],
+      "disabled": false,
+      "autoApprove": [
+        "list_allowed_directories"
+      ]
+    },
+    "github.com/modelcontextprotocol/servers/tree/main/src/git": {
+      "command": "C:\\Users\\aiand\\AppData\\Roaming\\Python\\Python313\\Scripts\\mcp-server-git.exe",
+      "args": [],
+      "disabled": false,
+      "autoApprove": []
+    }
+  }
+}
