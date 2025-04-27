@@ -15,6 +15,7 @@ export default function useScrollPosition() {
         percent: 0
     })
     
+    
     // Use refs to track previous values and calculate direction
     const prevScrollY = useRef(typeof window !== 'undefined' ? document.documentElement.scrollTop : 0)
     const frameRef = useRef(null)
