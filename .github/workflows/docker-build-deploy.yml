@@ -40,10 +40,18 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            echo "Creating .env file on droplet..."
+            cat > /home/${{ secrets.DEPLOY_USER }}/.env <<'EOF'
+            NODE_ENV=${{ secrets.NODE_ENV }}
+            ADMIN_ACCESS_TOKEN=${{ secrets.ADMIN_ACCESS_TOKEN }}
+            DOCKER_CONTAINER=true
+            PORT=3000
+            # add more environment variables as needed
+            EOF
             echo "Pulling the latest image from Docker Hub..."
             docker pull aiandrew631/portfolio:latest
             echo "Stopping and removing old container (if exists)..."
             docker stop portfolio || true
             docker rm portfolio || true
-            echo "Starting new container..."
-            docker run -d --name portfolio -p 80:3000 aiandrew631/portfolio:latest
+            echo "Starting new container with .env file..."
+            docker run -d --name portfolio --env-file /home/${{ secrets.DEPLOY_USER }}/.env -p 80:3000 aiandrew631/portfolio:latest
