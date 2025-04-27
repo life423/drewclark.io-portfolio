@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * Enhanced scroll position hook that efficiently tracks scroll position
  * Uses requestAnimationFrame and throttling for optimal performance
@@ -170,4 +171,27 @@ export default function useScrollPosition() {
         ...scrollInfo,
         forceRecalculation
     }
+=======
+// src/hooks/useScrollPosition.js
+import { useState, useEffect } from 'react'
+
+export default function useScrollPosition() {
+    const [scrollY, setScrollY] = useState(0)
+
+    useEffect(() => {
+        function handleScroll() {
+            setScrollY(window.scrollY)
+        }
+
+        // Listen for scroll events
+        window.addEventListener('scroll', handleScroll)
+        // Initialize scroll position in case user is already scrolled
+        handleScroll()
+
+        // Cleanup event on unmount
+        return () => window.removeEventListener('scroll', handleScroll)
+    }, [])
+
+    return scrollY
+>>>>>>> ef0428e (Refactored App component to functional component, added NavBar and ProgressBar components. Created useScrollPosition hook for scroll tracking. Updated Tailwind config with new color scheme.)
 }
