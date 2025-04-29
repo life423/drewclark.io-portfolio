@@ -32,17 +32,29 @@ jobs:
           subscription-id: ${{ secrets.LANDINGPAGE_AZURE_SUBSCRIPTION_ID }}
 
       - name: Build and push container image to registry
+        id: build_and_push
         uses: azure/container-apps-deploy-action@v2
         with:
           appSourcePath: ${{ github.workspace }}
-          _dockerfilePathKey_: _dockerfilePath_
+          dockerfilePath: Dockerfile
           registryUrl: docker.io
           registryUsername: ${{ secrets.LANDINGPAGE_REGISTRY_USERNAME }}
           registryPassword: ${{ secrets.LANDINGPAGE_REGISTRY_PASSWORD }}
           containerAppName: landingpage
           resourceGroup: portfolio-apps
           imageToBuild: aiandrew631/landingpage:${{ github.sha }}
-          _buildArgumentsKey_: |
-            _buildArgumentsValues_
+        continue-on-error: true
 
-
+      - name: Set up retry deployment script
+        if: steps.build_and_push.outcome == 'failure'
+        run: |
+          chmod +x .github/scripts/deploy-with-retry.sh
+          
+      - name: Deploy with retry logic
+        if: steps.build_and_push.outcome == 'failure'
+        run: |
+          # Set Container App registry credentials
+          az containerapp registry set -n landingpage -g portfolio-apps --server docker.io --username ${{ secrets.LANDINGPAGE_REGISTRY_USERNAME }} --password ${{ secrets.LANDINGPAGE_REGISTRY_PASSWORD }}
+          
+          # Run the retry script
+          .github/scripts/deploy-with-retry.sh landingpage portfolio-apps aiandrew631/landingpage:${{ github.sha }}
