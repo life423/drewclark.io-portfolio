@@ -43,6 +43,8 @@ jobs:
           containerAppName: landingpage
           resourceGroup: portfolio-apps
           imageToBuild: aiandrew631/landingpage:${{ github.sha }}
+          buildArguments: |
+            OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
         continue-on-error: true
 
       - name: Set up retry deployment script
@@ -55,6 +57,10 @@ jobs:
         run: |
           # Set Container App registry credentials
           az containerapp registry set -n landingpage -g portfolio-apps --server docker.io --username ${{ secrets.LANDINGPAGE_REGISTRY_USERNAME }} --password ${{ secrets.LANDINGPAGE_REGISTRY_PASSWORD }}
+          
+          # Add environment variables to Container App (as a secret)
+          az containerapp secret set -n landingpage -g portfolio-apps --secrets openai-api-key=${{ secrets.OPENAI_API_KEY }}
+          az containerapp update -n landingpage -g portfolio-apps --set-env-vars "OPENAI_API_KEY=secretref:openai-api-key"
           
           # Run the retry script
           .github/scripts/deploy-with-retry.sh landingpage portfolio-apps aiandrew631/landingpage:${{ github.sha }}
