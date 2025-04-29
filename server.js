@@ -128,15 +128,12 @@ app.use((req, res, next) => {
 app.use('/api', apiRoutes)
 
 // Serve static frontend assets - improve path resolution
-const distPath = path.join(__dirname, 'app/dist');
-console.log(`Serving static files from: ${distPath}`);
-
-app.use(express.static(distPath));
+app.use(express.static(path.join(__dirname, 'app', 'dist')));
+console.log(`Serving static files from: ${path.join(__dirname, 'app', 'dist')}`);
 
 // Catch-all route to serve index.html for client-side routing with environment injection
 app.get('*', (req, res) => {
-    const indexPath = path.join(distPath, 'index.html');
-    console.log(`Serving index.html from: ${indexPath}`);
+    const indexPath = path.join(__dirname, 'app', 'dist', 'index.html');
     
     // Check if the file exists before serving
     if (require('fs').existsSync(indexPath)) {
@@ -167,17 +164,8 @@ app.get('*', (req, res) => {
         // Send the modified HTML
         res.send(html);
     } else {
-        res.status(404).send(`
-            <h1>Configuration Error</h1>
-            <p>Cannot find index.html at ${indexPath}</p>
-            <p>Current directory: ${__dirname}</p>
-            <p>Files in current directory: ${require('fs').readdirSync(__dirname).join(', ')}</p>
-            <p>Files in app directory (if exists): ${
-                require('fs').existsSync(path.join(__dirname, 'app')) 
-                    ? require('fs').readdirSync(path.join(__dirname, 'app')).join(', ') 
-                    : 'app directory not found'
-            }</p>
-        `);
+        // Fallback to sendFile if the file can't be read or modified
+        res.sendFile(indexPath);
     }
 })
 
