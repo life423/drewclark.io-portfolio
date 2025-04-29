@@ -1,5 +1,5 @@
 # ─── Stage 1: Install, patch & build dependencies ───────────────────
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 # Accept build arguments for environment variables
 ARG VITE_API_URL="/api/askGPT"
@@ -35,7 +35,7 @@ RUN echo "Building with VITE_API_URL=${VITE_API_URL:-/api/askGPT}" && \
     cd app && VITE_API_URL=${VITE_API_URL:-/api/askGPT} npm run build
 
 # ─── Stage 2: Create minimal prod image ───────────────────────────
-FROM node:18-alpine AS runner
+FROM node:20-alpine AS runner
 LABEL maintainer="drew@drewclark.io"
 
 # Install Git

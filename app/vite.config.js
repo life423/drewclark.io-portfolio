@@ -24,6 +24,7 @@ export default defineConfig(({ command, mode }) => {
         base: './', // Use relative paths
         server: {
             port: 5173, // Explicit Vite port to avoid conflicts
+            host: '0.0.0.0', // Bind to all interfaces instead of just localhost
             proxy: {
                 '/api': {
                     target: 'http://localhost:3000',

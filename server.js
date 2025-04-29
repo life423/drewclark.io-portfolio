@@ -181,8 +181,8 @@ app.get('*', (req, res) => {
     }
 })
 
-// Start the server - bind to 0.0.0.0 in container environments to allow external connections
-const HOST = process.env.DOCKER_CONTAINER ? '0.0.0.0' : 'localhost'
+// Start the server - bind to 0.0.0.0 to allow external connections
+const HOST = '0.0.0.0'  // Always bind to all interfaces
 app.listen(PORT, HOST, () => {
     console.log(`Server running on ${HOST}:${PORT}`)
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`)
