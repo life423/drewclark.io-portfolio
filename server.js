@@ -40,7 +40,8 @@ app.use(helmet({
         directives: {
             defaultSrc: ["'self'"],
             scriptSrc: ["'self'", "'unsafe-inline'"], // Allow inline scripts for frontend
-            styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"], // Allow inline styles and Google Fonts
+            fontSrc: ["'self'", "https://fonts.gstatic.com"], // Allow Google Fonts
             imgSrc: ["'self'", "data:", "blob:"], // Allow data URIs for images
             connectSrc: ["'self'", process.env.NODE_ENV === 'development' ? '*' : ''] // More permissive in dev
         }
