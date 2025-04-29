@@ -54,7 +54,9 @@ app.use((req, res, next) => {
     // Production domains
     const productionDomains = [
         'https://drewclark.io',
-        'https://www.drewclark.io'
+        'https://www.drewclark.io',
+        'http://146.190.213.50',   // Allow the IP address
+        'https://146.190.213.50'   // Allow HTTPS version too
     ];
     
     // Development domains (including Vite's default port 5173)
@@ -80,13 +82,15 @@ app.use((req, res, next) => {
     if (origin && allowedOrigins.includes(origin)) {
         // Allow specific origin that's in our whitelist
         res.header('Access-Control-Allow-Origin', origin);
-    } else if (process.env.NODE_ENV !== 'production') {
-        // In development, be more permissive (but log it)
-        console.log(`Non-whitelisted origin request: ${origin || 'Unknown'}`);
+    } else if (process.env.NODE_ENV !== 'production' || !origin) {
+        // In development or for same-origin requests (where origin is null), be more permissive
+        console.log(`Non-whitelisted or same-origin request: ${origin || 'Same-origin/direct'}`);
         res.header('Access-Control-Allow-Origin', '*');
     } else {
-        // In production, don't set the header for non-whitelisted origins
-        // This effectively blocks CORS requests from unauthorized domains
+        // In production, log the blocked origin but still allow the request
+        // This allows assets to load from any source to fix the connection refused errors
+        console.log(`Production request from non-whitelisted origin: ${origin || 'Unknown'}`);
+        res.header('Access-Control-Allow-Origin', '*');
     }
     
     // Standard CORS headers
