@@ -21,7 +21,7 @@ export default defineConfig(({ command, mode }) => {
     return {
         root: './src', // if your index.html is in src/
         publicDir: '../public', // Specify the public directory at project root
-        base: './', // Use relative paths
+        base: '/', // Use absolute paths
         server: {
             port: 5173, // Explicit Vite port to avoid conflicts
             host: '0.0.0.0', // Bind to all interfaces instead of just localhost
