@@ -93,58 +93,92 @@ class QdrantService {
         }
     }
 
-    /**
-     * Initialize the Qdrant client and create collections if they don't exist
-     * @returns {Promise<boolean>} Success status
-     */
-    async initialize() {
-        try {
-            if (this.initialized && this.client) {
+/**
+ * Initialize the Qdrant client and create collections if they don't exist
+ * @returns {Promise<boolean>} Success status
+ */
+async initialize() {
+    try {
+        if (this.initialized && this.client) {
+            return true
+        }
+
+        // Try different URLs if hostname resolution fails in production
+        let qdrantUrls = [config.vectorDb.url]
+        
+        // In production, add fallback URLs for robustness
+        if (!config.isDevelopment) {
+            // If using Docker service name, add IP fallbacks
+            if (config.vectorDb.url.includes('qdrant:')) {
+                qdrantUrls.push(
+                    // Try localhost fallback
+                    config.vectorDb.url.replace('qdrant:', 'localhost:'),
+                    // Try internal Docker DNS
+                    config.vectorDb.url.replace('qdrant:', '127.0.0.1:')
+                )
+            }
+        }
+
+        console.log(`Initializing Qdrant client with primary URL: ${qdrantUrls[0]}`)
+        if (qdrantUrls.length > 1) {
+            console.log(`Will try fallback URLs if needed: ${qdrantUrls.slice(1).join(', ')}`)
+        }
+
+        // Try each URL until one works
+        let connectionSuccess = false
+        let lastError = null
+
+        for (const url of qdrantUrls) {
+            try {
+                // Create Qdrant client with API key if available
+                const clientOptions = {
+                    url: url,
+                    timeout: config.vectorDb.timeout || 15000, // 15 second timeout by default
+                }
+
+                // Add API key if available
+                if (process.env.VECTOR_DB_API_KEY) {
+                    console.log('Using API key for Qdrant authentication')
+                    clientOptions.apiKey = process.env.VECTOR_DB_API_KEY
+                }
+
+                this.client = new QdrantClient(clientOptions)
+
+                // Test the connection
+                await this.testConnection()
+                console.log(`Successfully connected to Qdrant at ${url}`)
+                connectionSuccess = true
+                break
+            } catch (connectionError) {
+                console.warn(`Connection to Qdrant at ${url} failed:`, connectionError.message)
+                lastError = connectionError
+            }
+        }
+
+        // Handle connection failure
+        if (!connectionSuccess) {
+            console.error('Failed to connect to Qdrant after trying all URLs')
+            if (config.isDevelopment) {
+                console.warn('Falling back to mock implementation in development mode')
+                this.useMock = true
+                this.initialized = true
+                return true
+            } else {
+                // In production, log details but continue with degraded functionality
+                console.error('Using degraded functionality without vector search capabilities')
+                this.useMock = true
+                this.initialized = true
                 return true
             }
+        }
 
-            console.log(
-                `Initializing Qdrant client with URL: ${config.vectorDb.url}`
-            )
+        // Create collections if they don't exist
+        if (!this.useMock) {
+            await this.ensureCollections()
+        }
 
-            // Create Qdrant client with API key if available
-            const clientOptions = {
-                url: config.vectorDb.url,
-                timeout: config.vectorDb.timeout || 15000, // 15 second timeout by default
-            }
-
-            // Add API key if available
-            if (process.env.VECTOR_DB_API_KEY) {
-                console.log('Using API key for Qdrant authentication')
-                clientOptions.apiKey = process.env.VECTOR_DB_API_KEY
-            }
-
-            this.client = new QdrantClient(clientOptions)
-
-            // For development/testing, skip connection test if no Qdrant server is running
-            if (config.isDevelopment) {
-                try {
-                    await this.testConnection()
-                    console.log('Successfully connected to Qdrant')
-                } catch (connectionError) {
-                    console.warn(
-                        'Could not connect to Qdrant server, using mock implementation'
-                    )
-                    this.useMock = true
-                }
-            } else {
-                // In production, we require a successful connection
-                await this.testConnection()
-                console.log('Successfully connected to Qdrant')
-            }
-
-            // Create collections if they don't exist
-            if (!this.useMock) {
-                await this.ensureCollections()
-            }
-
-            this.initialized = true
-            return true
+        this.initialized = true
+        return true
         } catch (error) {
             console.error('Failed to initialize vector database:', error)
             if (config.isDevelopment) {
