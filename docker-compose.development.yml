@@ -12,6 +12,7 @@ services:
     environment:
       - NODE_ENV=development
       - QDRANT_URL=http://qdrant:6333
+      - DOCKER_CONTAINER=true
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     volumes:
       # Mount source code for hot reloading
@@ -23,6 +24,19 @@ services:
     depends_on:
       - qdrant
     command: npm run dev:cloud
+    networks:
+      - portfolio_dev_network
+    dns:
+      - 8.8.8.8  # Use Google DNS as fallback
+    # Add helpful debugging tools for development
+    extra_hosts:
+      - "host.docker.internal:host-gateway"  # Easy access to host machine
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   # Qdrant vector database - same as production but with different ports
   qdrant:
@@ -34,6 +48,19 @@ services:
       - "6334:6334"  # GRPC API
     environment:
       - QDRANT_ALLOW_CORS=true
+    networks:
+      - portfolio_dev_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 volumes:
   qdrant_dev_data:
+  
+# Define an explicit network to ensure container communication
+networks:
+  portfolio_dev_network:
+    driver: bridge
