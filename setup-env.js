@@ -35,6 +35,7 @@ const apiProdEnvTemplate = `# Production Environment Configuration
 # Get your API key from: https://platform.openai.com/api-keys
 OPENAI_API_KEY=your_openai_api_key_here
 
+
 # Other environment variables can be added below
 `;
 
