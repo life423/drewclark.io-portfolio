@@ -37,6 +37,15 @@ if (isAzureFunctions) {
     console.log(`Azure Functions hostname: ${process.env.WEBSITE_HOSTNAME}`)
 }
 
+// Enhanced environment variable debugging
+console.log('Environment variables for OpenAI debugging:')
+console.log('OPENAI_API_KEY present:', !!process.env.OPENAI_API_KEY)
+if (process.env.OPENAI_API_KEY) {
+    console.log('OPENAI_API_KEY length:', process.env.OPENAI_API_KEY.length)
+    console.log('OPENAI_API_KEY format check:', 
+        process.env.OPENAI_API_KEY.startsWith('sk-') ? 'Valid format (starts with sk-)' : 'Invalid format')
+}
+
 // Configuration object with all settings centralized
 const config = {
     // Environment
