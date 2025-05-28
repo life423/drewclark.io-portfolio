@@ -29,3 +29,11 @@ data/contact/
 
 # Sensitive documentation
 CONTACT-SYSTEM.md
+
+# Cleanup: prevent return of removed items
+temp_mcp_settings*
+.vscode/
+vscode_*.json
+*.git/
+.husky-setup.js
+AZURE_CONFIG_FIX.md
