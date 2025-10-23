@@ -31,18 +31,22 @@ export default function useScrollPosition() {
         // Skip if scroll is locked
         if (scrollLockState.isLocked) return
         
-        // Get scroll values from documentElement (more consistent across browsers/devices)
-        const doc = document.documentElement
-        const scrollTop = doc.scrollTop
-        const scrollHeight = doc.scrollHeight
-        const clientHeight = doc.clientHeight
+        // Use the document's scrolling element for cross-browser consistency
+        const el = document.scrollingElement || document.documentElement
+        const scrollTop = el.scrollTop
+        const scrollHeight = el.scrollHeight
+        const viewportHeight = (window.visualViewport && window.visualViewport.height)
+            ? window.visualViewport.height
+            : el.clientHeight
         
         // Calculate scrollable area (total height minus visible area)
-        const scrollable = scrollHeight - clientHeight
+        const scrollable = scrollHeight - viewportHeight
         
-        // Prevent division by zero and calculate percentage
-        // Using Math.round and a slight buffer (100.5%) to ensure we hit 100% on mobile
-        const percent = scrollable <= 0 ? 0 : Math.min(100.5, Math.round((scrollTop / scrollable) * 100))
+        // Clamp to avoid iOS bounce and compute precise percentage (no rounding)
+        const clampedTop = Math.max(0, Math.min(scrollTop, scrollable))
+        const percent = scrollable <= 0
+            ? 0
+            : Math.max(0, Math.min(100, (clampedTop / scrollable) * 100))
         
         // Debug logging removed for production
         
@@ -165,6 +169,8 @@ export default function useScrollPosition() {
             }
         }
     }, [forceRecalculation])
+
+    // Rely on visualViewport-aware math above; no bottom sentinel needed
     
     // Return scroll info plus the force recalculation function
     return {

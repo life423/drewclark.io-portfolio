@@ -41,4 +41,46 @@
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum";
   }
+
+  /* Large-screen rails variables */
+  :root {
+    --content-max: 1440px;
+    --rail: clamp(24px, 5vw, 128px);
+    /* Subtle brand-blue rail; tweak as desired */
+    --rail-color: rgba(3, 105, 161, 0.18); /* brandBlue[700] @ 18% */
+  }
+
+  /* Side rails for large screens without DOM changes */
+  @media (min-width: 1440px) {
+    .site-rails {
+      position: relative;
+    }
+    .site-rails::before,
+    .site-rails::after {
+      content: "";
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      width: var(--rail);
+      background: var(--rail-color);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .site-rails::before { left: 0; }
+    .site-rails::after { right: 0; }
+    /* Ensure actual content sits above the decorative rails */
+    .site-rails > * { position: relative; z-index: 1; }
+  }
+
+  /* Scoped container to cap width without affecting full-bleed sections */
+  .content-wrap {
+    max-width: var(--content-max);
+    margin-inline: auto;
+    padding-inline: clamp(24px, 2vw, 48px);
+  }
+
+  /* On ultra-wide, allow a slightly wider content cap */
+  @media (min-width: 2560px) {
+    :root { --content-max: 1600px; }
+  }
 }

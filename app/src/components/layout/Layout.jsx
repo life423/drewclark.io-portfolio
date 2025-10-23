@@ -11,7 +11,7 @@ export default function Layout({
     children,
 }) {
     return (
-        <div className='relative min-h-screen flex flex-col overflow-x-hidden bg-brandGray-500'>
+        <div className='site-rails relative min-h-screen flex flex-col overflow-x-hidden bg-brandGray-500'>
             <header>
                 <Navbar
                     drawerOpen={drawerOpen}
