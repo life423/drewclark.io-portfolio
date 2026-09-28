@@ -8,6 +8,7 @@
 const qdrantService = require('../vectorDb/qdrantService');
 const { generateEmbedding } = require('../embeddings/embeddingService');
 const { cloneOrUpdateRepository } = require('../repositories/repoCloneService');
+const { parseAllowedRepo } = require('../repositories/repoUtils');
 const { limitSnippetsToTokenBudget } = require('./tokenUtils');
 const config = require('../../config');
 
@@ -32,10 +33,11 @@ async function enhanceQuestionWithCodeContext(question, repoUrl, limit = 8) {
 
     console.log(`Enhancing question with code context from ${repoUrl}`);
     
-    // Extract repo information from URL
-    const repoInfo = await getRepositoryInfo(repoUrl);
+    // Only our own repositories, and never clone or pull during a chat request:
+    // the background scheduler keeps the index up to date
+    const repoInfo = parseAllowedRepo(repoUrl);
     if (!repoInfo) {
-      console.log(`Could not extract repository information from ${repoUrl}`);
+      console.log(`Skipping code context: ${repoUrl} is not an allowed repository`);
       return question;
     }
 

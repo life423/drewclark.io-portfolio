@@ -5,6 +5,8 @@
  * from user questions.
  */
 
+const config = require('../../config');
+
 /**
  * Extract GitHub repository URL from a question
  * @param {string} question - User question
@@ -97,9 +99,26 @@ function extractRepoDetails(url) {
   return null;
 }
 
+/**
+ * Parse a GitHub URL and return { owner, repo } only if it is on the allow list
+ * (config.repositories.allowed). Anything else returns null.
+ * @param {string} url - GitHub repository URL
+ * @returns {{owner: string, repo: string}|null}
+ */
+function parseAllowedRepo(url) {
+  const cleaned = String(url || '').trim().replace(/\.+$/, '');
+  const match = /^https:\/\/github\.com\/([\w.-]+)\/([\w.-]+?)(?:\.git)?\/?$/.exec(cleaned);
+  if (!match) {
+    return null;
+  }
+  const [, owner, repo] = match;
+  return config.repositories.allowed.includes(`${owner}/${repo}`.toLowerCase()) ? { owner, repo } : null;
+}
+
 module.exports = {
   extractRepositoryUrl,
   normalizeRepositoryUrl,
   isGitHubRepositoryUrl,
-  extractRepoDetails
+  extractRepoDetails,
+  parseAllowedRepo
 };

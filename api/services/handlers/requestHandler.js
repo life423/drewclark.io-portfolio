@@ -112,13 +112,10 @@ async function handlePostRequest(req, createResponse, headers, logger) {
 
   // Enhanced with repository context if available
   let enhancedQuestion = userQuestion;
-  let repositoryUrl = req.body.repositoryUrl;
+  // Code context only comes from a configured vector database and our own repos.
+  // Nothing here clones or pulls repositories, and the client can't pick one.
+  const repositoryUrl = config.vectorDb.enabled ? extractRepositoryUrl(userQuestion) : null;
   let usingRepoContext = false;
-
-  // Check if a repository URL was provided or can be extracted from the question
-  if (!repositoryUrl) {
-    repositoryUrl = extractRepositoryUrl(userQuestion);
-  }
 
   // Enhance question with code context if repository URL is available
   if (repositoryUrl) {

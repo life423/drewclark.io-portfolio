@@ -86,6 +86,8 @@ const config = {
 
     // Vector Database Configuration
     vectorDb: {
+        // Code context for the chat is off unless a vector database is configured
+        enabled: Boolean(process.env.VECTOR_DB_URL),
         url: process.env.VECTOR_DB_URL || 'http://localhost:6333',
         apiKey: process.env.VECTOR_DB_API_KEY, // Add this line
         embeddingModel: 'text-embedding-ada-002',
@@ -102,6 +104,11 @@ const config = {
     repositories: {
         // Default repositories to always include
         defaultRepos: ['https://github.com/life423/drewclark.io-portfolio'],
+        // The only repositories the chat and the admin tools may use
+        allowed: (process.env.ALLOWED_REPOS || 'life423/drewclark.io-portfolio,life423/ai-platform-trainer,life423/ascend-avoid,life423/polyalphabetic-and-caesar_cipher')
+            .split(',')
+            .map(name => name.trim().toLowerCase())
+            .filter(Boolean),
         // How often to sync repositories with GitHub (1 hour)
         syncIntervalMs: 3600000,
     },

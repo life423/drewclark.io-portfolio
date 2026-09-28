@@ -195,11 +195,11 @@ app.listen(PORT, HOST, () => {
     console.log('PORT:', process.env.PORT)
     
     // Initialize the repository update scheduler
-    if (process.env.ENABLE_REPOSITORY_SCHEDULER === 'true' || process.env.NODE_ENV === 'production') {
+    if (config.vectorDb.enabled && (process.env.ENABLE_REPOSITORY_SCHEDULER === 'true' || process.env.NODE_ENV === 'production')) {
         console.log('Initializing repository update scheduler...')
         initializeScheduler()
         console.log('Repository update scheduler initialized')
     } else {
-        console.log('Repository update scheduler disabled. Set ENABLE_REPOSITORY_SCHEDULER=true to enable.')
+        console.log('Repository update scheduler disabled (needs VECTOR_DB_URL, plus ENABLE_REPOSITORY_SCHEDULER=true outside production).')
     }
 })

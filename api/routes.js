@@ -7,6 +7,7 @@ const adminAuth = require('./adminAuth')
 const { rateLimit } = require('express-rate-limit')
 const config = require('./config')
 const { updateAllRepositories, processRepository } = require('./services/scheduler/repositoryUpdateService')
+const { parseAllowedRepo } = require('./services/repositories/repoUtils')
 const { defaultHandler, projectsHandler } = require('./routes/askGptAdapter')
 
 // Chat rate limits: per visitor, plus a site-wide daily ceiling so a
@@ -152,6 +153,9 @@ router.post('/admin/repositories/process', adminAuth.requireAdmin, (req, res) =>
     const { repositoryUrl } = req.body || {};
     if (!repositoryUrl) {
         return res.status(400).json({ error: 'Missing repository URL' });
+    }
+    if (!parseAllowedRepo(repositoryUrl)) {
+        return res.status(400).json({ error: 'Repository is not on the allowed list' });
     }
     console.log(`Manually processing repository: ${repositoryUrl}`);
     processRepository(repositoryUrl)
