@@ -19,6 +19,7 @@ concurrency:
 env:
   APP_NAME: landingpage
   RESOURCE_GROUP: portfolio-apps
+  IMAGE: aiandrew631/landingpage
 
 jobs:
   build-and-deploy:
@@ -70,7 +71,7 @@ jobs:
           registryPassword: ${{ secrets.LANDINGPAGE_REGISTRY_PASSWORD }}
           containerAppName: ${{ env.APP_NAME }}
           resourceGroup: ${{ env.RESOURCE_GROUP }}
-          imageToBuild: aiandrew631/landingpage:${{ github.sha }}
+          imageToBuild: ${{ env.IMAGE }}:${{ github.sha }}
           # Public HTTPS on the port the server listens on (the action would otherwise assume 80)
           ingress: external
           targetPort: 3000
@@ -78,16 +79,27 @@ jobs:
             OPENAI_API_KEY=secretref:openai-api-key
             MONGODB_URI=secretref:mongodb-uri
             ADMIN_PASSWORD=secretref:admin-password
+            APP_VERSION=${{ github.sha }}
 
-      - name: Check the new version is up
+      # A healthy response alone isn't proof: an older container can answer too.
+      # Require exactly one container on the image just built, and the public
+      # site answering with this commit.
+      - name: Check the new version is live
         run: |
+          expected="$IMAGE:$GITHUB_SHA"
+          images=$(az containerapp show -n "$APP_NAME" -g "$RESOURCE_GROUP" --query "properties.template.containers[].image" -o tsv)
+          if [ "$images" != "$expected" ]; then
+            echo "::error::Expected one container running $expected, found: $(echo $images)"
+            exit 1
+          fi
           fqdn=$(az containerapp show -n "$APP_NAME" -g "$RESOURCE_GROUP" --query properties.configuration.ingress.fqdn -o tsv)
+          version=${GITHUB_SHA::7}
           for attempt in $(seq 1 20); do
-            if curl -fsS "https://$fqdn/api/health" > /dev/null; then
-              echo "Healthy: https://$fqdn"
+            if curl -fsS "https://$fqdn/api/health" | grep -q "\"version\":\"$version\""; then
+              echo "Live: https://$fqdn is serving $version"
               exit 0
             fi
             sleep 15
           done
-          echo "::error::https://$fqdn/api/health did not respond within 5 minutes"
+          echo "::error::https://$fqdn/api/health is not serving $version after 5 minutes"
           exit 1

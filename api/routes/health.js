@@ -12,6 +12,8 @@ router.get('/', (req, res) => {
   res.json({
     success: true,
     timestamp: new Date().toISOString(),
+    // Commit this build came from; the deploy workflow sets APP_VERSION and checks it
+    version: (process.env.APP_VERSION || 'dev').slice(0, 7),
     uptime: Math.floor(process.uptime()),
     components: {
       api: { status: 'healthy' },
