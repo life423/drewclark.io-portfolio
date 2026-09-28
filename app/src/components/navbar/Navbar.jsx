@@ -1,11 +1,17 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import clsx from 'clsx'
 import { LuMenu } from 'react-icons/lu'
 import useScrollPosition from '../../hooks/useScrollPosition'
 import HorizontalProgressBar from '../progress/HorizontalProgressBar'
 import { getInterpolatedColor } from '../../components/utils/colorInterpolate'
+import EmailContactModal from '../drawer/EmailContactModal'
 
 export default function Navbar({ drawerOpen, toggleDrawer, progressBarVisible = true }) {
+  // Desktop 'Contact' link opens the same modal the mobile drawer uses
+  const [isContactOpen, setIsContactOpen] = useState(false)
+  const closeContact = useCallback(() => setIsContactOpen(false), [])
+
   const { y: scrollY, percent: scrollPercent, forceRecalculation } = useScrollPosition()
   const isScrolled = scrollY > 50
 
@@ -152,6 +158,31 @@ export default function Navbar({ drawerOpen, toggleDrawer, progressBarVisible = 
               </a>
             </li>
           ))}
+          <li
+            className={clsx(
+              'nav-link-hover relative overflow-hidden',
+              'transition-all duration-300 ease-out',
+              isScrolled
+                ? 'text-brandGreen-400 text-sm'
+                : 'text-brandGreen-300 text-base'
+            )}
+          >
+            <button
+              type='button'
+              onClick={() => setIsContactOpen(true)}
+              className={clsx(
+                'relative block transition-all duration-300 ease-out',
+                'hover:text-brandGreen-300 group'
+              )}
+            >
+              Contact
+              <span
+                className='absolute bottom-0 left-0 w-0 h-0.5 
+                bg-gradient-to-r from-brandGreen-400 to-brandBlue-400
+                group-hover:animate-nav-underline'
+              ></span>
+            </button>
+          </li>
         </ul>
       </div>
       <HorizontalProgressBar
@@ -159,6 +190,11 @@ export default function Navbar({ drawerOpen, toggleDrawer, progressBarVisible = 
         progress={scrollPercent}
         getInterpolatedColor={getInterpolatedColor}
       />
+      {/* Portaled to <body>: the nav's transform and backdrop-filter would otherwise trap the modal's fixed positioning */}
+      {createPortal(
+        <EmailContactModal isOpen={isContactOpen} onClose={closeContact} />,
+        document.body
+      )}
     </nav>
   )
 }
