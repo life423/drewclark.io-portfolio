@@ -15,81 +15,6 @@ const log = logger.getLogger('AIGenerationService');
 log.info('AIGenerationService initialized with environment:', config.environment);
 
 /**
- * Extracts GitHub repository URL from project data
- * 
- * @param {Object} projectData - Project data object
- * @returns {string|null} - GitHub repository URL or null if not found
- */
-function extractGitHubUrl(projectData) {
-  if (!projectData) return null;
-  
-  // Check various fields where GitHub URL might be mentioned
-  const fieldsToCheck = [
-    'readme',
-    'technicalDetails',
-    'detailedDescription', 
-    'initialDescription'
-  ];
-  
-  // GitHub URL pattern - improved to be more specific
-  const githubUrlPattern = /https:\/\/github\.com\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9_.-]+/g;
-  
-  for (const field of fieldsToCheck) {
-    if (projectData[field]) {
-      const matches = projectData[field].match(githubUrlPattern);
-      if (matches && matches.length > 0) {
-        log.debug(`Found GitHub URL in ${field}: ${matches[0]}`);
-        return matches[0]; // Return the first GitHub URL found
-      }
-    }
-  }
-  
-  log.debug('No GitHub URL found in project data');
-  return null;
-}
-
-/**
- * Creates context for the AI based on project data
- * Separated for better testability and reuse
- * 
- * @param {Object} projectData - Project data
- * @param {string} question - User question
- * @returns {string} - Formatted context
- */
-function createAIPrompt(projectData, question) {
-  // Extract GitHub repository URL
-  const repoUrl = extractGitHubUrl(projectData);
-  
-  // Base project information
-  const baseContext = `
-Project: ${projectData.title}
-Tech Stack: ${projectData.stack.join(', ')}
-Summary: ${projectData.summary || ''}
-Basic Description: ${projectData.initialDescription || ''}
-${projectData.detailedDescription ? `Detailed Description: ${projectData.detailedDescription}` : ''}
-${projectData.technicalDetails ? `Technical Implementation: ${projectData.technicalDetails}` : ''}
-${projectData.challenges ? `Challenges & Solutions: ${projectData.challenges}` : ''}
-${repoUrl ? `GitHub Repository: ${repoUrl}` : ''}
-${projectData.readme ? `Documentation: ${projectData.readme}` : ''}
-`;
-
-  // Add UI context if available
-  const uiContextStr = projectData.uiContext ? `
-Current User Context:
-- User is currently viewing: ${projectData.uiContext.activeSection || 'project overview'}
-- User interaction state: ${projectData.uiContext.interactionState || 'browsing'}
-- Previous questions in this session: ${projectData.uiContext.previousQuestions?.length ? projectData.uiContext.previousQuestions.join(', ') : 'None'}
-${projectData.uiContext.scrollPosition ? `- User has scrolled to: ${projectData.uiContext.scrollPosition}` : ''}
-${projectData.uiContext.customContext || ''}
-
-When responding, acknowledge the user's current context and tailor your answer to be relevant to what they're currently viewing or interacting with. Be conversational and reference specific details they can see on their screen.
-` : '';
-
-  // Combine everything into the final prompt
-  return `${baseContext}${projectData.uiContext ? uiContextStr : ''}\n\nQuestion: ${question}`;
-}
-
-/**
  * Sends a question about a project to the backend API which uses OpenAI to generate a response
  * 
  * @param {Object} projectData - Data about the project being asked about
@@ -123,30 +48,8 @@ export async function answerProjectQuestion(projectData, question, options = {})
   log.info(`Processing question for project: ${projectData.title}`);
   
   try {
-    // Create the AI prompt
-    const prompt = createAIPrompt(projectData, question);
-    
-    // Measure the length and log it
-    const promptLength = prompt.length;
-    log.debug(`Prompt length: ${promptLength} characters`);
-    
-    // Check if prompt is too long and truncate if necessary
-    const MAX_PROMPT_LENGTH = 8000;
-    const truncatedPrompt = promptLength > MAX_PROMPT_LENGTH 
-      ? prompt.substring(0, MAX_PROMPT_LENGTH) + '... [content truncated due to length]'
-      : prompt;
-    
-    if (promptLength > MAX_PROMPT_LENGTH) {
-      log.warn(`Prompt truncated from ${promptLength} to ${MAX_PROMPT_LENGTH} characters`);
-    }
-    
-    // Prepare the request body
-    const requestBody = {
-      question: truncatedPrompt,
-      maxTokens: 300,
-      temperature: 0.7,
-      model: "gpt-4o-mini"
-    };
+    // The server builds the prompt from the site's project data; send just the question
+    const requestBody = { question, projectId: projectData.id };
     
     // Create an abort controller for request cancellation
     const abortController = new AbortController();
@@ -250,61 +153,6 @@ export async function mockAnswerProjectQuestion(projectData, question) {
 }
 
 /**
- * Creates context for the AI based on multiple projects data
- * Used for the unified chat that can discuss any/all projects
- * 
- * @param {Array<Object>} projectsData - Array of project data objects
- * @param {string} question - User question
- * @returns {string} - Formatted context with all projects
- */
-function createMultiProjectAIPrompt(projectsData, question) {
-  if (!projectsData || !Array.isArray(projectsData) || projectsData.length === 0) {
-    log.error('Invalid or empty projectsData array');
-    return `Question: ${question}`;
-  }
-
-  // Build context for each project
-  const projectContexts = projectsData.map((project, index) => {
-    const projectNum = index + 1;
-    
-    return `PROJECT ${projectNum}: ${project.title}
-Tech Stack: ${project.stack ? project.stack.join(', ') : 'N/A'}
-Summary: ${project.summary || ''}
-Basic Description: ${project.initialDescription || ''}
-${project.detailedDescription ? `Detailed Description: ${project.detailedDescription}` : ''}
-${project.technicalDetails ? `Technical Implementation: ${project.technicalDetails}` : ''}
-${project.challenges ? `Challenges & Solutions: ${project.challenges}` : ''}`;
-  }).join('\n\n');
-
-  // Information about the chat interface itself
-  const chatInterfaceInfo = `
-CHAT INTERFACE INFORMATION:
-This unified chat interface allows users to ask questions about any of the projects.
-- It uses a React-based component (UnifiedProjectChat.jsx)
-- Messages are stored locally in the browser using localStorage
-- It has a collapsible interface with clear chat history option
-- AI responses come from OpenAI's API through a backend serverless function
-- Questions about the projects are enhanced with code context from GitHub repositories
-- The chat component displays the beginning of AI responses rather than auto-scrolling to the bottom
-- Users can ask about specific projects or compare multiple projects at once
-`;
-
-  // Instruction prompt for handling multi-project questions
-  const instructions = `
-You are a knowledgeable AI assistant that can discuss multiple projects at once.
-When responding to questions, consider all the projects above and their details.
-If a question refers to specific projects by number or name, focus on those projects.
-If a question asks for comparisons between projects, highlight similarities and differences.
-If the question is about the chat interface itself, use the CHAT INTERFACE INFORMATION section to explain how the chat works.
-If the question is general, consider which projects are most relevant to the answer.
-Always mention which project(s) you're referring to by number (e.g., "Project 1", "Project 2").
-`;
-
-  // Combine everything into the final prompt
-  return `${projectContexts}\n\n${chatInterfaceInfo}\n\n${instructions}\n\nQuestion: ${question}`;
-}
-
-/**
  * Handles questions that can span multiple projects
  * Used by the unified project chat interface
  * 
@@ -331,29 +179,8 @@ export async function answerMultiProjectQuestion(projectsData, question, options
   log.info(`Processing multi-project question across ${projectsData.length} projects`);
   
   try {
-    // Create the multi-project AI prompt
-    const prompt = createMultiProjectAIPrompt(projectsData, question);
-    
-    // Check if prompt is too long and truncate if necessary
-    const MAX_PROMPT_LENGTH = 10000; // Increased for multi-project context
-    const promptLength = prompt.length;
-    log.debug(`Multi-project prompt length: ${promptLength} characters`);
-    
-    const truncatedPrompt = promptLength > MAX_PROMPT_LENGTH 
-      ? prompt.substring(0, MAX_PROMPT_LENGTH) + '... [content truncated due to length]'
-      : prompt;
-    
-    if (promptLength > MAX_PROMPT_LENGTH) {
-      log.warn(`Multi-project prompt truncated from ${promptLength} to ${MAX_PROMPT_LENGTH} characters`);
-    }
-    
-    // Prepare the request body - similar to single project
-    const requestBody = {
-      question: truncatedPrompt,
-      maxTokens: 500, // Increased token limit for multi-project responses
-      temperature: 0.7,
-      model: "gpt-4o-mini"
-    };
+    // The server builds the prompt from the site's project data; send just the question
+    const requestBody = { question };
     
     // Create an abort controller for request cancellation
     const abortController = new AbortController();

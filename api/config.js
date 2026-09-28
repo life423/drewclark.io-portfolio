@@ -61,8 +61,7 @@ const config = {
         model: process.env.OPENAI_CHAT_MODEL || 'gpt-4o-mini',
         temperature: 0.7,
         maxTokens: 500,
-        // Generous for now because the client still sends project context with each question
-        maxPromptChars: 12000,
+        maxQuestionChars: 500, // visitors send just their question
         limitPerMinute: Number(process.env.CHAT_LIMIT_PER_MINUTE) || 10, // per visitor
         limitPerDay: Number(process.env.CHAT_LIMIT_PER_DAY) || 500, // whole site
     },

@@ -5,7 +5,8 @@
  * This handler is used by both Express.js server and Azure Functions.
  */
 
-const { getChatCompletion, createSystemPrompt } = require('../ai/openaiService');
+const { getChatCompletion } = require('../ai/openaiService');
+const { buildChatMessages, findProject } = require('../ai/promptBuilder');
 const { extractRepositoryUrl } = require('../repositories/repoUtils');
 const { enhanceQuestionWithCodeContext } = require('../codeContext/codeContextService');
 const { checkCache, cacheResponse, generateCacheKey } = require('../cache/cacheService');
@@ -23,23 +24,6 @@ function toPlainText(text) {
     .replace(/`([^`\n]+)`/g, '$1')         // `code`
     .replace(/^#{1,6}\s+/gm, '')          // # headings
     .replace(/^(\s*)[-*]\s+/gm, '$1• ');  // - bullets
-}
-
-/**
- * Sanitize input to prevent injection attacks
- * @param {string} input - User input to sanitize
- * @returns {string} Sanitized input
- */
-function sanitizeInput(input) {
-  if (typeof input !== 'string') return '';
-  
-  // Thorough sanitization
-  return input
-    .replace(/<[^>]*>?/gm, '') // Remove HTML tags
-    .replace(/javascript:/gi, '') // Remove javascript: protocol
-    .replace(/on\w+=/gi, '') // Remove event handlers
-    .replace(/data:[^,]*,/gi, '') // Remove data: URI scheme
-    .trim();
 }
 
 /**
@@ -97,15 +81,23 @@ async function handlePostRequest(req, createResponse, headers, logger) {
     });
   }
 
-  if (req.body.question.length > config.chat.maxPromptChars) {
-    logWarn(`Rejected an oversized question (${req.body.question.length} characters)`);
-    return createResponse(413, headers, {
-      error: 'That question is too long. Please shorten it and try again.'
+  if (req.body.question.trim().length > config.chat.maxQuestionChars) {
+    return createResponse(400, headers, {
+      error: `Please keep questions under ${config.chat.maxQuestionChars} characters.`
     });
   }
 
-  // Get and sanitize the question
-  const userQuestion = sanitizeInput(req.body.question.trim());
+  // Optional: answer about one project only
+  let project = null;
+  if (req.body.projectId !== undefined && req.body.projectId !== null) {
+    project = findProject(req.body.projectId);
+    if (!project) {
+      return createResponse(400, headers, { error: 'Unknown project.' });
+    }
+  }
+
+  // Used as-is: answers are rendered as text, never HTML
+  const userQuestion = req.body.question.trim();
   logInfo(`Question: "${userQuestion.substring(0, 50)}${userQuestion.length > 50 ? '...' : ''}"`);
 
   // Determine which feature is making the request
@@ -154,7 +146,7 @@ async function handlePostRequest(req, createResponse, headers, logger) {
   }
 
   // Check cache for identical questions (with same parameters)
-  const cacheKey = generateCacheKey(userQuestion, modelName, temperature, maxTokens, repositoryUrl || '');
+  const cacheKey = generateCacheKey(userQuestion.toLowerCase(), modelName, temperature, maxTokens, `${repositoryUrl || ''}|${project ? project.id : 'all'}`);
   const cachedResponse = checkCache(cacheKey);
   
   if (cachedResponse) {
@@ -188,22 +180,10 @@ async function handlePostRequest(req, createResponse, headers, logger) {
   }
 
   try {
-    // Create system prompt based on whether we're using repository context
-    const systemPrompt = createSystemPrompt(usingRepoContext);
-    
-    // Call OpenAI with the configured parameters
+    // The prompt is built here from the site's own project data; visitors only send the question
     const response = await getChatCompletion({
       model: modelName,
-      messages: [
-        {
-          role: 'system',
-          content: systemPrompt
-        },
-        {
-          role: 'user',
-          content: enhancedQuestion
-        }
-      ],
+      messages: buildChatMessages({ question: enhancedQuestion, project, hasCodeContext: usingRepoContext }),
       temperature,
       maxTokens,
       logInfo,
@@ -309,5 +289,4 @@ module.exports = {
   handleOptionsRequest,
   handleGetRequest,
   handlePostRequest,
-  sanitizeInput
 };

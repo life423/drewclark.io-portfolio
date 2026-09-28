@@ -58,6 +58,7 @@ RUN npm install --production --legacy-peer-deps && \
 COPY --from=builder /app/app/dist     app/dist
 COPY --from=builder /app/api          api
 COPY --from=builder /app/server.js    server.js
+COPY --from=builder /app/app/src/data/projects.json app/src/data/projects.json
 
 # create runtime dirs
 RUN mkdir -p data/embeddings data/repositories data/contact
