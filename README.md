@@ -74,7 +74,7 @@ Contact form messages are at `/admin`. Sign in with `ADMIN_PASSWORD`. The sessio
 
 ## Deployment
 
-Pushes to `main` build the Docker image and deploy it to Azure Container Apps (`.github/workflows/landingpage-AutoDeployTrigger-*.yml`). No secrets are baked into the image: the container needs `OPENAI_API_KEY`, `MONGODB_URI` and `ADMIN_PASSWORD` at runtime, set as Container App secrets.
+Pushes to `main` build the Docker image and deploy it to Azure Container Apps (`.github/workflows/landingpage-AutoDeployTrigger-*.yml`). No secrets are baked into the image. On every deploy the workflow copies the `OPENAI_API_KEY`, `MONGODB_URI` and `ADMIN_PASSWORD` repository secrets into the Container App's secrets, deploys the new image with them as environment variables, and then checks `/api/health` on the new version.
 
 The index workflow needs the `OPENAI_API_KEY` and `MONGODB_URI` repository secrets. GitHub's runners don't have fixed IP addresses, so Atlas network access has to allow connections from anywhere; give the database user a long generated password and access to the `portfolio` database only.
 
