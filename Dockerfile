@@ -11,22 +11,10 @@ RUN apk add --no-cache git openssh python3 make g++
 WORKDIR /app
 
 # copy manifests
-COPY package*.json ./
-COPY api/package*.json api/
 COPY app/package*.json app/
 
-# Copy scripts first so postinstall can find them
-COPY scripts/ scripts/
-
-# patch Windows permissions script before running npm install
-RUN sed -i 's/const { spawn } = require(.child_process.);/const { spawn } = require("child_process");\
-\n\/\/ Skip PowerShell in Docker\nfunction setWindowsPermissions() { return Promise.resolve(true); }/' \
-  scripts/permissions.js
-
-# install root + api + app deps (incl. devDeps)
-RUN npm install --legacy-peer-deps \
-  && cd api && npm install --legacy-peer-deps \
-  && cd ../app && npm install --legacy-peer-deps
+# install the frontend's deps (incl. devDeps) to build it
+RUN cd app && npm install --legacy-peer-deps
 
 # copy source & build frontend
 COPY . .
@@ -42,12 +30,8 @@ LABEL maintainer="drew@drewclark.io"
 
 WORKDIR /app
 
-# Copy scripts first so postinstall can find them
-COPY --from=builder /app/scripts      scripts
-
 # install runtime deps
 COPY package*.json ./
-COPY api/package*.json api/
 RUN npm install --production --legacy-peer-deps
 
 # bring in built frontend & server code

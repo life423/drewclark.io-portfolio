@@ -13,7 +13,7 @@ Source for [drewclark.io](https://drewclark.io), Drew Clark's portfolio. Besides
 ## Running locally
 
 ```bash
-npm run setup   # installs root, app and api dependencies
+npm run setup   # installs root and app dependencies
 npm run dev     # API on http://localhost:3000, site on http://localhost:5173
 ```
 
@@ -28,8 +28,6 @@ ADMIN_PASSWORD="a-long-password"
 Put quotes around any value that contains `#`. Without `MONGODB_URI`, contact messages are saved to a local file and the chat answers from the project descriptions only.
 
 Optional settings: `MONGODB_DB` (default `portfolio`), `OPENAI_CHAT_MODEL` (default `gpt-4o-mini`), `CHAT_LIMIT_PER_MINUTE` (default 10 per visitor), `CHAT_LIMIT_PER_DAY` (default 500 for the whole site) and `ALLOWED_REPOS`.
-
-`npm test` runs the test suite.
 
 ## How the chat knows the code
 
