@@ -13,7 +13,7 @@ router.all('/askGPT', defaultHandler)
 router.all('/askGPT/projects', projectsHandler)
 
 // Contact form submission endpoint
-router.post('/contact', (req, res) => {
+router.post('/contact', async (req, res) => {
     try {
         const { name, email, message } = req.body;
         
@@ -29,7 +29,7 @@ router.post('/contact', (req, res) => {
         }
         
         // Add the message
-        const result = contactHandler.addMessage(name, email, message);
+        const result = await contactHandler.addMessage(name, email, message);
         
         if (!result) {
             return res.status(500).json({ error: 'Failed to save message' });
@@ -43,8 +43,7 @@ router.post('/contact', (req, res) => {
     } catch (error) {
         console.error('Contact submission error:', error);
         res.status(500).json({ 
-            error: 'Server error processing contact submission',
-            message: error.message
+            error: 'Server error processing contact submission'
         });
     }
 });
@@ -85,19 +84,19 @@ router.get('/admin/session', (req, res) => {
 });
 
 // Everything below needs a signed-in admin
-router.get('/admin/messages', adminAuth.requireAdmin, (req, res) => {
+router.get('/admin/messages', adminAuth.requireAdmin, async (req, res) => {
     try {
-        res.status(200).json({ messages: contactHandler.getMessages() });
+        res.status(200).json({ messages: await contactHandler.getMessages() });
     } catch (error) {
         console.error('Admin messages error:', error);
         res.status(500).json({ error: 'Server error fetching messages' });
     }
 });
 
-router.put('/admin/messages/:id', adminAuth.requireAdmin, (req, res) => {
+router.put('/admin/messages/:id', adminAuth.requireAdmin, async (req, res) => {
     try {
         const { read } = req.body || {};
-        const success = contactHandler.markMessageRead(req.params.id, read !== false);
+        const success = await contactHandler.markMessageRead(req.params.id, read !== false);
         if (!success) {
             return res.status(404).json({ error: 'Message not found' });
         }
@@ -108,9 +107,9 @@ router.put('/admin/messages/:id', adminAuth.requireAdmin, (req, res) => {
     }
 });
 
-router.delete('/admin/messages/:id', adminAuth.requireAdmin, (req, res) => {
+router.delete('/admin/messages/:id', adminAuth.requireAdmin, async (req, res) => {
     try {
-        const success = contactHandler.deleteMessage(req.params.id);
+        const success = await contactHandler.deleteMessage(req.params.id);
         if (!success) {
             return res.status(404).json({ error: 'Message not found' });
         }
