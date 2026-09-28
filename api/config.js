@@ -117,6 +117,11 @@ const config = {
         maxFileBytes: 150 * 1024,
         // Bump when chunking or the embedding model changes, to force a full re-index
         version: 1,
+        // Chat search: the closest chunks, skipping weak matches, within a size budget
+        searchLimit: 6,
+        minScore: 0.68, // on-topic questions score about 0.7 and up, off-topic ones below 0.68
+        maxContextChars: 12000,
+        searchTimeoutMs: 4000,
     },
 
     // Repository Storage Configuration
@@ -130,6 +135,8 @@ const config = {
             .filter(Boolean),
         // How often to sync repositories with GitHub (1 hour)
         syncIntervalMs: 3600000,
+        // This website's own repo (project repos are listed in projects.json)
+        siteRepo: 'life423/drewclark.io-portfolio',
     },
 
     // Logging

@@ -16,6 +16,7 @@ dotenv.config()
 const apiRoutes = require('./api/routes')
 const { setCacheTTL } = require('./api/utils')
 const config = require('./api/config')
+const { getDb, isMongoConfigured } = require('./api/db')
 
 // Repository and code embedding systems
 const { initializeScheduler } = require('./api/services/scheduler/repositoryUpdateService')
@@ -194,6 +195,13 @@ app.listen(PORT, HOST, () => {
     console.log('NODE_ENV:', process.env.NODE_ENV)
     console.log('PORT:', process.env.PORT)
     
+    // Connect to MongoDB now instead of on the first chat or contact request
+    if (isMongoConfigured()) {
+        getDb()
+            .then(() => console.log('MongoDB connected'))
+            .catch(error => console.warn(`MongoDB not reachable yet: ${error.message}`))
+    }
+
     // Initialize the repository update scheduler
     if (config.vectorDb.enabled && (process.env.ENABLE_REPOSITORY_SCHEDULER === 'true' || process.env.NODE_ENV === 'production')) {
         console.log('Initializing repository update scheduler...')

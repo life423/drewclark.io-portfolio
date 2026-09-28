@@ -6,9 +6,8 @@
  */
 
 const { getChatCompletion } = require('../ai/openaiService');
-const { buildChatMessages, findProject } = require('../ai/promptBuilder');
-const { extractRepositoryUrl } = require('../repositories/repoUtils');
-const { enhanceQuestionWithCodeContext } = require('../codeContext/codeContextService');
+const { buildChatMessages, findProject, searchableRepos, repoLabel } = require('../ai/promptBuilder');
+const { searchCode } = require('../codeIndex/codeSearch');
 const { checkCache, cacheResponse, generateCacheKey } = require('../cache/cacheService');
 const config = require('../../config');
 
@@ -20,10 +19,26 @@ const config = require('../../config');
 function toPlainText(text) {
   if (typeof text !== 'string') return text;
   return text
+    .replace(/^```[^\n]*\n?/gm, '')       // ``` code fences (the code itself stays)
     .replace(/\*\*(.+?)\*\*/g, '$1')      // **bold**
     .replace(/`([^`\n]+)`/g, '$1')         // `code`
     .replace(/^#{1,6}\s+/gm, '')          // # headings
     .replace(/^(\s*)[-*]\s+/gm, '$1• ');  // - bullets
+}
+
+/**
+ * Where a code excerpt came from, with a link to those lines on GitHub
+ * @param {Object} excerpt - Result from searchCode()
+ * @returns {{project: string, file: string, lines: string, url: string}}
+ */
+function toSource(excerpt) {
+  const { repo, path, startLine, endLine, commit } = excerpt;
+  return {
+    project: repoLabel(repo),
+    file: path,
+    lines: `${startLine}-${endLine}`,
+    url: `https://github.com/${repo}/blob/${commit}/${encodeURI(path)}#L${startLine}-L${endLine}`
+  };
 }
 
 /**
@@ -100,59 +115,16 @@ async function handlePostRequest(req, createResponse, headers, logger) {
   const userQuestion = req.body.question.trim();
   logInfo(`Question: "${userQuestion.substring(0, 50)}${userQuestion.length > 50 ? '...' : ''}"`);
 
-  // Determine which feature is making the request
-  const feature = req.feature || 'default';
-  
   // Model and limits are fixed on the server; anything the client sends is ignored
-  const modelName = config.chat.model;
-  const temperature = config.chat.temperature;
-  const maxTokens = config.chat.maxTokens;
-
+  const { model: modelName, temperature, maxTokens } = config.chat;
   logInfo(`Using model: ${modelName}, temperature: ${temperature}, maxTokens: ${maxTokens}`);
 
-  // Enhanced with repository context if available
-  let enhancedQuestion = userQuestion;
-  // Code context only comes from a configured vector database and our own repos.
-  // Nothing here clones or pulls repositories, and the client can't pick one.
-  const repositoryUrl = config.vectorDb.enabled ? extractRepositoryUrl(userQuestion) : null;
-  let usingRepoContext = false;
-
-  // Enhance question with code context if repository URL is available
-  if (repositoryUrl) {
-    try {
-      logInfo(`Enhancing question with context from repository: ${repositoryUrl}`);
-      
-      // This will add code context to the question
-      const questionWithContext = await enhanceQuestionWithCodeContext(
-        userQuestion,
-        repositoryUrl,
-        3 // Limit to 3 code snippets
-      );
-      
-      if (questionWithContext !== userQuestion) {
-        enhancedQuestion = questionWithContext;
-        usingRepoContext = true;
-        logInfo('Successfully enhanced question with repository code context');
-      } else {
-        logInfo('No relevant code context found for this question');
-      }
-    } catch (error) {
-      logWarn(`Failed to enhance question with code context: ${error.message}`);
-      // Continue with the original question if enhancement fails
-    }
-  }
-
-  // Check cache for identical questions (with same parameters)
-  const cacheKey = generateCacheKey(userQuestion.toLowerCase(), modelName, temperature, maxTokens, `${repositoryUrl || ''}|${project ? project.id : 'all'}`);
+  // Identical questions about the same project are answered from the cache
+  const cacheKey = generateCacheKey(userQuestion.toLowerCase(), modelName, temperature, maxTokens, project ? String(project.id) : 'all');
   const cachedResponse = checkCache(cacheKey);
-  
   if (cachedResponse) {
     logInfo('Cache hit for question');
-    return createResponse(200, headers, {
-      answer: cachedResponse,
-      cached: true,
-      repositoryContext: usingRepoContext ? repositoryUrl : undefined
-    });
+    return createResponse(200, headers, { ...cachedResponse, cached: true });
   }
 
   // Get API key from config
@@ -170,34 +142,42 @@ async function handlePostRequest(req, createResponse, headers, logger) {
       debug: {
         environment: process.env.NODE_ENV || 'not set',
         hasApiKey: !!apiKey,
-        error: errorMsg,
-        usingRepoContext: usingRepoContext
+        error: errorMsg
       }
     });
+  }
+
+  // The code that best matches the question, from the project's repo (or every repo
+  // for general questions). If the search is unavailable, answer from the descriptions.
+  let excerpts = [];
+  try {
+    excerpts = await searchCode(userQuestion, searchableRepos(project));
+    logInfo(`Code search: ${excerpts.length} excerpt(s)`);
+  } catch (error) {
+    logWarn(`Code search unavailable, answering from project descriptions only: ${error.message}`);
   }
 
   try {
     // The prompt is built here from the site's own project data; visitors only send the question
     const response = await getChatCompletion({
       model: modelName,
-      messages: buildChatMessages({ question: enhancedQuestion, project, hasCodeContext: usingRepoContext }),
+      messages: buildChatMessages({ question: userQuestion, project, excerpts }),
       temperature,
       maxTokens,
       logInfo,
       logError
     });
 
-    // Store in cache
     const answer = toPlainText(response.answer);
-    cacheResponse(cacheKey, answer);
+    const sources = excerpts.map(toSource);
+    cacheResponse(cacheKey, { answer, sources });
 
-    // Return the answer
     return createResponse(200, headers, {
       answer,
-      repositoryContext: usingRepoContext ? repositoryUrl : undefined,
+      sources,
       metrics: {
         apiCallDurationMs: response.duration,
-        enhancedPrompt: usingRepoContext,
+        codeExcerpts: excerpts.length,
         tokenUsage: response.usage
       }
     });

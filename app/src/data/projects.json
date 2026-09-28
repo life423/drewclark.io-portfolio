@@ -2,6 +2,7 @@
     {
         "id": 1,
         "title": "AI Platform Trainer",
+        "repo": "life423/ai-platform-trainer",
         "summary": "A 2D platformer game featuring AI-driven enemy behavior built with Python and Pygame.",
         "stack": [
             "Python",
@@ -18,6 +19,7 @@
     {
         "id": 2,
         "title": "Cryptography Toolkit with AI Analysis",
+        "repo": "life423/polyalphabetic-and-caesar_cipher",
         "summary": "A comprehensive encryption application implementing Caesar and Polyalphabetic ciphers with AI-powered cryptanalysis capabilities.",
         "stack": [
             "Python",
@@ -34,6 +36,7 @@
     {
         "id": 3,
         "title": "Ascend-Avoid",
+        "repo": "life423/ascend-avoid",
         "summary": "A responsive HTML5 Canvas game with touch controls and progressive difficulty.",
         "stack": [
             "JavaScript",
