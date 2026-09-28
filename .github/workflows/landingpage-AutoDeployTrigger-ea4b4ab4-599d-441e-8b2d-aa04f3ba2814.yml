@@ -71,6 +71,9 @@ jobs:
           containerAppName: ${{ env.APP_NAME }}
           resourceGroup: ${{ env.RESOURCE_GROUP }}
           imageToBuild: aiandrew631/landingpage:${{ github.sha }}
+          # Public HTTPS on the port the server listens on (the action would otherwise assume 80)
+          ingress: external
+          targetPort: 3000
           environmentVariables: >-
             OPENAI_API_KEY=secretref:openai-api-key
             MONGODB_URI=secretref:mongodb-uri
