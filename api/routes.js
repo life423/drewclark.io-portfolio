@@ -6,8 +6,6 @@ const contactHandler = require('./contact-handler')
 const adminAuth = require('./adminAuth')
 const { rateLimit } = require('express-rate-limit')
 const config = require('./config')
-const { updateAllRepositories, processRepository } = require('./services/scheduler/repositoryUpdateService')
-const { parseAllowedRepo } = require('./services/repositories/repoUtils')
 const { defaultHandler, projectsHandler } = require('./routes/askGptAdapter')
 
 // Chat rate limits: per visitor, plus a site-wide daily ceiling so a
@@ -138,30 +136,6 @@ router.delete('/admin/messages/:id', adminAuth.requireAdmin, async (req, res) =>
         console.error('Delete message error:', error);
         res.status(500).json({ error: 'Server error deleting message' });
     }
-});
-
-// Repository management (long-running jobs, so respond immediately)
-router.post('/admin/repositories/update', adminAuth.requireAdmin, (req, res) => {
-    console.log('Manually triggering repository update...');
-    updateAllRepositories()
-        .then(() => console.log('Repository update job completed.'))
-        .catch(error => console.error('Error in repository update:', error));
-    res.status(200).json({ success: true, message: 'Repository update started. Check server logs for progress.' });
-});
-
-router.post('/admin/repositories/process', adminAuth.requireAdmin, (req, res) => {
-    const { repositoryUrl } = req.body || {};
-    if (!repositoryUrl) {
-        return res.status(400).json({ error: 'Missing repository URL' });
-    }
-    if (!parseAllowedRepo(repositoryUrl)) {
-        return res.status(400).json({ error: 'Repository is not on the allowed list' });
-    }
-    console.log(`Manually processing repository: ${repositoryUrl}`);
-    processRepository(repositoryUrl)
-        .then(result => console.log(`Repository processing completed: ${result.success ? 'Success' : 'Failed'}`))
-        .catch(error => console.error(`Error processing repository ${repositoryUrl}:`, error));
-    res.status(200).json({ success: true, message: 'Repository processing started. Check server logs for progress.' });
 });
 
 // Import health check routes

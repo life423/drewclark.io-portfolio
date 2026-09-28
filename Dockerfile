@@ -40,9 +40,6 @@ LABEL maintainer="drew@drewclark.io"
 
 # Secrets like OPENAI_API_KEY are injected at runtime (Container Apps secret, docker run -e). Never ARG/ENV them.
 
-# Install Git
-RUN apk add --no-cache git
-
 WORKDIR /app
 
 # Copy scripts first so postinstall can find them
@@ -51,8 +48,7 @@ COPY --from=builder /app/scripts      scripts
 # install runtime deps
 COPY package*.json ./
 COPY api/package*.json api/
-RUN npm install --production --legacy-peer-deps && \
-    npm install uuid --legacy-peer-deps
+RUN npm install --production --legacy-peer-deps
 
 # bring in built frontend & server code
 COPY --from=builder /app/app/dist     app/dist
@@ -61,7 +57,7 @@ COPY --from=builder /app/server.js    server.js
 COPY --from=builder /app/app/src/data/projects.json app/src/data/projects.json
 
 # create runtime dirs
-RUN mkdir -p data/embeddings data/repositories data/contact
+RUN mkdir -p data/contact
 
 EXPOSE 3000
 CMD ["node", "server.js"]

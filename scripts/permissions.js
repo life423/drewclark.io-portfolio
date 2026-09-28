@@ -14,9 +14,7 @@ const { spawn } = require('child_process');
 
 // Configuration: Files that need executable permissions
 const files = [
-  "./start-app.js", 
-  "./dev-start.js",
-  "./scripts/qdrant/index.js"
+  "./start-app.js"
 ];
 
 /**

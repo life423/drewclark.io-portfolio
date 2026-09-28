@@ -54,7 +54,6 @@ const config = {
 
     // API Keys
     openAiApiKey: process.env.OPENAI_API_KEY,
-    githubToken: process.env.GITHUB_TOKEN,
 
     // Chat (/api/askGPT). Model and limits are fixed here; the client cannot change them.
     chat: {
@@ -84,22 +83,6 @@ const config = {
         ? process.env.CORS_ORIGINS.split(',')
         : ['*'],
 
-    // Vector Database Configuration
-    vectorDb: {
-        // Code context for the chat is off unless a vector database is configured
-        enabled: Boolean(process.env.VECTOR_DB_URL),
-        url: process.env.VECTOR_DB_URL || 'http://localhost:6333',
-        apiKey: process.env.VECTOR_DB_API_KEY, // Add this line
-        embeddingModel: 'text-embedding-ada-002',
-        collections: {
-            codeEmbeddings: 'code_embeddings',
-            documentEmbeddings: 'document_embeddings',
-            commitEmbeddings: 'commit_embeddings',
-        },
-        dimensions: 1536, // OpenAI Ada embedding dimension
-        updateIntervalMs: 3600000, // How often to check for repository updates (1 hour)
-    },
-
     // Code-aware chat: scripts/index-repos.js embeds the allowed repos into
     // MongoDB Atlas Vector Search, and the chat searches them
     codeIndex: {
@@ -124,17 +107,12 @@ const config = {
         searchTimeoutMs: 4000,
     },
 
-    // Repository Storage Configuration
+    // The repos the chat can search and scripts/index-repos.js embeds
     repositories: {
-        // Default repositories to always include
-        defaultRepos: ['https://github.com/life423/drewclark.io-portfolio'],
-        // The only repositories the chat and the admin tools may use
         allowed: (process.env.ALLOWED_REPOS || 'life423/drewclark.io-portfolio,life423/ai-platform-trainer,life423/ascend-avoid,life423/polyalphabetic-and-caesar_cipher')
             .split(',')
             .map(name => name.trim().toLowerCase())
             .filter(Boolean),
-        // How often to sync repositories with GitHub (1 hour)
-        syncIntervalMs: 3600000,
         // This website's own repo (project repos are listed in projects.json)
         siteRepo: 'life423/drewclark.io-portfolio',
     },
@@ -151,16 +129,6 @@ if (config.openAiApiKey) {
     )
 } else {
     console.log('WARNING: OpenAI API key is missing')
-}
-
-if (config.githubToken) {
-    console.log(
-        `GitHub token is configured (${config.githubToken.length} characters)`
-    )
-} else {
-    console.log(
-        'Note: GitHub token is not configured. Public repository access only.'
-    )
 }
 
 module.exports = config

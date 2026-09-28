@@ -18,9 +18,6 @@ const { setCacheTTL } = require('./api/utils')
 const config = require('./api/config')
 const { getDb, isMongoConfigured } = require('./api/db')
 
-// Repository and code embedding systems
-const { initializeScheduler } = require('./api/services/scheduler/repositoryUpdateService')
-
 // Set cache TTL based on config
 setCacheTTL(config.cacheTtlMs)
 
@@ -200,14 +197,5 @@ app.listen(PORT, HOST, () => {
         getDb()
             .then(() => console.log('MongoDB connected'))
             .catch(error => console.warn(`MongoDB not reachable yet: ${error.message}`))
-    }
-
-    // Initialize the repository update scheduler
-    if (config.vectorDb.enabled && (process.env.ENABLE_REPOSITORY_SCHEDULER === 'true' || process.env.NODE_ENV === 'production')) {
-        console.log('Initializing repository update scheduler...')
-        initializeScheduler()
-        console.log('Repository update scheduler initialized')
-    } else {
-        console.log('Repository update scheduler disabled (needs VECTOR_DB_URL, plus ENABLE_REPOSITORY_SCHEDULER=true outside production).')
     }
 })
