@@ -3,9 +3,7 @@ FROM node:20-alpine AS builder
 
 # Accept build arguments for environment variables
 ARG VITE_API_URL="/api/askGPT"
-ARG OPENAI_API_KEY
 ENV VITE_API_URL=${VITE_API_URL}
-ENV OPENAI_API_KEY=${OPENAI_API_KEY}
 
 # system tools only needed at build time
 RUN apk add --no-cache git openssh python3 make g++
@@ -40,9 +38,7 @@ RUN echo "Building with VITE_API_URL=${VITE_API_URL:-/api/askGPT}" && \
 FROM node:20-alpine AS runner
 LABEL maintainer="drew@drewclark.io"
 
-# Pass OpenAI API key to runtime stage
-ARG OPENAI_API_KEY
-ENV OPENAI_API_KEY=${OPENAI_API_KEY}
+# Secrets like OPENAI_API_KEY are injected at runtime (Container Apps secret, docker run -e). Never ARG/ENV them.
 
 # Install Git
 RUN apk add --no-cache git

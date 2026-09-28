@@ -43,8 +43,6 @@ jobs:
           containerAppName: landingpage
           resourceGroup: portfolio-apps
           imageToBuild: aiandrew631/landingpage:${{ github.sha }}
-          buildArguments: |
-            OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
         continue-on-error: true
         
       # Add environment variables to Container App regardless of build outcome

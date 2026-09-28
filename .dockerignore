@@ -23,9 +23,9 @@ yarn-error.log
 *.log
 
 # Environment files
-.env
-.env.*
-!.env.example
+**/.env
+**/.env.*
+!**/.env.example
 
 # Docker files (already on host)
 Dockerfile
