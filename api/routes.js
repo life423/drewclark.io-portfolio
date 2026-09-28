@@ -5,12 +5,31 @@ const path = require('path')
 const contactHandler = require('./contact-handler')
 const adminAuth = require('./adminAuth')
 const { rateLimit } = require('express-rate-limit')
+const config = require('./config')
 const { updateAllRepositories, processRepository } = require('./services/scheduler/repositoryUpdateService')
 const { defaultHandler, projectsHandler } = require('./routes/askGptAdapter')
 
+// Chat rate limits: per visitor, plus a site-wide daily ceiling so a
+// distributed burst can't run up the OpenAI bill. Both reset on restart.
+const chatLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    limit: config.chat.limitPerMinute,
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: { error: 'Too many questions. Please wait a minute and try again.' },
+})
+const chatDailyLimiter = rateLimit({
+    windowMs: 24 * 60 * 60 * 1000,
+    limit: config.chat.limitPerDay,
+    keyGenerator: () => 'site-wide',
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: { error: 'The chat has reached its daily limit. Please try again tomorrow.' },
+})
+
 // AskGPT endpoints using the new modular architecture
-router.all('/askGPT', defaultHandler)
-router.all('/askGPT/projects', projectsHandler)
+router.all('/askGPT', chatLimiter, chatDailyLimiter, defaultHandler)
+router.all('/askGPT/projects', chatLimiter, chatDailyLimiter, projectsHandler)
 
 // Contact form submission endpoint
 router.post('/contact', async (req, res) => {

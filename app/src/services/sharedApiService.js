@@ -271,7 +271,17 @@ class SharedApiService {
               statusText: response.statusText,
               responseText: errorText.substring(0, 500) // Limit the size for logging
             });
-            throw new Error(`API error: ${response.status} - ${response.statusText || 'Unknown error'}`);
+            // Keep the server's friendly message (e.g. rate limits) so the chat can show it
+            let userMessage;
+            try {
+              userMessage = JSON.parse(errorText).error;
+            } catch {
+              // not JSON
+            }
+            const apiError = new Error(`API error: ${response.status} - ${response.statusText || 'Unknown error'}`);
+            apiError.status = response.status;
+            apiError.userMessage = userMessage;
+            throw apiError;
           }
           
           try {

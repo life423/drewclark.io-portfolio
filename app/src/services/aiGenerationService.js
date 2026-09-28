@@ -189,6 +189,10 @@ export async function answerProjectQuestion(projectData, question, options = {})
     }
     
     log.error('Error in AI generation service', error);
+
+    if (error.userMessage) {
+      return error.userMessage;
+    }
     
     // Specific error handling based on message
     if (error.message?.includes('Rate limit')) {
@@ -392,6 +396,10 @@ export async function answerMultiProjectQuestion(projectsData, question, options
     }
     
     log.error('Error in multi-project AI generation', error);
+
+    if (error.userMessage) {
+      return error.userMessage;
+    }
     
     // Generic error message
     return 'There was a problem connecting to the AI service. Please try again later.';

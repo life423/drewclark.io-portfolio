@@ -5,11 +5,10 @@
  * This handler is used by both Express.js server and Azure Functions.
  */
 
-const { getChatCompletion, createSystemPrompt, isValidModel } = require('../ai/openaiService');
+const { getChatCompletion, createSystemPrompt } = require('../ai/openaiService');
 const { extractRepositoryUrl } = require('../repositories/repoUtils');
 const { enhanceQuestionWithCodeContext } = require('../codeContext/codeContextService');
 const { checkCache, cacheResponse, generateCacheKey } = require('../cache/cacheService');
-const { isRateLimited } = require('../security/rateLimitService');
 const config = require('../../config');
 
 /**
@@ -98,6 +97,13 @@ async function handlePostRequest(req, createResponse, headers, logger) {
     });
   }
 
+  if (req.body.question.length > config.chat.maxPromptChars) {
+    logWarn(`Rejected an oversized question (${req.body.question.length} characters)`);
+    return createResponse(413, headers, {
+      error: 'That question is too long. Please shorten it and try again.'
+    });
+  }
+
   // Get and sanitize the question
   const userQuestion = sanitizeInput(req.body.question.trim());
   logInfo(`Question: "${userQuestion.substring(0, 50)}${userQuestion.length > 50 ? '...' : ''}"`);
@@ -105,33 +111,10 @@ async function handlePostRequest(req, createResponse, headers, logger) {
   // Determine which feature is making the request
   const feature = req.feature || 'default';
   
-  // Rate limiting check with feature-specific bucket
-  const clientIp = req.headers['x-forwarded-for'] || req.ip || 'unknown';
-  if (isRateLimited(clientIp, feature)) {
-    logWarn(`Rate limit exceeded for IP: ${clientIp} on feature: ${feature}`);
-    return createResponse(429, headers, {
-      error: 'Too many requests. Please try again later.',
-      feature: feature,
-      recommendedWait: '10 seconds'
-    });
-  }
-
-  // Extract configuration from request or use defaults
-  const modelName = req.body.model && isValidModel(req.body.model) 
-    ? req.body.model 
-    : 'gpt-3.5-turbo';
-
-  const temperature = req.body.temperature !== undefined && 
-    req.body.temperature >= 0 && 
-    req.body.temperature <= 1
-      ? req.body.temperature
-      : 0.7;
-
-  const maxTokens = req.body.maxTokens && 
-    req.body.maxTokens > 0 && 
-    req.body.maxTokens <= 4000
-      ? req.body.maxTokens
-      : 500;
+  // Model and limits are fixed on the server; anything the client sends is ignored
+  const modelName = config.chat.model;
+  const temperature = config.chat.temperature;
+  const maxTokens = config.chat.maxTokens;
 
   logInfo(`Using model: ${modelName}, temperature: ${temperature}, maxTokens: ${maxTokens}`);
 
