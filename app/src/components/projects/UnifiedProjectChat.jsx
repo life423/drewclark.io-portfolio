@@ -1,11 +1,45 @@
 import React, { useState, useRef, useEffect } from 'react'
 import clsx from 'clsx'
-import { answerMultiProjectQuestion } from '../../services/aiGenerationService'
-import { config } from '../../config'
-import { brandGreen, brandOrange, brandGray } from '../../styles/colors'
+import { askProjectsChat } from '../../services/chatService'
 
-// Log environment for debugging deployment issues
-console.log('UnifiedProjectChat loaded with environment:', config.environment)
+// First questions for someone evaluating the work. Each is answered from the code.
+const STARTER_QUESTIONS = [
+    'How does the enemy AI in AI Platform Trainer learn?',
+    'How does multiplayer work in Ascend-Avoid?',
+    'How does the Cryptography Toolkit figure out which cipher was used?',
+    'How does this chat find the code it cites?',
+]
+
+// Links to the code an answer drew on: one per file, best match first
+function AnswerSources({ sources }) {
+    const seen = new Set()
+    const links = (Array.isArray(sources) ? sources : []).filter(source => {
+        const key = `${source?.project}|${source?.file}`
+        const isGitHubLink = typeof source?.url === 'string' && source.url.startsWith('https://github.com/')
+        if (!isGitHubLink || !source.file || seen.has(key)) return false
+        seen.add(key)
+        return true
+    })
+    if (links.length === 0) return null
+
+    return (
+        <div className='mt-2 flex flex-wrap items-center gap-1.5 text-xs'>
+            <span className='text-brandGray-500'>Sources</span>
+            {links.map(source => (
+                <a
+                    key={`${source.project}|${source.file}`}
+                    href={source.url}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    title={`${source.project}: ${source.file}, lines ${source.lines}`}
+                    className='font-mono px-2 py-0.5 rounded-full bg-brandGray-800 border border-brandGray-700 text-brandGreen-300 hover:text-brandGreen-200 hover:border-brandGreen-600 transition-colors'
+                >
+                    {source.file.split('/').pop()}
+                </a>
+            ))}
+        </div>
+    )
+}
 
 /**
  * UnifiedProjectChat - A component that allows users to ask questions about any project
@@ -18,7 +52,7 @@ console.log('UnifiedProjectChat loaded with environment:', config.environment)
  * - Message timestamps and improved styling
  * - Support for asking about any project in one conversation
  */
-export default function UnifiedProjectChat({ projectsData }) {
+export default function UnifiedProjectChat() {
     const [userQuestion, setUserQuestion] = useState('')
     const [isGenerating, setIsGenerating] = useState(false)
     const [messages, setMessages] = useState([])
@@ -182,75 +216,32 @@ export default function UnifiedProjectChat({ projectsData }) {
         }
     }, [messages])
 
-    const handleQuestionSubmit = async e => {
-        e.preventDefault()
+    const askQuestion = async question => {
+        const trimmed = question.trim()
+        if (!trimmed || isGenerating) return
 
-        if (!userQuestion.trim()) return
-        
-        // Ensure chat is expanded when user submits a question
+        // Make sure the conversation is visible
         setIsCollapsed(false)
         setUserHasInteracted(true)
 
-        // Add user question to the messages array
-        setMessages(prev => [...prev, { role: 'user', content: userQuestion }])
-
-        // Store the current question before clearing the input
-        const currentQuestion = userQuestion
-
-        // Clear the input field immediately for better UX
+        setMessages(prev => [...prev, { role: 'user', content: trimmed, timestamp: Date.now() }])
         setUserQuestion('')
-
         setIsGenerating(true)
 
         try {
-            // Display a subtle indicator that context-aware answering is active
-            setMessages(prev => {
-                // Only add the indicator if it doesn't exist yet
-                const hasIndicator = prev.some(
-                    msg =>
-                        msg.role === 'system' &&
-                        msg.content.includes('thinking')
-                )
-
-                if (!hasIndicator && prev.length > 0) {
-                    return [
-                        ...prev,
-                        {
-                            role: 'system',
-                            content: 'Thinking about all projects...',
-                            isIndicator: true,
-                        },
-                    ]
-                }
-                return prev
-            })
-
-            // Call the AI service to generate a response about multiple projects
-            const response = await answerMultiProjectQuestion(
-                projectsData,
-                currentQuestion
-            )
-
-            // Remove the indicator before adding the actual response
-            setMessages(prev => {
-                const filtered = prev.filter(msg => !msg.isIndicator)
-                return [...filtered, { role: 'assistant', content: response }]
-            })
-        } catch (error) {
-            console.error('Error generating AI response:', error)
-
-            // Add error message to the messages array
+            const { answer, sources } = await askProjectsChat(trimmed)
             setMessages(prev => [
                 ...prev,
-                {
-                    role: 'assistant',
-                    content:
-                        "I'm sorry, I couldn't generate a response at this time. Please try again later.",
-                },
+                { role: 'assistant', content: answer, sources, timestamp: Date.now() },
             ])
         } finally {
             setIsGenerating(false)
         }
+    }
+
+    const handleQuestionSubmit = e => {
+        e.preventDefault()
+        askQuestion(userQuestion)
     }
 
     // Helper function to format timestamps
@@ -300,7 +291,7 @@ export default function UnifiedProjectChat({ projectsData }) {
                             <path d='M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z' />
                             <path d='M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z' />
                         </svg>
-                        Project Chat
+                        Ask about the code
                     </h3>
                     <div className='flex items-center space-x-2'>
                         {/* Clear button */}
@@ -463,6 +454,9 @@ export default function UnifiedProjectChat({ projectsData }) {
                                                     >
                                                         {msg.content}
                                                     </div>
+                                                    {msg.role === 'assistant' && (
+                                                        <AnswerSources sources={msg.sources} />
+                                                    )}
                                                 </div>
                                             )}
                                         </div>
@@ -506,13 +500,22 @@ export default function UnifiedProjectChat({ projectsData }) {
                                         d='M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z'
                                     />
                                 </svg>
-                                <p className='text-brandGray-400 mb-1'>
-                                    Ask me anything about the projects
+                                <p className='text-brandGray-300 mb-4'>
+                                    Ask about the code behind these projects
                                 </p>
-                                <p className='text-xs text-brandGray-500'>
-                                    You can ask about specific projects or
-                                    compare them
-                                </p>
+                                <div className='flex flex-wrap justify-center gap-2'>
+                                    {STARTER_QUESTIONS.map(question => (
+                                        <button
+                                            key={question}
+                                            type='button'
+                                            onClick={() => askQuestion(question)}
+                                            disabled={isGenerating}
+                                            className='text-xs px-3 py-1.5 rounded-full border border-brandGreen-600/40 text-brandGreen-300 hover:bg-brandGreen-500/10 hover:border-brandGreen-500 transition-colors disabled:opacity-50'
+                                        >
+                                            {question}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
                         )}
                     </>
@@ -525,7 +528,7 @@ export default function UnifiedProjectChat({ projectsData }) {
                             type='text'
                             value={userQuestion}
                             onChange={e => setUserQuestion(e.target.value)}
-                            placeholder="Ask about any project (e.g., 'Compare the technologies in projects 1 and 3')"
+                            placeholder='Ask how something in these projects works'
                             className='flex-1 px-3 py-2 bg-brandGray-800 border border-brandGray-700 rounded-lg text-sm text-white focus:ring-2 focus:ring-brandGreen-500/40 focus:border-brandGreen-500 outline-none transition-all duration-200'
                             style={{
                                 backfaceVisibility: 'hidden',
@@ -574,7 +577,7 @@ export default function UnifiedProjectChat({ projectsData }) {
                     </div>
                 </form>
                 <div className='text-xs text-brandGray-500 text-center'>
-                    Ask anything about Project 1, 2, or 3 — or compare them
+                    Answers come from the current code of each project on GitHub, with links to the exact lines
                 </div>
             </div>
         </div>

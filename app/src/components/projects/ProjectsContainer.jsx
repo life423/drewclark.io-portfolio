@@ -187,7 +187,7 @@ export default function ProjectsContainer() {
 
                     {/* Add chat component to welcome screen - shown below the welcome card */}
                     <div className='mt-8 max-w-3xl mx-auto'>
-                        <UnifiedProjectChat projectsData={PROJECTS} />
+                        <UnifiedProjectChat />
                     </div>
                 </div>
             </section>
@@ -415,7 +415,7 @@ export default function ProjectsContainer() {
                         
                         {/* Unified Project Chat - shown on all screen sizes */}
                         <div className='mt-8 lg:mt-12'>
-                            <UnifiedProjectChat projectsData={PROJECTS} />
+                            <UnifiedProjectChat />
                         </div>
                     </div>
                 </div>

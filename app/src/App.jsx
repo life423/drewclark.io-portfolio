@@ -4,7 +4,6 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { FocusProvider } from './contexts/FocusContext';
 import { ANIMATION } from './styles/constants';
 import logger from './utils/logger';
-import { config } from './config';
 
 // Lazy-loaded components
 const Layout = lazy(() => import('./components/layout/Layout'));
@@ -88,42 +87,6 @@ export default function App() {
         };
     }, [appLogger]);
     
-    // Set up debug environment for development and deployment debugging
-    useEffect(() => {
-        // Use a small delay to ensure this runs after critical rendering is complete
-        const debugSetupTimer = setTimeout(() => {
-            // Dynamically import debugUtils to reduce initial bundle
-            import('./utils/debug-utils').then(module => {
-                const debugUtils = module.default;
-                
-                // Log environment information when app starts
-                const envInfo = debugUtils.logEnvironmentInfo('App', { 
-                    version: process.env.VERSION || 'dev',
-                    initialLoadTime: new Date().toISOString()
-                });
-                
-                appLogger.debug('Environment details:', envInfo);
-                
-                // Set up debug keyboard shortcut (Ctrl+Shift+D)
-                debugUtils.setupDebugShortcut();
-                
-                // Show debug panel in development or if URL contains debug parameter
-                const urlParams = new URLSearchParams(window.location.search);
-                const showDebug = urlParams.has('debug') || 
-                                config.environment.envType === 'development';
-                
-                if (showDebug) {
-                    debugUtils.createDebugPanel({ 
-                        autoHide: config.environment.isProduction,
-                        detailed: urlParams.get('debug') === 'detailed'
-                    });
-                }
-            });
-        }, 200); // Small delay to prioritize critical content rendering first
-        
-        return () => clearTimeout(debugSetupTimer);
-    }, [appLogger]);
-
     // Calculate whether to show progress indicators based on app state
     const progressBarVisible = useMemo(
         () => !initialLoading && !drawerOpen,

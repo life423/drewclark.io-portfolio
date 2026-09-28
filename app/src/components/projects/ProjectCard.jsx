@@ -1,10 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useRef } from 'react'
 import clsx from 'clsx'
-import { answerProjectQuestion } from '../../services/aiGenerationService'
 import { ProjectProgressIndicator } from './progress'
 import useScrollPosition from '../../hooks/useScrollPosition'
-import TypedTextEffect from '../hero/TypedTextEffect'
-import useIntersection from '../../hooks/useIntersection'
 
 export default function ProjectCard({
     projectNumber,
@@ -24,75 +21,12 @@ export default function ProjectCard({
     isCompact = false, // Whether this card should show compact content (for magazine layout)
     onClick = null, // Click handler for the card
 }) {
-    // Track previous project number to detect changes
-    const prevProjectNumberRef = useRef(projectNumber)
-    
-    // Track the user's current UI state (for analytics and context)
-    const [uiContext, setUiContext] = useState({
-        activeSection: 'overview',
-        interactionState: 'browsing',
-        scrollPosition: 0,
-        customContext: '',
-    })
-
-    // Get scroll info from useScrollPosition
-    const {
-        direction: scrollDirection,
-        percent: scrollPercent,
-        forceRecalculation,
-    } = useScrollPosition()
-
-    // Update UI context when scroll position changes in the main window
-    useEffect(() => {
-        if (scrollPercent > 0) {
-            let activeSection = 'overview'
-
-            // Determine which section is in view based on scroll percentage
-            if (scrollPercent < 30) {
-                activeSection = 'project header'
-            } else if (scrollPercent < 70) {
-                activeSection = 'project details'
-            } else {
-                activeSection = 'project innovations'
-            }
-
-            setUiContext(prev => ({
-                ...prev,
-                scrollPosition: scrollPercent,
-                activeSection,
-                interactionState: `scrolling ${scrollDirection}`,
-                customContext: `User is viewing the ${activeSection} section`,
-            }))
-        }
-    }, [scrollPercent, scrollDirection])
+    // Re-measured when the content's transition ends (see onTransitionEnd below)
+    const { forceRecalculation } = useScrollPosition()
 
     // References for DOM elements
     const cardRef = useRef(null)
     const contentRef = useRef(null)
-
-    // Project transition detection effect
-    useEffect(() => {
-        // Skip on initial render
-        if (prevProjectNumberRef.current !== projectNumber && prevProjectNumberRef.current !== undefined) {
-            // This runs when projectNumber changes (navigating to a new project)
-            
-            // Update UI context to reflect new project context
-            setUiContext(prev => ({
-                ...prev,
-                activeSection: 'overview',
-                interactionState: 'viewing new project',
-                customContext: `User has navigated to project ${projectNumber}: ${title}`
-            }))
-        }
-        
-        // Update ref with current project number for next comparison
-        prevProjectNumberRef.current = projectNumber
-        
-    }, [projectNumber, title])
-
-    // Set up ref and use the intersection hook for title animation
-    const headerRef = useRef(null)
-    const headerInView = useIntersection(headerRef, { threshold: 0.2 })
 
     return (
         <div
@@ -138,7 +72,6 @@ export default function ProjectCard({
                 </div>
 
                 <h2
-                    ref={headerRef}
                     className='text-xl @sm:text-2xl font-bold mb-1 min-h-[1.75rem] @sm:min-h-[2rem]'
                 >
                     <span className='bg-clip-text text-transparent bg-gradient-to-r from-brandGreen-300 via-brandGreen-200 to-brandGreen-300'>
