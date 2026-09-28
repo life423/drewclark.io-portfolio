@@ -225,6 +225,7 @@ class SharedApiService {
         if (request.signal && request.signal.aborted) {
           console.log(`Request ${request.id} was cancelled, removing from queue`);
           queue.shift(); // Now remove it from the queue
+          request.reject(new DOMException('Request cancelled', 'AbortError'));
           setTimeout(processNext, 50);
           isProcessing = false;
           return;
@@ -284,12 +285,8 @@ class SharedApiService {
         } catch (error) {
           console.log(`Request ${request.id} failed: ${error.message}`);
           
-          // Only reject if not aborted
-          if (error.name !== 'AbortError') {
-            request.reject(error);
-          } else {
-            console.log(`Request ${request.id} was aborted during processing`);
-          }
+          // Always settle the promise. Callers turn AbortError into a "timed out" message.
+          request.reject(error);
         } finally {
           this.pendingRequests.delete(request.id);
           
