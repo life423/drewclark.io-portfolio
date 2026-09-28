@@ -7,8 +7,11 @@ export default function EmailContactModal({ isOpen, onClose }) {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [message, setMessage] = useState('');
+    const [website, setWebsite] = useState(''); // honeypot: stays empty for people
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [submitStatus, setSubmitStatus] = useState(null); // null, 'success', 'error'
+    const [submitStatus, setSubmitStatus] = useState(null); // null or 'success'
+    const [emailError, setEmailError] = useState(false);
+    const [sendError, setSendError] = useState(null);
     
     const modalRef = useRef(null);
     const closeButtonRef = useRef(null);
@@ -48,7 +51,10 @@ export default function EmailContactModal({ isOpen, onClose }) {
             setName('');
             setEmail('');
             setMessage('');
+            setWebsite('');
             setSubmitStatus(null);
+            setEmailError(false);
+            setSendError(null);
         }
     }, [isOpen]);
 
@@ -61,48 +67,39 @@ export default function EmailContactModal({ isOpen, onClose }) {
     // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+        setSendError(null);
+
         if (!isEmailValid(email)) {
-            setSubmitStatus('error');
+            setEmailError(true);
             return;
         }
 
         setIsSubmitting(true);
-        
         try {
-            // Submit to our API endpoint
             const response = await fetch('/api/contact', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    name,
-                    email,
-                    message
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, message, website }),
             });
-            
-            const data = await response.json();
-            
+            const data = await response.json().catch(() => ({}));
+
             if (!response.ok) {
-                throw new Error(data.error || 'Failed to send message');
+                // Messages for 4xx errors (rate limits, a field that's too long) are written for visitors
+                setSendError(
+                    response.status < 500 && data.error
+                        ? data.error
+                        : "Sorry, your message couldn't be sent. Please try again in a moment."
+                );
+                return;
             }
-            
-            // Success!
-            setIsSubmitting(false);
+
             setSubmitStatus('success');
-            
-            // Close modal after success
-            setTimeout(() => {
-                onClose();
-            }, 2000);
-        } catch (error) {
-            console.error('Error sending message:', error);
+            // Close the modal after showing the confirmation
+            setTimeout(() => onClose(), 2000);
+        } catch {
+            setSendError("Couldn't reach the server. Please check your connection and try again.");
+        } finally {
             setIsSubmitting(false);
-            setSubmitStatus('error');
-            // Display a more detailed error if available
-            alert(`Failed to send message: ${error.message}`);
         }
     };
 
@@ -163,7 +160,7 @@ export default function EmailContactModal({ isOpen, onClose }) {
                                 <p className="text-brandGray-300">Thank you for your message! I'll get back to you soon.</p>
                             </div>
                         ) : (
-                            <form onSubmit={handleSubmit} className="space-y-4">
+                            <form id="contact-form" onSubmit={handleSubmit} className="space-y-4">
                                 <div>
                                     <label htmlFor="name" className="block text-sm font-medium text-brandGray-300 mb-1">
                                         Name
@@ -172,6 +169,7 @@ export default function EmailContactModal({ isOpen, onClose }) {
                                         ref={firstInputRef}
                                         type="text"
                                         id="name"
+                                        maxLength={100}
                                         value={name}
                                         onChange={(e) => setName(e.target.value)}
                                         required
@@ -188,19 +186,20 @@ export default function EmailContactModal({ isOpen, onClose }) {
                                     <input
                                         type="email"
                                         id="email"
+                                        maxLength={254}
                                         value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
+                                        onChange={(e) => { setEmail(e.target.value); setEmailError(false); }}
                                         required
                                         className={clsx(
                                             "w-full px-3 py-2 bg-brandGray-700 border rounded-md",
                                             "text-white focus:outline-none focus:ring-2 transition-colors",
-                                            submitStatus === 'error'
+                                            emailError
                                                 ? "border-brandOrange-500 focus:ring-brandOrange-500/50 focus:border-brandOrange-500"
                                                 : "border-brandGray-600 focus:ring-brandGreen-500/50 focus:border-brandGreen-500"
                                         )}
                                         placeholder="your.email@example.com"
                                     />
-                                    {submitStatus === 'error' && (
+                                    {emailError && (
                                         <p className="mt-1 text-xs text-brandOrange-400">
                                             Please enter a valid email address
                                         </p>
@@ -212,6 +211,7 @@ export default function EmailContactModal({ isOpen, onClose }) {
                                     </label>
                                     <textarea
                                         id="message"
+                                        maxLength={5000}
                                         value={message}
                                         onChange={(e) => setMessage(e.target.value)}
                                         required
@@ -222,6 +222,18 @@ export default function EmailContactModal({ isOpen, onClose }) {
                                         placeholder="How can I help you?"
                                     />
                                 </div>
+                                {/* Honeypot: hidden from people, so only bots fill it in */}
+                                <div aria-hidden="true" className="absolute -left-[9999px] w-px h-px overflow-hidden">
+                                    <label htmlFor="website">Website</label>
+                                    <input
+                                        type="text"
+                                        id="website"
+                                        tabIndex={-1}
+                                        autoComplete="off"
+                                        value={website}
+                                        onChange={(e) => setWebsite(e.target.value)}
+                                    />
+                                </div>
                             </form>
                         )}
                     </div>
@@ -229,9 +241,14 @@ export default function EmailContactModal({ isOpen, onClose }) {
                     {/* Modal Footer */}
                     {submitStatus !== 'success' && (
                         <div className="p-4 border-t border-brandGray-700/30">
+                            {sendError && (
+                                <p role="alert" className="mb-3 text-sm text-center text-brandOrange-400">
+                                    {sendError}
+                                </p>
+                            )}
                             <button
-                                type="button"
-                                onClick={handleSubmit}
+                                type="submit"
+                                form="contact-form"
                                 disabled={isSubmitting || !name || !email || !message}
                                 className={clsx(
                                     "w-full py-2 px-4 rounded-md font-medium text-sm transition-all duration-200",
@@ -252,7 +269,7 @@ export default function EmailContactModal({ isOpen, onClose }) {
                                 ) : "Send Message"}
                             </button>
                             <p className="text-xs text-center text-brandGray-400 mt-2">
-                                Your message will be saved securely
+                                Your message goes straight to my inbox.
                             </p>
                         </div>
                     )}

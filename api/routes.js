@@ -27,41 +27,60 @@ const chatDailyLimiter = rateLimit({
 // Chat
 router.all('/askGPT', chatLimiter, chatDailyLimiter, askGptHandler)
 
-// Contact form submission endpoint
-router.post('/contact', async (req, res) => {
+// Contact form: 5 messages an hour per visitor plus a site-wide daily ceiling.
+// Rejected submissions (validation errors) don't count toward either.
+const contactLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    limit: 5,
+    skipFailedRequests: true,
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: { error: 'Too many messages. Please try again in an hour.' },
+})
+const contactDailyLimiter = rateLimit({
+    windowMs: 24 * 60 * 60 * 1000,
+    limit: 100,
+    keyGenerator: () => 'site-wide',
+    skipFailedRequests: true,
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: { error: 'The contact form has reached its daily limit. Please try again tomorrow.' },
+})
+const CONTACT_FIELD_LIMITS = { name: 100, email: 254, message: 5000 }
+const COULD_NOT_SEND = "Sorry, your message couldn't be sent. Please try again in a moment."
+
+router.post('/contact', contactLimiter, contactDailyLimiter, async (req, res) => {
     try {
-        const { name, email, message } = req.body;
-        
-        // Validate inputs
-        if (!name || !email || !message) {
-            return res.status(400).json({ error: 'Missing required fields' });
+        const { name, email, message, website } = req.body || {}
+
+        // Honeypot: people never see the website field, so anything in it came from a bot.
+        // Reply as if it worked so the bot doesn't learn to skip it.
+        if (website) {
+            return res.status(200).json({ success: true })
         }
-        
-        // Simple email validation
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            return res.status(400).json({ error: 'Invalid email address' });
+
+        const fields = { name, email, message }
+        for (const [field, value] of Object.entries(fields)) {
+            if (typeof value !== 'string' || !value.trim()) {
+                return res.status(400).json({ error: 'Please fill in your name, email and message.' })
+            }
+            if (value.trim().length > CONTACT_FIELD_LIMITS[field]) {
+                return res.status(400).json({
+                    error: `Your ${field} is too long (the limit is ${CONTACT_FIELD_LIMITS[field]} characters).`,
+                })
+            }
         }
-        
-        // Add the message
-        const result = await contactHandler.addMessage(name, email, message);
-        
-        if (!result) {
-            return res.status(500).json({ error: 'Failed to save message' });
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+            return res.status(400).json({ error: 'Please enter a valid email address.' })
         }
-        
-        // Return success
-        res.status(200).json({ 
-            success: true, 
-            message: 'Contact message saved successfully' 
-        });
+
+        await contactHandler.addMessage(name.trim(), email.trim(), message.trim())
+        res.status(200).json({ success: true })
     } catch (error) {
-        console.error('Contact submission error:', error);
-        res.status(500).json({ 
-            error: 'Server error processing contact submission'
-        });
+        console.error('Contact submission error:', error)
+        res.status(500).json({ error: COULD_NOT_SEND })
     }
-});
+})
 
 // ─── Admin (contact inbox) ─────────────────────────────────────────────────
 // Password login sets a signed, HttpOnly session cookie scoped to /api/admin.
