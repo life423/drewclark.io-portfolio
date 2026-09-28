@@ -127,12 +127,13 @@ function isValidModel(model) {
  * @param {boolean} usingRepoContext - Whether repository context is available
  * @returns {string} - System prompt
  */
+// The chat UI shows answers as plain text, so ask for no Markdown.
+const FORMAT_RULES = 'Write in plain text, not Markdown: no asterisks, pound signs, or backticks. Use short paragraphs, and if you need a list, put each item on its own line starting with "1.", "2.", and so on.';
+
 function createSystemPrompt(usingRepoContext) {
-  if (usingRepoContext) {
-    return "You are a helpful assistant answering questions for Drew Clark's portfolio website visitors. You have been provided with relevant code snippets from the repository to help answer questions about the code. Refer to these code snippets when answering questions about how the code works. Keep responses concise, informative, and friendly.";
-  }
-  
-  return "You are a helpful assistant answering questions for Drew Clark's portfolio website visitors. Keep responses concise, informative, and friendly.";
+  const base = "You are a helpful assistant answering questions for Drew Clark's portfolio website visitors. Keep responses concise, informative, and friendly.";
+  const codeNote = ' You have been provided with relevant code snippets from the repository. Refer to them when answering questions about how the code works.';
+  return `${base}${usingRepoContext ? codeNote : ''} ${FORMAT_RULES}`;
 }
 
 // Initialize the client automatically on module import (non-blocking)

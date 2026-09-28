@@ -455,7 +455,7 @@ export default function UnifiedProjectChat({ projectsData }) {
 
                                                     <div
                                                         className={clsx(
-                                                            'rounded-lg p-3 text-sm shadow-sm message-item',
+                                                            'rounded-lg p-3 text-sm shadow-sm message-item whitespace-pre-line',
                                                             msg.role === 'user'
                                                                 ? 'bg-brandGray-700/80 text-brandGreen-200 border-r-2 border-r-brandGreen-500 rounded-tr-none'
                                                                 : 'bg-brandGray-800/80 text-brandGray-200 border-l-2 border-l-brandOrange-500 rounded-tl-none'

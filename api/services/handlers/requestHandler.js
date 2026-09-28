@@ -13,6 +13,20 @@ const { isRateLimited } = require('../security/rateLimitService');
 const config = require('../../config');
 
 /**
+ * Safety net: the UI renders plain text, so strip Markdown the model may still produce.
+ * @param {string} text - Model output
+ * @returns {string} Plain text
+ */
+function toPlainText(text) {
+  if (typeof text !== 'string') return text;
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '$1')      // **bold**
+    .replace(/`([^`\n]+)`/g, '$1')         // `code`
+    .replace(/^#{1,6}\s+/gm, '')          // # headings
+    .replace(/^(\s*)[-*]\s+/gm, '$1• ');  // - bullets
+}
+
+/**
  * Sanitize input to prevent injection attacks
  * @param {string} input - User input to sanitize
  * @returns {string} Sanitized input
@@ -214,11 +228,12 @@ async function handlePostRequest(req, createResponse, headers, logger) {
     });
 
     // Store in cache
-    cacheResponse(cacheKey, response.answer);
+    const answer = toPlainText(response.answer);
+    cacheResponse(cacheKey, answer);
 
     // Return the answer
     return createResponse(200, headers, {
-      answer: response.answer,
+      answer,
       repositoryContext: usingRepoContext ? repositoryUrl : undefined,
       metrics: {
         apiCallDurationMs: response.duration,
