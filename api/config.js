@@ -100,6 +100,25 @@ const config = {
         updateIntervalMs: 3600000, // How often to check for repository updates (1 hour)
     },
 
+    // Code-aware chat: scripts/index-repos.js embeds the allowed repos into
+    // MongoDB Atlas Vector Search, and the chat searches them
+    codeIndex: {
+        enabled: Boolean(process.env.MONGODB_URI),
+        embeddingModel: 'text-embedding-3-small',
+        dimensions: 1536,
+        chunksCollection: 'code_chunks',
+        stateCollection: 'code_index_state',
+        vectorIndexName: 'code_vector_index',
+        // About 60 lines per chunk, overlapping so code split across two chunks shows up in both
+        chunkLines: 60,
+        overlapLines: 10,
+        maxChunkChars: 3000,
+        // Bigger files are almost always generated
+        maxFileBytes: 150 * 1024,
+        // Bump when chunking or the embedding model changes, to force a full re-index
+        version: 1,
+    },
+
     // Repository Storage Configuration
     repositories: {
         // Default repositories to always include

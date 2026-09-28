@@ -12,6 +12,7 @@
         "clean": "rimraf node_modules app/node_modules api/node_modules",
         "lint": "eslint . --ext .js,.jsx",
         "lint:fix": "eslint . --ext .js,.jsx --fix",
+        "index:repos": "node scripts/index-repos.js",
         "verify": "node scripts/verify-openai.js",
         "postinstall": "node scripts/permissions.js"
     },

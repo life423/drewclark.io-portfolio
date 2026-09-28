@@ -7,7 +7,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const { MongoClient } = require('mongodb');
+const { getDb } = require('./db');
 
 const DB_NAME = process.env.MONGODB_DB || 'portfolio';
 const COLLECTION = 'messages';
@@ -20,21 +20,10 @@ console.log(
 );
 
 // ─── MongoDB ────────────────────────────────────────────────────────────────
-let collectionPromise = null;
-
-// One shared client, connected on first use
-function getCollection() {
-    if (!collectionPromise) {
-        const client = new MongoClient(process.env.MONGODB_URI, { serverSelectionTimeoutMS: 8000 });
-        collectionPromise = client
-            .connect()
-            .then(connected => connected.db(DB_NAME).collection(COLLECTION))
-            .catch(error => {
-                collectionPromise = null; // try again on the next request
-                throw error;
-            });
-    }
-    return collectionPromise;
+// Uses the shared connection in db.js
+async function getCollection() {
+    const db = await getDb();
+    return db.collection(COLLECTION);
 }
 
 // Documents use the message id as _id; the API exposes it as `id`
