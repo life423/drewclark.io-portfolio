@@ -10,7 +10,6 @@ const config = require('../../config');
 
 // Global client instance (singleton)
 let openAiClient = null;
-let openAiInitError = null;
 
 /**
  * Initialize the OpenAI client if not already initialized
@@ -27,7 +26,6 @@ function initializeClient(apiKey = null) {
   if (!key) {
     const error = 'OpenAI API key is missing';
     console.error(error);
-    openAiInitError = error;
     return { client: null, error };
   }
   
@@ -37,7 +35,6 @@ function initializeClient(apiKey = null) {
     return { client: openAiClient, error: null };
   } catch (error) {
     console.error(`Failed to initialize OpenAI client: ${error.message}`);
-    openAiInitError = error.message;
     return { client: null, error: error.message };
   }
 }
@@ -116,7 +113,4 @@ async function getChatCompletion(params) {
 // Initialize the client automatically on module import (non-blocking)
 initializeClient();
 
-module.exports = {
-  getChatCompletion,
-  getInitError: () => openAiInitError
-};
+module.exports = { getChatCompletion };

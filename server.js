@@ -34,6 +34,7 @@ app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
 // Add security headers
 app.use(helmet({
+    frameguard: { action: 'deny' },
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
@@ -42,74 +43,27 @@ app.use(helmet({
             styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"], // Allow inline styles and Google Fonts
             fontSrc: ["'self'", "https://fonts.gstatic.com"], // Allow Google Fonts
             imgSrc: ["'self'", "data:", "blob:"], // Allow data URIs for images
-            connectSrc: ["'self'", process.env.NODE_ENV === 'development' ? '*' : ''] // More permissive in dev
+            connectSrc: ["'self'"],
         }
     }
 }));
 
-// Enhanced CORS middleware with proper security
+// CORS: the site and its API share an origin (and Vite proxies /api in development),
+// so browsers need no CORS headers. Another site's pages can only call the API
+// from a browser if their origin is listed in CORS_ORIGINS.
 app.use((req, res, next) => {
-    // Production domains
-    const productionDomains = [
-        'https://drewclark.io',
-        'https://www.drewclark.io',
-        'http://146.190.213.50',   // Allow the IP address
-        'https://146.190.213.50'   // Allow HTTPS version too
-    ];
-    
-    // Development domains (including Vite's default port 5173)
-    const developmentDomains = [
-        'http://localhost:3000',
-        'http://127.0.0.1:3000',
-        'http://localhost:3001',
-        'http://127.0.0.1:3001',
-        'http://localhost:5173', 
-        'http://127.0.0.1:5173', 
-        'http://localhost:5174', 
-        'http://127.0.0.1:5174'
-    ];
-    
-    // Determine allowed origins based on environment
-    const allowedOrigins = process.env.NODE_ENV === 'production' 
-        ? productionDomains 
-        : [...productionDomains, ...developmentDomains];
-    
-    const origin = req.headers.origin;
-    
-    // Set appropriate CORS headers
-    if (origin && allowedOrigins.includes(origin)) {
-        // Allow specific origin that's in our whitelist
-        res.header('Access-Control-Allow-Origin', origin);
-    } else if (process.env.NODE_ENV !== 'production' || !origin) {
-        // In development or for same-origin requests (where origin is null), be more permissive
-        console.log(`Non-whitelisted or same-origin request: ${origin || 'Same-origin/direct'}`);
-        res.header('Access-Control-Allow-Origin', '*');
-    } else {
-        // In production, log the blocked origin but still allow the request
-        // This allows assets to load from any source to fix the connection refused errors
-        console.log(`Production request from non-whitelisted origin: ${origin || 'Unknown'}`);
-        res.header('Access-Control-Allow-Origin', '*');
+    const origin = req.headers.origin
+    if (origin && config.corsOrigins.includes(origin)) {
+        res.header('Access-Control-Allow-Origin', origin)
+        res.header('Vary', 'Origin')
+        res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        res.header('Access-Control-Allow-Headers', 'Content-Type')
     }
-    
-    // Standard CORS headers
-    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.header(
-        'Access-Control-Allow-Headers',
-        'Content-Type, Authorization, X-Correlation-Id'
-    );
-    
-    // Add security headers
-    res.header('X-Content-Type-Options', 'nosniff');
-    res.header('X-Frame-Options', 'DENY');
-    res.header('X-XSS-Protection', '1; mode=block');
-    
-    // Handle preflight requests
     if (req.method === 'OPTIONS') {
-        return res.sendStatus(200);
+        return res.sendStatus(204)
     }
-    
-    next();
-});
+    next()
+})
 
 // Request validation middleware
 app.use((req, res, next) => {
@@ -128,49 +82,20 @@ app.use((req, res, next) => {
     next();
 });
 
-// API routes
+// API routes; unknown API paths get a JSON 404 instead of the app's HTML
 app.use('/api', apiRoutes)
+app.use('/api', (req, res) => res.status(404).json({ error: 'Not found' }))
 
-// Serve static frontend assets - improve path resolution
-app.use(express.static(path.join(__dirname, 'app', 'dist')));
-console.log(`Serving static files from: ${path.join(__dirname, 'app', 'dist')}`);
+// The built frontend
+const distDir = path.join(__dirname, 'app', 'dist')
+app.use(express.static(distDir))
 
-// Catch-all route to serve index.html for client-side routing with environment injection
+// A missing asset is a 404, not the app's HTML (which the service worker would cache as the asset)
+app.use('/assets', (req, res) => res.status(404).end())
+
+// Any other GET is a client-side route: serve the app
 app.get('*', (req, res) => {
-    const indexPath = path.join(__dirname, 'app', 'dist', 'index.html');
-    
-    // Check if the file exists before serving
-    if (require('fs').existsSync(indexPath)) {
-        // Read the file so we can modify it
-        const fs = require('fs');
-        let html = fs.readFileSync(indexPath, 'utf8');
-        
-        // Create an environment script to inject into the HTML
-        const envScript = `
-            <script>
-                // Inject environment variables into window
-                window.ENV_DOCKER_CONTAINER = ${process.env.DOCKER_CONTAINER === 'true' ? 'true' : 'false'};
-                window.ENV_NODE_ENV = "${process.env.NODE_ENV || 'development'}";
-                window.ENV_DEPLOYED_VERSION = "${process.env.npm_package_version || '1.0.0'}";
-                window.ENV_SERVER_PORT = "${process.env.PORT || '3000'}";
-                console.log("Server-injected environment:", {
-                    ENV_DOCKER_CONTAINER: window.ENV_DOCKER_CONTAINER,
-                    ENV_NODE_ENV: window.ENV_NODE_ENV,
-                    ENV_DEPLOYED_VERSION: window.ENV_DEPLOYED_VERSION,
-                    ENV_SERVER_PORT: window.ENV_SERVER_PORT
-                });
-            </script>
-        `;
-        
-        // Inject our script before the closing </head> tag
-        html = html.replace('</head>', `${envScript}</head>`);
-        
-        // Send the modified HTML
-        res.send(html);
-    } else {
-        // Fallback to sendFile if the file can't be read or modified
-        res.sendFile(indexPath);
-    }
+    res.sendFile(path.join(distDir, 'index.html'))
 })
 
 // Start the server - bind to 0.0.0.0 to allow external connections

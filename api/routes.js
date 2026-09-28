@@ -1,12 +1,10 @@
 const express = require('express')
 const router = express.Router()
-const os = require('os')
-const path = require('path')
 const contactHandler = require('./contact-handler')
 const adminAuth = require('./adminAuth')
 const { rateLimit } = require('express-rate-limit')
 const config = require('./config')
-const { defaultHandler, projectsHandler } = require('./routes/askGptAdapter')
+const { askGptHandler } = require('./routes/askGptAdapter')
 
 // Chat rate limits: per visitor, plus a site-wide daily ceiling so a
 // distributed burst can't run up the OpenAI bill. Both reset on restart.
@@ -26,9 +24,8 @@ const chatDailyLimiter = rateLimit({
     message: { error: 'The chat has reached its daily limit. Please try again tomorrow.' },
 })
 
-// AskGPT endpoints using the new modular architecture
-router.all('/askGPT', chatLimiter, chatDailyLimiter, defaultHandler)
-router.all('/askGPT/projects', chatLimiter, chatDailyLimiter, projectsHandler)
+// Chat
+router.all('/askGPT', chatLimiter, chatDailyLimiter, askGptHandler)
 
 // Contact form submission endpoint
 router.post('/contact', async (req, res) => {
@@ -143,53 +140,5 @@ const healthRoutes = require('./routes/health');
 
 // Mount health check routes
 router.use('/health', healthRoutes);
-
-// Legacy health check endpoint (simple version, kept for backward compatibility)
-router.get('/health/legacy', (req, res) => {
-    try {
-        // Collect basic system info
-        const uptime = process.uptime()
-        const memoryUsage = process.memoryUsage()
-        const nodeVersion = process.version
-        const hostname = os.hostname()
-        const platform = os.platform()
-
-        // Collected deployment-specific info
-        const deploymentInfo = {
-            environment: process.env.NODE_ENV || 'development',
-            inDocker: process.env.DOCKER_CONTAINER === 'true',
-            port: process.env.PORT || '3000',
-            apiDirectory: path.resolve(__dirname),
-            serverUptime: `${Math.floor(uptime / 60)}m ${Math.floor(uptime % 60)}s`,
-            startTime: new Date(Date.now() - uptime * 1000).toISOString(),
-            currentTime: new Date().toISOString()
-        }
-
-        // Response with comprehensive diagnostic information
-        res.json({
-            status: 'online',
-            system: {
-                hostname,
-                platform,
-                nodeVersion,
-                memoryMB: {
-                    rss: Math.round(memoryUsage.rss / 1024 / 1024),
-                    heapTotal: Math.round(memoryUsage.heapTotal / 1024 / 1024),
-                    heapUsed: Math.round(memoryUsage.heapUsed / 1024 / 1024),
-                    external: Math.round(memoryUsage.external / 1024 / 1024)
-                },
-                cpus: os.cpus().length
-            },
-            deployment: deploymentInfo
-        })
-    } catch (error) {
-        // Return error information if anything fails
-        res.status(500).json({
-            status: 'error',
-            message: 'Error retrieving health information',
-            error: error.message
-        })
-    }
-})
 
 module.exports = router

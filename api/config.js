@@ -1,49 +1,13 @@
 /**
- * API Configuration
+ * API configuration
  *
- * This module centralizes the configuration for the API and loads the appropriate
- * environment variables based on the current environment.
+ * Everything the server reads from the environment. server.js and the scripts
+ * load the root .env before requiring this file.
  */
 
-const path = require('path')
-
-// Detect Azure Functions environment
-const isAzureFunctions = process.env.WEBSITE_HOSTNAME !== undefined
-
-// Set NODE_ENV if not already set (important for Azure Functions)
+// Without NODE_ENV, assume local development (the Docker image sets production)
 if (!process.env.NODE_ENV) {
-    process.env.NODE_ENV = isAzureFunctions ? 'production' : 'development'
-}
-
-// Load appropriate .env file based on NODE_ENV
-if (!isAzureFunctions) {
-    // Only load from .env files in local development
-    try {
-        require('dotenv').config({
-            path:
-                process.env.NODE_ENV === 'production'
-                    ? path.resolve(__dirname, '.env.production')
-                    : path.resolve(__dirname, '.env.development'),
-        })
-    } catch (error) {
-        console.warn(`Warning: Could not load .env file - ${error.message}`)
-    }
-}
-
-// Log environment detection for debugging
-console.log(`API environment: ${process.env.NODE_ENV}`)
-console.log(`Running in Azure Functions: ${isAzureFunctions}`)
-if (isAzureFunctions) {
-    console.log(`Azure Functions hostname: ${process.env.WEBSITE_HOSTNAME}`)
-}
-
-// Enhanced environment variable debugging
-console.log('Environment variables for OpenAI debugging:')
-console.log('OPENAI_API_KEY present:', !!process.env.OPENAI_API_KEY)
-if (process.env.OPENAI_API_KEY) {
-    console.log('OPENAI_API_KEY length:', process.env.OPENAI_API_KEY.length)
-    console.log('OPENAI_API_KEY format check:', 
-        process.env.OPENAI_API_KEY.startsWith('sk-') ? 'Valid format (starts with sk-)' : 'Invalid format')
+    process.env.NODE_ENV = 'development'
 }
 
 // Configuration object with all settings centralized
@@ -64,10 +28,12 @@ const config = {
     // Response Caching
     cacheTtlMs: 3600000, // 1 hour
 
-    // CORS settings
-    corsOrigins: process.env.CORS_ORIGINS
-        ? process.env.CORS_ORIGINS.split(',')
-        : ['*'],
+    // Other sites allowed to call the API from a browser (comma-separated origins).
+    // The site itself is same-origin and needs none.
+    corsOrigins: (process.env.CORS_ORIGINS || '')
+        .split(',')
+        .map(origin => origin.trim())
+        .filter(Boolean),
 
     // Code-aware chat: scripts/index-repos.js embeds the allowed repos into
     // MongoDB Atlas Vector Search, and the chat searches them
@@ -107,13 +73,5 @@ const config = {
     isDevelopment: process.env.NODE_ENV !== 'production',
 }
 
-// Log API keys status (without revealing the keys)
-if (config.openAiApiKey) {
-    console.log(
-        `OpenAI API key is configured (${config.openAiApiKey.length} characters)`
-    )
-} else {
-    console.log('WARNING: OpenAI API key is missing')
-}
 
 module.exports = config

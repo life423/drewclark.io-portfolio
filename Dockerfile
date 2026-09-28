@@ -25,6 +25,7 @@ RUN echo "Building with VITE_API_URL=${VITE_API_URL:-/api/askGPT}" && \
 # ─── Stage 2: Create minimal prod image ───────────────────────────
 FROM node:20-alpine AS runner
 LABEL maintainer="drew@drewclark.io"
+ENV NODE_ENV=production
 
 # Secrets like OPENAI_API_KEY are injected at runtime (Container Apps secret, docker run -e). Never ARG/ENV them.
 
@@ -32,7 +33,7 @@ WORKDIR /app
 
 # install runtime deps
 COPY package*.json ./
-RUN npm install --production --legacy-peer-deps
+RUN npm install --omit=dev --legacy-peer-deps
 
 # bring in built frontend & server code
 COPY --from=builder /app/app/dist     app/dist
@@ -40,8 +41,9 @@ COPY --from=builder /app/api          api
 COPY --from=builder /app/server.js    server.js
 COPY --from=builder /app/app/src/data/projects.json app/src/data/projects.json
 
-# create runtime dirs
-RUN mkdir -p data/contact
+# the contact form's fallback file lives in data/; then drop root
+RUN mkdir -p data/contact && chown -R node:node data
+USER node
 
 EXPOSE 3000
 CMD ["node", "server.js"]
