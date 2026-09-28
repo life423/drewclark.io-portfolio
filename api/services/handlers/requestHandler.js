@@ -260,10 +260,4 @@ async function handleRequest(params) {
   }
 }
 
-module.exports = {
-  handleRequest,
-  // Export component handlers for testing
-  handleOptionsRequest,
-  handleGetRequest,
-  handlePostRequest,
-};
+module.exports = { handleRequest };

@@ -221,4 +221,4 @@ async function ensureVectorIndex(log = console.log) {
     }
 }
 
-module.exports = { indexRepo, ensureVectorIndex, VECTOR_INDEX_DEFINITION, formatCost };
+module.exports = { indexRepo, ensureVectorIndex, formatCost };

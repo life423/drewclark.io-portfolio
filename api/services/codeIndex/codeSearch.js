@@ -128,4 +128,4 @@ async function searchCode(question, repos) {
     return fitToBudget(mergeNeighbours(relevant), settings.maxContextChars);
 }
 
-module.exports = { searchCode, mergeNeighbours, fitToBudget };
+module.exports = { searchCode };

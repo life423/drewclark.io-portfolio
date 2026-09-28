@@ -148,6 +148,4 @@ module.exports = {
     latestCommit,
     listIndexableFiles,
     removeDir,
-    redactSecrets,
-    isIndexable,
 };

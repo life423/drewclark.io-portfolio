@@ -113,36 +113,10 @@ async function getChatCompletion(params) {
   }
 }
 
-/**
- * Check if a model name is allowed
- * @param {string} model - Model name
- * @returns {boolean} - Whether the model is allowed
- */
-function isValidModel(model) {
-  return config.allowedModels.includes(model);
-}
-
-/**
- * Create system prompt based on repository context
- * @param {boolean} usingRepoContext - Whether repository context is available
- * @returns {string} - System prompt
- */
-// The chat UI shows answers as plain text, so ask for no Markdown.
-const FORMAT_RULES = 'Write in plain text, not Markdown: no asterisks, pound signs, or backticks. Use short paragraphs, and if you need a list, put each item on its own line starting with "1.", "2.", and so on.';
-
-function createSystemPrompt(usingRepoContext) {
-  const base = "You are a helpful assistant answering questions for Drew Clark's portfolio website visitors. Keep responses concise, informative, and friendly.";
-  const codeNote = ' You have been provided with relevant code snippets from the repository. Refer to them when answering questions about how the code works.';
-  return `${base}${usingRepoContext ? codeNote : ''} ${FORMAT_RULES}`;
-}
-
 // Initialize the client automatically on module import (non-blocking)
 initializeClient();
 
 module.exports = {
-  initializeClient,
   getChatCompletion,
-  isValidModel,
-  createSystemPrompt,
   getInitError: () => openAiInitError
 };

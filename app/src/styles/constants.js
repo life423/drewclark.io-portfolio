@@ -27,19 +27,3 @@ export const EASING = {
   SHARP: 'cubic-bezier(0.33, 1, 0.68, 1)',
   GENTLE: 'cubic-bezier(0.22, 1, 0.36, 1)'
 };
-
-// Delays (in milliseconds)
-export const DELAY = {
-  NONE: 0,
-  SHORT: 100,
-  MEDIUM: 300,
-  LONG: 600,
-  STAGGER: 200, // For staggered animations of multiple elements
-};
-
-// Export all constants as default
-export default {
-  ANIMATION,
-  EASING,
-  DELAY
-};

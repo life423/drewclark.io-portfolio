@@ -76,13 +76,5 @@ export const brandColors = {
     gray: brandGray
 }
 
-// For easy access to most commonly used shades
-export const coreColors = {
-    green: brandGreen[500],  // #10B981
-    blue: brandBlue[500],    // #0EA5E9
-    orange: brandOrange[500], // #FF6B00
-    gray: brandGray[500],    // #71717A
-}
-
 // Export as default for backward compatibility
 export default brandColors;

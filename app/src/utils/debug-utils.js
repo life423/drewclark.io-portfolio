@@ -200,56 +200,6 @@ export function logEnvironmentInfo(componentName, extraData = {}) {
 }
 
 /**
- * Test API connectivity and log results
- * Useful for debugging API connection issues
- * 
- * @returns {Promise<Object>} Test results
- */
-export async function testAPIConnectivity() {
-  console.group('API Connectivity Test');
-  
-  try {
-    console.log('Testing API connection...');
-    const startTime = performance.now();
-    
-    const response = await fetch('/api/health', {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' }
-    });
-    
-    const endTime = performance.now();
-    const duration = Math.round(endTime - startTime);
-    
-    const data = await response.json();
-    
-    const result = {
-      success: response.ok,
-      status: response.status,
-      statusText: response.statusText,
-      data,
-      duration,
-      timestamp: new Date().toISOString()
-    };
-    
-    console.log(`API ${response.ok ? 'Connected' : 'Error'} (${duration}ms):`, result);
-    console.groupEnd();
-    
-    return result;
-  } catch (error) {
-    const result = {
-      success: false,
-      error: error.message,
-      timestamp: new Date().toISOString()
-    };
-    
-    console.error('API Connection Failed:', result);
-    console.groupEnd();
-    
-    return result;
-  }
-}
-
-/**
  * Debug keyboard shortcut to toggle the debug panel
  * Press Ctrl+Shift+D to toggle
  */
@@ -274,6 +224,5 @@ export function setupDebugShortcut() {
 export default {
   createDebugPanel,
   logEnvironmentInfo,
-  testAPIConnectivity,
   setupDebugShortcut
 };

@@ -14,12 +14,8 @@ dotenv.config()
 
 // Import API routes and utilities
 const apiRoutes = require('./api/routes')
-const { setCacheTTL } = require('./api/utils')
 const config = require('./api/config')
 const { getDb, isMongoConfigured } = require('./api/db')
-
-// Set cache TTL based on config
-setCacheTTL(config.cacheTtlMs)
 
 // Initialize Express app
 const app = express()

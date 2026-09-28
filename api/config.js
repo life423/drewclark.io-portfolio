@@ -48,10 +48,6 @@ if (process.env.OPENAI_API_KEY) {
 
 // Configuration object with all settings centralized
 const config = {
-    // Environment
-    nodeEnv: process.env.NODE_ENV || 'development',
-    isAzureFunctions,
-
     // API Keys
     openAiApiKey: process.env.OPENAI_API_KEY,
 
@@ -67,16 +63,6 @@ const config = {
 
     // Response Caching
     cacheTtlMs: 3600000, // 1 hour
-
-    // Models
-    allowedModels: [
-        'gpt-3.5-turbo',
-        'gpt-4',
-        'gpt-4o',
-        'gpt-4o-mini',
-        'gpt-4-turbo',
-        'gpt-3.5-turbo-16k',
-    ],
 
     // CORS settings
     corsOrigins: process.env.CORS_ORIGINS
@@ -117,9 +103,8 @@ const config = {
         siteRepo: 'life423/drewclark.io-portfolio',
     },
 
-    // Logging
+    // Error responses include details only in development
     isDevelopment: process.env.NODE_ENV !== 'production',
-    logLevel: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
 }
 
 // Log API keys status (without revealing the keys)
