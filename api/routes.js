@@ -3,6 +3,8 @@ const router = express.Router()
 const os = require('os')
 const path = require('path')
 const contactHandler = require('./contact-handler')
+const adminAuth = require('./adminAuth')
+const { rateLimit } = require('express-rate-limit')
 const { updateAllRepositories, processRepository } = require('./services/scheduler/repositoryUpdateService')
 const { defaultHandler, projectsHandler } = require('./routes/askGptAdapter')
 
@@ -47,182 +49,97 @@ router.post('/contact', (req, res) => {
     }
 });
 
-// Admin routes for managing contact messages
-router.get('/admin/messages', (req, res) => {
+// ─── Admin (contact inbox) ─────────────────────────────────────────────────
+// Password login sets a signed, HttpOnly session cookie scoped to /api/admin.
+// Secrets never go in URLs, logs, or responses.
+
+// Counts failed logins only: 5 per 15 minutes per IP
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 5,
+    skipSuccessfulRequests: true,
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: { error: 'Too many login attempts. Try again in 15 minutes.' },
+});
+
+router.post('/admin/login', loginLimiter, (req, res) => {
+    if (!adminAuth.isConfigured()) {
+        return res.status(503).json({ error: 'Admin login is not configured' });
+    }
+    const { password } = req.body || {};
+    if (!adminAuth.verifyPassword(password)) {
+        return res.status(401).json({ error: 'Wrong password' });
+    }
+    adminAuth.setSessionCookie(res);
+    res.status(200).json({ authenticated: true });
+});
+
+router.post('/admin/logout', (req, res) => {
+    adminAuth.clearSessionCookie(res);
+    res.status(200).json({ authenticated: false });
+});
+
+router.get('/admin/session', (req, res) => {
+    res.status(200).json({ authenticated: adminAuth.isAuthenticated(req) });
+});
+
+// Everything below needs a signed-in admin
+router.get('/admin/messages', adminAuth.requireAdmin, (req, res) => {
     try {
-        const { token } = req.query;
-        
-        // Verify admin token
-        if (!contactHandler.verifyAdminToken(token)) {
-            return res.status(401).json({ error: 'Unauthorized' });
-        }
-        
-        // Get all messages
-        const messages = contactHandler.getMessages();
-        
-        // Return messages
-        res.status(200).json({ messages });
+        res.status(200).json({ messages: contactHandler.getMessages() });
     } catch (error) {
         console.error('Admin messages error:', error);
-        res.status(500).json({ 
-            error: 'Server error fetching messages',
-            message: error.message
-        });
+        res.status(500).json({ error: 'Server error fetching messages' });
     }
 });
 
-// Mark message as read
-router.put('/admin/messages/:id', (req, res) => {
+router.put('/admin/messages/:id', adminAuth.requireAdmin, (req, res) => {
     try {
-        const { id } = req.params;
-        const { token, read } = req.body;
-        
-        // Verify admin token
-        if (!contactHandler.verifyAdminToken(token)) {
-            return res.status(401).json({ error: 'Unauthorized' });
-        }
-        
-        // Mark message as read/unread
-        const success = contactHandler.markMessageRead(id, read !== false);
-        
+        const { read } = req.body || {};
+        const success = contactHandler.markMessageRead(req.params.id, read !== false);
         if (!success) {
             return res.status(404).json({ error: 'Message not found' });
         }
-        
-        // Return success
-        res.status(200).json({ 
-            success: true, 
-            message: 'Message updated successfully' 
-        });
+        res.status(200).json({ success: true });
     } catch (error) {
         console.error('Update message error:', error);
-        res.status(500).json({ 
-            error: 'Server error updating message',
-            message: error.message
-        });
+        res.status(500).json({ error: 'Server error updating message' });
     }
 });
 
-// Delete message
-router.delete('/admin/messages/:id', (req, res) => {
+router.delete('/admin/messages/:id', adminAuth.requireAdmin, (req, res) => {
     try {
-        const { id } = req.params;
-        const { token } = req.query;
-        
-        // Verify admin token
-        if (!contactHandler.verifyAdminToken(token)) {
-            return res.status(401).json({ error: 'Unauthorized' });
-        }
-        
-        // Delete message
-        const success = contactHandler.deleteMessage(id);
-        
+        const success = contactHandler.deleteMessage(req.params.id);
         if (!success) {
             return res.status(404).json({ error: 'Message not found' });
         }
-        
-        // Return success
-        res.status(200).json({ 
-            success: true, 
-            message: 'Message deleted successfully' 
-        });
+        res.status(200).json({ success: true });
     } catch (error) {
         console.error('Delete message error:', error);
-        res.status(500).json({ 
-            error: 'Server error deleting message',
-            message: error.message
-        });
+        res.status(500).json({ error: 'Server error deleting message' });
     }
 });
 
-// Admin token generation (development only)
-router.get('/admin/generate-token', (req, res) => {
-    // Only allow in development mode
-    if (process.env.NODE_ENV === 'production') {
-        return res.status(404).json({ error: 'Endpoint not available in production' });
-    }
-    
-    const token = contactHandler.generateAdminToken();
-    
-    res.status(200).json({ 
-        message: 'Store this token securely and add it to your environment variables as ADMIN_ACCESS_TOKEN',
-        token
-    });
+// Repository management (long-running jobs, so respond immediately)
+router.post('/admin/repositories/update', adminAuth.requireAdmin, (req, res) => {
+    console.log('Manually triggering repository update...');
+    updateAllRepositories()
+        .then(() => console.log('Repository update job completed.'))
+        .catch(error => console.error('Error in repository update:', error));
+    res.status(200).json({ success: true, message: 'Repository update started. Check server logs for progress.' });
 });
 
-// Repository management endpoints
-router.post('/admin/repositories/update', async (req, res) => {
-    try {
-        const { token } = req.body;
-        
-        // Verify admin token
-        if (!contactHandler.verifyAdminToken(token)) {
-            return res.status(401).json({ error: 'Unauthorized' });
-        }
-        
-        console.log('Manually triggering repository update...');
-        
-        // Start the update process
-        updateAllRepositories()
-            .then(results => {
-                console.log('Repository update job completed.');
-            })
-            .catch(error => {
-                console.error('Error in repository update:', error);
-            });
-        
-        // Return immediate success since this is a long-running operation
-        res.status(200).json({ 
-            success: true, 
-            message: 'Repository update job started. Check server logs for progress.'
-        });
-    } catch (error) {
-        console.error('Repository update error:', error);
-        res.status(500).json({ 
-            error: 'Server error updating repositories',
-            message: error.message
-        });
+router.post('/admin/repositories/process', adminAuth.requireAdmin, (req, res) => {
+    const { repositoryUrl } = req.body || {};
+    if (!repositoryUrl) {
+        return res.status(400).json({ error: 'Missing repository URL' });
     }
-});
-
-// Process a specific repository
-router.post('/admin/repositories/process', async (req, res) => {
-    try {
-        const { token, repositoryUrl } = req.body;
-        
-        // Validate input
-        if (!repositoryUrl) {
-            return res.status(400).json({ error: 'Missing repository URL' });
-        }
-        
-        // Verify admin token
-        if (!contactHandler.verifyAdminToken(token)) {
-            return res.status(401).json({ error: 'Unauthorized' });
-        }
-        
-        console.log(`Manually processing repository: ${repositoryUrl}`);
-        
-        // Process the specified repository
-        processRepository(repositoryUrl)
-            .then(result => {
-                console.log(`Repository processing completed: ${result.success ? 'Success' : 'Failed'}`);
-            })
-            .catch(error => {
-                console.error(`Error processing repository ${repositoryUrl}:`, error);
-            });
-        
-        // Return immediate success since this is a long-running operation
-        res.status(200).json({ 
-            success: true, 
-            message: `Processing of repository ${repositoryUrl} started. Check server logs for progress.`
-        });
-    } catch (error) {
-        console.error('Repository processing error:', error);
-        res.status(500).json({ 
-            error: 'Server error processing repository',
-            message: error.message
-        });
-    }
+    console.log(`Manually processing repository: ${repositoryUrl}`);
+    processRepository(repositoryUrl)
+        .then(result => console.log(`Repository processing completed: ${result.success ? 'Success' : 'Failed'}`))
+        .catch(error => console.error(`Error processing repository ${repositoryUrl}:`, error));
+    res.status(200).json({ success: true, message: 'Repository processing started. Check server logs for progress.' });
 });
 
 // Import health check routes

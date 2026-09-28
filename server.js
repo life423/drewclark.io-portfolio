@@ -25,6 +25,10 @@ setCacheTTL(config.cacheTtlMs)
 
 // Initialize Express app
 const app = express()
+
+// One reverse proxy (the Container Apps ingress) sits in front in production.
+// Trusting that hop makes req.ip the real client IP, which rate limiting keys on.
+app.set('trust proxy', 1)
 const PORT = process.env.PORT || 3000
 
 // Security middleware
@@ -186,7 +190,7 @@ app.listen(PORT, HOST, () => {
     
     // Log environment variables for debugging
     console.log('Environment variables:')
-    console.log('ADMIN_ACCESS_TOKEN:', process.env.ADMIN_ACCESS_TOKEN ? `Configured (${process.env.ADMIN_ACCESS_TOKEN.length} chars)` : 'Missing')
+    console.log('Admin login:', process.env.ADMIN_PASSWORD ? 'configured' : 'not configured (set ADMIN_PASSWORD)')
     console.log('NODE_ENV:', process.env.NODE_ENV)
     console.log('PORT:', process.env.PORT)
     

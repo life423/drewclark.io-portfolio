@@ -90,35 +90,9 @@ function deleteMessage(id) {
     return saveMessages(filteredMessages);
 }
 
-// Generate a secure admin token
-function generateAdminToken() {
-    return crypto.randomBytes(32).toString('hex');
-}
-
-// Verify admin token
-function verifyAdminToken(token) {
-    const ADMIN_TOKEN = process.env.ADMIN_ACCESS_TOKEN;
-    
-    console.log('Verifying admin token...');
-    console.log('Provided token:', token);
-    console.log('Expected token from env:', ADMIN_TOKEN);
-    console.log('Token length:', token?.length, 'Expected length:', ADMIN_TOKEN?.length);
-    console.log('Do they match?', token === ADMIN_TOKEN);
-    
-    if (!ADMIN_TOKEN) {
-        console.warn('Warning: ADMIN_ACCESS_TOKEN not set in environment variables');
-        return false;
-    }
-    
-    // Compare trimmed values to handle any whitespace issues
-    return token.trim() === ADMIN_TOKEN.trim();
-}
-
 module.exports = {
     getMessages,
     addMessage,
     markMessageRead,
     deleteMessage,
-    generateAdminToken,
-    verifyAdminToken
 };
