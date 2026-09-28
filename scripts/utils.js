@@ -2,7 +2,6 @@
  * Shared utilities for development scripts
  */
 const { exec, spawn } = require('child_process');
-const http = require('http');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
@@ -160,55 +159,6 @@ function safeSpawn(command, args, options = {}) {
 }
 
 /**
- * Make an HTTP request with timeout
- * @param {string} url - The URL to request
- * @param {Object} options - HTTP options
- * @param {number} timeoutMs - Timeout in milliseconds
- * @returns {Promise<Object>} - Response data
- */
-function httpRequest(url, options = {}, timeoutMs = 5000) {
-  return new Promise((resolve, reject) => {
-    const req = http.request(url, {
-      timeout: timeoutMs,
-      ...options
-    }, (res) => {
-      let data = '';
-      res.on('data', (chunk) => {
-        data += chunk;
-      });
-      
-      res.on('end', () => {
-        if (res.statusCode >= 200 && res.statusCode < 300) {
-          try {
-            resolve({
-              statusCode: res.statusCode,
-              headers: res.headers,
-              data: data.length > 0 ? JSON.parse(data) : null
-            });
-          } catch (e) {
-            resolve({
-              statusCode: res.statusCode,
-              headers: res.headers,
-              data: data
-            });
-          }
-        } else {
-          reject(new Error(`HTTP Error: ${res.statusCode} ${res.statusMessage}`));
-        }
-      });
-    });
-    
-    req.on('error', reject);
-    req.on('timeout', () => {
-      req.destroy();
-      reject(new Error(`Request timeout after ${timeoutMs}ms`));
-    });
-    
-    req.end();
-  });
-}
-
-/**
  * Retry a function with exponential backoff
  * @param {Function} fn - The async function to retry
  * @param {Object} options - Options for retrying
@@ -257,13 +207,9 @@ async function withRetry(fn, options = {}) {
 // Export utilities
 module.exports = {
   colors,
-  isWindows,
   rootDir,
   log,
-  execPromise,
-  isPortInUse,
   killProcessesOnPorts,
   safeSpawn,
-  httpRequest,
   withRetry
 };

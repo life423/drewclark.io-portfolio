@@ -1,0 +1,52 @@
+name: Index repos for the chat
+
+# Keeps the chat's code index (MongoDB Atlas Vector Search) in step with the
+# project repos. Repos with no new commits are skipped without cloning, and only
+# changed files are re-embedded, so frequent runs cost next to nothing.
+on:
+  schedule:
+    - cron: '17 * * * *' # hourly: picks up pushes to the project repos
+  push:
+    branches: [main] # this site's own code
+  workflow_dispatch:
+    inputs:
+      full:
+        description: Re-embed everything from scratch
+        type: boolean
+        default: false
+  repository_dispatch:
+    types: [repo-updated] # optional: sent by a project repo right after a push (see README)
+
+permissions:
+  contents: read
+
+concurrency:
+  group: index-repos
+  cancel-in-progress: false
+
+jobs:
+  index:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # package-lock.json isn't committed, so this is npm install rather than npm ci
+      - name: Install dependencies
+        run: npm install --omit=dev --ignore-scripts --no-audit --no-fund
+
+      - name: Index new commits
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          FULL: ${{ inputs.full }}
+          REPO: ${{ github.event.client_payload.repo }}
+        run: |
+          args=()
+          if [ "$FULL" = "true" ]; then args+=(--full); fi
+          if [ -n "$REPO" ]; then args+=("$REPO"); fi
+          node scripts/index-repos.js "${args[@]}"

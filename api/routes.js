@@ -1,227 +1,156 @@
 const express = require('express')
 const router = express.Router()
-const os = require('os')
-const path = require('path')
 const contactHandler = require('./contact-handler')
-const { updateAllRepositories, processRepository } = require('./services/scheduler/repositoryUpdateService')
-const { defaultHandler, projectsHandler } = require('./routes/askGptAdapter')
+const adminAuth = require('./adminAuth')
+const { rateLimit } = require('express-rate-limit')
+const config = require('./config')
+const { askGptHandler } = require('./routes/askGptAdapter')
 
-// AskGPT endpoints using the new modular architecture
-router.all('/askGPT', defaultHandler)
-router.all('/askGPT/projects', projectsHandler)
+// Chat rate limits: per visitor, plus a site-wide daily ceiling so a
+// distributed burst can't run up the OpenAI bill. Both reset on restart.
+const chatLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    limit: config.chat.limitPerMinute,
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: { error: 'Too many questions. Please wait a minute and try again.' },
+})
+const chatDailyLimiter = rateLimit({
+    windowMs: 24 * 60 * 60 * 1000,
+    limit: config.chat.limitPerDay,
+    keyGenerator: () => 'site-wide',
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: { error: 'The chat has reached its daily limit. Please try again tomorrow.' },
+})
 
-// Contact form submission endpoint
-router.post('/contact', (req, res) => {
+// Chat
+router.all('/askGPT', chatLimiter, chatDailyLimiter, askGptHandler)
+
+// Contact form: 5 messages an hour per visitor plus a site-wide daily ceiling.
+// Rejected submissions (validation errors) don't count toward either.
+const contactLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    limit: 5,
+    skipFailedRequests: true,
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: { error: 'Too many messages. Please try again in an hour.' },
+})
+const contactDailyLimiter = rateLimit({
+    windowMs: 24 * 60 * 60 * 1000,
+    limit: 100,
+    keyGenerator: () => 'site-wide',
+    skipFailedRequests: true,
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: { error: 'The contact form has reached its daily limit. Please try again tomorrow.' },
+})
+const CONTACT_FIELD_LIMITS = { name: 100, email: 254, message: 5000 }
+const COULD_NOT_SEND = "Sorry, your message couldn't be sent. Please try again in a moment."
+
+router.post('/contact', contactLimiter, contactDailyLimiter, async (req, res) => {
     try {
-        const { name, email, message } = req.body;
-        
-        // Validate inputs
-        if (!name || !email || !message) {
-            return res.status(400).json({ error: 'Missing required fields' });
+        const { name, email, message, website } = req.body || {}
+
+        // Honeypot: people never see the website field, so anything in it came from a bot.
+        // Reply as if it worked so the bot doesn't learn to skip it.
+        if (website) {
+            return res.status(200).json({ success: true })
         }
-        
-        // Simple email validation
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            return res.status(400).json({ error: 'Invalid email address' });
+
+        const fields = { name, email, message }
+        for (const [field, value] of Object.entries(fields)) {
+            if (typeof value !== 'string' || !value.trim()) {
+                return res.status(400).json({ error: 'Please fill in your name, email and message.' })
+            }
+            if (value.trim().length > CONTACT_FIELD_LIMITS[field]) {
+                return res.status(400).json({
+                    error: `Your ${field} is too long (the limit is ${CONTACT_FIELD_LIMITS[field]} characters).`,
+                })
+            }
         }
-        
-        // Add the message
-        const result = contactHandler.addMessage(name, email, message);
-        
-        if (!result) {
-            return res.status(500).json({ error: 'Failed to save message' });
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+            return res.status(400).json({ error: 'Please enter a valid email address.' })
         }
-        
-        // Return success
-        res.status(200).json({ 
-            success: true, 
-            message: 'Contact message saved successfully' 
-        });
+
+        await contactHandler.addMessage(name.trim(), email.trim(), message.trim())
+        res.status(200).json({ success: true })
     } catch (error) {
-        console.error('Contact submission error:', error);
-        res.status(500).json({ 
-            error: 'Server error processing contact submission',
-            message: error.message
-        });
+        console.error('Contact submission error:', error)
+        res.status(500).json({ error: COULD_NOT_SEND })
     }
+})
+
+// ─── Admin (contact inbox) ─────────────────────────────────────────────────
+// Password login sets a signed, HttpOnly session cookie scoped to /api/admin.
+// Secrets never go in URLs, logs, or responses.
+
+// Counts failed logins only: 5 per 15 minutes per IP
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 5,
+    skipSuccessfulRequests: true,
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: { error: 'Too many login attempts. Try again in 15 minutes.' },
 });
 
-// Admin routes for managing contact messages
-router.get('/admin/messages', (req, res) => {
+router.post('/admin/login', loginLimiter, (req, res) => {
+    if (!adminAuth.isConfigured()) {
+        return res.status(503).json({ error: 'Admin login is not configured' });
+    }
+    const { password } = req.body || {};
+    if (!adminAuth.verifyPassword(password)) {
+        return res.status(401).json({ error: 'Wrong password' });
+    }
+    adminAuth.setSessionCookie(res);
+    res.status(200).json({ authenticated: true });
+});
+
+router.post('/admin/logout', (req, res) => {
+    adminAuth.clearSessionCookie(res);
+    res.status(200).json({ authenticated: false });
+});
+
+router.get('/admin/session', (req, res) => {
+    res.status(200).json({ authenticated: adminAuth.isAuthenticated(req) });
+});
+
+// Everything below needs a signed-in admin
+router.get('/admin/messages', adminAuth.requireAdmin, async (req, res) => {
     try {
-        const { token } = req.query;
-        
-        // Verify admin token
-        if (!contactHandler.verifyAdminToken(token)) {
-            return res.status(401).json({ error: 'Unauthorized' });
-        }
-        
-        // Get all messages
-        const messages = contactHandler.getMessages();
-        
-        // Return messages
-        res.status(200).json({ messages });
+        res.status(200).json({ messages: await contactHandler.getMessages() });
     } catch (error) {
         console.error('Admin messages error:', error);
-        res.status(500).json({ 
-            error: 'Server error fetching messages',
-            message: error.message
-        });
+        res.status(500).json({ error: 'Server error fetching messages' });
     }
 });
 
-// Mark message as read
-router.put('/admin/messages/:id', (req, res) => {
+router.put('/admin/messages/:id', adminAuth.requireAdmin, async (req, res) => {
     try {
-        const { id } = req.params;
-        const { token, read } = req.body;
-        
-        // Verify admin token
-        if (!contactHandler.verifyAdminToken(token)) {
-            return res.status(401).json({ error: 'Unauthorized' });
-        }
-        
-        // Mark message as read/unread
-        const success = contactHandler.markMessageRead(id, read !== false);
-        
+        const { read } = req.body || {};
+        const success = await contactHandler.markMessageRead(req.params.id, read !== false);
         if (!success) {
             return res.status(404).json({ error: 'Message not found' });
         }
-        
-        // Return success
-        res.status(200).json({ 
-            success: true, 
-            message: 'Message updated successfully' 
-        });
+        res.status(200).json({ success: true });
     } catch (error) {
         console.error('Update message error:', error);
-        res.status(500).json({ 
-            error: 'Server error updating message',
-            message: error.message
-        });
+        res.status(500).json({ error: 'Server error updating message' });
     }
 });
 
-// Delete message
-router.delete('/admin/messages/:id', (req, res) => {
+router.delete('/admin/messages/:id', adminAuth.requireAdmin, async (req, res) => {
     try {
-        const { id } = req.params;
-        const { token } = req.query;
-        
-        // Verify admin token
-        if (!contactHandler.verifyAdminToken(token)) {
-            return res.status(401).json({ error: 'Unauthorized' });
-        }
-        
-        // Delete message
-        const success = contactHandler.deleteMessage(id);
-        
+        const success = await contactHandler.deleteMessage(req.params.id);
         if (!success) {
             return res.status(404).json({ error: 'Message not found' });
         }
-        
-        // Return success
-        res.status(200).json({ 
-            success: true, 
-            message: 'Message deleted successfully' 
-        });
+        res.status(200).json({ success: true });
     } catch (error) {
         console.error('Delete message error:', error);
-        res.status(500).json({ 
-            error: 'Server error deleting message',
-            message: error.message
-        });
-    }
-});
-
-// Admin token generation (development only)
-router.get('/admin/generate-token', (req, res) => {
-    // Only allow in development mode
-    if (process.env.NODE_ENV === 'production') {
-        return res.status(404).json({ error: 'Endpoint not available in production' });
-    }
-    
-    const token = contactHandler.generateAdminToken();
-    
-    res.status(200).json({ 
-        message: 'Store this token securely and add it to your environment variables as ADMIN_ACCESS_TOKEN',
-        token
-    });
-});
-
-// Repository management endpoints
-router.post('/admin/repositories/update', async (req, res) => {
-    try {
-        const { token } = req.body;
-        
-        // Verify admin token
-        if (!contactHandler.verifyAdminToken(token)) {
-            return res.status(401).json({ error: 'Unauthorized' });
-        }
-        
-        console.log('Manually triggering repository update...');
-        
-        // Start the update process
-        updateAllRepositories()
-            .then(results => {
-                console.log('Repository update job completed.');
-            })
-            .catch(error => {
-                console.error('Error in repository update:', error);
-            });
-        
-        // Return immediate success since this is a long-running operation
-        res.status(200).json({ 
-            success: true, 
-            message: 'Repository update job started. Check server logs for progress.'
-        });
-    } catch (error) {
-        console.error('Repository update error:', error);
-        res.status(500).json({ 
-            error: 'Server error updating repositories',
-            message: error.message
-        });
-    }
-});
-
-// Process a specific repository
-router.post('/admin/repositories/process', async (req, res) => {
-    try {
-        const { token, repositoryUrl } = req.body;
-        
-        // Validate input
-        if (!repositoryUrl) {
-            return res.status(400).json({ error: 'Missing repository URL' });
-        }
-        
-        // Verify admin token
-        if (!contactHandler.verifyAdminToken(token)) {
-            return res.status(401).json({ error: 'Unauthorized' });
-        }
-        
-        console.log(`Manually processing repository: ${repositoryUrl}`);
-        
-        // Process the specified repository
-        processRepository(repositoryUrl)
-            .then(result => {
-                console.log(`Repository processing completed: ${result.success ? 'Success' : 'Failed'}`);
-            })
-            .catch(error => {
-                console.error(`Error processing repository ${repositoryUrl}:`, error);
-            });
-        
-        // Return immediate success since this is a long-running operation
-        res.status(200).json({ 
-            success: true, 
-            message: `Processing of repository ${repositoryUrl} started. Check server logs for progress.`
-        });
-    } catch (error) {
-        console.error('Repository processing error:', error);
-        res.status(500).json({ 
-            error: 'Server error processing repository',
-            message: error.message
-        });
+        res.status(500).json({ error: 'Server error deleting message' });
     }
 });
 
@@ -230,53 +159,5 @@ const healthRoutes = require('./routes/health');
 
 // Mount health check routes
 router.use('/health', healthRoutes);
-
-// Legacy health check endpoint (simple version, kept for backward compatibility)
-router.get('/health/legacy', (req, res) => {
-    try {
-        // Collect basic system info
-        const uptime = process.uptime()
-        const memoryUsage = process.memoryUsage()
-        const nodeVersion = process.version
-        const hostname = os.hostname()
-        const platform = os.platform()
-
-        // Collected deployment-specific info
-        const deploymentInfo = {
-            environment: process.env.NODE_ENV || 'development',
-            inDocker: process.env.DOCKER_CONTAINER === 'true',
-            port: process.env.PORT || '3000',
-            apiDirectory: path.resolve(__dirname),
-            serverUptime: `${Math.floor(uptime / 60)}m ${Math.floor(uptime % 60)}s`,
-            startTime: new Date(Date.now() - uptime * 1000).toISOString(),
-            currentTime: new Date().toISOString()
-        }
-
-        // Response with comprehensive diagnostic information
-        res.json({
-            status: 'online',
-            system: {
-                hostname,
-                platform,
-                nodeVersion,
-                memoryMB: {
-                    rss: Math.round(memoryUsage.rss / 1024 / 1024),
-                    heapTotal: Math.round(memoryUsage.heapTotal / 1024 / 1024),
-                    heapUsed: Math.round(memoryUsage.heapUsed / 1024 / 1024),
-                    external: Math.round(memoryUsage.external / 1024 / 1024)
-                },
-                cpus: os.cpus().length
-            },
-            deployment: deploymentInfo
-        })
-    } catch (error) {
-        // Return error information if anything fails
-        res.status(500).json({
-            status: 'error',
-            message: 'Error retrieving health information',
-            error: error.message
-        })
-    }
-})
 
 module.exports = router

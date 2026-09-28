@@ -1,31 +1,35 @@
 import React, { useRef, useEffect } from 'react'
 import useViewport from '../../hooks/useViewport'
 import { brandGreen, brandBlue } from '../../styles/colors'
-// Temporarily removing Three.js dependency to fix build error
-// import * as THREE from 'three'
 
 // Placeholder static canvas with simple dots (temporary solution)
 const PlaceholderCanvas = ({ scrollPosition }) => {
   const canvasRef = useRef(null);
-  
+  // Latest scroll position for the drawing loop, so scrolling never restarts it
+  const scrollRef = useRef(scrollPosition);
+
+  useEffect(() => {
+    scrollRef.current = scrollPosition;
+  }, [scrollPosition]);
+
+  // One animation loop per mount. Before, every scroll started a new loop that
+  // was never cancelled, so the page got slower the longer you scrolled.
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    
+
     const ctx = canvas.getContext('2d');
     const width = canvas.width;
     const height = canvas.height;
-    
-    // Clear canvas
-    ctx.clearRect(0, 0, width, height);
-    
-    // Set up the animation
-    const animateDots = () => {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let frameId = null;
+
+    const drawDots = () => {
       ctx.clearRect(0, 0, width, height);
-      
+
       // Calculate scroll factor (0 to 1)
-      const scrollFactor = Math.min(scrollPosition / 500, 1);
-      
+      const scrollFactor = Math.min(scrollRef.current / 500, 1);
+
       // Draw 30 dots with random positions
       for (let i = 0; i < 30; i++) {
         const x = Math.random() * width;
@@ -56,18 +60,26 @@ const PlaceholderCanvas = ({ scrollPosition }) => {
           ctx.stroke();
         }
       }
-      
-      requestAnimationFrame(animateDots);
     };
-    
-    const animation = requestAnimationFrame(animateDots);
-    
-    // Cleanup
+
+    const animate = () => {
+      drawDots();
+      frameId = requestAnimationFrame(animate);
+    };
+
+    if (reduceMotion) {
+      drawDots(); // a single still frame for people who prefer less motion
+    } else {
+      frameId = requestAnimationFrame(animate);
+    }
+
     return () => {
-      cancelAnimationFrame(animation);
+      if (frameId !== null) {
+        cancelAnimationFrame(frameId);
+      }
     };
-  }, [scrollPosition]);
-  
+  }, []);
+
   return (
     <canvas
       ref={canvasRef}

@@ -10,7 +10,6 @@ const config = require('../../config');
 
 // Global client instance (singleton)
 let openAiClient = null;
-let openAiInitError = null;
 
 /**
  * Initialize the OpenAI client if not already initialized
@@ -27,7 +26,6 @@ function initializeClient(apiKey = null) {
   if (!key) {
     const error = 'OpenAI API key is missing';
     console.error(error);
-    openAiInitError = error;
     return { client: null, error };
   }
   
@@ -37,7 +35,6 @@ function initializeClient(apiKey = null) {
     return { client: openAiClient, error: null };
   } catch (error) {
     console.error(`Failed to initialize OpenAI client: ${error.message}`);
-    openAiInitError = error.message;
     return { client: null, error: error.message };
   }
 }
@@ -113,35 +110,7 @@ async function getChatCompletion(params) {
   }
 }
 
-/**
- * Check if a model name is allowed
- * @param {string} model - Model name
- * @returns {boolean} - Whether the model is allowed
- */
-function isValidModel(model) {
-  return config.allowedModels.includes(model);
-}
-
-/**
- * Create system prompt based on repository context
- * @param {boolean} usingRepoContext - Whether repository context is available
- * @returns {string} - System prompt
- */
-function createSystemPrompt(usingRepoContext) {
-  if (usingRepoContext) {
-    return "You are a helpful assistant answering questions for Drew Clark's portfolio website visitors. You have been provided with relevant code snippets from the repository to help answer questions about the code. Refer to these code snippets when answering questions about how the code works. Keep responses concise, informative, and friendly.";
-  }
-  
-  return "You are a helpful assistant answering questions for Drew Clark's portfolio website visitors. Keep responses concise, informative, and friendly.";
-}
-
 // Initialize the client automatically on module import (non-blocking)
 initializeClient();
 
-module.exports = {
-  initializeClient,
-  getChatCompletion,
-  isValidModel,
-  createSystemPrompt,
-  getInitError: () => openAiInitError
-};
+module.exports = { getChatCompletion };

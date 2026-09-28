@@ -3,9 +3,7 @@ FROM node:20-alpine AS builder
 
 # Accept build arguments for environment variables
 ARG VITE_API_URL="/api/askGPT"
-ARG OPENAI_API_KEY
 ENV VITE_API_URL=${VITE_API_URL}
-ENV OPENAI_API_KEY=${OPENAI_API_KEY}
 
 # system tools only needed at build time
 RUN apk add --no-cache git openssh python3 make g++
@@ -13,22 +11,10 @@ RUN apk add --no-cache git openssh python3 make g++
 WORKDIR /app
 
 # copy manifests
-COPY package*.json ./
-COPY api/package*.json api/
 COPY app/package*.json app/
 
-# Copy scripts first so postinstall can find them
-COPY scripts/ scripts/
-
-# patch Windows permissions script before running npm install
-RUN sed -i 's/const { spawn } = require(.child_process.);/const { spawn } = require("child_process");\
-\n\/\/ Skip PowerShell in Docker\nfunction setWindowsPermissions() { return Promise.resolve(true); }/' \
-  scripts/permissions.js
-
-# install root + api + app deps (incl. devDeps)
-RUN npm install --legacy-peer-deps \
-  && cd api && npm install --legacy-peer-deps \
-  && cd ../app && npm install --legacy-peer-deps
+# install the frontend's deps (incl. devDeps) to build it
+RUN cd app && npm install --legacy-peer-deps
 
 # copy source & build frontend
 COPY . .
@@ -39,32 +25,25 @@ RUN echo "Building with VITE_API_URL=${VITE_API_URL:-/api/askGPT}" && \
 # ─── Stage 2: Create minimal prod image ───────────────────────────
 FROM node:20-alpine AS runner
 LABEL maintainer="drew@drewclark.io"
+ENV NODE_ENV=production
 
-# Pass OpenAI API key to runtime stage
-ARG OPENAI_API_KEY
-ENV OPENAI_API_KEY=${OPENAI_API_KEY}
-
-# Install Git
-RUN apk add --no-cache git
+# Secrets like OPENAI_API_KEY are injected at runtime (Container Apps secret, docker run -e). Never ARG/ENV them.
 
 WORKDIR /app
 
-# Copy scripts first so postinstall can find them
-COPY --from=builder /app/scripts      scripts
-
 # install runtime deps
 COPY package*.json ./
-COPY api/package*.json api/
-RUN npm install --production --legacy-peer-deps && \
-    npm install uuid --legacy-peer-deps
+RUN npm install --omit=dev --legacy-peer-deps
 
 # bring in built frontend & server code
 COPY --from=builder /app/app/dist     app/dist
 COPY --from=builder /app/api          api
 COPY --from=builder /app/server.js    server.js
+COPY --from=builder /app/app/src/data/projects.json app/src/data/projects.json
 
-# create runtime dirs
-RUN mkdir -p data/embeddings data/repositories data/contact
+# the contact form's fallback file lives in data/; then drop root
+RUN mkdir -p data/contact && chown -R node:node data
+USER node
 
 EXPOSE 3000
 CMD ["node", "server.js"]

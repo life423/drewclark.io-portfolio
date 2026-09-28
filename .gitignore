@@ -2,9 +2,8 @@
 node_modules/
 npm-debug.log
 yarn-error.log
-# Exclude package-lock.json but allow it in the api directory
+# Lockfiles aren't committed
 package-lock.json
-!api/package-lock.json
 
 # Logs
 logs
@@ -24,8 +23,8 @@ local.settings.json
 dist/
 build/
 
-# Contact form submissions
-data/contact/
+# Local data (the contact form's fallback file)
+data/
 
 # Sensitive documentation
 CONTACT-SYSTEM.md

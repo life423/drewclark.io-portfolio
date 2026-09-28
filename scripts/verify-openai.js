@@ -23,8 +23,6 @@ async function verifyOpenAI() {
         console.log(`✅ API Key Format: ${config.openAiApiKey.startsWith('sk-') ? 'Valid (starts with sk-)' : 'Invalid'}`)
     }
     
-    console.log(`✅ Vector DB URL: ${config.vectorDb.url}`)
-    console.log(`✅ Repository Scheduler: ${process.env.ENABLE_REPOSITORY_SCHEDULER === 'true' ? 'Enabled' : 'Disabled'}`)
     
     if (!config.openAiApiKey) {
         console.log('\n❌ OpenAI API key is missing!')

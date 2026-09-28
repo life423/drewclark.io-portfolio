@@ -1,117 +1,114 @@
 /**
- * Contact form submission handler
- * 
- * Handles storing and retrieving contact form submissions
+ * Contact form storage
+ *
+ * Uses MongoDB when MONGODB_URI is set. Otherwise falls back to a local JSON
+ * file, which is fine for development but is wiped whenever a container restarts.
  */
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const { getDb } = require('./db');
 
-// Path to contact messages
+const DB_NAME = process.env.MONGODB_DB || 'portfolio';
+const COLLECTION = 'messages';
+const useMongo = Boolean(process.env.MONGODB_URI);
+
+console.log(
+    useMongo
+        ? `Contact messages: MongoDB (${DB_NAME}.${COLLECTION})`
+        : 'Contact messages: local file data/contact/messages.json (set MONGODB_URI to use MongoDB)'
+);
+
+// ─── MongoDB ────────────────────────────────────────────────────────────────
+// Uses the shared connection in db.js
+async function getCollection() {
+    const db = await getDb();
+    return db.collection(COLLECTION);
+}
+
+// Documents use the message id as _id; the API exposes it as `id`
+function fromDoc({ _id, ...rest }) {
+    return { id: _id, ...rest };
+}
+
+// ─── Local file (development fallback) ─────────────────────────────────────
 const CONTACT_DIR = path.join(__dirname, '..', 'data', 'contact');
 const MESSAGES_FILE = path.join(CONTACT_DIR, 'messages.json');
 
-// Ensure the contact directory exists
-function ensureContactDir() {
-    if (!fs.existsSync(CONTACT_DIR)) {
-        fs.mkdirSync(CONTACT_DIR, { recursive: true });
-    }
-}
-
-// Get all messages
-function getMessages() {
-    ensureContactDir();
-    
-    if (!fs.existsSync(MESSAGES_FILE)) {
-        return [];
-    }
-    
+function readFile() {
     try {
-        const data = fs.readFileSync(MESSAGES_FILE, 'utf8');
-        return JSON.parse(data);
-    } catch (error) {
-        console.error('Error reading messages file:', error);
+        return JSON.parse(fs.readFileSync(MESSAGES_FILE, 'utf8'));
+    } catch {
         return [];
     }
 }
 
-// Save all messages
-function saveMessages(messages) {
-    ensureContactDir();
-    
-    try {
-        fs.writeFileSync(MESSAGES_FILE, JSON.stringify(messages, null, 2), 'utf8');
-        return true;
-    } catch (error) {
-        console.error('Error saving messages file:', error);
-        return false;
-    }
+function writeFile(messages) {
+    fs.mkdirSync(CONTACT_DIR, { recursive: true });
+    fs.writeFileSync(MESSAGES_FILE, JSON.stringify(messages, null, 2), 'utf8');
 }
 
-// Add a new message
-function addMessage(name, email, message) {
-    const messages = getMessages();
-    
-    const newMessage = {
-        id: crypto.randomBytes(8).toString('hex'),
+// ─── Public API ─────────────────────────────────────────────────────────────
+
+// Newest first
+async function getMessages() {
+    if (useMongo) {
+        const collection = await getCollection();
+        const docs = await collection.find().sort({ timestamp: -1 }).toArray();
+        return docs.map(fromDoc);
+    }
+    return readFile().sort((a, b) => String(b.timestamp).localeCompare(String(a.timestamp)));
+}
+
+async function addMessage(name, email, message) {
+    const doc = {
+        _id: crypto.randomBytes(8).toString('hex'),
         name,
         email,
         message,
-        timestamp: new Date().toISOString(),
-        read: false
+        timestamp: new Date(),
+        read: false,
     };
-    
-    messages.push(newMessage);
-    return saveMessages(messages) ? newMessage : null;
+    if (useMongo) {
+        const collection = await getCollection();
+        await collection.insertOne(doc);
+    } else {
+        const messages = readFile();
+        messages.push({ ...fromDoc(doc), timestamp: doc.timestamp.toISOString() });
+        writeFile(messages);
+    }
+    return fromDoc(doc);
 }
 
-// Mark a message as read
-function markMessageRead(id, isRead = true) {
-    const messages = getMessages();
-    const messageIndex = messages.findIndex(msg => msg.id === id);
-    
-    if (messageIndex === -1) {
+async function markMessageRead(id, isRead = true) {
+    if (useMongo) {
+        const collection = await getCollection();
+        const result = await collection.updateOne({ _id: String(id) }, { $set: { read: Boolean(isRead) } });
+        return result.matchedCount === 1;
+    }
+    const messages = readFile();
+    const target = messages.find(msg => msg.id === id);
+    if (!target) {
         return false;
     }
-    
-    messages[messageIndex].read = isRead;
-    return saveMessages(messages);
+    target.read = Boolean(isRead);
+    writeFile(messages);
+    return true;
 }
 
-// Delete a message
-function deleteMessage(id) {
-    const messages = getMessages();
-    const filteredMessages = messages.filter(msg => msg.id !== id);
-    
-    if (filteredMessages.length === messages.length) {
-        return false; // No message was removed
+async function deleteMessage(id) {
+    if (useMongo) {
+        const collection = await getCollection();
+        const result = await collection.deleteOne({ _id: String(id) });
+        return result.deletedCount === 1;
     }
-    
-    return saveMessages(filteredMessages);
-}
-
-// Generate a secure admin token
-function generateAdminToken() {
-    return crypto.randomBytes(32).toString('hex');
-}
-
-// Verify admin token
-function verifyAdminToken(token) {
-    const ADMIN_TOKEN = process.env.ADMIN_ACCESS_TOKEN;
-    
-    console.log('Verifying admin token...');
-    console.log('Provided token:', token);
-    console.log('Expected token from env:', ADMIN_TOKEN);
-    console.log('Token length:', token?.length, 'Expected length:', ADMIN_TOKEN?.length);
-    console.log('Do they match?', token === ADMIN_TOKEN);
-    
-    if (!ADMIN_TOKEN) {
-        console.warn('Warning: ADMIN_ACCESS_TOKEN not set in environment variables');
+    const messages = readFile();
+    const remaining = messages.filter(msg => msg.id !== id);
+    if (remaining.length === messages.length) {
         return false;
     }
-    
-    // Compare trimmed values to handle any whitespace issues
-    return token.trim() === ADMIN_TOKEN.trim();
+    writeFile(remaining);
+    return true;
 }
 
 module.exports = {
@@ -119,6 +116,4 @@ module.exports = {
     addMessage,
     markMessageRead,
     deleteMessage,
-    generateAdminToken,
-    verifyAdminToken
 };

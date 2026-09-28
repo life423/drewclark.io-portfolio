@@ -3,7 +3,8 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import logger from './utils/logger';
-import ContactMessagesAdmin from './components/admin/ContactMessagesAdmin';
+// Admin inbox lives in its own chunk, so regular visitors never download it
+const ContactMessagesAdmin = React.lazy(() => import('./components/admin/ContactMessagesAdmin'));
 
 // Create a module-specific logger
 const log = logger.getLogger('Main');
@@ -92,10 +93,12 @@ function Root() {
   const path = window.location.pathname;
   
   // Check if we're on the admin messages page
-  if (path === '/admin-messages') {
+  if (path === '/admin-messages' || path === '/admin') {
     return (
       <>
-        <ContactMessagesAdmin />
+        <React.Suspense fallback={null}>
+          <ContactMessagesAdmin />
+        </React.Suspense>
         <OfflineNotification />
       </>
     );

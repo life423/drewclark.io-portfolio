@@ -1,118 +1,136 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import clsx from 'clsx';
 
 /**
- * Admin interface for viewing contact form submissions
- * 
- * Accessible only with a valid admin token
- * URL format: /admin-messages?token=YOUR_SECRET_TOKEN
+ * Admin inbox for contact form submissions.
+ *
+ * Sign in with ADMIN_PASSWORD. The server sets an HttpOnly session cookie,
+ * so nothing secret lives in the URL, in storage, or in this component.
  */
 export default function ContactMessagesAdmin() {
+    // 'checking' until we know whether a session exists, then 'signedOut' or 'signedIn'
+    const [authState, setAuthState] = useState('checking');
+    const [password, setPassword] = useState('');
+    const [loginError, setLoginError] = useState(null);
+    const [isSigningIn, setIsSigningIn] = useState(false);
+
     const [messages, setMessages] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [token, setToken] = useState('');
-    const [tokenValid, setTokenValid] = useState(false);
     const [selectedMessage, setSelectedMessage] = useState(null);
-    
-    // Get token from URL query parameters
-    useEffect(() => {
-        const searchParams = new URLSearchParams(window.location.search);
-        const urlToken = searchParams.get('token');
-        
-        if (urlToken) {
-            setToken(urlToken);
-            loadMessages(urlToken);
-        }
+
+    // Any 401 means the session is gone (expired, or signed out elsewhere)
+    const handleUnauthorized = useCallback(() => {
+        setAuthState('signedOut');
+        setMessages([]);
+        setSelectedMessage(null);
     }, []);
-    
-    // Load messages using token
-    const loadMessages = async (accessToken) => {
+
+    const loadMessages = useCallback(async () => {
         setIsLoading(true);
         setError(null);
-        
         try {
-            console.log('Fetching messages with token:', accessToken);
-            
-            // First try direct API call to check token validity
-            const testResponse = await fetch(`/api/admin/generate-token`);
-            console.log('Token generation response:', await testResponse.json());
-            
-            const apiUrl = `/api/admin/messages?token=${accessToken}`;
-            console.log('API URL:', apiUrl);
-            
-            const response = await fetch(apiUrl);
-            console.log('Response status:', response.status);
-            
+            const response = await fetch('/api/admin/messages');
+            if (response.status === 401) {
+                handleUnauthorized();
+                return;
+            }
             const data = await response.json();
-            console.log('Response data:', data);
-            
             if (!response.ok) {
                 throw new Error(data.error || 'Failed to load messages');
             }
-            
             setMessages(data.messages || []);
-            setTokenValid(true);
-        } catch (error) {
-            console.error('Error loading messages:', error);
-            setError(error.message);
-            setTokenValid(false);
+        } catch (err) {
+            setError(err.message);
         } finally {
             setIsLoading(false);
         }
+    }, [handleUnauthorized]);
+
+    // On first load, reuse an existing session if there is one
+    useEffect(() => {
+        fetch('/api/admin/session')
+            .then(res => res.json())
+            .then(data => {
+                if (data.authenticated) {
+                    setAuthState('signedIn');
+                    loadMessages();
+                } else {
+                    setAuthState('signedOut');
+                }
+            })
+            .catch(() => setAuthState('signedOut'));
+    }, [loadMessages]);
+
+    const signIn = async (event) => {
+        event.preventDefault();
+        setIsSigningIn(true);
+        setLoginError(null);
+        try {
+            const response = await fetch('/api/admin/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password }),
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                throw new Error(data.error || 'Sign-in failed');
+            }
+            setPassword('');
+            setAuthState('signedIn');
+            loadMessages();
+        } catch (err) {
+            setLoginError(err.message);
+        } finally {
+            setIsSigningIn(false);
+        }
     };
-    
+
+    const signOut = async () => {
+        await fetch('/api/admin/logout', { method: 'POST' }).catch(() => {});
+        handleUnauthorized();
+    };
+
     // Mark a message as read/unread
     const toggleMessageRead = async (id, read) => {
         try {
-            const response = await fetch(`/api/admin/messages/${id}`, {
+            const response = await fetch(`/api/admin/messages/${encodeURIComponent(id)}`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    token,
-                    read
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ read }),
             });
-            
+            if (response.status === 401) {
+                handleUnauthorized();
+                return;
+            }
             if (!response.ok) {
                 throw new Error('Failed to update message');
             }
-            
-            // Update local state
-            setMessages(messages.map(msg => 
-                msg.id === id ? { ...msg, read } : msg
-            ));
-        } catch (error) {
-            console.error('Error updating message:', error);
-            alert(`Error: ${error.message}`);
+            setMessages(prev => prev.map(msg => (msg.id === id ? { ...msg, read } : msg)));
+            setSelectedMessage(prev => (prev?.id === id ? { ...prev, read } : prev));
+        } catch (err) {
+            setError(err.message);
         }
     };
-    
+
     // Delete a message
     const deleteMessage = async (id) => {
-        if (!confirm('Are you sure you want to delete this message?')) {
+        if (!window.confirm('Delete this message? This cannot be undone.')) {
             return;
         }
-        
         try {
-            const response = await fetch(`/api/admin/messages/${id}?token=${token}`, {
-                method: 'DELETE'
-            });
-            
+            const response = await fetch(`/api/admin/messages/${encodeURIComponent(id)}`, { method: 'DELETE' });
+            if (response.status === 401) {
+                handleUnauthorized();
+                return;
+            }
             if (!response.ok) {
                 throw new Error('Failed to delete message');
             }
-            
-            // Update local state
-            setMessages(messages.filter(msg => msg.id !== id));
-            if (selectedMessage?.id === id) {
-                setSelectedMessage(null);
-            }
-        } catch (error) {
-            console.error('Error deleting message:', error);
-            alert(`Error: ${error.message}`);
+            setMessages(prev => prev.filter(msg => msg.id !== id));
+            setSelectedMessage(prev => (prev?.id === id ? null : prev));
+        } catch (err) {
+            setError(err.message);
         }
     };
     
@@ -128,40 +146,48 @@ export default function ContactMessagesAdmin() {
         }).format(date);
     };
     
-    // If no token provided
-    if (!token) {
+    if (authState === 'checking') {
         return (
             <div className="container mx-auto px-4 py-8">
-                <div className="bg-brandGray-800 p-6 rounded-lg shadow-lg border border-brandGray-700">
-                    <h1 className="text-2xl font-bold text-brandGreen-400 mb-6">Admin Access Required</h1>
-                    <p className="text-white mb-4">You need an admin token to access this page.</p>
-                    <p className="text-brandGray-400 text-sm">
-                        Add <code className="bg-brandGray-700 px-1 py-0.5 rounded">?token=YOUR_TOKEN</code> to the URL.
-                    </p>
+                <div className="flex justify-center py-12">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brandGreen-500"></div>
                 </div>
             </div>
         );
     }
-    
-    // If token is invalid
-    if (!isLoading && !tokenValid) {
+
+    if (authState === 'signedOut') {
         return (
             <div className="container mx-auto px-4 py-8">
-                <div className="bg-brandGray-800 p-6 rounded-lg shadow-lg border border-brandGray-700">
-                    <h1 className="text-2xl font-bold text-brandOrange-400 mb-6">Access Denied</h1>
-                    <p className="text-white mb-4">The provided admin token is invalid.</p>
-                    <p className="text-brandGray-400 text-sm">{error}</p>
-                    <div className="mt-4 p-4 bg-brandGray-900 rounded text-xs text-brandGray-400 font-mono whitespace-pre-wrap overflow-auto">
-                        <p>Debug Information:</p>
-                        <p>Token length: {token?.length || 0}</p>
-                        <p>Token: {token}</p>
-                        <button 
-                            className="mt-4 px-3 py-1 bg-brandGray-700 text-brandGreen-400 rounded"
-                            onClick={() => loadMessages(token)}
+                <div className="max-w-md mx-auto bg-brandGray-800 p-6 rounded-lg shadow-lg border border-brandGray-700">
+                    <h1 className="text-2xl font-bold text-brandGreen-400 mb-6">Admin sign in</h1>
+                    <form onSubmit={signIn} className="space-y-4">
+                        <div>
+                            <label htmlFor="admin-password" className="block text-sm text-brandGray-300 mb-1">
+                                Password
+                            </label>
+                            <input
+                                id="admin-password"
+                                type="password"
+                                autoComplete="current-password"
+                                autoFocus
+                                required
+                                value={password}
+                                onChange={e => setPassword(e.target.value)}
+                                className="w-full px-3 py-2 rounded bg-brandGray-900 border border-brandGray-600 text-white focus:outline-none focus:ring-2 focus:ring-brandGreen-500/50 focus:border-brandGreen-500"
+                            />
+                        </div>
+                        {loginError && (
+                            <p role="alert" className="text-sm text-brandOrange-400">{loginError}</p>
+                        )}
+                        <button
+                            type="submit"
+                            disabled={isSigningIn || password.length === 0}
+                            className="w-full py-2 px-4 rounded bg-brandGreen-500 hover:bg-brandGreen-600 text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Retry Token Validation
+                            {isSigningIn ? 'Signing in…' : 'Sign in'}
                         </button>
-                    </div>
+                    </form>
                 </div>
             </div>
         );
@@ -170,7 +196,13 @@ export default function ContactMessagesAdmin() {
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="bg-brandGray-800 p-6 rounded-lg shadow-lg border border-brandGray-700">
-                <h1 className="text-2xl font-bold text-brandGreen-400 mb-6">Contact Messages</h1>
+                <div className="flex items-center justify-between mb-6">
+                    <h1 className="text-2xl font-bold text-brandGreen-400">Contact Messages</h1>
+                    <button onClick={signOut} className="text-sm text-brandGray-400 hover:text-white transition-colors">
+                        Sign out
+                    </button>
+                </div>
+                {error && <p role="alert" className="mb-4 text-sm text-brandOrange-400">{error}</p>}
                 
                 {isLoading ? (
                     <div className="flex justify-center py-12">
@@ -190,7 +222,7 @@ export default function ContactMessagesAdmin() {
                                     <h2 className="font-medium text-white">Messages ({messages.length})</h2>
                                     <button 
                                         className="text-xs text-brandGreen-400 hover:text-brandGreen-300"
-                                        onClick={() => loadMessages(token)}
+                                        onClick={loadMessages}
                                     >
                                         Refresh
                                     </button>
