@@ -34,10 +34,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
 
+      # package-lock.json isn't committed, so this is npm install rather than npm ci
       - name: Install dependencies
-        run: npm ci --omit=dev --ignore-scripts
+        run: npm install --omit=dev --ignore-scripts --no-audit --no-fund
 
       - name: Index new commits
         env:
