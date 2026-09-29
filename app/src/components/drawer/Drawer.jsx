@@ -6,6 +6,7 @@
 import React, { useEffect, useRef, useCallback, memo, useState } from 'react'
 import { LuX, LuMail } from 'react-icons/lu'
 import clsx from 'clsx'
+import { createPortal } from 'react-dom'
 import useLockBodyScroll from '../../hooks/useLockBodyScroll'
 import EmailContactModal from './EmailContactModal'
 
@@ -250,15 +251,18 @@ const Drawer = memo(function Drawer({ isOpen, onClose }) {
                     </button>
                 </div>
                 
-                {/* Email Contact Modal */}
-                <EmailContactModal 
-                    isOpen={isContactModalOpen} 
-                    onClose={() => {
-                        setIsContactModalOpen(false);
-                        // Optional - can also close drawer when modal is closed
-                        // onClose();
-                    }} 
-                />
+                {/* Portaled to <body>: the drawer panel's transform would otherwise trap this fixed-position modal inside the drawer */}
+                {createPortal(
+                    <EmailContactModal 
+                        isOpen={isContactModalOpen} 
+                        onClose={() => {
+                            setIsContactModalOpen(false);
+                            // Optional - can also close drawer when modal is closed
+                            // onClose();
+                        }} 
+                    />,
+                    document.body
+                )}
             </div>
         </>
     )
