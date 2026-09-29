@@ -54,6 +54,9 @@
   @media (min-width: 1440px) {
     .site-rails {
       position: relative;
+      /* Own stacking context, so the rails can sit behind the content at z-index: -1.
+         (Giving every child z-index: 1 instead put <main> on top of the fixed navbar.) */
+      isolation: isolate;
     }
     .site-rails::before,
     .site-rails::after {
@@ -64,12 +67,10 @@
       width: var(--rail);
       background: var(--rail-color);
       pointer-events: none;
-      z-index: 0;
+      z-index: -1;
     }
     .site-rails::before { left: 0; }
     .site-rails::after { right: 0; }
-    /* Ensure actual content sits above the decorative rails */
-    .site-rails > * { position: relative; z-index: 1; }
   }
 
   /* Scoped container to cap width without affecting full-bleed sections */
