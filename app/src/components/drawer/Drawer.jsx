@@ -203,9 +203,11 @@ const Drawer = memo(function Drawer({ isOpen, onClose }) {
                                                 
                                                 // Wait for drawer close animation, then scroll
                                                 setTimeout(() => {
-                                                    const projectsSection = document.querySelector('#projects');
-                                                    if (projectsSection) {
-                                                        projectsSection.scrollIntoView({ behavior: 'smooth' });
+                                                    // The question goes to the chat, which sits at the bottom of the
+                                                    // projects section, so bring the chat itself into view
+                                                    const target = document.querySelector('#project-chat') || document.querySelector('#projects');
+                                                    if (target) {
+                                                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
                                                     }
                                                 }, 350); // Slightly longer than the drawer transition
                                             }}

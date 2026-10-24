@@ -60,6 +60,12 @@ function describeProject(project) {
     if (project.repo) {
         lines.push(`Repository: github.com/${project.repo}`);
     }
+    if (project.liveUrl) {
+        lines.push(`Live at: ${project.liveUrl}`);
+    }
+    if (Array.isArray(project.downloads) && project.downloads.length > 0) {
+        lines.push(`Downloads: ${project.downloads.map(file => `${file.label} ${file.url}`).join(', ')}`);
+    }
     if (Array.isArray(project.stack) && project.stack.length > 0) {
         lines.push(`Tech stack: ${project.stack.join(', ')}`);
     }

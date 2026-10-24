@@ -14,7 +14,24 @@
         "detailedDescription": "AI Platform Trainer is a complete 2D platformer with modular code architecture and AI-driven enemy behavior. The game demonstrates how even simple AI implementations can create engaging gameplay by having enemies that learn and respond to player actions, rather than following fixed patterns.",
         "technicalDetails": "Built with Python and the Pygame library, the game uses a component-based architecture to handle various game elements. Enemy AI is implemented using pathfinding algorithms and basic machine learning concepts to create adaptive behavior. The project includes collision detection, physics simulation, sprite animations, and state management systems.",
         "challenges": "The biggest challenge was creating enemy AI that felt intelligent without being frustratingly difficult. I solved this by implementing a layered approach to enemy decision-making that balances aggression with vulnerability. Another challenge was optimizing performance while maintaining visual quality, which required efficient sprite handling and collision detection algorithms.",
-        "readme": "This project showcases game development skills and basic AI implementation in a practical, playable format. The code is structured in a modular way that allows for easy expansion and modification. The MIT-licensed codebase is available on GitHub and serves as both a fun game and a learning resource for those interested in game development or AI programming fundamentals."
+        "readme": "This project showcases game development skills and basic AI implementation in a practical, playable format. The code is structured in a modular way that allows for easy expansion and modification. The MIT-licensed codebase is available on GitHub and serves as both a fun game and a learning resource for those interested in game development or AI programming fundamentals.",
+        "tagline": "A 2D platformer whose enemies are driven by AI, built in Python and Pygame.",
+        "facts": [
+            {
+                "icon": "brain",
+                "label": "AI-driven enemies"
+            },
+            {
+                "icon": "gamepad",
+                "label": "2D platformer"
+            },
+            {
+                "icon": "monitor",
+                "label": "Desktop, Python and Pygame"
+            }
+        ],
+        "image": "/projects/ai-platform-trainer.jpg?v=2",
+        "imageAlt": "A glowing green brain wired into a circuit, with orange and blue nodes, on a dark background"
     },
     {
         "id": 2,
@@ -31,23 +48,81 @@
         "detailedDescription": "This Cryptography Toolkit provides an educational platform for understanding how classical ciphers work, their vulnerabilities, and methods for breaking them. It implements Caesar cipher (with simple character shifting) and more complex Polyalphabetic substitution ciphers that use multiple substitution alphabets. The AI analyzer component can detect the cipher type and attempt to break it using statistical analysis and pattern recognition.",
         "technicalDetails": "Built with Python and PyQt for the graphical interface, the application features a modular architecture with separate components for encryption/decryption logic, file handling, and AI analysis. The cryptanalysis module uses frequency analysis, pattern matching, and machine learning techniques to identify cipher types and attempt decryption without knowing the key. The application supports both text and file-based encryption with customizable parameters.",
         "challenges": "The primary challenge was developing effective cipher-breaking algorithms that could work reliably across different languages and text lengths. I implemented a layered approach to frequency analysis that adapts to the input text characteristics. Another significant challenge was creating an intuitive interface that makes complex cryptographic concepts accessible to users without extensive background in the field.",
-        "readme": "This desktop application provides tools for encrypting/decrypting text using classical ciphers, with a built-in AI analyzer that can detect encryption methods and attempt to break simple ciphers. Features include: multiple cipher implementations, key generation tools, frequency analysis visualizations, brute-force attack simulations, and educational resources about cryptographic principles. The codebase follows object-oriented design principles with comprehensive testing and documentation."
+        "readme": "This desktop application provides tools for encrypting/decrypting text using classical ciphers, with a built-in AI analyzer that can detect encryption methods and attempt to break simple ciphers. Features include: multiple cipher implementations, key generation tools, frequency analysis visualizations, brute-force attack simulations, and educational resources about cryptographic principles. The codebase follows object-oriented design principles with comprehensive testing and documentation.",
+        "tagline": "Caesar and polyalphabetic ciphers with AI-assisted cryptanalysis.",
+        "facts": [
+            {
+                "icon": "lock",
+                "label": "Caesar and polyalphabetic ciphers"
+            },
+            {
+                "icon": "brain",
+                "label": "AI-assisted cryptanalysis"
+            },
+            {
+                "icon": "monitor",
+                "label": "Desktop, Python and PyQt"
+            }
+        ],
+        "image": "/projects/cryptography-toolkit.jpg?v=2",
+        "imageAlt": "A glowing green padlock with a combination dial on a dark circuit-board background",
+        "downloads": [
+            {
+                "platform": "macos",
+                "label": "Mac",
+                "version": "v2.0.0",
+                "url": "https://github.com/life423/polyalphabetic-and-caesar_cipher/releases/download/v2.0.0/ciphercraft-macos.zip"
+            },
+            {
+                "platform": "windows",
+                "label": "Windows",
+                "version": "v2.0.0",
+                "url": "https://github.com/life423/polyalphabetic-and-caesar_cipher/releases/download/v2.0.0/ciphercraft-windows.zip"
+            }
+        ]
     },
     {
         "id": 3,
         "title": "Ascend-Avoid",
         "repo": "life423/ascend-avoid",
-        "summary": "A responsive HTML5 Canvas game with touch controls and progressive difficulty.",
+        "liveUrl": "https://ascend.drewclark.io",
+        "liveLabel": "Play the game",
+        "summary": "A shared-arena multiplayer browser game: open the page and you're in, hopping for gems against people and bots in real time.",
         "stack": [
-            "JavaScript",
+            "TypeScript",
+            "Colyseus",
             "HTML5 Canvas",
-            "CSS3",
-            "Jest"
+            "Node.js",
+            "Vite",
+            "Playwright"
         ],
-        "initialDescription": "I created this browser-based arcade game to practice object-oriented JavaScript and canvas animation. The game features a player-controlled white block that must navigate across the screen while avoiding moving obstacles, with difficulty increasing as your score rises.",
-        "detailedDescription": "Ascend-Avoid is an HTML5 Canvas game that works across devices, offering both keyboard and touch controls. The game presents the player with a simple yet challenging objective: guide a white block to the top of the screen without colliding with blue obstacle blocks. As you progress, the game becomes increasingly difficult by spawning more obstacles at higher speeds.",
-        "technicalDetails": "Built with vanilla JavaScript using ES6+ features and classes for game objects. The animation system uses requestAnimationFrame with delta time calculations to ensure consistent gameplay regardless of device performance. Collision detection is optimized using axis-aligned bounding box (AABB) algorithms. The game includes intelligent obstacle spawning logic to prevent unfair object clustering.",
-        "challenges": "The main challenge was creating frame-rate independent animations that would run consistently across different devices. I solved this by implementing delta time-based movement instead of frame-based updates. Another significant challenge was designing responsive controls that work well on both desktop and mobile devices, which I addressed by developing keyboard input for desktop and touch/swipe detection for mobile.",
-        "readme": "This browser game demonstrates object-oriented programming principles and responsive design techniques. Features include adaptive difficulty based on player score, intelligent obstacle spawning to prevent unfair overlaps, responsive design for all screen sizes, touch controls for mobile devices, and comprehensive test coverage with Jest. The game presents a simple yet engaging challenge suitable for players of all ages."
+        "initialDescription": "Ascend-Avoid is a multiplayer browser game I built where everyone on the site plays in one big open arena. There's no lobby and no waiting: open the page and you're playing, with bots filling the arena until enough people arrive and stepping aside as they do. You hop around collecting gems, which are both your score and your size, and shove, inhale and catch the other creatures to knock their gems loose. Nobody is ever eliminated; knocked out with no gems left, you're back in about two seconds.",
+        "detailedDescription": "The arena is about three screens across and the camera follows you, widening as you grow. Everyone starts small and grows with the square root of their gems, so a big creature is heavier, pushes harder and is a bigger target, and a very big one slowly sheds gems. Hopping into someone shoves them, and a hit sprays half their gems across the floor for whoever is quickest. Bigger creatures can breathe in: an airflow beam that latches onto a smaller creature, catches it at the mouth and then either shoots it out as a projectile or gulps it and spits it back out alive. Turbines appear in open spots and blow whatever is in front of them, and drifting cores can be pulled by breath, two players at once in a tug-of-war. A minimap shows everyone and the leader's crown, and a live top-five leaderboard keeps score. The bots hop by the same rules as people: they dodge, chase gems, shove and swallow.",
+        "technicalDetails": "TypeScript end to end: a Vite-built canvas client and a Node server running Colyseus rooms over WebSockets, shipped as a Docker image on Azure Container Apps. The server is authoritative: your browser applies each hop instantly, the server applies the same hops under its own rate limit and decides every hit, and the client's types are generated from the server's schema so the two sides can't drift. Every screen sees the same amount of world, fitted to its aspect ratio within limits, so a big monitor gets no extra warning; the canvas fills whatever space the page gives it, with touch controls on phones. Bigger systems, such as traffic lanes that always leave a gap for the largest player and an arena shift that reshapes the floor from tile layouts, sit behind per-world switches so they can be tested in isolation and turned on when the balance is right. Playwright end-to-end tests, server unit tests and bot simulations back it, with type-check, lint, synced types and build on every pull request.",
+        "challenges": "The hard part is making a shared world feel instant and fair. Movement is hop-based and predicted in the browser, so you never wait on the network, while the server keeps authority over positions and hits and caps how fast hops can arrive; the two agree without visible snapping through a shared hop model and a queue of at most four pending hops. Fairness across screens came next: a 4K monitor must not see more of the arena than a phone, so the view is a fixed world area fitted to the screen within an aspect range. The arena also has to stay playable with nobody else around, which is why bots are a first-class part of the server rather than a demo, and why they give up their slots as people arrive. Tuning combat so that stealing gems is fun but never a death sentence took several passes; the current rules give each mechanic one job and let a swallowed creature come back out alive.",
+        "readme": "Play at ascend.drewclark.io; source at github.com/life423/ascend-avoid. The client lives in src/ (core, entities, managers, render, ui) and the server in server/ (rooms, schema, systems, game), with the design notes in docs/GAME_DESIGN.md. npm run dev starts client and server, npm test runs the Playwright suite, npm run gen:types regenerates the client types from the server schema, and npm run sim:bots runs bot simulations.",
+        "highlights": [
+            "No lobby: open the page and you're in a shared arena, with bots filling in until people arrive",
+            "Authoritative Colyseus server with client-side prediction; client types generated from the server schema",
+            "Every screen sees the same amount of world, so a big monitor is no advantage",
+            "Combat where nothing kills: shove, inhale, catch and spit creatures out alive"
+        ],
+        "tagline": "A shared-arena multiplayer browser game: open the page and you are in.",
+        "facts": [
+            {
+                "icon": "users",
+                "label": "Up to 30 players"
+            },
+            {
+                "icon": "radio",
+                "label": "Real time over WebSockets"
+            },
+            {
+                "icon": "smartphone",
+                "label": "Phone and desktop"
+            }
+        ],
+        "image": "/projects/ascend-avoid.jpg?v=2",
+        "imageAlt": "Ascend-Avoid mid-match: a round white creature named Drew floats among glowing gems in the starry arena"
     }
 ]

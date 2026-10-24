@@ -1,11 +1,12 @@
- import React, { useState, useEffect } from 'react'
+ import React, { useState, useEffect, useRef, useCallback } from 'react'
 import ProjectCard from './ProjectCard'
+import ProjectLinks from './ProjectLinks'
+import ProjectOverviewRow from './ProjectOverviewRow'
 import UnifiedProjectChat from './UnifiedProjectChat'
 import clsx from 'clsx'
 import PrimaryButton from '../utils/PrimaryButton'
 // Also read by the API to build the chat prompt (api/services/ai/promptBuilder.js)
 import PROJECTS from '../../data/projects.json'
-
 
 export default function ProjectsContainer() {
     const [started, setStarted] = useState(false)
@@ -13,8 +14,38 @@ export default function ProjectsContainer() {
     const [featuredProjectIndex, setFeaturedProjectIndex] = useState(0) // For magazine-style desktop layout
     const [transitionDirection, setTransitionDirection] = useState(null)
 
-    const handleStart = () => {
+    // Picking a project swaps the overview for the project view, so the card the visitor
+    // asked for should end up at the top of the screen, not wherever the page happened to be
+    const projectsTopRef = useRef(null)
+    const scrollAfterRender = useRef(false)
+
+    const scrollToProjects = useCallback(() => {
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        projectsTopRef.current?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' })
+    }, [])
+
+    // The project view only exists after the next render, so the scroll waits for it
+    useEffect(() => {
+        if (!scrollAfterRender.current) return
+        scrollAfterRender.current = false
+        scrollToProjects()
+    }, [started, activeProjectIndex, featuredProjectIndex, scrollToProjects])
+
+    const showProject = index => {
+        scrollAfterRender.current = true
         setStarted(true)
+        setActiveProjectIndex(index)
+        setFeaturedProjectIndex(index)
+    }
+
+    // Going back is the same swap in reverse: land on the overview panel, not mid-page
+    const showOverview = () => {
+        scrollAfterRender.current = true
+        setStarted(false)
+    }
+
+    const handleStart = () => {
+        showProject(activeProjectIndex)
     }
 
     const navigateToProject = index => {
@@ -46,7 +77,7 @@ export default function ProjectsContainer() {
                     }}
                 ></div>
                 <div className='max-w-3xl mx-auto'>
-                    <div className='my-4 sm:my-6 md:my-8 overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transform transition-all duration-300 hover:shadow-xl hover:border-brandGray-600 flex flex-col min-h-[500px] lg:h-[700px]'>
+                    <div ref={projectsTopRef} className='scroll-mt-20 my-4 sm:my-6 md:my-8 overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transform transition-all duration-300 hover:shadow-xl hover:border-brandGray-600 flex flex-col min-h-[500px]'>
                         {}
                         <div className='p-3 sm:p-4 md:p-5 border-b border-brandGray-700 bg-gradient-to-r from-brandGray-800 via-brandGray-800 to-brandBlue-900/10'>
                             <div className='flex items-center justify-between mb-2'>
@@ -55,9 +86,9 @@ export default function ProjectsContainer() {
                                 </span>
                             </div>
 
-                            <h1 className='text-xl sm:text-2xl font-bold text-brandGreen-300 mb-1'>
+                            <h2 className='text-xl sm:text-2xl font-bold text-brandGreen-300 mb-1'>
                                 My Portfolio Projects
-                            </h1>
+                            </h2>
                         </div>
 
                         <div className='p-3 sm:p-4 md:p-5 flex-1 flex flex-col'>
@@ -84,85 +115,14 @@ export default function ProjectsContainer() {
                                     Projects Overview
                                 </h3>
                                 
-                                {/* Show grid of cards on all screen sizes except small mobile */}
-                                <div className='hidden sm:grid sm:grid-cols-3 lg:grid-cols-1 gap-3 lg:gap-2 mb-4 lg:mb-1'>
+                                <div className="grid grid-cols-1 auto-rows-fr gap-3 lg:gap-4 mb-4">
                                     {PROJECTS.map((project, index) => (
-                                        <div 
-                                            key={index}
-                                            onClick={() => {
-                                                setStarted(true);
-                                                setActiveProjectIndex(index);
-                                                setFeaturedProjectIndex(index);
-                                            }}
-                                            className='transition-all duration-300 cursor-pointer p-3 lg:p-2.5 rounded-lg border bg-gradient-to-br from-brandGray-800 to-brandGray-800/90 border-brandGray-700 hover:border-brandGray-600 hover:shadow-[0_4px_12px_-2px_rgba(11,163,112,0.12)] hover:translate-y-[-1px]'
-                                        >
-                                            <div className='flex items-center justify-between'>
-                                                <span className='text-xs font-semibold text-brandOrange-400 px-2 py-0.5 rounded-md bg-brandOrange-900/30 border border-brandOrange-800/30 shadow-sm'>
-                                                    #{index + 1}
-                                                </span>
-                                                <div className='w-2 h-2 rounded-full bg-gradient-to-r from-brandGreen-500 to-brandGreen-400 opacity-60'></div>
-                                            </div>
-                                            <h4 className='font-medium text-white mt-2 text-sm truncate'>
-                                                {project.title}
-                                            </h4>
-                                            <div className='flex flex-wrap gap-1 mt-2'>
-                                                {project.stack.slice(0, 2).map((tech, techIndex) => (
-                                                    <span
-                                                        key={techIndex}
-                                                        className='text-[10px] font-medium text-brandGray-300 px-1.5 py-0.5 rounded-full bg-brandGray-700/70 border border-brandGray-700'
-                                                    >
-                                                        {tech}
-                                                    </span>
-                                                ))}
-                                                {project.stack.length > 2 && (
-                                                    <span className='text-[10px] font-medium text-brandGray-300 px-1.5 py-0.5 rounded-full bg-brandGray-700/70 border border-brandGray-700'>
-                                                        +{project.stack.length - 2}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                                
-                                {/* On mobile - show more compact horizontal cards */}
-                                <div className='sm:hidden grid grid-cols-1 gap-2 mb-4'>
-                                    {PROJECTS.map((project, index) => (
-                                        <div 
-                                            key={index}
-                                            onClick={() => {
-                                                setStarted(true);
-                                                setActiveProjectIndex(index);
-                                                setFeaturedProjectIndex(index);
-                                            }}
-                                            className='transition-all duration-300 cursor-pointer p-2 rounded-lg border bg-gradient-to-r from-brandGray-800 to-brandGray-800/90 border-brandGray-700 hover:border-brandGray-600'
-                                        >
-                                            <div className='flex items-center justify-between'>
-                                                <div className='flex items-center gap-2'>
-                                                    <span className='text-xs font-semibold text-brandOrange-400 px-2 py-0.5 rounded-md bg-brandOrange-900/30 border border-brandOrange-800/30 shadow-sm'>
-                                                        #{index + 1}
-                                                    </span>
-                                                    <h4 className='font-medium text-white text-sm'>
-                                                        {project.title}
-                                                    </h4>
-                                                </div>
-                                                <div className='w-2 h-2 rounded-full bg-gradient-to-r from-brandGreen-500 to-brandGreen-400 opacity-60 flex-shrink-0'></div>
-                                            </div>
-                                            <div className='flex flex-wrap gap-1 mt-2 ml-7'>
-                                                {project.stack.slice(0, 2).map((tech, techIndex) => (
-                                                    <span
-                                                        key={techIndex}
-                                                        className='text-[10px] font-medium text-brandGray-300 px-1.5 py-0.5 rounded-full bg-brandGray-700/70 border border-brandGray-700'
-                                                    >
-                                                        {tech}
-                                                    </span>
-                                                ))}
-                                                {project.stack.length > 2 && (
-                                                    <span className='text-[10px] font-medium text-brandGray-300 px-1.5 py-0.5 rounded-full bg-brandGray-700/70 border border-brandGray-700'>
-                                                        +{project.stack.length - 2}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
+                                        <ProjectOverviewRow
+                                            key={project.id}
+                                            project={project}
+                                            index={index}
+                                            onOpen={() => showProject(index)}
+                                        />
                                     ))}
                                 </div>
                             </div>
@@ -208,7 +168,7 @@ export default function ProjectsContainer() {
             <div className='max-w-7xl mx-auto'>
                 <div className='flex flex-col'>
                     {/* Projects Grid */}
-                    <div className='w-full'>
+                    <div ref={projectsTopRef} className='w-full scroll-mt-20'>
                         {/* On mobile and tablet - show the active project with navigation */}
                         <div className='block lg:hidden'>
                             
@@ -252,6 +212,13 @@ export default function ProjectsContainer() {
                                                     </span>
                                                 ))}
                                             </div>
+                                            <ProjectLinks
+                                                title={PROJECTS[activeProjectIndex].title}
+                                                liveUrl={PROJECTS[activeProjectIndex].liveUrl}
+                                                liveLabel={PROJECTS[activeProjectIndex].liveLabel}
+                                                repo={PROJECTS[activeProjectIndex].repo}
+                                                downloads={PROJECTS[activeProjectIndex].downloads}
+                                            />
                                         </div>
                                         
                                         {/* Project Description */}
@@ -274,7 +241,7 @@ export default function ProjectsContainer() {
                                     {/* Back Button */}
                                     <div className='p-3 sm:p-4 md:p-5 border-t border-brandGray-700/30'>
                                         <button
-                                            onClick={() => setStarted(false)}
+                                            onClick={showOverview}
                                             className='w-full flex items-center justify-center gap-2 px-4 py-2 bg-brandGray-700 hover:bg-brandGray-600 text-white rounded-lg text-sm transition-colors duration-200'
                                         >
                                             <svg
@@ -312,12 +279,17 @@ export default function ProjectsContainer() {
                                         technicalDetails={PROJECTS[featuredProjectIndex].technicalDetails}
                                         challenges={PROJECTS[featuredProjectIndex].challenges}
                                         readme={PROJECTS[featuredProjectIndex].readme}
+                                        repo={PROJECTS[featuredProjectIndex].repo}
+                                        liveUrl={PROJECTS[featuredProjectIndex].liveUrl}
+                                        liveLabel={PROJECTS[featuredProjectIndex].liveLabel}
+                                        downloads={PROJECTS[featuredProjectIndex].downloads}
+                                        highlights={PROJECTS[featuredProjectIndex].highlights}
                                         totalProjects={PROJECTS.length}
                                         onNavigateToProject={(newIndex) => {
                                             if (newIndex === -1) {
-                                                setStarted(false);
+                                                showOverview();
                                             } else if (newIndex >= 0) {
-                                                setFeaturedProjectIndex(newIndex);
+                                                showProject(newIndex);
                                             }
                                         }}
                                         hideToc={true}
@@ -334,7 +306,7 @@ export default function ProjectsContainer() {
                                             <div 
                                                 key={project.id}
                                                 className="transition-all duration-300 cursor-pointer h-[320px]"
-                                                onClick={() => setFeaturedProjectIndex(index)}
+                                                onClick={() => showProject(index)}
                                             >
                                                 <ProjectCard
                                                     projectNumber={index + 1}
@@ -358,7 +330,7 @@ export default function ProjectsContainer() {
                             <button
                                 onClick={() =>
                                     activeProjectIndex === 0
-                                        ? setStarted(false)
+                                        ? showOverview()
                                         : navigateToProject(activeProjectIndex - 1)
                                 }
                                 className={clsx(

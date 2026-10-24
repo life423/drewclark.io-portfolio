@@ -2,6 +2,7 @@ import React, { useRef } from 'react'
 import clsx from 'clsx'
 import { ProjectProgressIndicator } from './progress'
 import useScrollPosition from '../../hooks/useScrollPosition'
+import ProjectLinks from './ProjectLinks'
 
 export default function ProjectCard({
     projectNumber,
@@ -13,6 +14,11 @@ export default function ProjectCard({
     technicalDetails,
     challenges,
     readme,
+    repo, // owner/name on GitHub, for the source link
+    liveUrl, // where to try the project, when it has a public URL
+    liveLabel, // text for that link, e.g. Play the game
+    highlights, // short bullets for Key Innovations; the section is left out without them
+    downloads, // downloadable builds: [{ platform, label, url, version }]
     onNavigateToProject,
     totalProjects = 3,
     hideToc = false, // Prop to hide the table of contents in the card
@@ -33,8 +39,9 @@ export default function ProjectCard({
             ref={cardRef}
             className={clsx(
                 'my-4 @container overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transition-all duration-300 flex flex-col',
-                // Adjust height based on mode
-                isCompact ? 'h-full' : isExpanded ? 'h-[700px]' : 'h-[700px]',
+                // Compact cards fill their slot; a full card is at least 700px (so it lines up with the
+                // sidebar) and grows with its content rather than scrolling inside itself
+                isCompact ? 'h-full' : 'min-h-[700px]',
                 // Card styles based on state
                 isActive 
                     ? 'ring-2 ring-brandGreen-500/50 shadow-xl border-brandGreen-600/30 bg-gradient-to-b from-brandGray-800 to-brandGray-850' 
@@ -88,12 +95,15 @@ export default function ProjectCard({
                         </span>
                     ))}
                 </div>
+                {!isCompact && (
+                    <ProjectLinks title={title} liveUrl={liveUrl} liveLabel={liveLabel} repo={repo} downloads={downloads} />
+                )}
             </div>
 
             {/* Project Content - conditionally render based on mode */}
             <div
                 ref={contentRef}
-                className='p-3 @sm:p-4 @md:p-5 flex-1 flex flex-col overflow-y-auto'
+                className='p-3 @sm:p-4 @md:p-5 flex-1 flex flex-col'
             >
                 <div
                     className={clsx(
@@ -123,23 +133,30 @@ export default function ProjectCard({
                             {/* Full project details for expanded/normal cards */}
                             {(isExpanded || !isCompact) && (
                                 <>
-                                    <h3>The Challenge</h3>
-                                    <p>{challenges || "This project presented numerous technical and design challenges that pushed our team to innovate."}</p>
+                                    {challenges && (
+                                        <>
+                                            <h3>The Challenge</h3>
+                                            <p>{challenges}</p>
+                                        </>
+                                    )}
 
-                                    <h3>Technical Details</h3>
-                                    <p>{technicalDetails || "This project showcases a variety of technical skills and innovative approaches."}</p>
+                                    {technicalDetails && (
+                                        <>
+                                            <h3>Technical Details</h3>
+                                            <p>{technicalDetails}</p>
+                                        </>
+                                    )}
 
-                                    <h3>Key Innovations</h3>
-                                    <ul>
-                                        <li>
-                                            Implemented real-time data processing pipelines
-                                        </li>
-                                        <li>
-                                            Designed an intuitive interface for complex
-                                            information
-                                        </li>
-                                        <li>Optimized performance for mobile devices</li>
-                                    </ul>
+                                    {Array.isArray(highlights) && highlights.length > 0 && (
+                                        <>
+                                            <h3>Key Innovations</h3>
+                                            <ul>
+                                                {highlights.map((item, index) => (
+                                                    <li key={index}>{item}</li>
+                                                ))}
+                                            </ul>
+                                        </>
+                                    )}
                                 </>
                             )}
                         </>

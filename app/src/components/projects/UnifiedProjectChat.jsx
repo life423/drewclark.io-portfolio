@@ -24,7 +24,7 @@ function AnswerSources({ sources }) {
 
     return (
         <div className='mt-2 flex flex-wrap items-center gap-1.5 text-xs'>
-            <span className='text-brandGray-500'>Sources</span>
+            <span className='text-brandGray-400'>Sources</span>
             {links.map(source => (
                 <a
                     key={`${source.project}|${source.file}`}
@@ -199,7 +199,8 @@ export default function UnifiedProjectChat() {
                     if (newMessage.role === 'assistant') {
                         // Scroll to the top of the new message with a small offset for context
                         if (newMessageElement) {
-                            newMessageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            const top = newMessageElement.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop;
+                            container.scrollTo({ top, behavior: 'smooth' });
                         }
                     } else {
                         // For user messages, scroll to bottom as before
@@ -262,7 +263,7 @@ export default function UnifiedProjectChat() {
     }
 
     return (
-        <div className='mt-8 w-full'>
+        <div id='project-chat' className='mt-8 w-full scroll-mt-20'>
             <div
                 className={clsx(
                     'bg-brandGray-900 rounded-lg shadow-lg border border-brandGray-700 transition-all duration-300',
@@ -576,7 +577,7 @@ export default function UnifiedProjectChat() {
                         </button>
                     </div>
                 </form>
-                <div className='text-xs text-brandGray-500 text-center'>
+                <div className='text-xs text-brandGray-400 text-center'>
                     Answers come from the current code of each project on GitHub, with links to the exact lines
                 </div>
             </div>

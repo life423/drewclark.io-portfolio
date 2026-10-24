@@ -1,0 +1,14 @@
+# Drew Clark
+
+> Portfolio of Drew Clark, a software engineer. It presents three projects and has a chat that answers questions about each project from its current source code on GitHub.
+
+## Projects
+
+- [AI Platform Trainer](https://github.com/life423/ai-platform-trainer): A 2D platformer game featuring AI-driven enemy behavior built with Python and Pygame.
+- [Cryptography Toolkit with AI Analysis](https://github.com/life423/polyalphabetic-and-caesar_cipher): A comprehensive encryption application implementing Caesar and Polyalphabetic ciphers with AI-powered cryptanalysis capabilities.
+- [Ascend-Avoid](https://ascend.drewclark.io): A shared-arena multiplayer browser game: open the page and you're in, hopping for gems against people and bots in real time. Source: https://github.com/life423/ascend-avoid
+
+## About this site
+
+- [Source code](https://github.com/life423/drewclark.io-portfolio): React and Vite frontend, Express API, and an OpenAI chat that searches the project repos with MongoDB Atlas Vector Search
+- Contact: drew@drewclark.io
