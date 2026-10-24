@@ -4,13 +4,13 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { FocusProvider } from './contexts/FocusContext';
 import { ANIMATION } from './styles/constants';
 import logger from './utils/logger';
+// Layout and Hero are the above-the-fold content, so they ship in the main bundle:
+// lazy-loading them put an extra round trip in front of the first paint
+import Layout from './components/layout/Layout';
+import Hero from './components/hero/Hero';
 
-// Lazy-loaded components
-const Layout = lazy(() => import('./components/layout/Layout'));
-const Hero = lazy(() => import('./components/hero/Hero'));
-
-// Lazy load ProjectsContainer for better code splitting
-const ProjectsContainer = lazy(() => import(/* webpackChunkName: "projects" */ './components/projects/ProjectsContainer'));
+// The projects section is below the fold and large, so it loads on its own
+const ProjectsContainer = lazy(() => import('./components/projects/ProjectsContainer'));
 
 // Optimized loading fallback component with precomputed dimensions to prevent layout shifts
 const LoadingFallback = () => (

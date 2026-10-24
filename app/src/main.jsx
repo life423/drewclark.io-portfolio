@@ -9,47 +9,14 @@ const ContactMessagesAdmin = React.lazy(() => import('./components/admin/Contact
 // Create a module-specific logger
 const log = logger.getLogger('Main');
 
-// Register service worker for production environments
-if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/serviceWorker.js')
-      .then(registration => {
-        log.info('Service Worker registered successfully:', registration.scope);
-        
-        // Check for updates
-        registration.onupdatefound = () => {
-          const installingWorker = registration.installing;
-          if (installingWorker) {
-            installingWorker.onstatechange = () => {
-              if (installingWorker.state === 'installed') {
-                if (navigator.serviceWorker.controller) {
-                  // At this point, the updated precached content has been fetched,
-                  // but the previous service worker will still serve the older
-                  // content until all client tabs are closed.
-                  log.info('New content is available; please refresh.');
-                  
-                  // Optional: Show a notification to the user
-                  if (window.confirm('New version available! Reload to update?')) {
-                    window.location.reload();
-                  }
-                } else {
-                  // At this point, everything has been precached.
-                  log.info('Content is cached for offline use.');
-                }
-              }
-            };
-          }
-        };
-      })
-      .catch(error => {
-        log.error('Error during service worker registration:', error);
-      });
-      
-    // Handle service worker updates
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      log.info('New service worker controller');
-    });
-  });
+// The site no longer uses a service worker. Anyone who still has the old one gets it
+// removed here (and public/serviceWorker.js is now a kill switch that unregisters itself).
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations()
+    .then(registrations => Promise.all(registrations.map(registration => registration.unregister())))
+    .then(() => (window.caches ? window.caches.keys() : []))
+    .then(keys => Promise.all(keys.map(key => window.caches.delete(key))))
+    .catch(error => log.error('Service worker cleanup failed:', error));
 }
 
 // Create offline notification component

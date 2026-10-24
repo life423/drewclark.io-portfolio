@@ -4,9 +4,11 @@ import useIsInViewport from '../../hooks/useIsInViewport'
 
 // Import both WebP and JPG versions
 import sproutMobile from '../../assets/sprout-mobile.jpg'
-import sproutMobileWebp from '../../assets/sprout-mobile.webp'
 import largeSprout from '../../assets/large-sprout.jpg'
-import largeSproutWebp from '../../assets/large-sprout.webp'
+// The WebP versions are served from app/public under fixed names, so index.html can
+// preload the exact URL the browser will request (an import would get a hashed name)
+const sproutMobileWebp = '/assets/sprout-mobile.webp'
+const largeSproutWebp = '/assets/large-sprout.webp'
 import PrimaryButton from '../utils/PrimaryButton'
 import ProgressiveElement from '../utils/ProgressiveElement'
 import NeuralNetworkCanvas from './NeuralNetworkCanvas'

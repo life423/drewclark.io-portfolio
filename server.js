@@ -23,7 +23,20 @@ const app = express()
 // One reverse proxy (the Container Apps ingress) sits in front in production.
 // Trusting that hop makes req.ip the real client IP, which rate limiting keys on.
 app.set('trust proxy', 1)
+
+// One address for the site: www.drewclark.io sends visitors (and search engines) to drewclark.io
+app.use((req, res, next) => {
+    if (req.hostname === 'www.drewclark.io') {
+        return res.redirect(301, 'https://drewclark.io' + req.originalUrl)
+    }
+    next()
+})
 const PORT = process.env.PORT || 3000
+
+// Compress responses: the Container Apps ingress doesn't, and this takes the main
+// bundle from about 155 KB to 50 KB on the wire
+const compression = require('compression')
+app.use(compression())
 
 // Security middleware
 const helmet = require('helmet');
@@ -88,14 +101,34 @@ app.use('/api', (req, res) => res.status(404).json({ error: 'Not found' }))
 
 // The built frontend
 const distDir = path.join(__dirname, 'app', 'dist')
-app.use(express.static(distDir))
+// Vite gives bundled files a content hash (index-BX0DW6Aj.js), so those are safe to cache
+// for a year. Files copied from app/public keep their names and get an hour. index.html and
+// the service worker are always revalidated, so a deploy shows up right away.
+const HASHED_ASSET = /-[A-Za-z0-9_-]{8}[.][A-Za-z0-9]+$/
+app.use(
+    express.static(distDir, {
+        setHeaders(res, filePath) {
+            const name = path.basename(filePath)
+            if (name === 'index.html' || name === 'serviceWorker.js') {
+                res.setHeader('Cache-Control', 'no-cache')
+            } else if (HASHED_ASSET.test(name)) {
+                res.setHeader('Cache-Control', 'public, max-age=31536000, immutable')
+            } else {
+                res.setHeader('Cache-Control', 'public, max-age=3600')
+            }
+        },
+    })
+)
 
-// A missing asset is a 404, not the app's HTML (which the service worker would cache as the asset)
-app.use('/assets', (req, res) => res.status(404).end())
 
-// Any other GET is a client-side route: serve the app
+// Any other extensionless GET is a client-side route (like /admin): serve the app.
+// A path that looks like a file (a stale /assets/ hash, a robots.txt we don't ship) is a
+// real 404 rather than the app's HTML, so crawlers and the service worker aren't fooled.
 app.get('*', (req, res) => {
-    res.sendFile(path.join(distDir, 'index.html'))
+    if (path.extname(req.path)) {
+        return res.status(404).end()
+    }
+    res.sendFile(path.join(distDir, 'index.html'), { headers: { 'Cache-Control': 'no-cache' } })
 })
 
 // Start the server - bind to 0.0.0.0 to allow external connections

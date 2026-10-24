@@ -50,9 +50,11 @@ export default function Footer() {
                             href='https://twitter.com/andrewgenai'
                             target='_blank'
                             rel='noopener noreferrer'
+                            aria-label='Drew Clark on Twitter'
                             className='relative inline-block'
                         >
                             <LuTwitter
+                                aria-hidden='true'
                                 className={clsx(
                                     'h-6 w-6 fill-current text-brandGreen-500',
                                     animateTwitter &&
@@ -66,9 +68,11 @@ export default function Footer() {
                             href='https://github.com/life423'
                             target='_blank'
                             rel='noopener noreferrer'
+                            aria-label='Drew Clark on GitHub'
                             className='relative inline-block'
                         >
                             <LuGithub
+                                aria-hidden='true'
                                 className={clsx(
                                     'h-6 w-6 fill-current text-brandGreen-500',
                                     animateGithub && 'animate-icon-gentle-pulse'

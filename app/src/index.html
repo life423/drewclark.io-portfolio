@@ -3,15 +3,59 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="description" content="Drew Clark is a software engineer and full-stack web developer. Projects in Python, React and TypeScript, with an AI chat that answers questions about each one from its code on GitHub." />
+        <meta name="theme-color" content="#1a1a1a" />
+        <link rel="canonical" href="https://drewclark.io/" />
+
+        <!-- Link previews (Slack, LinkedIn, X, iMessage) -->
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://drewclark.io/" />
+        <meta property="og:title" content="Drew Clark | Software Engineer and Full-Stack Web Developer" />
+        <meta property="og:description" content="Drew Clark is a software engineer and full-stack web developer. Projects in Python, React and TypeScript, with an AI chat that answers questions about each one from its code on GitHub." />
+        <meta property="og:image" content="https://drewclark.io/og-image.jpg" />
+        <meta property="og:image:width" content="1600" />
+        <meta property="og:image:height" content="1069" />
+        <meta property="og:image:alt" content="A seedling sprouting from dark soil" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Drew Clark | Software Engineer and Full-Stack Web Developer" />
+        <meta name="twitter:description" content="Drew Clark is a software engineer and full-stack web developer. Projects in Python, React and TypeScript, with an AI chat that answers questions about each one from its code on GitHub." />
+        <meta name="twitter:image" content="https://drewclark.io/og-image.jpg" />
+
+        <!-- Who this site is about, for search engines: Drew and Andrew Clark are the same person -->
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@graph": [
+                {
+                    "@type": "Person",
+                    "@id": "https://drewclark.io/#person",
+                    "name": "Drew Clark",
+                    "alternateName": "Andrew Clark",
+                    "jobTitle": "Software Engineer",
+                    "description": "Software engineer and full-stack web developer.",
+                    "url": "https://drewclark.io/",
+                    "sameAs": [
+                        "https://github.com/life423"
+                    ]
+                },
+                {
+                    "@type": "WebSite",
+                    "@id": "https://drewclark.io/#website",
+                    "url": "https://drewclark.io/",
+                    "name": "drewclark.io",
+                    "description": "Drew Clark is a software engineer and full-stack web developer. Projects in Python, React and TypeScript, with an AI chat that answers questions about each one from its code on GitHub.",
+                    "author": { "@id": "https://drewclark.io/#person" },
+                    "about": { "@id": "https://drewclark.io/#person" }
+                }
+            ]
+        }
+        </script>
         
         <!-- Preload largest contentful paint image - both WebP and JPG versions for browser compatibility -->
         <link rel="preload" href="/assets/sprout-mobile.webp" as="image" type="image/webp" media="(max-width: 1023px)" fetchpriority="high" />
         <link rel="preload" href="/assets/large-sprout.webp" as="image" type="image/webp" media="(min-width: 1024px)" fetchpriority="high" />
         
-        <!-- Fallback preloads for browsers without WebP support -->
-        <link rel="preload" href="/assets/sprout-mobile.jpg" as="image" type="image/jpeg" media="(max-width: 1023px) and (not (webp))" fetchpriority="high" />
-        <link rel="preload" href="/assets/large-sprout.jpg" as="image" type="image/jpeg" media="(min-width: 1024px) and (not (webp))" fetchpriority="high" />
-        
+                
         <!-- Google Fonts - Lato - Optimized loading -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -73,7 +117,7 @@
             content="/favicon/browserconfig.xml"
         />
 
-        <title>drewclark.io</title>
+        <title>Drew Clark | Software Engineer and Full-Stack Web Developer</title>
     </head>
     <body>
         <div id="root"></div>
