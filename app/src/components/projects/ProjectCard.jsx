@@ -39,9 +39,9 @@ export default function ProjectCard({
             ref={cardRef}
             className={clsx(
                 'my-4 @container overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transition-all duration-300 flex flex-col',
-                // Compact cards fill their slot; a full card is at least 700px (so it lines up with the
-                // sidebar) and grows with its content rather than scrolling inside itself
-                isCompact ? 'h-full' : 'min-h-[700px]',
+                // Compact cards fill their slot; a full card fills its column beside the sidebar,
+                // and is at least 700px tall, growing with its content rather than scrolling inside itself
+                isCompact ? 'h-full' : 'h-full min-h-[700px]',
                 // Card styles based on state
                 isActive 
                     ? 'ring-2 ring-brandGreen-500/50 shadow-xl border-brandGreen-600/30 bg-gradient-to-b from-brandGray-800 to-brandGray-850' 

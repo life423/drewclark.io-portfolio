@@ -86,6 +86,9 @@ export default function ProjectOverviewRow({ project, index, onOpen }) {
     const facts = Array.isArray(project.facts) ? project.facts : []
     const files = Array.isArray(project.downloads) ? project.downloads : []
     const extraPills = project.stack.length - MAX_PILLS
+    // Games get the play button; anything else says what the link does (e.g. "Visit the site")
+    const liveLabel = project.liveLabel || 'Play'
+    const isPlay = liveLabel.startsWith('Play')
 
     return (
         <article
@@ -145,11 +148,11 @@ export default function ProjectOverviewRow({ project, index, onOpen }) {
                                 href={project.liveUrl}
                                 target='_blank'
                                 rel='noopener noreferrer'
-                                aria-label={(project.liveLabel || 'Try it live') + ': ' + project.title + ' (opens in a new tab)'}
+                                aria-label={liveLabel + ': ' + project.title + ' (opens in a new tab)'}
                                 className={PLAY}
                             >
-                                <LuPlay className='h-4 w-4 fill-current' aria-hidden='true' />
-                                Play
+                                {isPlay ? <LuPlay className='h-4 w-4 fill-current' aria-hidden='true' /> : <LuGlobe className='h-4 w-4' aria-hidden='true' />}
+                                {liveLabel}
                             </a>
                         )}
                         {files.map(file => {
