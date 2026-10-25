@@ -61,7 +61,7 @@ const config = {
 
     // The repos the chat can search and scripts/index-repos.js embeds
     repositories: {
-        allowed: (process.env.ALLOWED_REPOS || 'life423/drewclark.io-portfolio,life423/ai-platform-trainer,life423/ascend-avoid,life423/polyalphabetic-and-caesar_cipher')
+        allowed: (process.env.ALLOWED_REPOS || 'life423/drewclark.io-portfolio,life423/ai-platform-trainer,life423/ascend-avoid,life423/polyalphabetic-and-caesar_cipher,life423/myprivateteacher')
             .split(',')
             .map(name => name.trim().toLowerCase())
             .filter(Boolean),

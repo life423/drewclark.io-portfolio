@@ -305,7 +305,7 @@ export default function ProjectsContainer() {
                                         index !== featuredProjectIndex && (
                                             <div 
                                                 key={project.id}
-                                                className="transition-all duration-300 cursor-pointer h-[320px]"
+                                                className="flex-1 min-h-[240px] transition-all duration-300 cursor-pointer"
                                                 onClick={() => showProject(index)}
                                             >
                                                 <ProjectCard

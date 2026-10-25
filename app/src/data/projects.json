@@ -124,5 +124,49 @@
         ],
         "image": "/projects/ascend-avoid.jpg?v=2",
         "imageAlt": "Ascend-Avoid mid-match: a round white creature named Drew floats among glowing gems in the starry arena"
+    },
+    {
+        "id": 4,
+        "title": "My Private Teacher",
+        "repo": "life423/myprivateteacher",
+        "liveUrl": "https://myprivateteacher.com",
+        "liveLabel": "Visit the site",
+        "summary": "A live lesson workspace for dyslexia tutors, with a shared whiteboard, letter tiles, pictures, video and the Phoneme Pop activity.",
+        "stack": [
+            "React",
+            "Vite",
+            "Express",
+            "WebSockets",
+            "Stripe",
+            "Azure"
+        ],
+        "initialDescription": "My Private Teacher is a live lesson workspace I built for tutors who teach reading to students with dyslexia. Tutor and student share one whiteboard with letter tiles, sound boxes, pictures and video. Students join with a four-digit code and don't need an account.",
+        "detailedDescription": "A tutor starts a session on the Alphabet Whiteboard and gets a code. The student joins from any browser, and both screens draw the same board as it changes. Tutors can drag letter tiles, build word chains like map, mat and sat, and turn on two to five sound boxes that tiles snap into. A library of mouth-position pictures supports reading instruction, and tutors can add their own worksheets and choose which parts the student can lift out. Phoneme Pop is built into the same app: a student hears a word, splits it into its sounds and puts them back in order.",
+        "technicalDetails": "React and Vite on the client, with an Express server that also handles realtime rooms over WebSockets. Each room has one tutor and one student. The server keeps rooms in memory, so the app runs as a single replica. Video calls go directly between the two browsers using WebRTC, with a TURN relay on Azure for networks that block direct connections. The app ships as a Docker image to Azure Container Apps, and the deploy workflow runs the tests before every release.",
+        "challenges": "The hard part is keeping two screens in step. Both screens draw the same fixed 1600 by 1000 stage, scaled to fit, so a point on a large monitor is the same point on an iPad. The student's device sends finger positions about 30 times a second, and the newest position wins. Rooms also live in memory, so after a server restart the tutor's browser sends the board back up, and the room keeps its code.",
+        "readme": "Reading activities and a live whiteboard for tutors working with students who have dyslexia. The source is on GitHub at life423/myprivateteacher. Run npm install, then npm run server and npm run dev to start the app locally, and npm test to run the tests.",
+        "highlights": [
+            "One shared whiteboard with letter tiles, sound boxes, pictures and video",
+            "Students join with a four-digit code, with no account",
+            "Both screens draw the same stage, so the board looks the same on any device",
+            "Phoneme Pop: hear a word, split it into sounds and put them back in order"
+        ],
+        "tagline": "A live lesson workspace for dyslexia tutors and their students.",
+        "facts": [
+            {
+                "icon": "users",
+                "label": "Tutor and student in one room"
+            },
+            {
+                "icon": "key",
+                "label": "Students join with a code"
+            },
+            {
+                "icon": "radio",
+                "label": "Live whiteboard and video"
+            }
+        ],
+        "image": "/projects/my-private-teacher.jpg?v=3",
+        "imageAlt": "The My Private Teacher logo: a white letter a on a mint green square"
     }
 ]
