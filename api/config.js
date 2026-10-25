@@ -19,7 +19,7 @@ const config = {
     chat: {
         model: process.env.OPENAI_CHAT_MODEL || 'gpt-4o-mini',
         temperature: 0.7,
-        maxTokens: 500,
+        maxTokens: 200, // about 150 words, enough for the 80-word answers the prompt asks for
         maxQuestionChars: 500, // visitors send just their question
         limitPerMinute: Number(process.env.CHAT_LIMIT_PER_MINUTE) || 10, // per visitor
         limitPerDay: Number(process.env.CHAT_LIMIT_PER_DAY) || 500, // whole site
