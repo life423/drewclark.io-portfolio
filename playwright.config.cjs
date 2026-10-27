@@ -1,4 +1,5 @@
 const { defineConfig } = require('@playwright/test');
+const process = require('node:process');
 
 module.exports = defineConfig({
     testDir: './tests/ui',

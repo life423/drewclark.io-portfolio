@@ -9,7 +9,8 @@
   in `artwork/` for future review.
 - Selected details, a short row of other projects and chat follow one vertical
   flow on desktop, avoiding the previous tall sidebar/empty column.
-- Header Next control cycles all four projects, wrapping last to first. Bottom
+- Header Next control has a 48px minimum height and cycles all four projects,
+  wrapping last to first. Bottom
   navigation remains available, with at least 44px-high targets.
 - One selected project survives responsive breakpoint changes. Hero actions stack
   on narrow phones; the hero grows when needed on short landscape screens.
@@ -30,6 +31,12 @@ horizontal overflow, compact-row spacing, touch navigation and rotation, desktop
 resizing, hero hover/press/reduced-motion states, chat success/source links/loading
 and recoverable failure, and menu/contact-dialog Escape behavior. Chat responses
 are controlled fixtures and do not validate the live AI service.
+
+The first Linux four-browser run passed 55 of 56 cases. Firefox at 768×1024
+failed the strict 44px header-button measurement; the capture showed the control
+in its intended position. The header control now has a 48px minimum height,
+providing a more comfortable target and margin above the 44px threshold. The
+assertion reports the actual measured number on failure rather than a boolean.
 
 The Windows Firefox runtime fails before launch with a side-by-side assembly
 error, including after reinstalling the runtime. The pull-request browser workflow

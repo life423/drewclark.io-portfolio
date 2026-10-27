@@ -1,4 +1,6 @@
+/* global document, innerWidth, getComputedStyle */
 const { test, expect } = require('@playwright/test');
+const { setTimeout: delay } = require('node:timers/promises');
 const projects = require('../../app/src/data/projects.json');
 
 const sizes = [
@@ -63,8 +65,8 @@ for (const [width, height] of sizes) {
             await expect(next).toHaveAttribute('aria-label', `Next project: ${projects[(index + 1) % projects.length].title}`);
             await expect.poll(async () => {
                 const r = await next.boundingBox();
-                return r && r.height >= 44;
-            }).toBeTruthy();
+                return r?.height || 0;
+            }).toBeGreaterThanOrEqual(44);
             if (width >= 1024) {
                 const alternatives = page.getByRole('button', { name: /^View .+ details$/ });
                 await expect(alternatives).toHaveCount(projects.length - 1);
@@ -130,7 +132,7 @@ test('chat success, sources, loading and recoverable failure', async ({ page }) 
     let failed = false;
     await page.route('**/api/askGPT', async route => {
         if (failed) return route.fulfill({ status: 503, json: { error: 'temporarily unavailable' } });
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await delay(500);
         return route.fulfill({ json: { answer: 'PPO trains on the GPU.', sources: [{ project: 'Project 1, CudaRL-Arena', file: 'src/rl/ppo.cpp', lines: '1-10', url: 'https://github.com/life423/CudaRL-Arena/blob/main/src/rl/ppo.cpp#L1-L10' }] } });
     });
     await ready(page);
