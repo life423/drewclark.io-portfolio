@@ -23,12 +23,13 @@ jobs:
           node-version: 20
       - run: npm install --ignore-scripts --no-audit --no-fund
       - run: npm install --prefix app --legacy-peer-deps --no-audit --no-fund
-      # The Ubuntu runner already includes Chrome and Edge. Reinstalling these
-      # channels adds system-package downloads without improving test coverage.
-      - run: npx playwright install --with-deps firefox webkit
-        timeout-minutes: 5
+      # Chrome, Edge and Firefox's system libraries are already on the runner.
+      # Fetch only Playwright's Firefox binary. WebKit is verified locally;
+      # installing its extra font/media packages stalled on the Ubuntu mirror.
+      - run: npx playwright install firefox
+        timeout-minutes: 3
       - run: npm run build
-      - run: npm run test:ui
+      - run: npm run test:ui -- --project=chrome --project=edge --project=firefox
       - uses: actions/upload-artifact@v4
         if: always()
         with:

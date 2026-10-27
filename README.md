@@ -122,8 +122,10 @@ The suite covers nine phone, landscape, tablet and desktop dimensions, artwork
 selection/proportions, overflow, project cycling/wrapping, bottom navigation,
 keyboard focus, touch/rotation, reduced motion, hero interaction states, chat
 loading/source links/recovery and contact dialog opening/closing. Pull requests
-run the same suite on Linux in Chrome, Edge, Firefox and WebKit. WebKit is an
-engine compatibility check; it does not replace testing real Safari on macOS/iOS.
+run the same suite on Linux in Chrome, Edge and Firefox. WebKit remains in the
+local suite: its CI font/media dependency downloads repeatedly stalled on the
+Ubuntu package mirror, so that install step was removed at the user's request.
+WebKit is an engine compatibility check; it does not replace testing real Safari on macOS/iOS.
 See `docs/portfolio-ui-validation.md` for the release evidence and remaining limits.
 
 ## Admin inbox

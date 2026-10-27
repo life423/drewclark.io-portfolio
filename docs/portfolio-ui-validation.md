@@ -40,7 +40,13 @@ assertion reports the actual measured number on failure rather than a boolean.
 
 The Windows Firefox runtime fails before launch with a side-by-side assembly
 error, including after reinstalling the runtime. The pull-request browser workflow
-runs all four browser projects on Linux; merge must wait for that result.
+runs Chrome, Edge and Firefox on Linux; merge must wait for that result. WebKit's
+14 cases passed both locally and in the first Linux run. The updated 48px control
+also passes local WebKit tablet and touch/rotation checks. A later CI setup attempt
+timed out downloading fonts/media packages from azure.archive.ubuntu.com before
+any tests ran. At the user's request, that unreliable dependency-install step is
+removed; CI downloads only Firefox's browser binary and uses the runner's existing
+system libraries. WebKit remains available in the local four-browser suite.
 
 Rendered phone, tablet and desktop screenshots were inspected. The production
 build passes. Scoped ESLint comparison
