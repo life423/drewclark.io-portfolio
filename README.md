@@ -44,7 +44,17 @@ npm run index:repos -- --full                # re-embed everything
 npm run index:repos -- life423/ascend-avoid  # one repo only
 ```
 
-Indexing all four repos from scratch costs about one cent in embeddings.
+The first portfolio project is CudaRL-Arena, replacing AI Platform Trainer. Its
+overview uses the repository's `docs/images/tadpole-learning.png` screenshot, copied
+to `app/public/projects/cudarl-arena.png`. Project descriptions and chat context
+share `app/src/data/projects.json`.
+
+The default chat allowlist includes this website and all four project repositories.
+The indexer includes C++, CUDA, GDScript and CMake sources as well as web and Python
+files. After deployment, the index workflow adds CudaRL-Arena automatically;
+AI Platform Trainer is excluded from searches. If `ALLOWED_REPOS` is overridden,
+update that environment setting too. Indexing requires `MONGODB_URI` and
+`OPENAI_API_KEY`; a local preview without MongoDB answers from project descriptions.
 
 **Adding a project repo:** add it to `repositories.allowed` in `api/config.js`, set `"repo"` on the project in `app/src/data/projects.json`, and run the indexer.
 

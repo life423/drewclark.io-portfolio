@@ -1,37 +1,44 @@
 [
     {
         "id": 1,
-        "title": "AI Platform Trainer",
-        "repo": "life423/ai-platform-trainer",
-        "summary": "A 2D platformer game featuring AI-driven enemy behavior built with Python and Pygame.",
+        "title": "CudaRL-Arena",
+        "repo": "life423/CudaRL-Arena",
+        "summary": "Reinforcement learning built from scratch in C++ and CUDA, with live Godot demos of balancing carts, racing cars and swimming tadpoles.",
         "stack": [
-            "Python",
-            "Pygame",
-            "AI Algorithms",
-            "Game Development"
+            "C++",
+            "CUDA",
+            "Godot",
+            "Reinforcement Learning",
+            "CMake"
         ],
-        "initialDescription": "I developed this 2D platformer game from scratch to deepen my understanding of game development and AI implementation. The project features intelligent enemies that adapt their behavior based on player actions, creating a dynamic and challenging gameplay experience.",
-        "detailedDescription": "AI Platform Trainer is a complete 2D platformer with modular code architecture and AI-driven enemy behavior. The game demonstrates how even simple AI implementations can create engaging gameplay by having enemies that learn and respond to player actions, rather than following fixed patterns.",
-        "technicalDetails": "Built with Python and the Pygame library, the game uses a component-based architecture to handle various game elements. Enemy AI is implemented using pathfinding algorithms and basic machine learning concepts to create adaptive behavior. The project includes collision detection, physics simulation, sprite animations, and state management systems.",
-        "challenges": "The biggest challenge was creating enemy AI that felt intelligent without being frustratingly difficult. I solved this by implementing a layered approach to enemy decision-making that balances aggression with vulnerability. Another challenge was optimizing performance while maintaining visual quality, which required efficient sprite handling and collision detection algorithms.",
-        "readme": "This project showcases game development skills and basic AI implementation in a practical, playable format. The code is structured in a modular way that allows for easy expansion and modification. The MIT-licensed codebase is available on GitHub and serves as both a fun game and a learning resource for those interested in game development or AI programming fundamentals.",
-        "tagline": "A 2D platformer whose enemies are driven by AI, built in Python and Pygame.",
+        "initialDescription": "I built CudaRL-Arena to explore reinforcement learning directly on the GPU. The environments, neural networks and learning algorithms are written from scratch in C++ and CUDA. Godot calls the native code in the same process and shows what the agents are learning, without Python or a machine-learning framework in the training loop.",
+        "detailedDescription": "Three Godot demonstrations make the learning visible: CartPole balances a pole on a moving cart, eight-car racing combines steering and throttle with nearby-car sensing, and a 3D tadpole pond trains swimmers to find food. CartPole and racing offer trained-policy playback or fresh training. The shallow pond learns live across 1,024 swimmers; the deep pond plays a validated food-selection policy paired with a retained swimming network. Native headless training can save and resume the optimizer and world state.",
+        "technicalDetails": "A C++ core holds the environments, CUDA kernels, neural-network forward and backward passes, Adam optimizer and Proximal Policy Optimization (PPO). Rollouts, advantage estimates and policy updates run on the GPU. A Godot 4.4 GDExtension connects that core to GDScript, while the core also builds independently for tests and benchmarks. Separate bf16 tensor-core matrix kernels use mma.sync, ldmatrix, asynchronous copies and swizzled shared memory. On the project's RTX 5070 benchmarks, those kernels reach 91–96% of cuBLAS throughput on large matrices; the small PPO networks still train in fp32.",
+        "challenges": "The main challenge is making GPU speedups measurable without losing correctness. I check gradients with fp64 finite differences, compare kernels against CPU references and cuBLAS, and retain reference execution paths when optimizing the racing pipeline. Small networks are often limited by memory traffic and kernel-launch overhead, so the work includes CUDA Graphs and end-to-end timing rather than relying on large matrix benchmarks alone. The Godot extension also reports missing GPU or driver support without crashing the editor. Windows CI checks the build and CPU tests; GPU validation runs locally on an RTX 5070.",
+        "readme": "Source and measured results are at github.com/life423/CudaRL-Arena. The current Godot application targets Windows with an NVIDIA GPU. Build with CMake and the CUDA Toolkit; Godot 4.4 supplies the live viewer. The repository includes PPO write-ups, GPU optimization studies, swimmer evaluation results and their limitations. Broader racing evaluation, Linux support and a self-hosted GPU CI runner remain future work.",
+        "highlights": [
+            "Environments, neural networks and PPO written from scratch in C++ and CUDA",
+            "Godot calls the GPU code directly through an in-process GDExtension",
+            "CartPole, eight-car racing and a 3D tadpole pond make learned behavior visible",
+            "Numerical reference checks and reproducible GPU benchmarks support the performance claims"
+        ],
+        "tagline": "Reinforcement learning from scratch on the GPU, brought to life in Godot.",
         "facts": [
             {
                 "icon": "brain",
-                "label": "AI-driven enemies"
+                "label": "PPO reinforcement learning"
             },
             {
-                "icon": "gamepad",
-                "label": "2D platformer"
+                "icon": "cpu",
+                "label": "Hand-written CUDA kernels"
             },
             {
                 "icon": "monitor",
-                "label": "Desktop, Python and Pygame"
+                "label": "Windows and NVIDIA GPU"
             }
         ],
-        "image": "/projects/ai-platform-trainer.jpg?v=2",
-        "imageAlt": "A glowing green brain wired into a circuit, with orange and blue nodes, on a dark background"
+        "image": "/projects/cudarl-arena.png",
+        "imageAlt": "CudaRL-Arena's Godot tadpole pond, with a swimming agent, CUDA training statistics and a food-collection learning curve"
     },
     {
         "id": 2,

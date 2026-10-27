@@ -4,7 +4,7 @@ import { askProjectsChat } from '../../services/chatService'
 
 // First questions for someone evaluating the work. Each is answered from the code.
 const STARTER_QUESTIONS = [
-    'How does the enemy AI in AI Platform Trainer learn?',
+    'How does CudaRL-Arena train agents directly on the GPU?',
     'How does multiplayer work in Ascend-Avoid?',
     'How does the Cryptography Toolkit figure out which cipher was used?',
     'How does this chat find the code it cites?',
