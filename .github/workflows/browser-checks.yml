@@ -8,9 +8,13 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: portfolio-browsers-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   browsers:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
@@ -19,7 +23,10 @@ jobs:
           node-version: 20
       - run: npm install --ignore-scripts --no-audit --no-fund
       - run: npm install --prefix app --legacy-peer-deps --no-audit --no-fund
-      - run: npx playwright install --with-deps chrome msedge firefox webkit
+      # The Ubuntu runner already includes Chrome and Edge. Reinstalling these
+      # channels adds system-package downloads without improving test coverage.
+      - run: npx playwright install --with-deps firefox webkit
+        timeout-minutes: 5
       - run: npm run build
       - run: npm run test:ui
       - uses: actions/upload-artifact@v4
