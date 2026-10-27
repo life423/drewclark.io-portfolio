@@ -17,9 +17,10 @@ const GIT_ENV = { ...process.env, GIT_TERMINAL_PROMPT: '0' }; // fail instead of
 const INCLUDED_EXTENSIONS = new Set([
     '.js', '.jsx', '.mjs', '.cjs', '.ts', '.tsx',
     '.py', '.html', '.css', '.scss',
+    '.cpp', '.h', '.hpp', '.cu', '.cuh', '.gd', '.cmake',
     '.md', '.json', '.yml', '.yaml', '.toml', '.sh',
 ]);
-const INCLUDED_NAMES = new Set(['dockerfile', 'makefile', 'procfile', 'requirements.txt']);
+const INCLUDED_NAMES = new Set(['dockerfile', 'makefile', 'procfile', 'requirements.txt', 'cmakelists.txt']);
 
 const SKIPPED_DIRS = new Set([
     '.git', 'node_modules', 'dist', 'build', 'coverage', '.next', '.cache',
@@ -35,6 +36,8 @@ const LANGUAGES = {
     '.ts': 'typescript', '.tsx': 'typescript', '.py': 'python', '.html': 'html',
     '.css': 'css', '.scss': 'scss', '.md': 'markdown', '.json': 'json',
     '.yml': 'yaml', '.yaml': 'yaml', '.toml': 'toml', '.sh': 'shell',
+    '.cpp': 'cpp', '.h': 'cpp', '.hpp': 'cpp', '.cu': 'cuda', '.cuh': 'cuda',
+    '.gd': 'gdscript', '.cmake': 'cmake',
 };
 
 // Anything that looks like a credential is blanked out before it can reach the index
@@ -71,6 +74,7 @@ function languageFor(relativePath) {
     const name = path.basename(relativePath).toLowerCase();
     if (name === 'dockerfile' || name === 'makefile') return name;
     if (name === 'requirements.txt') return 'text';
+    if (name === 'cmakelists.txt') return 'cmake';
     return LANGUAGES[path.extname(name)] || 'text';
 }
 
