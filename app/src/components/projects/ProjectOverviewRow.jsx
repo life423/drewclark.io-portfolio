@@ -53,16 +53,18 @@ const CODE =
     'hover:border-brandGreen-400/70 hover:bg-brandGreen-900/20 hover:text-brandGreen-300'
 
 function Thumbnail({ project }) {
-    if (project.image) {
+    const image = project.cardImage?.src || project.image
+    if (image) {
         return (
             <img
-                src={project.image}
-                alt={project.imageAlt || ''}
-                width='560'
-                height='350'
+                src={image}
+                alt={project.cardImage?.alt || project.imageAlt || ''}
+                width={project.cardImage?.width || project.imageWidth || 560}
+                height={project.cardImage?.height || project.imageHeight || 350}
                 loading='lazy'
                 decoding='async'
                 className='h-full w-full object-cover'
+                style={{ objectPosition: project.cardImage ? 'center' : project.imagePosition || 'center' }}
             />
         )
     }

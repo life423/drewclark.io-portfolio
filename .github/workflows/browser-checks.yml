@@ -1,0 +1,38 @@
+name: Portfolio browser checks
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: portfolio-browsers-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  browsers:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - run: npm install --prefix app --legacy-peer-deps --no-audit --no-fund
+      # Chrome, Edge and Firefox's system libraries are already on the runner.
+      # Fetch only Playwright's Firefox binary. WebKit is verified locally;
+      # installing its extra font/media packages stalled on the Ubuntu mirror.
+      - run: npx playwright install firefox
+        timeout-minutes: 3
+      - run: npm run build
+      - run: npm run test:ui -- --project=chrome --project=edge --project=firefox
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-test-results
+          path: test-results/
+          retention-days: 7

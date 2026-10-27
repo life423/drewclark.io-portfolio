@@ -12,7 +12,8 @@
         "lint": "eslint . --ext .js,.jsx",
         "lint:fix": "eslint . --ext .js,.jsx --fix",
         "index:repos": "node scripts/index-repos.js",
-        "verify": "node scripts/verify-openai.js"
+        "verify": "node scripts/verify-openai.js",
+        "test:ui": "playwright test"
     },
     "dependencies": {
         "compression": "^1.8.2",
@@ -25,6 +26,7 @@
     },
     "devDependencies": {
         "@eslint/js": "^9.27.0",
+        "@playwright/test": "1.64.1",
         "concurrently": "^8.2.2",
         "cross-env": "^7.0.3",
         "eslint": "^9.27.0",

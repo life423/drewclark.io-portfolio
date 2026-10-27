@@ -1,0 +1,105 @@
+.hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.hero-action {
+    --action-green: theme('colors.brandGreen.400');
+    --action-ink: theme('colors.brandGray.900');
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 52px;
+    padding: 12px 20px;
+    overflow: hidden;
+    border: 1px solid var(--action-green);
+    border-radius: 9999px;
+    font-weight: 700;
+    line-height: 1.5;
+    text-align: center;
+    touch-action: manipulation;
+    transition: color 180ms ease-out, background-color 180ms ease-out, transform 120ms ease-out;
+}
+
+.hero-action > span {
+    position: relative;
+    z-index: 1;
+}
+
+.hero-action--primary {
+    background-color: var(--action-green);
+    color: var(--action-ink);
+}
+
+.hero-action--outline {
+    /* Keep the outlined text readable even over the bright leaves. */
+    background-color: theme('colors.brandGray.900 / 90%');
+    color: var(--action-green);
+}
+
+.hero-action--outline::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: var(--action-green);
+    transform: translateY(101%);
+    transition: transform 180ms ease-out;
+}
+
+@media (hover: hover) {
+    .hero-action--primary:hover {
+        background-color: theme('colors.brandGreen.300');
+    }
+
+    .hero-action--outline:hover {
+        color: var(--action-ink);
+    }
+
+    .hero-action--outline:hover::before {
+        transform: translateY(0);
+    }
+}
+
+.hero-action:focus-visible {
+    outline: 3px solid theme('colors.brandGreen.200');
+    outline-offset: 4px;
+}
+
+.hero-action--outline:focus-visible,
+.hero-action--outline:active {
+    color: var(--action-ink);
+}
+
+.hero-action--outline:focus-visible::before,
+.hero-action--outline:active::before {
+    transform: translateY(0);
+}
+
+.hero-action:active {
+    background-color: theme('colors.brandGreen.500');
+    transform: translateY(1px);
+}
+
+.hero-action--outline:active::before {
+    background-color: theme('colors.brandGreen.500');
+}
+
+@media (max-width: 479px) {
+    .hero-action {
+        flex: 1 1 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hero-action,
+    .hero-action--outline::before {
+        transition: none;
+    }
+
+    .hero-action:active {
+        transform: none;
+    }
+}
