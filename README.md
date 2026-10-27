@@ -78,6 +78,54 @@ jobs:
             -f event_type=repo-updated -f "client_payload[repo]=$REPO"
 ```
 
+## Portfolio presentation
+
+Project detail views show each project's main image at full content width,
+using its natural aspect ratio rather than a fixed-height frame. Explicit source
+dimensions reserve space before loading. Images link to the original in a new tab.
+Both the mobile/tablet view and the desktop cards use `ProjectImage`. On desktop,
+the selected project, a row of three short image cards and the chat follow one
+vertical flow. Do not restore a tall sidebar beside shorter project details: it
+creates a large empty column. Compact cards retain uncropped thumbnails; clicking
+the preview opens that project's details, while the featured image opens at full
+size. Compact cards also support Enter and Space with a visible focus indicator.
+
+Ascend-Avoid keeps the user's `BEST.png`, copied unchanged to
+`app/public/projects/ascend-avoid-cover-best.png`, in project details and the
+full-image link. The latest user choice is to try emerald/teal artwork on the
+overview and smaller cards, using the optional `cardImage` source, dimensions
+and alt text in `projects.json`. The full-resolution 1122 × 1402 emerald artwork
+is saved at `app/public/projects/ascend-avoid-best-emerald-master.png` for a
+possible future detail-view switch. Preserve the natural proportions. Generation
+prompt and provenance are in `docs/ascend-avoid-emerald-art.md`.
+
+The hero offers Featured Projects and a direct Play Ascend-Avoid link. The latter
+starts with a green outline, then fills on hover, keyboard focus or press. The
+buttons share the brand green with dark text when filled, stack on small phones,
+and disable their transitions when reduced motion is requested. Keep the overview
+introduction short so visitors reach the apps quickly.
+
+Each detail header has a keyboard-accessible Next control that cycles through
+all four projects and wraps to the first. Keep the bottom Previous/Next controls
+available too. Selecting a project scrolls its header below the fixed site nav,
+and the selection survives phone/tablet/desktop breakpoint changes.
+
+## Browser verification
+
+Run `npm run build`, install test browsers with
+`npx playwright install --with-deps chrome msedge firefox webkit`, then run
+`npm run test:ui`. The tests start an isolated production-build preview on port
+3201. Chat requests are intercepted with success/failure fixtures; no API key or
+database is required. To test an existing server, set `UI_TEST_URL` first.
+
+The suite covers nine phone, landscape, tablet and desktop dimensions, artwork
+selection/proportions, overflow, project cycling/wrapping, bottom navigation,
+keyboard focus, touch/rotation, reduced motion, hero interaction states, chat
+loading/source links/recovery and contact dialog opening/closing. Pull requests
+run the same suite on Linux in Chrome, Edge, Firefox and WebKit. WebKit is an
+engine compatibility check; it does not replace testing real Safari on macOS/iOS.
+See `docs/portfolio-ui-validation.md` for the release evidence and remaining limits.
+
 ## Admin inbox
 
 Contact form messages are at `/admin`. Sign in with `ADMIN_PASSWORD`. The session is an HttpOnly cookie that lasts 8 hours, and five wrong passwords lock sign-in for 15 minutes.

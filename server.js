@@ -57,6 +57,9 @@ app.use(helmet({
             fontSrc: ["'self'", "https://fonts.gstatic.com"], // Allow Google Fonts
             imgSrc: ["'self'", "data:", "blob:"], // Allow data URIs for images
             connectSrc: ["'self'"],
+            // Safari upgrades localhost assets to HTTPS too. Local HTTP previews
+            // need this disabled; the production container keeps the protection.
+            upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null,
         }
     }
 }));

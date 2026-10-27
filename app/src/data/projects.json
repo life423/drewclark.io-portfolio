@@ -38,6 +38,8 @@
             }
         ],
         "image": "/projects/cudarl-arena.png",
+        "imageWidth": 1280,
+        "imageHeight": 720,
         "imageAlt": "CudaRL-Arena's Godot tadpole pond, with a swimming agent, CUDA training statistics and a food-collection learning curve"
     },
     {
@@ -72,6 +74,8 @@
             }
         ],
         "image": "/projects/cryptography-toolkit.jpg?v=2",
+        "imageWidth": 1120,
+        "imageHeight": 700,
         "imageAlt": "A glowing green padlock with a combination dial on a dark circuit-board background",
         "downloads": [
             {
@@ -129,8 +133,17 @@
                 "label": "Phone and desktop"
             }
         ],
-        "image": "/projects/ascend-avoid.jpg?v=2",
-        "imageAlt": "Ascend-Avoid mid-match: a round white creature named Drew floats among glowing gems in the starry arena"
+        "image": "/projects/ascend-avoid-cover-best.png",
+        "imageWidth": 1122,
+        "imageHeight": 1402,
+        "imagePosition": "top",
+        "imageAlt": "Ascend-Avoid cover art: a red creature collides with a white spiked rival amid colorful gems in a neon space arena beneath the Ascend/Avoid title",
+        "cardImage": {
+            "src": "/projects/ascend-avoid-best-emerald-master.png",
+            "width": 1122,
+            "height": 1402,
+            "alt": "Emerald-and-teal Ascend-Avoid illustration: two round creatures collide in a dark arena surrounded by green gems"
+        }
     },
     {
         "id": 4,
@@ -174,6 +187,8 @@
             }
         ],
         "image": "/projects/my-private-teacher.jpg?v=3",
+        "imageWidth": 800,
+        "imageHeight": 800,
         "imageAlt": "The My Private Teacher logo: a white letter a on a mint green square"
     }
 ]

@@ -3,11 +3,18 @@ import clsx from 'clsx'
 import { ProjectProgressIndicator } from './progress'
 import useScrollPosition from '../../hooks/useScrollPosition'
 import ProjectLinks from './ProjectLinks'
+import ProjectImage from './ProjectImage'
+import ProjectNextButton from './ProjectNextButton'
 
 export default function ProjectCard({
     projectNumber,
     title,
+    image,
+    imageAlt,
+    imageWidth,
+    imageHeight,
     summary,
+    tagline,
     stack,
     initialDescription,
     detailedDescription,
@@ -20,6 +27,8 @@ export default function ProjectCard({
     highlights, // short bullets for Key Innovations; the section is left out without them
     downloads, // downloadable builds: [{ platform, label, url, version }]
     onNavigateToProject,
+    onNextProject,
+    nextProjectTitle,
     totalProjects = 3,
     hideToc = false, // Prop to hide the table of contents in the card
     isActive = false, // Whether this card is the active one
@@ -34,14 +43,27 @@ export default function ProjectCard({
     const cardRef = useRef(null)
     const contentRef = useRef(null)
 
+    if (isCompact) {
+        return (
+            <div className='flex h-full items-start gap-3 rounded-xl border border-brandGray-700 bg-brandGray-800 p-3 transition-colors duration-200 hover:border-brandGreen-600 motion-reduce:transition-none'>
+                <div className='w-20 shrink-0'>
+                    <ProjectImage image={image} imageAlt={imageAlt} imageWidth={imageWidth} imageHeight={imageHeight} title={title} preview />
+                </div>
+                <div className='min-w-0 flex-1'>
+                    <span className='text-xs text-brandGray-400'>Project {projectNumber}</span>
+                    <h3 className='mt-1 text-base font-semibold leading-snug text-brandGreen-300'>{title}</h3>
+                    <p className='mt-1 line-clamp-2 text-sm leading-relaxed text-brandGray-300'>{tagline || summary}</p>
+                    <span className='mt-2 block text-xs font-medium text-brandGreen-400'>View project →</span>
+                </div>
+            </div>
+        )
+    }
+
     return (
         <div
             ref={cardRef}
             className={clsx(
-                'my-4 @container overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transition-all duration-300 flex flex-col',
-                // Compact cards fill their slot; a full card fills its column beside the sidebar,
-                // and is at least 700px tall, growing with its content rather than scrolling inside itself
-                isCompact ? 'h-full' : 'h-full min-h-[700px]',
+                '@container overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transition-all duration-300 flex flex-col',
                 // Card styles based on state
                 isActive 
                     ? 'ring-2 ring-brandGreen-500/50 shadow-xl border-brandGreen-600/30 bg-gradient-to-b from-brandGray-800 to-brandGray-850' 
@@ -57,25 +79,7 @@ export default function ProjectCard({
                     <span className='text-sm font-semibold text-white px-2 py-1 rounded-md bg-gradient-to-r from-brandOrange-700 to-brandOrange-600 shadow-sm'>
                         Project {projectNumber}
                     </span>
-                    {/* Overview button - only visible on mobile/tablet */}
-                    <button
-                        onClick={() => onNavigateToProject?.(-1)}
-                        className='lg:hidden group flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm text-brandGray-400 hover:text-brandGreen-400 transition-all duration-300'
-                    >
-                        <svg
-                            xmlns='http://www.w3.org/2000/svg'
-                            className='h-4 w-4'
-                            viewBox='0 0 20 20'
-                            fill='currentColor'
-                        >
-                            <path
-                                fillRule='evenodd'
-                                d='M10 18a8 8 0 100-16 8 8 0 000 16zm.707-10.293a1 1 0 00-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L9.414 11H13a1 1 0 100-2H9.414l1.293-1.293z'
-                                clipRule='evenodd'
-                            />
-                        </svg>
-                        <span>Overview</span>
-                    </button>
+                    {onNextProject && <ProjectNextButton onClick={onNextProject} nextTitle={nextProjectTitle} />}
                 </div>
 
                 <h2
@@ -105,6 +109,7 @@ export default function ProjectCard({
                 ref={contentRef}
                 className='p-3 @sm:p-4 @md:p-5 flex-1 flex flex-col'
             >
+                <ProjectImage image={image} imageAlt={imageAlt} imageWidth={imageWidth} imageHeight={imageHeight} title={title} preview={isCompact} />
                 <div
                     className={clsx(
                         'prose prose-sm prose-invert max-w-none',
@@ -117,12 +122,12 @@ export default function ProjectCard({
                         setTimeout(() => forceRecalculation(), 200)
                     }}
                 >
-                    {/* Compact mode just shows summary */}
+                    {/* Compact mode keeps the preview image and a short summary. */}
                     {isCompact ? (
                         <div>
                             <p className="text-sm">{summary}</p>
                             <div className="mt-4 text-xs text-brandGreen-400">
-                                Click to view detailed project information
+                                View project →
                             </div>
                         </div>
                     ) : (

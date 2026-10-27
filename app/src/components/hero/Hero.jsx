@@ -9,7 +9,7 @@ import largeSprout from '../../assets/large-sprout.jpg'
 // preload the exact URL the browser will request (an import would get a hashed name)
 const sproutMobileWebp = '/assets/sprout-mobile.webp'
 const largeSproutWebp = '/assets/large-sprout.webp'
-import PrimaryButton from '../utils/PrimaryButton'
+import '../../styles/components/hero-actions.css'
 import ProgressiveElement from '../utils/ProgressiveElement'
 import NeuralNetworkCanvas from './NeuralNetworkCanvas'
 import TypedTextEffect from './TypedTextEffect'
@@ -115,7 +115,7 @@ export default function Hero() {
         <section
             ref={heroRef}
             onMouseMove={handleMouseMove}
-            className='relative h-[70vh] md:h-[85vh] lg:h-[95vh] flex items-center justify-center px-4 py-16 text-white overflow-hidden'
+            className='relative min-h-[70vh] md:min-h-[85vh] lg:min-h-[95vh] flex items-center justify-center px-4 py-16 text-white overflow-hidden'
             style={calculateTransform()}
         >
             {/* Spotlight overlay - follows cursor */}
@@ -293,11 +293,20 @@ export default function Hero() {
                     appearDelay={900}
                     focusStage={4}
                 >
-                    <PrimaryButton href='#projects'>
-                        <span className='text-white font-medium'>
-                            Featured Projects
-                        </span>
-                    </PrimaryButton>
+                    <div className='hero-actions'>
+                        <a href='#projects' className='hero-action hero-action--primary'>
+                            <span>Featured Projects</span>
+                        </a>
+                        <a
+                            href='https://ascend.drewclark.io'
+                            target='_blank'
+                            rel='noopener noreferrer'
+                            aria-label='Play Ascend-Avoid (opens in a new tab)'
+                            className='hero-action hero-action--outline'
+                        >
+                            <span>Play Ascend-Avoid</span>
+                        </a>
+                    </div>
                 </ProgressiveElement>
             </div>
 

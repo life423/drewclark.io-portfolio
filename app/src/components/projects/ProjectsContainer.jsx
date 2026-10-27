@@ -1,10 +1,11 @@
  import React, { useState, useEffect, useRef, useCallback } from 'react'
 import ProjectCard from './ProjectCard'
 import ProjectLinks from './ProjectLinks'
+import ProjectImage from './ProjectImage'
+import ProjectNextButton from './ProjectNextButton'
 import ProjectOverviewRow from './ProjectOverviewRow'
 import UnifiedProjectChat from './UnifiedProjectChat'
 import clsx from 'clsx'
-import PrimaryButton from '../utils/PrimaryButton'
 // Also read by the API to build the chat prompt (api/services/ai/promptBuilder.js)
 import PROJECTS from '../../data/projects.json'
 
@@ -51,8 +52,11 @@ export default function ProjectsContainer() {
     const navigateToProject = index => {
         if (index < 0 || index >= PROJECTS.length) return
 
-        setTransitionDirection(index > activeProjectIndex ? 'next' : 'prev')
+        scrollAfterRender.current = true
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        setTransitionDirection(reduceMotion ? null : index > activeProjectIndex ? 'next' : 'prev')
         setActiveProjectIndex(index)
+        setFeaturedProjectIndex(index)
     }
 
     useEffect(() => {
@@ -95,17 +99,7 @@ export default function ProjectsContainer() {
                             {/* Welcome text - shown on all screen sizes */}
                             <div className='prose prose-sm prose-invert max-w-none mb-3 sm:mb-4 md:mb-6 lg:mb-3'>
                                 <p>
-                                    Welcome to an interactive journey through my
-                                    portfolio projects. Rather than a simple
-                                    list, I've created an experience that guides
-                                    you through each of my key projects.
-                                </p>
-                                <p>
-                                    Each project reveals the challenges,
-                                    solutions, and technologies behind my work.
-                                    And you can ask questions along the way to
-                                    dive deeper into any aspect that interests
-                                    you.
+                                    Try an app, explore the code, or open a project to see how it works.
                                 </p>
                             </div>
 
@@ -188,6 +182,10 @@ export default function ProjectsContainer() {
                                             <span className='text-sm font-semibold text-white px-2 py-1 rounded-md bg-gradient-to-r from-brandOrange-700 to-brandOrange-600 shadow-sm'>
                                                 Project {activeProjectIndex + 1}/{PROJECTS.length}
                                             </span>
+                                            <ProjectNextButton
+                                                onClick={() => showProject((activeProjectIndex + 1) % PROJECTS.length)}
+                                                nextTitle={PROJECTS[(activeProjectIndex + 1) % PROJECTS.length].title}
+                                            />
                                         </div>
                                         <h2 className='text-xl font-bold mb-1 text-transparent bg-clip-text bg-gradient-to-r from-brandGreen-300 via-brandGreen-200 to-brandGreen-300'>
                                             {PROJECTS[activeProjectIndex].title}
@@ -197,6 +195,13 @@ export default function ProjectsContainer() {
                                     
                                     {/* Project Content */}
                                     <div className='p-3 sm:p-4 md:p-5'>
+                                        <ProjectImage
+                                            image={PROJECTS[activeProjectIndex].image}
+                                            imageAlt={PROJECTS[activeProjectIndex].imageAlt}
+                                            imageWidth={PROJECTS[activeProjectIndex].imageWidth}
+                                            imageHeight={PROJECTS[activeProjectIndex].imageHeight}
+                                            title={PROJECTS[activeProjectIndex].title}
+                                        />
                                         {/* Project Summary and Stack */}
                                         <div className='mb-4'>
                                             <h3 className='text-base sm:text-lg font-medium text-white mb-2'>Summary</h3>
@@ -263,15 +268,17 @@ export default function ProjectsContainer() {
                             </div>
                         </div>
                         
-                        {/* On desktop - implement magazine-style layout with 2/3 + 1/3 split */}
-                        <div className='hidden lg:block relative'>
-                            {/* Magazine-style layout with featured project (2/3) and stacked projects (1/3) */}
-                            <div className='grid grid-cols-3 gap-6'>
-                                {/* Featured project (2/3 width) */}
-                                <div className='col-span-2 transition-all duration-300'>
+                        {/* Keep project details, alternatives and chat in one vertical flow. */}
+                        <div className='hidden lg:block relative mx-auto max-w-5xl'>
+                            <div className='space-y-6'>
+                                <div className='transition-all duration-300'>
                                     <ProjectCard
                                         projectNumber={featuredProjectIndex + 1}
                                         title={PROJECTS[featuredProjectIndex].title}
+                                        image={PROJECTS[featuredProjectIndex].image}
+                                        imageAlt={PROJECTS[featuredProjectIndex].imageAlt}
+                                        imageWidth={PROJECTS[featuredProjectIndex].imageWidth}
+                                        imageHeight={PROJECTS[featuredProjectIndex].imageHeight}
                                         summary={PROJECTS[featuredProjectIndex].summary}
                                         stack={PROJECTS[featuredProjectIndex].stack}
                                         initialDescription={PROJECTS[featuredProjectIndex].initialDescription}
@@ -285,6 +292,8 @@ export default function ProjectsContainer() {
                                         downloads={PROJECTS[featuredProjectIndex].downloads}
                                         highlights={PROJECTS[featuredProjectIndex].highlights}
                                         totalProjects={PROJECTS.length}
+                                        onNextProject={() => showProject((featuredProjectIndex + 1) % PROJECTS.length)}
+                                        nextProjectTitle={PROJECTS[(featuredProjectIndex + 1) % PROJECTS.length].title}
                                         onNavigateToProject={(newIndex) => {
                                             if (newIndex === -1) {
                                                 showOverview();
@@ -298,20 +307,33 @@ export default function ProjectsContainer() {
                                     />
                                 </div>
                                 
-                                {/* Stacked projects (1/3 width) */}
-                                <div className='flex flex-col gap-6'>
-                                    {/* Stacked Project Cards - show only projects that aren't featured */}
+                                {/* Short image cards keep the other projects together below the details. */}
+                                <div className='grid grid-cols-3 items-stretch gap-4'>
                                     {PROJECTS.map((project, index) => 
                                         index !== featuredProjectIndex && (
                                             <div 
                                                 key={project.id}
-                                                className="flex-1 min-h-[240px] transition-all duration-300 cursor-pointer"
+                                                role='button'
+                                                tabIndex={0}
+                                                aria-label={`View ${project.title} details`}
+                                                className="h-full rounded-xl cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brandGreen-300"
                                                 onClick={() => showProject(index)}
+                                                onKeyDown={event => {
+                                                    if (event.key === 'Enter' || event.key === ' ') {
+                                                        event.preventDefault()
+                                                        showProject(index)
+                                                    }
+                                                }}
                                             >
                                                 <ProjectCard
                                                     projectNumber={index + 1}
                                                     title={project.title}
+                                                    image={project.cardImage?.src || project.image}
+                                                    imageAlt={project.cardImage?.alt || project.imageAlt}
+                                                    imageWidth={project.cardImage?.width || project.imageWidth}
+                                                    imageHeight={project.cardImage?.height || project.imageHeight}
                                                     summary={project.summary}
+                                                    tagline={project.tagline}
                                                     stack={project.stack}
                                                     hideToc={true}
                                                     isCompact={true}
@@ -323,10 +345,8 @@ export default function ProjectsContainer() {
                             </div>
                         </div>
 
-                        {/* No desktop navigation buttons as per requirements */}
-
-                        {/* Mobile/Tablet Navigation Controls */}
-                        <div className='flex lg:hidden justify-between mt-6'>
+                        {/* Bottom navigation stays available alongside the header shortcut. */}
+                        <div className='mx-auto mt-6 flex max-w-5xl justify-between'>
                             <button
                                 onClick={() =>
                                     activeProjectIndex === 0
@@ -334,7 +354,7 @@ export default function ProjectsContainer() {
                                         : navigateToProject(activeProjectIndex - 1)
                                 }
                                 className={clsx(
-                                    'px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 flex items-center gap-1',
+                                    'min-h-11 px-3 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 flex items-center gap-1 motion-reduce:transition-none',
                                     'focus:outline-none focus:ring-2 focus:ring-brandGreen-500/50',
                                     'bg-brandGray-800 text-white hover:bg-brandGray-700 active:bg-brandGray-800 active:text-white'
                                 )}
@@ -362,7 +382,7 @@ export default function ProjectsContainer() {
                                 }
                                 disabled={activeProjectIndex === PROJECTS.length - 1}
                                 className={clsx(
-                                    'px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 flex items-center gap-1',
+                                    'min-h-11 px-3 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 flex items-center gap-1 motion-reduce:transition-none',
                                     'focus:outline-none focus:ring-2 focus:ring-brandGreen-500/50',
                                     activeProjectIndex === PROJECTS.length - 1
                                         ? 'bg-brandGray-800 text-brandGray-600 cursor-not-allowed'
@@ -386,7 +406,7 @@ export default function ProjectsContainer() {
                         </div>
                         
                         {/* Unified Project Chat - shown on all screen sizes */}
-                        <div className='mt-8 lg:mt-12'>
+                        <div className='mt-8 lg:mx-auto lg:max-w-5xl'>
                             <UnifiedProjectChat />
                         </div>
                     </div>

@@ -9,6 +9,8 @@ package-lock.json
 logs
 *.log
 *.log.*
+test-results/
+playwright-report/
 
 # OS / Editor junk
 .DS_Store
