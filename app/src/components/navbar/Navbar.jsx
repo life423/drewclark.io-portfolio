@@ -127,11 +127,15 @@ export default function Navbar({ drawerOpen, toggleDrawer, progressBarVisible = 
             isScrolled ? 'space-x-6' : 'space-x-8'
           )}
         >
-          {['Home', 'GitHub'].map((item, index) => (
+          {[
+            { label: 'Home', href: '#' },
+            { label: 'Blog', href: 'https://blog.drewclark.io' },
+            { label: 'GitHub', href: 'https://github.com/life423' },
+          ].map(({ label, href }) => (
             <li
-              key={item}
+              key={label}
               className={clsx(
-                'nav-link-hover relative overflow-hidden',
+                'nav-link-hover relative',
                 'transition-all duration-300 ease-out',
                 isScrolled
                   ? 'text-brandGreen-400 text-sm'
@@ -139,17 +143,16 @@ export default function Navbar({ drawerOpen, toggleDrawer, progressBarVisible = 
               )}
             >
               <a
-                href={
-                  index === 0 ? '#' : 'https://github.com/life423'
-                }
-                target={index === 0 ? '_self' : '_blank'}
-                rel={index === 0 ? '' : 'noopener noreferrer'}
+                href={href}
+                target={label === 'Home' ? '_self' : '_blank'}
+                rel={label === 'Home' ? '' : 'noopener noreferrer'}
                 className={clsx(
                   'relative block transition-all duration-300 ease-out',
-                  'hover:text-brandGreen-300 group'
+                  'hover:text-brandGreen-300 group',
+                  'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brandGreen-300'
                 )}
               >
-                {item}
+                {label}
                 <span
                   className='absolute bottom-0 left-0 w-0 h-0.5 
                   bg-gradient-to-r from-brandGreen-400 to-brandBlue-400

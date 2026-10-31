@@ -169,6 +169,18 @@ const Drawer = memo(function Drawer({ isOpen, onClose }) {
                     {/* Main Drawer Content - Ask the Portfolio */}
                 <div className='flex-1 overflow-y-auto overscroll-contain'>
                     <div className='mt-2 px-4 pb-20'>
+                        <a
+                            href='https://blog.drewclark.io'
+                            target='_blank'
+                            rel='noopener noreferrer'
+                            onClick={onClose}
+                            className='group mb-4 flex min-h-11 items-center rounded-md px-3 text-base font-medium text-brandGreen-300 transition-colors hover:text-brandGreen-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brandGreen-400 motion-reduce:transition-none'
+                        >
+                            <span className='relative'>
+                                Blog
+                                <span className='absolute bottom-0 left-0 h-0.5 w-0 bg-gradient-to-r from-brandGreen-400 to-brandBlue-400 group-hover:animate-nav-underline'></span>
+                            </span>
+                        </a>
                         <div 
                             className='p-3 rounded-lg border border-brandGray-700/50 bg-brandGray-800/30'
                             style={{

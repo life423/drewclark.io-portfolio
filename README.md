@@ -80,6 +80,11 @@ jobs:
 
 ## Portfolio presentation
 
+The navbar's Blog link opens `https://blog.drewclark.io` in a new tab, using the
+same text styling and hover treatment as Home and GitHub. On phones it appears
+in the existing navigation drawer with a 44px touch target and closes the drawer
+when selected. Keep it a plain navigation link, without a separate button style.
+
 Project detail views show each project's main image at full content width,
 using its natural aspect ratio rather than a fixed-height frame. Explicit source
 dimensions reserve space before loading. Images link to the original in a new tab.
