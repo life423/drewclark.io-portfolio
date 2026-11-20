@@ -73,10 +73,10 @@
                 "label": "Desktop, Python and PyQt"
             }
         ],
-        "image": "/projects/cryptography-toolkit.jpg?v=2",
-        "imageWidth": 1120,
-        "imageHeight": 700,
-        "imageAlt": "A glowing green padlock with a combination dial on a dark circuit-board background",
+        "image": "/projects/cryptography-toolkit-emerald.webp",
+        "imageWidth": 880,
+        "imageHeight": 1100,
+        "imageAlt": "An emerald cipher wheel with two alphabet rings and a gold pointer aligning A with D",
         "downloads": [
             {
                 "platform": "macos",
