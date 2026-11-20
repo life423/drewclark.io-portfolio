@@ -186,9 +186,9 @@
                 "label": "Live whiteboard and video"
             }
         ],
-        "image": "/projects/my-private-teacher.jpg?v=3",
-        "imageWidth": 800,
-        "imageHeight": 800,
-        "imageAlt": "The My Private Teacher logo: a white letter a on a mint green square"
+        "image": "/projects/my-private-teacher-emerald.webp",
+        "imageWidth": 880,
+        "imageHeight": 1100,
+        "imageAlt": "Illustration of a tutor on video beside a phonics whiteboard, on a forest-green background"
     }
 ]
