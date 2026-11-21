@@ -1,7 +1,10 @@
-/* Extend the work section's charcoal into a quiet, separate footer. */
+/* Keep a distinct evergreen finish below the charcoal project gallery. */
 .portfolio-footer {
-    background: linear-gradient(180deg, theme('colors.brandGray.900'), #121214);
-    border-top: 1px solid theme('colors.brandGray.800');
+    background: linear-gradient(180deg, #0d382e, #112e28);
+    background: linear-gradient(180deg,
+        color-mix(in srgb, theme('colors.brandGreen.900') 60%, theme('colors.brandGray.900')),
+        color-mix(in srgb, theme('colors.brandGreen.900') 40%, theme('colors.brandGray.900')));
+    border-top: 1px solid theme('colors.brandGreen.900');
     padding: 1.6rem 1rem 1.75rem;
 }
 
