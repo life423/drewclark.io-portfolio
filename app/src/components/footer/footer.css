@@ -1,7 +1,6 @@
-/* Keep the same emerald finish as the gallery divider. */
+/* Keep a distinct evergreen finish below the charcoal project gallery. */
 .portfolio-footer {
     background: var(--portfolio-emerald-gradient);
-    color: theme('colors.brandGray.900');
     border-top: 1px solid theme('colors.brandGreen.900');
     padding: .65rem 1rem .7rem;
 }
@@ -24,15 +23,4 @@
     outline: 2px solid theme('colors.brandGray.50');
     outline-offset: 4px;
     border-radius: 2px;
-}
-
-
-/* The dark badge preserves green/orange glyph visibility across the gradient. */
-.portfolio-footer a {
-    border-radius: 999px;
-    background: theme('colors.brandGray.900');
-}
-/* The charcoal second ring remains visible on the brightest end. */
-.portfolio-footer button:focus-visible {
-    box-shadow: 0 0 0 4px theme('colors.brandGray.900');
 }

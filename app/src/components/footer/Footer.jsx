@@ -40,7 +40,7 @@ export default function Footer() {
     }
 
     return (
-        <footer ref={containerRef} className='portfolio-footer'>
+        <footer ref={containerRef} className='portfolio-footer text-white'>
             <div className='portfolio-footer__inner'>
                 {/* Single row layout on all screen sizes */}
                 <div className='flex flex-row justify-between items-center'>
@@ -87,20 +87,20 @@ export default function Footer() {
                         {/* 1) Clickable 'Copy Email' text */}
                         <button
                             onClick={handleCopyEmail}
-                            className="text-sm font-semibold no-underline hover:no-underline active:no-underline focus:outline-none">
+                            className="text-sm text-brandGreen-500 no-underline hover:no-underline active:no-underline focus:outline-none">
 
                             {email}
                         </button>
 
                         {/* 2) Feedback message that appears briefly */}
                         {copySuccess && (
-                            <span className='text-xs font-semibold'>
+                            <span className='text-xs text-neonOrange-500'>
                                 Copied
                             </span>
                         )}
 
                         {/* 3) Copyright */}
-                        <div className='text-sm'>
+                        <div className='text-sm text-brandGray-200'>
                             &copy; {currentYear} Drew Clark
                         </div>
                     </div>
