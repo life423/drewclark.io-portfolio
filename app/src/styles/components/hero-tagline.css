@@ -1,0 +1,27 @@
+/* A zero-width caret cannot push a word onto a new line during the reveal. */
+.hero-tagline-cursor {
+    position: relative;
+    display: inline-block;
+    width: 0;
+}
+
+.hero-tagline-cursor::after {
+    content: '';
+    position: absolute;
+    left: 0.12em;
+    bottom: -0.12em;
+    width: 0.1em;
+    height: 1.05em;
+    background: currentColor;
+    animation: hero-tagline-blink 1s step-end infinite;
+}
+
+@keyframes hero-tagline-blink {
+    50% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hero-tagline-cursor {
+        display: none;
+    }
+}
