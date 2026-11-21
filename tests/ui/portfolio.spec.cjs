@@ -74,9 +74,9 @@ for (const [width, height] of sizes) {
             const chat = page.locator('#project-chat');
             await expect(chat).toHaveCount(1);
             await expect(chat.getByRole('textbox', { name: 'Question for Project Chat' })).toBeVisible();
-            // A single read avoids mismatched y coordinates while the page scrolls.
+            // Measure the fixed layout rail rather than the child chat that can stick during scrolling.
             const [summary, panel, media, details, related] = await page.evaluate(() => [
-                '[data-testid="case-study-summary"]', '#project-chat', '[aria-labelledby="case-study-title"] figure img',
+                '[data-testid="case-study-summary"]', '[aria-label="Ask about this case study"]', '[aria-labelledby="case-study-title"] figure img',
                 '#case-study-details', '#related-projects-title',
             ].map(selector => document.querySelector(selector).getBoundingClientRect().toJSON()));
             if (width >= 1100) {
@@ -524,4 +524,73 @@ test('overview studio widens into its rail on large monitors without squeezing c
     expect(Math.abs(layout.fieldLeft - layout.fieldRight)).toBeLessThan(1);
     expect(Math.abs(layout.alignedY)).toBeLessThan(1);
     await noOverflow(page);
+});
+
+test('overview title uses the orange arc without repeating it on project card headings', async ({ page }) => {
+    await page.setViewportSize({ width: 1126, height: 900 });
+    await ready(page);
+    for (const width of [1126, 390]) {
+        await page.setViewportSize({ width, height: 900 });
+        const mark = await page.getByRole('heading', { name: 'My Portfolio Projects' }).evaluate(node => {
+            const arc = getComputedStyle(node, '::after');
+            const heading = node.getBoundingClientRect();
+            return {
+                ratio: parseFloat(arc.width) / heading.width, image: arc.backgroundImage,
+                summaryGap: node.nextElementSibling.getBoundingClientRect().top - heading.bottom,
+            };
+        });
+        expect(mark.ratio).toBeCloseTo(0.93, 2);
+        expect(mark.image).toContain('FF6B00');
+        expect(mark.summaryGap).toBeGreaterThan(0);
+        expect(await page.locator('.work-gallery-card h3').first().evaluate(node => getComputedStyle(node, '::after').backgroundImage)).toBe('none');
+        await noOverflow(page);
+    }
+});
+
+test('gallery images keep their full card width through mobile and tablet transitions', async ({ page }) => {
+    await ready(page);
+    for (const width of [390, 639, 640, 719, 720, 768, 930, 1099, 1100, 1126]) {
+        await page.setViewportSize({ width, height: 900 });
+        const boxes = await page.locator('.work-gallery-card').evaluateAll(cards => cards.map(card => {
+            const rect = node => node.getBoundingClientRect().toJSON();
+            return { card: rect(card), frame: rect(card.querySelector('.work-gallery-art')),
+                image: rect(card.querySelector('img')) };
+        }));
+        expect(boxes).toHaveLength(4);
+        for (const { card, frame, image } of boxes) {
+            expect(Math.abs(frame.width - card.width)).toBeLessThan(1);
+            expect(Math.abs(image.width - frame.width)).toBeLessThan(1);
+            expect(Math.abs(image.height - frame.height)).toBeLessThan(1);
+            expect(frame.width / frame.height).toBeCloseTo(16 / 9, 2);
+        }
+        if (width >= 720) {
+            expect(Math.abs(boxes[0].card.y - boxes[1].card.y)).toBeLessThan(1);
+            expect(boxes[1].card.x).toBeGreaterThan(boxes[0].card.x);
+        } else {
+            expect(boxes[1].card.y).toBeGreaterThan(boxes[0].card.bottom);
+            expect(Math.abs(boxes[1].card.x - boxes[0].card.x)).toBeLessThan(1);
+        }
+        await noOverflow(page);
+    }
+});
+
+test('work headings reuse the hero colors and the explorer has an explicit purpose', async ({ page }) => {
+    await page.setViewportSize({ width: 1126, height: 900 });
+    await ready(page);
+    const overview = page.getByRole('heading', { name: 'My Portfolio Projects' });
+    const gradient = await overview.locator('span').evaluate(span => getComputedStyle(span).backgroundImage);
+    expect(gradient).toContain('rgb(110, 231, 183)');
+    expect(gradient).toContain('rgb(167, 243, 208)');
+    expect(gradient).toContain('rgb(56, 189, 248)');
+    await expect(overview.locator('xpath=..').getByText('Portfolio', { exact: true })).toHaveCount(0);
+    const chat = page.locator('#project-chat');
+    await expect(chat.getByRole('heading', { name: 'Project Code Explorer' })).toBeVisible();
+    await expect(chat.getByText('Ask me a question', { exact: true })).toBeVisible();
+    await expect(chat.getByRole('textbox')).toHaveAccessibleDescription(/actual GitHub code.*exact files and lines/);
+    await page.getByRole('button', { name: projects[0].title, exact: true }).click();
+    const detail = page.getByRole('heading', { name: projects[0].title, level: 2, exact: true });
+    await expect(detail.locator('span')).toHaveCSS('background-image', gradient);
+    await page.emulateMedia({ forcedColors: 'active' });
+    await expect(detail.locator('span')).toHaveCSS('background-image', 'none');
+    await expect(detail.locator('span')).not.toHaveCSS('color', 'rgba(0, 0, 0, 0)');
 });

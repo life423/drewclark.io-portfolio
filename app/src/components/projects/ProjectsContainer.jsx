@@ -46,8 +46,7 @@ export default function ProjectsContainer() {
             <section className='work-studio-section'>
                 <div ref={projectsTopRef} className='work-studio-shell work-studio-grid work-studio-overview'>
                     <header className='work-studio-intro' data-testid='work-gallery-intro'>
-                        <p className='work-studio-kicker'>Portfolio</p>
-                        <h2 className='work-studio-title'>My Portfolio Projects</h2>
+                        <h2 className='work-studio-title'><span className='work-studio-title-color'>My Portfolio Projects</span></h2>
                         <p className='work-studio-summary'>Try an app, explore the code, or open a project to see how it works.</p>
                     </header>
                     <aside className='work-studio-rail' aria-label='Ask about the portfolio code'>

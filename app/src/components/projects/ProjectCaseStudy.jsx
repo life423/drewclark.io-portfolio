@@ -24,7 +24,7 @@ export default function ProjectCaseStudy({ project, projectNumber, totalProjects
             </nav>
             <header data-testid='case-study-summary' className='work-studio-intro'>
                 <p className='work-studio-kicker'>Case study {projectNumber} of {totalProjects}</p>
-                <h2 id='case-study-title' className='work-studio-title'>{title}</h2>
+                <h2 id='case-study-title' className='work-studio-title'><span className='work-studio-title-color'>{title}</span></h2>
                 <p className='work-studio-summary'>{summary}</p>
                 <ProjectLinks title={title} liveUrl={liveUrl} liveLabel={liveLabel} repo={repo} downloads={downloads} />
             </header>

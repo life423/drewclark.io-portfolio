@@ -291,7 +291,7 @@ export default function UnifiedProjectChat({ project, embedded = false }) {
         <div id='project-chat' className={clsx('w-full scroll-mt-20', embedded ? 'code-studio' : 'mt-8')}>
             <div
                 className={clsx(
-                    'code-studio-surface rounded-xl',
+                    'code-studio-surface rounded-2xl',
                     isCollapsed ? 'p-3 sm:px-4' : 'p-4 lg:p-5'
                 )}
                 style={{
@@ -307,17 +307,17 @@ export default function UnifiedProjectChat({ project, embedded = false }) {
                         toggleCollapse();
                     }}
                 >
-                    <h3 className='text-lg font-semibold text-brandGreen-300 flex items-center'>
+                    <h3 className='flex min-w-0 items-center text-xl font-semibold leading-tight tracking-tight text-brandGreen-200 sm:text-2xl'>
                         <svg
                             xmlns='http://www.w3.org/2000/svg'
-                            className='h-5 w-5 mr-2 text-brandOrange-500'
+                            className='mr-2 h-5 w-5 shrink-0 text-brandOrange-500' aria-hidden='true'
                             viewBox='0 0 20 20'
                             fill='currentColor'
                         >
                             <path d='M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z' />
                             <path d='M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z' />
                         </svg>
-                        Ask about the code
+                        Project Code Explorer
                     </h3>
                     <div className='flex items-center space-x-2'>
                         {/* Clear button */}
@@ -401,7 +401,7 @@ export default function UnifiedProjectChat({ project, embedded = false }) {
                 </div>
 
                 <p id='project-chat-description' className='mb-3 max-w-[52ch] text-sm leading-relaxed text-brandGray-200'>
-                    Search the projects&apos; GitHub code for architecture and implementation details. When matching code is found, answers link to the exact files and lines.
+                    Trace how a feature works. This searches the actual GitHub code and links to exact files and lines when it finds a match.
                 </p>
                 {project && (
                     <div className='mb-2 flex flex-wrap items-center gap-2'>
@@ -442,9 +442,7 @@ export default function UnifiedProjectChat({ project, embedded = false }) {
                                 'relative overflow-hidden border',
                                 isGenerating
                                     ? 'bg-brandGray-700 text-brandGray-500 border-transparent cursor-wait'
-                                    : !userQuestion.trim()
-                                    ? 'bg-transparent text-brandGreen-400 border-brandGreen-500/50 hover:bg-brandGreen-500/10'
-                                    : 'bg-gradient-to-r from-brandGreen-600 to-brandGreen-500 text-white hover:shadow-lg hover:shadow-brandGreen-500/20 border-transparent'
+                                    : 'border-transparent bg-brandGreen-400 text-brandGray-900 shadow-sm shadow-brandGreen-500/20 hover:bg-brandGreen-300 active:bg-brandGreen-500'
                             )}
                         >
                             {isGenerating ? (
@@ -602,7 +600,7 @@ export default function UnifiedProjectChat({ project, embedded = false }) {
                         ) : (
                             <div className='mt-4 border-t border-emerald-400/15 pt-3'>
                                 <p className='mb-2 text-xs font-semibold uppercase tracking-wider text-brandOrange-300'>
-                                    Try a question
+                                    Ask me a question
                                 </p>
                                 <div className='flex flex-wrap gap-2'>
                                     {starterQuestions.map(question => (
