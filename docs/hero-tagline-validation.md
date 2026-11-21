@@ -20,9 +20,11 @@ shine is preserved.
 ## Verification
 
 - Production build passes.
-- 21 new behavior cases passed across Chrome, Edge and WebKit, covering phone
+- 24 new behavior cases passed across Chrome, Edge and WebKit, covering phone
   and desktop copy, 60-second completed dwell, pointer movement, stable action
   positions, offscreen pause/resume, partial/completed resizing and reduced motion.
+  The test clock is frozen before navigation; a real four-second image delay
+  verifies slow loading cannot consume the typing entrance before assertions.
 - The existing 81 cases passed across the same browsers, including five rerun
   after parallel runs collided in their report directory. Outputs were isolated;
   those failures were trace-file cleanup errors rather than failed page assertions.

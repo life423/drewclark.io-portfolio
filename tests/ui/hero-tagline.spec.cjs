@@ -1,5 +1,6 @@
 /* global document, window */
 const { test, expect } = require('@playwright/test');
+const { setTimeout: delay } = require('node:timers/promises');
 
 const COMPACT = 'Software that solves real problems.';
 const FULL = 'Building elegant solutions to complex problems.';
@@ -12,18 +13,26 @@ async function openHero(page, { width = 390, height = 844, reducedMotion = 'no-p
     await page.setViewportSize({ width, height });
     await page.emulateMedia({ reducedMotion });
     await page.clock.install();
+    await page.clock.pauseAt(await page.evaluate(() => Date.now() + 1000));
+    const pausedTime = await page.evaluate(() => Date.now());
     await page.goto('/');
     await expect(page.getByTestId('hero-tagline')).toBeAttached();
-    // Let page loading run naturally, then control time without waiting through
-    // long idle periods. Small steps below allow React's timeout effects to render.
-    await page.clock.pauseAt(await page.evaluate(() => Date.now() + 1000));
-    await page.clock.runFor(0);
+    // Freezing on the blank page survives navigation and slow resource loading.
+    expect(await page.evaluate(() => Date.now())).toBe(pausedTime);
+    if (reducedMotion !== 'reduce') {
+        await expect(copy(page)).toHaveText('');
+        await expect(copy(page, false)).toHaveText('');
+    }
+    // Begin the entrance only after mount. Small steps let React render each timer.
+    await advance(page, 1000);
 }
 
 async function advance(page, milliseconds) {
     for (let elapsed = 0; elapsed < milliseconds; elapsed += 100) {
         await page.clock.runFor(Math.min(100, milliseconds - elapsed));
         await page.evaluate(() => 0);
+        // React commits timer updates on a real task even while page time is frozen.
+        await delay(0);
     }
 }
 
@@ -36,6 +45,27 @@ async function completeTyping(page) {
     await expect(copy(page, false)).toHaveText(FULL);
     await expect(page.locator('.hero-tagline-cursor')).toHaveCount(0);
 }
+
+test('slow resource loading does not consume the typing entrance', async ({ page }) => {
+    let delayed = false;
+    await page.route('**/assets/sprout-mobile.webp', async route => {
+        delayed = true;
+        // Longer than the entire typing entrance, measured outside the page clock.
+        await delay(4000);
+        await route.continue();
+    });
+    const delayedImage = page.waitForResponse('**/assets/sprout-mobile.webp');
+    await openHero(page);
+    expect(delayed).toBe(true);
+    const partial = await copy(page).textContent();
+    expect(partial.length).toBeGreaterThan(0);
+    expect(partial.length).toBeLessThan(COMPACT.length);
+    const pausedTime = await page.evaluate(() => Date.now());
+    await delayedImage;
+    expect(await page.evaluate(() => Date.now())).toBe(pausedTime);
+    await expect(copy(page)).toHaveText(partial);
+    await completeTyping(page);
+});
 
 for (const width of [390, 1280]) {
     test(`completed tagline stays readable after pointer movement and idle at ${width}px`, async ({ page }) => {
@@ -98,15 +128,21 @@ test('typing pauses offscreen and resumes the current sentence on return', async
 test('partial and complete copy survive height changes, rotation and the tablet breakpoint', async ({ page }) => {
     await openHero(page);
     await advance(page, 700);
-    const partial = { compact: await copy(page).textContent(), full: await copy(page, false).textContent() };
+    let partial = { compact: await copy(page).textContent(), full: await copy(page, false).textContent() };
     expect(partial.compact.length).toBeGreaterThan(0);
     expect(partial.full.length).toBeLessThan(FULL.length);
 
     for (const [width, height] of [[390, 550], [844, 390], [767, 600], [768, 600]]) {
         await page.setViewportSize({ width, height });
         await expect(copy(page, width < 768)).toBeVisible();
-        await expect(copy(page)).toHaveText(partial.compact);
-        await expect(copy(page, false)).toHaveText(partial.full);
+        const current = { compact: await copy(page).textContent(), full: await copy(page, false).textContent() };
+        // A queued React commit may reveal a character; resizing must never erase
+        // progress or replace either sentence with unrelated copy.
+        expect(current.compact.startsWith(partial.compact)).toBe(true);
+        expect(current.full.startsWith(partial.full)).toBe(true);
+        expect(COMPACT.startsWith(current.compact)).toBe(true);
+        expect(FULL.startsWith(current.full)).toBe(true);
+        partial = current;
     }
     await completeTyping(page);
     await page.setViewportSize({ width: 390, height: 844 });
