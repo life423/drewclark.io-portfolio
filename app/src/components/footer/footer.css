@@ -1,7 +1,8 @@
 /* Keep a distinct evergreen finish below the charcoal project gallery. */
 .portfolio-footer {
-    background: var(--portfolio-emerald-gradient);
+    background: linear-gradient(85deg, #081a15, #0d2e25 70%, #10362c);
     border-top: 1px solid theme('colors.brandGreen.900');
+    border-image: var(--portfolio-emerald-gradient) 1;
     padding: .65rem 1rem .7rem;
 }
 
