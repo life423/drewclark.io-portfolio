@@ -1,7 +1,8 @@
 /* Independent work and chat surfaces share only a responsive grid, never a panel wrapper. */
 .work-studio-section {
     background: linear-gradient(180deg, var(--work-entry-neutral, theme('colors.brandGray.800')) 0, theme('colors.brandGray.900') 8rem);
-    padding: 3rem 1rem 4rem;
+    --work-studio-bottom: 4rem;
+    padding: 3rem 1rem var(--work-studio-bottom);
 }
 .work-studio-shell {
     width: 100%;
@@ -12,7 +13,8 @@
 .work-studio-grid {
     display: grid;
     align-items: start;
-    gap: 1.25rem;
+    --work-studio-gap: 1.25rem;
+    gap: var(--work-studio-gap);
     min-width: 0;
 }
 .work-studio-intro, .work-studio-gallery, .work-studio-media, .work-studio-depth, .work-studio-rail {
@@ -99,10 +101,10 @@
 }
 @media (min-width: 640px) {
     .work-studio-section { padding-inline: 2rem; }
-    .work-studio-grid { gap: 1.5rem; }
+    .work-studio-grid { --work-studio-gap: 1.5rem; }
 }
 @media (min-width: 1100px) {
-    .work-studio-section { padding: 4.5rem clamp(2rem, 3.3vw, 3rem) 6rem; }
+    .work-studio-section { --work-studio-bottom: 6rem; padding: 4.5rem clamp(2rem, 3.3vw, 3rem) var(--work-studio-bottom); }
     .work-studio-case {
         grid-template-columns: minmax(0, 1fr) clamp(22.5rem, 27vw, 25rem);
         column-gap: clamp(2.5rem, 3.6vw, 3.5rem);
@@ -194,7 +196,14 @@
 
 /* The Explorer is one in-flow panel, followed by a full two-column gallery. */
 .work-studio-overview { grid-template-columns: minmax(0, 1fr); }
-.work-studio-shortcut { display: flex; justify-content: flex-end; }
+.work-studio-overview .work-studio-title { color: theme('colors.brandGreen.200'); }
+.work-studio-after-chat {
+    position: relative;
+    display: grid;
+    min-width: 0;
+    gap: var(--work-studio-gap);
+}
+.work-studio-shortcut { position: relative; z-index: 1; display: flex; justify-content: flex-end; }
 .work-studio-inline .code-studio {
     scroll-margin-top: max(5rem, calc(var(--site-nav-rest-height, 4rem) + .75rem));
 }
@@ -252,25 +261,25 @@
 .work-gallery-art--lesson::before { opacity: .38; }
 .work-gallery-art--lesson img { transform: scale(1.57); }
 
-/* The hero's slope reappears as a full-width ground behind the second row. */
-.work-studio-overview .work-studio-gallery {
+/* Position the angled band at the midpoint of Explorer bottom to footer top. */
+.work-studio-after-chat {
     --work-band-thickness: clamp(7.5rem, 20vw, 17rem);
     --work-band-height: calc(var(--work-entry-rise) + var(--work-band-thickness));
     position: relative;
 }
 .work-studio-overview .work-gallery-card { z-index: 1; }
 .work-gallery-divider { position: relative; height: 1rem; }
-.work-gallery-divider::before {
+.work-studio-after-chat::before {
     content: '';
     position: absolute;
-    top: calc(.25rem - var(--work-gallery-gap));
+    top: calc(50% + (var(--work-studio-bottom) - var(--work-studio-gap)) / 2);
     left: 50%;
     width: 100vw;
     height: var(--work-band-height);
     background: theme('colors.brandGreen.500');
     clip-path: polygon(0 var(--work-entry-rise), 100% 0, 100% var(--work-band-thickness), 0 100%);
     pointer-events: none;
-    transform: translateX(-50%);
+    transform: translate(-50%, -50%);
 }
 @media (min-width: 720px) {
     .work-gallery-divider { grid-column: 1 / -1; height: 1.75rem; }

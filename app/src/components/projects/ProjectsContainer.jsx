@@ -53,26 +53,28 @@ export default function ProjectsContainer() {
                     <aside className='work-studio-inline' aria-label='Ask about the portfolio code'>
                         <UnifiedProjectChat embedded collapseBelow={900} focusRequest={chatFocusRequest} />
                     </aside>
-                    <div className='work-studio-gallery' aria-label='Project gallery'>
-                        {PROJECTS.map((project, index) => (
-                            <Fragment key={project.id}>
-                                <ProjectOverviewRow
-                                    project={project}
-                                    index={index}
-                                    onOpen={() => showProject(index)}
-                                />
-                                {index === 1 && <div aria-hidden='true' className='work-gallery-divider' />}
-                            </Fragment>
-                        ))}
-                    </div>
-                    <div className='work-studio-shortcut'>
-                        <button
-                            type='button'
-                            className='inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-brandGreen-200 underline-offset-4 hover:text-brandGreen-100 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brandGreen-300'
-                            onClick={() => setChatFocusRequest(previous => previous + 1)}
-                        >
-                            Back to Code Explorer <span aria-hidden='true'>↑</span>
-                        </button>
+                    <div className='work-studio-after-chat'>
+                        <div className='work-studio-gallery' aria-label='Project gallery'>
+                            {PROJECTS.map((project, index) => (
+                                <Fragment key={project.id}>
+                                    <ProjectOverviewRow
+                                        project={project}
+                                        index={index}
+                                        onOpen={() => showProject(index)}
+                                    />
+                                    {index === 1 && <div aria-hidden='true' className='work-gallery-divider' />}
+                                </Fragment>
+                            ))}
+                        </div>
+                        <div className='work-studio-shortcut'>
+                            <button
+                                type='button'
+                                className='inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-brandGreen-200 underline-offset-4 hover:text-brandGreen-100 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brandGreen-300'
+                                onClick={() => setChatFocusRequest(previous => previous + 1)}
+                            >
+                                Back to Code Explorer <span aria-hidden='true'>↑</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </section>

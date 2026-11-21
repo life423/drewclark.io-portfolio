@@ -595,11 +595,11 @@ test('gallery artwork stays clipped to smaller full-card-width frames through re
     }
 });
 
-test('overview heading is near-white, case-study gradient stays, and Explorer has an explicit purpose', async ({ page }) => {
+test('overview heading is flat mint, case-study gradient stays, and Explorer has an explicit purpose', async ({ page }) => {
     await page.setViewportSize({ width: 1126, height: 900 });
     await ready(page);
     const overview = page.getByRole('heading', { name: 'My Portfolio Projects' });
-    await expect(overview).toHaveCSS('color', 'rgb(250, 250, 250)');
+    await expect(overview).toHaveCSS('color', 'rgb(167, 243, 208)');
     await expect(overview).toHaveCSS('background-image', 'none');
     await expect(overview.locator('xpath=..').getByText('Portfolio', { exact: true })).toHaveCount(0);
     const chat = page.locator('#project-chat');
@@ -675,39 +675,29 @@ test('each card has one visible case-study button and its artwork remains a mous
     await expect(page.getByRole('heading', { name: projects[0].title, level: 2 })).toBeVisible();
 });
 
-test('broad emerald section supports the second row without covering project controls', async ({ page }) => {
-    await page.setViewportSize({ width: 1095, height: 1040 });
-    await ready(page);
-    const gallery = page.locator('.work-studio-gallery');
-    const geometry = await gallery.evaluate(e => {
-        const band = e.querySelector('.work-gallery-divider');
-        const divider = getComputedStyle(band, '::before');
-        const cards = e.querySelectorAll('article');
-        const upper = cards[0].getBoundingClientRect().bottom;
-        const lower = cards[2].getBoundingClientRect().top;
-
-
-        const shadow = getComputedStyle(cards[0]).boxShadow;
-        const highEdge = band.getBoundingClientRect().top + parseFloat(divider.top);
-        const rise = parseFloat(divider.clipPath.match(/0px ([\d.]+)px/)?.[1]);
-        return { gap: lower - upper, fill: divider.backgroundColor, shape: divider.clipPath,
-            highClearance: highEdge - upper, lowDaylight: lower - highEdge - rise,
-            overlap: band.getBoundingClientRect().top + parseFloat(divider.top) + parseFloat(divider.height) - lower,
-            pointerEvents: divider.pointerEvents, width: parseFloat(divider.width), segment: parseFloat(divider.height), shadow };
-    });
-    expect(geometry.gap).toBeLessThan(85);
-    expect(geometry.highClearance).toBeCloseTo(4, 0);
-    expect(geometry.lowDaylight).toBeGreaterThanOrEqual(14);
-    expect(geometry.overlap).toBeGreaterThan(170);
-    expect(geometry.segment).toBeGreaterThanOrEqual(240);
-    expect(geometry.fill).toBe('rgb(16, 185, 129)');
-    expect(geometry.shape).toContain('polygon');
-    expect(geometry.width).toBe(1095);
-    await expect(page.locator('.code-studio-surface')).toHaveCSS('background-color', 'rgb(39, 39, 42)');
-    expect(geometry.pointerEvents).toBe('none');
-    expect(geometry.shadow).not.toContain('inset');
-    await page.getByRole('button', { name: 'Read case study: ' + projects[0].title }).focus();
-    await expect(gallery.locator('article').first()).toHaveCSS('box-shadow', 'rgb(117, 211, 174) 0px 0px 0px 2px');
+test('emerald band stays exactly halfway between Explorer and footer', async ({ page }) => {
+    for (const width of [1095, 390]) {
+        await page.setViewportSize({ width, height: 1000 });
+        await ready(page);
+        const explorer = page.locator('#project-chat');
+        for (let state = 0; state < 2; state++) {
+            const geometry = await page.locator('.work-studio-after-chat').evaluate(e => {
+                const band = getComputedStyle(e, '::before');
+                const mid = e.getBoundingClientRect().top + parseFloat(band.top);
+                const chat = document.querySelector('#project-chat').getBoundingClientRect().bottom;
+                const footer = document.querySelector('footer').getBoundingClientRect().top;
+                return { diff: Math.abs(mid - (chat + footer) / 2), fill: band.backgroundColor,
+                    pointer: band.pointerEvents, width: parseFloat(band.width), shape: band.clipPath };
+            });
+            expect(geometry.diff).toBeLessThan(1);
+            expect(geometry.fill).toBe('rgb(16, 185, 129)');
+            expect(geometry.pointer).toBe('none');
+            expect(geometry.width).toBe(width);
+            expect(geometry.shape).toContain('polygon');
+            await noOverflow(page);
+            if (!state) await explorer.getByRole('button', { name: /^(Expand|Collapse) chat$/ }).click();
+        }
+    }
 });
 
 test('all four case studies cycle green, blue and orange technology tags', async ({ page }) => {
