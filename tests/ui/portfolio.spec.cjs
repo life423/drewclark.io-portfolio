@@ -689,6 +689,7 @@ test('divider fits between the desktop card rows and leaves card hover and focus
             pointerEvents: divider.pointerEvents, thickness: parseFloat(divider.height), shadow };
     });
     expect(geometry.gap).toBeGreaterThan(geometry.rise + geometry.thickness);
+    expect(geometry.thickness).toBeGreaterThanOrEqual(30);
     expect(geometry.decoration).toContain('linear-gradient');
     expect(geometry.pointerEvents).toBe('none');
     expect(geometry.shadow).not.toContain('inset');

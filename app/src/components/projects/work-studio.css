@@ -231,16 +231,16 @@
 @media (min-width: 720px) {
     .work-studio-overview .work-studio-gallery {
         position: relative;
-        row-gap: clamp(3.25rem, 6vw, 5.5rem);
+        row-gap: clamp(5.25rem, 9vw, 7.5rem);
     }
     .work-studio-overview .work-studio-gallery::before {
         content: '';
         position: absolute;
         inset: 50% 0 auto;
-        height: 4px;
+        height: clamp(1.4rem, 3.1vw, 2.5rem);
         background: linear-gradient(90deg,
-            theme('colors.brandGreen.900'), theme('colors.brandGreen.600') 52%, theme('colors.brandGreen.900'));
-        border-radius: 999px;
+            theme('colors.brandGreen.900'), theme('colors.brandGreen.800') 52%, theme('colors.brandGreen.900'));
+        border-radius: 2px;
         pointer-events: none;
         transform: translateY(-50%) rotate(-3deg);
     }
