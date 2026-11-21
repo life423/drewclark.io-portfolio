@@ -207,6 +207,7 @@ test('hero artwork scrolls naturally without sliding inside its frame', async ({
     for (const [width, height] of [[1280, 800], [390, 844]]) {
         await page.setViewportSize({ width, height });
         await page.goto('/');
+        await expect(page.locator('.work-gallery-card').first()).toBeVisible();
         const measure = () => page.locator('.portfolio-hero').evaluate(hero => {
             const section = hero.getBoundingClientRect();
             const image = hero.querySelector('img');
