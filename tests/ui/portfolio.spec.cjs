@@ -471,6 +471,8 @@ test('CUDA preview and source stay together as the card actions wrap', async ({ 
         })));
         expect(links).toHaveLength(3);
         expect(links[1].href).toBe(projects[0].downloads[0].url);
+        await expect(actions.nth(1)).toHaveText('Windows');
+        await expect(actions.nth(1)).toHaveCSS('background-color', 'rgb(52, 211, 153)');
         expect(links[2].href).toBe('https://github.com/' + projects[0].repo);
         expect(Math.abs(links[1].y - links[2].y)).toBeLessThan(1);
     }
@@ -678,19 +680,21 @@ test('divider fits between the desktop card rows and leaves card hover and focus
     await ready(page);
     const gallery = page.locator('.work-studio-gallery');
     const geometry = await gallery.evaluate(e => {
-        const divider = getComputedStyle(e, '::before');
-        const cards = e.children;
+        const divider = getComputedStyle(e.querySelector('.work-gallery-divider'), '::before');
+        const cards = e.querySelectorAll('article');
         const upper = cards[0].getBoundingClientRect().bottom;
         const lower = cards[2].getBoundingClientRect().top;
-        const bounds = e.getBoundingClientRect();
-        const rise = Math.tan(Math.PI / 60) * bounds.width;
+
+
         const shadow = getComputedStyle(cards[0]).boxShadow;
-        return { gap: lower - upper, rise, decoration: divider.backgroundImage,
-            pointerEvents: divider.pointerEvents, thickness: parseFloat(divider.height), shadow };
+        return { gap: lower - upper, fill: divider.backgroundColor, shape: divider.clipPath,
+            pointerEvents: divider.pointerEvents, width: parseFloat(divider.width), segment: parseFloat(divider.height), shadow };
     });
-    expect(geometry.gap).toBeGreaterThan(geometry.rise + geometry.thickness);
-    expect(geometry.thickness).toBeGreaterThanOrEqual(30);
-    expect(geometry.decoration).toContain('linear-gradient');
+    expect(geometry.gap).toBeGreaterThan(geometry.segment);
+    expect(geometry.segment).toBeGreaterThanOrEqual(105);
+    expect(geometry.fill).toBe('rgb(16, 185, 129)');
+    expect(geometry.shape).toContain('polygon');
+    expect(geometry.width).toBe(1095);
     expect(geometry.pointerEvents).toBe('none');
     expect(geometry.shadow).not.toContain('inset');
     await page.getByRole('button', { name: 'Read case study: ' + projects[0].title }).focus();

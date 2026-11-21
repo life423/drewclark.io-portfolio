@@ -1,5 +1,5 @@
 /* eslint react/jsx-uses-react: "error", react/jsx-uses-vars: "error" */
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { Fragment, useState, useEffect, useRef, useCallback } from 'react'
 import ProjectCard from './ProjectCard'
 import ProjectCaseStudy from './ProjectCaseStudy'
 import ProjectOverviewRow from './ProjectOverviewRow'
@@ -55,12 +55,14 @@ export default function ProjectsContainer() {
                     </aside>
                     <div className='work-studio-gallery' aria-label='Project gallery'>
                         {PROJECTS.map((project, index) => (
-                            <ProjectOverviewRow
-                                key={project.id}
-                                project={project}
-                                index={index}
-                                onOpen={() => showProject(index)}
-                            />
+                            <Fragment key={project.id}>
+                                <ProjectOverviewRow
+                                    project={project}
+                                    index={index}
+                                    onOpen={() => showProject(index)}
+                                />
+                                {index === 1 && <div aria-hidden='true' className='work-gallery-divider' />}
+                            </Fragment>
                         ))}
                     </div>
                     <div className='work-studio-shortcut'>

@@ -227,21 +227,50 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
-/* Mirror the hero's ~3-degree slope between paired project rows, not over them. */
+/* Show portrait subjects at a useful scale over an extended, softened edge. */
+.work-gallery-art:is(.work-gallery-art--arena, .work-gallery-art--lesson) { position: relative; isolation: isolate; }
+.work-gallery-art:is(.work-gallery-art--arena, .work-gallery-art--lesson)::before {
+    content: '';
+    position: absolute;
+    inset: -18px;
+    z-index: -1;
+    background: var(--work-thumb-source) center / cover;
+    filter: blur(15px);
+    opacity: .60;
+}
+.work-gallery-art:is(.work-gallery-art--arena, .work-gallery-art--lesson) img {
+    object-fit: contain;
+    mask-image: linear-gradient(to right,
+        transparent calc(50% - var(--work-thumb-height) * .4),
+        black calc(50% - var(--work-thumb-height) * .35),
+        black calc(50% + var(--work-thumb-height) * .35),
+        transparent calc(50% + var(--work-thumb-height) * .4));
+}
+.work-gallery-art--arena img { transform: translateY(5%) scale(1.82); }
+.work-gallery-art--lesson { background: radial-gradient(ellipse at center, #124334, #0b201a); }
+.work-gallery-art--lesson::before { opacity: .38; }
+.work-gallery-art--lesson img { transform: scale(1.57); }
+
+/* Mirror the hero's slope with a solid, full-bleed emerald section break. */
+.work-studio-overview .work-studio-gallery {
+    --work-band-thickness: clamp(1.65rem, 5.4vw, 4.25rem);
+    --work-band-height: calc(var(--work-entry-rise) + var(--work-band-thickness));
+    position: relative;
+}
+.work-gallery-divider { position: relative; height: var(--work-band-height); }
+.work-gallery-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100vw;
+    height: var(--work-band-height);
+    background: theme('colors.brandGreen.500');
+    clip-path: polygon(0 var(--work-entry-rise), 100% 0, 100% var(--work-band-thickness), 0 100%);
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+}
 @media (min-width: 720px) {
-    .work-studio-overview .work-studio-gallery {
-        position: relative;
-        row-gap: clamp(5.25rem, 9vw, 7.5rem);
-    }
-    .work-studio-overview .work-studio-gallery::before {
-        content: '';
-        position: absolute;
-        inset: 50% 0 auto;
-        height: clamp(1.4rem, 3.1vw, 2.5rem);
-        background: linear-gradient(90deg,
-            theme('colors.brandGreen.900'), theme('colors.brandGreen.800') 52%, theme('colors.brandGreen.900'));
-        border-radius: 2px;
-        pointer-events: none;
-        transform: translateY(-50%) rotate(-3deg);
-    }
+    .work-gallery-divider { grid-column: 1 / -1; }
+    .work-studio-overview .work-studio-gallery { grid-template-rows: 1fr auto 1fr; grid-auto-rows: auto; }
 }

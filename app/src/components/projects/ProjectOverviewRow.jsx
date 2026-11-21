@@ -30,6 +30,7 @@ const FACT_ICONS = {
 }
 
 const MAX_PILLS = 3
+const ART_TREATMENTS = { 1: 'dashboard', 2: 'wheel', 3: 'arena', 4: 'lesson' }
 
 // The row is one big target: this button's hit area stretches over the whole card (the card is
 // position: relative), so the project opens from mouse, touch and keyboard. The links in the
@@ -71,12 +72,18 @@ function Thumbnail({ project }) {
 export default function ProjectOverviewRow({ project, index, onOpen }) {
     const facts = Array.isArray(project.facts) ? project.facts : []
     const extraPills = project.stack.length - MAX_PILLS
+    const treatment = ART_TREATMENTS[project.id]
+    const isCuda = treatment === 'dashboard'
+    const artSource = project.cardImage?.src || project.image
     return (
         <article
             className='work-gallery-card group relative'
         >
             {/* Thumbnail */}
-            <div className={'work-gallery-art' + (String(project.id) === '2' ? ' work-gallery-art--wheel' : String(project.id) === '1' ? ' work-gallery-art--dashboard' : '')}>
+            <div
+                className={'work-gallery-art' + (treatment ? ' work-gallery-art--' + treatment : '')}
+                style={artSource ? { '--work-thumb-source': 'url("' + artSource + '")' } : undefined}
+            >
                 <Thumbnail project={project} />
             </div>
 
@@ -133,7 +140,8 @@ export default function ProjectOverviewRow({ project, index, onOpen }) {
                         liveUrl={project.liveUrl}
                         liveLabel={project.liveLabel || 'Play'}
                         repo={project.repo}
-                        downloads={project.downloads}
+                        downloads={isCuda ? project.downloads.map(file => ({ ...file, label: 'Windows' })) : project.downloads}
+                        emphasizeDownloads={isCuda}
                         compact
                     />
                 </div>

@@ -36,7 +36,7 @@ const secondary =
 // The card can be clickable; following a link should not also count as a card click
 const stopCardClick = event => event.stopPropagation()
 
-export default function ProjectLinks({ title, liveUrl, liveLabel = 'Try it live', repo, downloads = [], compact = false }) {
+export default function ProjectLinks({ title, liveUrl, liveLabel = 'Try it live', repo, downloads = [], compact = false, emphasizeDownloads = false }) {
     const files = Array.isArray(downloads) ? downloads : []
     if (!liveUrl && !repo && files.length === 0) return null
 
@@ -83,7 +83,7 @@ export default function ProjectLinks({ title, liveUrl, liveLabel = 'Try it live'
                                 onClick={stopCardClick}
                                 title={downloadTitle(file)}
                                 aria-label={downloadAriaLabel(title, file)}
-                                className={base + ' ' + (liveUrl ? secondary : primary)}
+                                className={base + ' ' + (liveUrl && !emphasizeDownloads ? secondary : primary)}
                             >
                                 <Icon className='h-4 w-4 shrink-0' aria-hidden='true' />
                                 <span>{file.label}</span>
