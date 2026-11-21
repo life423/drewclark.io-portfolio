@@ -35,7 +35,7 @@ for (const [width, height] of sizes) {
         await ready(page);
         await noOverflow(page);
         const play = page.getByRole('link', { name: 'Play Ascend-Avoid (opens in a new tab)', exact: true });
-        await expect(play).toHaveAttribute('href', 'https://ascend.drewclark.io');
+        await expect(play).toHaveAttribute('href', 'https://ascendavoid.com');
         const heroFit = await play.evaluate(a => {
             const r = a.getBoundingClientRect(), s = a.closest('section').getBoundingClientRect();
             return r.height >= 44 && r.top >= s.top && r.bottom <= s.bottom + 1;
