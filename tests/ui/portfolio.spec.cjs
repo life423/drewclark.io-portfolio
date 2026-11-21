@@ -10,7 +10,7 @@ const sizes = [
 
 async function ready(page) {
     await page.goto('/');
-    await expect(page.getByRole('button', { name: projects[0].title, exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Read case study: ' + projects[0].title, exact: true })).toBeVisible();
     await expect(page.locator('#hero-cta')).toHaveClass(/pe-visible/);
 }
 
@@ -42,13 +42,13 @@ for (const [width, height] of sizes) {
         });
         expect(heroFit).toBe(true);
         for (const project of projects) {
-            const card = page.getByRole('button', { name: project.title, exact: true }).locator('xpath=ancestor::article');
+            const card = page.getByRole('button', { name: 'Read case study: ' + project.title, exact: true }).locator('xpath=ancestor::article');
             const image = card.getByRole('img');
             await image.scrollIntoViewIfNeeded();
             await imageLoaded(image);
             await expect(image).toHaveAttribute('src', project.cardImage?.src || project.image);
         }
-        await page.getByRole('button', { name: projects[0].title, exact: true }).click();
+        await page.getByRole('button', { name: 'Read case study: ' + projects[0].title, exact: true }).click();
         for (let index = 0; index < projects.length; index++) {
             const project = projects[index];
             await expect(page.getByRole('heading', { name: project.title, level: 2, exact: true })).toBeVisible();
@@ -73,7 +73,7 @@ for (const [width, height] of sizes) {
             await expect(next).toHaveCount(1);
             const chat = page.locator('#project-chat');
             await expect(chat).toHaveCount(1);
-            await expect(chat.getByRole('textbox', { name: 'Question for Project Chat' })).toBeVisible();
+            await expect(chat.getByRole('textbox', { name: 'Question for Project Chat' }))[width < 1100 ? 'toBeHidden' : 'toBeVisible']();
             // Measure the fixed layout rail rather than the child chat that can stick during scrolling.
             const [summary, panel, media, details, related] = await page.evaluate(() => [
                 '[data-testid="case-study-summary"]', '[aria-label="Ask about this case study"]', '[aria-labelledby="case-study-title"] figure img',
@@ -105,7 +105,7 @@ for (const [width, height] of sizes) {
 test('keyboard cycling, wrapping, card selection and focus feedback', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await ready(page);
-    await page.getByRole('button', { name: projects[0].title, exact: true }).press('Enter');
+    await page.getByRole('button', { name: 'Read case study: ' + projects[0].title, exact: true }).press('Enter');
     const next = page.getByRole('button', { name: /^Next project:/ });
     await next.focus();
     await next.press('Space');
@@ -193,7 +193,7 @@ test('touch navigation survives rotation and desktop resizing', async ({ browser
     const page = await context.newPage();
     try {
         await ready(page);
-        await page.getByRole('button', { name: projects[0].title, exact: true }).tap();
+        await page.getByRole('button', { name: 'Read case study: ' + projects[0].title, exact: true }).tap();
         const next = page.getByRole('button', { name: /^Next project:/ });
         await next.tap();
         await page.setViewportSize({ width: 844, height: 390 });
@@ -237,11 +237,12 @@ test('overview chat comes before project browsing; late answers stay scoped', as
     try {
         await ready(page);
         const chat = page.locator('#project-chat');
-        await expect(chat.getByRole('textbox', { name: 'Question for Project Chat' })).toBeVisible();
+        await expect(chat.getByRole('textbox', { name: 'Question for Project Chat' })).toBeHidden();
         const introChat = await chat.boundingBox();
-        const firstProject = await page.getByRole('button', { name: projects[0].title, exact: true }).boundingBox();
+        const firstProject = await page.getByRole('button', { name: 'Read case study: ' + projects[0].title, exact: true }).boundingBox();
         expect(introChat.y + introChat.height).toBeLessThan(firstProject.y);
-        await page.getByRole('button', { name: projects[0].title, exact: true }).click();
+        await page.getByRole('button', { name: 'Read case study: ' + projects[0].title, exact: true }).click();
+        await chat.getByRole('button', { name: 'Expand chat' }).click();
         await expect(chat.getByRole('combobox', { name: 'Chat scope' })).toHaveValue('project');
         await expect(chat.getByRole('option', { name: projects[0].title })).toHaveCount(1);
         await chat.getByRole('textbox').fill('Question for A');
@@ -328,7 +329,7 @@ test('chat stays reachable on tall desktops but returns to normal flow on shorte
     await page.setViewportSize({ width: 1440, height: 940 });
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await ready(page);
-    await page.getByRole('button', { name: projects[0].title, exact: true }).click();
+    await page.getByRole('button', { name: 'Read case study: ' + projects[0].title, exact: true }).click();
     const chat = page.locator('#project-chat');
     await expect(chat).toHaveCSS('position', 'sticky');
     await page.getByRole('heading', { name: 'Project details' }).evaluate(heading =>
@@ -345,7 +346,7 @@ test('wide cryptography case study uses the extra space for its chat', async ({ 
     await page.setViewportSize({ width: 1656, height: 940 });
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await ready(page);
-    await page.getByRole('button', { name: projects[1].title, exact: true }).click();
+    await page.getByRole('button', { name: 'Read case study: ' + projects[1].title, exact: true }).click();
     const { left, right, chat, art, input, heading } = await page.evaluate(() => {
         const rect = select => document.querySelector(select).getBoundingClientRect().toJSON();
         const shell = rect('.work-studio-shell');
@@ -372,7 +373,7 @@ test('wrapped case-study title keeps its curved underline clear of the summary',
     await page.setViewportSize({ width: 390, height: 844 });
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await ready(page);
-    await page.getByRole('button', { name: projects[1].title, exact: true }).click();
+    await page.getByRole('button', { name: 'Read case study: ' + projects[1].title, exact: true }).click();
     const title = page.getByRole('heading', { name: projects[1].title, level: 2, exact: true });
     const mark = await title.evaluate(node => {
         const pseudo = getComputedStyle(node, '::after');
@@ -409,7 +410,7 @@ test('gallery lift respects input mode, keyboard focus, and reduced motion', asy
     await expect.poll(() => action.evaluate(element => getComputedStyle(element).backgroundColor)).not.toBe(baseAction);
 
     await page.mouse.move(0, 0);
-    const open = card.getByRole('button', { name: projects[0].title, exact: true });
+    const open = card.getByRole('button', { name: 'Read case study: ' + projects[0].title, exact: true });
     await open.focus();
     await expect(open).toBeFocused();
     await expect(card).toHaveCSS('box-shadow', 'rgb(117, 211, 174) 0px 0px 0px 2px');
@@ -435,8 +436,8 @@ test('the studio explains source grounding and Cryptography actions fit on 1126p
     await ready(page);
     const chat = page.locator('#project-chat');
     await expect(chat.getByRole('textbox')).toHaveAccessibleDescription(/GitHub code.*exact files and lines/);
-    const crypto = page.getByRole('button', { name: projects[1].title, exact: true }).locator('xpath=ancestor::article');
-    const cuda = page.getByRole('button', { name: projects[0].title, exact: true }).locator('xpath=ancestor::article');
+    const crypto = page.getByRole('button', { name: 'Read case study: ' + projects[1].title, exact: true }).locator('xpath=ancestor::article');
+    const cuda = page.getByRole('button', { name: 'Read case study: ' + projects[0].title, exact: true }).locator('xpath=ancestor::article');
     await expect(crypto.getByText('Download', { exact: true })).toHaveCount(0);
     const actions = await crypto.locator('.work-gallery-actions a').evaluateAll(links => links.map(link => {
         const rect = link.getBoundingClientRect();
@@ -459,7 +460,7 @@ test('the studio explains source grounding and Cryptography actions fit on 1126p
 
 test('CUDA preview and source stay together as the card actions wrap', async ({ page }) => {
     await ready(page);
-    const actions = page.getByRole('button', { name: projects[0].title, exact: true })
+    const actions = page.getByRole('button', { name: 'Read case study: ' + projects[0].title, exact: true })
         .locator('xpath=ancestor::article').locator('.work-gallery-actions a');
     for (const width of [320, 390, 768, 1126, 1280, 1440, 1810]) {
         await page.setViewportSize({ width, height: 900 });
@@ -509,7 +510,9 @@ test('composer supports multiline questions and reflects the real limit', async 
     expect(payload).toEqual({ question });
 
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.getByRole('button', { name: projects[2].title, exact: true }).click();
+    await page.getByRole('button', { name: 'Read case study: ' + projects[2].title, exact: true }).click();
+    await expect(composer).toBeHidden();
+    await chat.getByRole('button', { name: 'Expand chat' }).click();
     await expect(composer).toBeVisible();
     await expect(composer).toHaveValue('');
     await expect(chat.getByRole('option', { name: projects[2].title })).toHaveCount(1);
@@ -603,7 +606,7 @@ test('work headings reuse the hero colors and the explorer has an explicit purpo
     await expect(chat.getByRole('heading', { name: 'Project Code Explorer' })).toBeVisible();
     await expect(chat.getByText('Ask me a question', { exact: true })).toBeVisible();
     await expect(chat.getByRole('textbox')).toHaveAccessibleDescription(/actual GitHub code.*exact files and lines/);
-    await page.getByRole('button', { name: projects[0].title, exact: true }).click();
+    await page.getByRole('button', { name: 'Read case study: ' + projects[0].title, exact: true }).click();
     const detail = page.getByRole('heading', { name: projects[0].title, level: 2, exact: true });
     await expect(detail.locator('span')).toHaveCSS('background-image', gradient);
     await page.emulateMedia({ forcedColors: 'active' });
@@ -625,4 +628,44 @@ test('tall desktop overview keeps the studio alongside the second row but before
     })).toBe(true);
     await page.setViewportSize({ width: 1126, height: 800 });
     await expect(rail).toHaveCSS('position', 'static');
+});
+
+test('mobile hero jump clears the fixed header and keeps chat compact until expanded', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await ready(page);
+    await page.getByRole('link', { name: 'Featured Projects' }).click();
+    await expect.poll(() => page.evaluate(() => {
+        const headline = document.querySelector('.work-studio-title').getBoundingClientRect();
+        return headline.top - document.querySelector('header nav').getBoundingClientRect().bottom;
+    })).toBeGreaterThanOrEqual(12);
+    const chat = page.locator('#project-chat');
+    await expect(chat.getByRole('textbox')).toBeHidden();
+    expect((await chat.boundingBox()).height).toBeLessThan(135);
+    await expect(page.locator('.work-gallery-card').first()).toBeInViewport({ ratio: 0.3 });
+    const disclosure = chat.getByRole('button', { name: 'Expand chat' });
+    await expect(disclosure).toHaveAttribute('aria-expanded', 'false');
+    await disclosure.press('Enter');
+    await expect(chat.getByRole('button', { name: 'Collapse chat' })).toHaveAttribute('aria-expanded', 'true');
+    await expect(chat.getByRole('textbox')).toBeVisible();
+});
+
+test('each card has one visible case-study button and its artwork remains a mouse target', async ({ page }) => {
+    await page.setViewportSize({ width: 1126, height: 900 });
+    await ready(page);
+    for (const project of projects) {
+        const cta = page.getByRole('button', { name: 'Read case study: ' + project.title, exact: true });
+        await expect(cta).toHaveCount(1);
+        await expect(cta).toHaveText('Read case study');
+        const card = cta.locator('xpath=ancestor::article');
+        await expect(card.getByRole('heading', { name: project.title })).toBeVisible();
+        const description = card.getByText(project.tagline, { exact: true });
+        await expect(description).toHaveCSS('font-size', '16px');
+        await expect(description).toHaveCSS('line-height', '24px');
+    }
+    const art = page.locator('.work-gallery-art').first();
+    await art.scrollIntoViewIfNeeded();
+    const r = await art.boundingBox();
+    await page.mouse.click(r.x + r.width / 2, r.y + r.height / 2);
+    await expect(page.getByRole('heading', { name: projects[0].title, level: 2 })).toBeVisible();
 });

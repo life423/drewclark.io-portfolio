@@ -83,7 +83,7 @@ export default function ProjectLinks({ title, liveUrl, liveLabel = 'Try it live'
                                 onClick={stopCardClick}
                                 title={downloadTitle(file)}
                                 aria-label={downloadAriaLabel(title, file)}
-                                className={base + ' ' + primary}
+                                className={base + ' ' + (liveUrl ? secondary : primary)}
                             >
                                 <Icon className='h-4 w-4 shrink-0' aria-hidden='true' />
                                 <span>{file.label}</span>

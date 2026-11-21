@@ -1,6 +1,7 @@
 /* eslint react/jsx-uses-react: "error", react/jsx-uses-vars: "error" */
 import React from 'react'
 import {
+    LuArrowRight,
     LuBrain,
     LuCpu,
     LuGamepad2,
@@ -33,7 +34,7 @@ const MAX_PILLS = 3
 // The row is one big target: this button's hit area stretches over the whole card (the card is
 // position: relative), so the project opens from mouse, touch and keyboard. The links in the
 // action column sit above it (z-10) as controls of their own, nothing nested inside anything.
-const ROW_BUTTON = "block w-full text-left focus:outline-none after:absolute after:inset-0 after:rounded-xl after:content-['']"
+const ROW_BUTTON = "inline-flex min-h-10 items-center gap-1.5 text-left text-sm font-semibold text-brandGreen-300 hover:text-brandGreen-100 focus:outline-none focus-visible:underline underline-offset-4 after:absolute after:inset-0 after:rounded-xl after:content-['']"
 
 function Thumbnail({ project }) {
     const image = project.cardImage?.src || project.image
@@ -85,11 +86,9 @@ export default function ProjectOverviewRow({ project, index, onOpen }) {
                     {'Project ' + String(index + 1).padStart(2, '0')}
                 </span>
                 <h3 className='mt-2 text-lg font-semibold leading-snug text-white sm:text-xl'>
-                    <button type='button' onClick={onOpen} className={ROW_BUTTON}>
-                        {project.title}
-                    </button>
+                    {project.title}
                 </h3>
-                {project.tagline && <p className='mt-1 text-sm text-brandGray-300'>{project.tagline}</p>}
+                {project.tagline && <p className='mt-1 text-base leading-6 text-brandGray-300'>{project.tagline}</p>}
 
                 {facts.length > 0 && (
                     <ul className='mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm text-brandGray-400'>
@@ -120,14 +119,24 @@ export default function ProjectOverviewRow({ project, index, onOpen }) {
                         </span>
                     )}
                 </div>
-                <ProjectLinks
-                    title={project.title}
-                    liveUrl={project.liveUrl}
-                    liveLabel={project.liveLabel || 'Play'}
-                    repo={project.repo}
-                    downloads={project.downloads}
-                    compact
-                />
+                <div className='work-gallery-ctas'>
+                    <button
+                        type='button'
+                        onClick={onOpen}
+                        className={ROW_BUTTON}
+                        aria-label={'Read case study: ' + project.title}
+                    >
+                        Read case study <LuArrowRight className='h-4 w-4' aria-hidden='true' />
+                    </button>
+                    <ProjectLinks
+                        title={project.title}
+                        liveUrl={project.liveUrl}
+                        liveLabel={project.liveLabel || 'Play'}
+                        repo={project.repo}
+                        downloads={project.downloads}
+                        compact
+                    />
+                </div>
             </div>
 
         </article>

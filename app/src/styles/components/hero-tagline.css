@@ -82,3 +82,15 @@
     clip-path: polygon(0 100%, 100% 0, 100% 100%);
     pointer-events: none;
 }
+
+/* The native hero jump backstops the section against the fixed mobile header. */
+@media (max-width: 1099px) {
+    .portfolio-work-entry {
+        scroll-margin-top: max(1rem, calc(var(--site-nav-rest-height, 4rem) - 2rem));
+    }
+}
+
+/* Bring right-hand leaf tips into narrower desktop frames without swapping art. */
+@media (min-width: 1024px) and (max-width: 1180px) {
+    .portfolio-hero__image { object-position: 72% 36%; }
+}

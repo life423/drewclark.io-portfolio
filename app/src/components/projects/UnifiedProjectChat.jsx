@@ -377,6 +377,8 @@ export default function UnifiedProjectChat({ project, embedded = false }) {
                             aria-label={
                                 isCollapsed ? 'Expand chat' : 'Collapse chat'
                             }
+                            aria-expanded={!isCollapsed}
+                            aria-controls='project-chat-content'
                             title={
                                 isCollapsed ? 'Expand chat' : 'Collapse chat'
                             }
@@ -400,6 +402,10 @@ export default function UnifiedProjectChat({ project, embedded = false }) {
                     </div>
                 </div>
 
+                {isCollapsed && (
+                    <p className='text-sm leading-5 text-brandGray-300'>Ask about the code and find the source.</p>
+                )}
+                <div id='project-chat-content' hidden={isCollapsed}>
                 <p id='project-chat-description' className='mb-3 max-w-[52ch] text-sm leading-relaxed text-brandGray-200'>
                     Trace how a feature works. This searches the actual GitHub code and links to exact files and lines when it finds a match.
                 </p>
@@ -472,17 +478,6 @@ export default function UnifiedProjectChat({ project, embedded = false }) {
                         </button>
                     </div>
                 </form>
-
-                {isCollapsed && project && scope !== 'all' && visibleMessages.length === 0 && (
-                    <button
-                        type='button'
-                        onClick={() => askQuestion(starterQuestions[0])}
-                        disabled={isGenerating}
-                        className='mt-2 min-h-10 w-full rounded-md border border-brandBlue-700/60 px-2.5 text-left text-xs leading-snug text-brandBlue-200 hover:border-brandBlue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brandOrange-300 disabled:opacity-50'
-                    >
-                        {starterQuestions[0]}
-                    </button>
-                )}
 
                 {!isCollapsed && (
                     <>
@@ -621,6 +616,7 @@ export default function UnifiedProjectChat({ project, embedded = false }) {
                 )}
 
 
+                </div>
             </div>
         </div>
     )

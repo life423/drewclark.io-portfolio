@@ -161,3 +161,20 @@ test('wide art is paired with the active preload; tablets and social previews st
     await page.setViewportSize({ width: 768, height: 1024 });
     await expect.poll(() => art.evaluate(img => new window.URL(img.currentSrc).pathname)).toBe('/assets/sprout-mobile.webp');
 });
+
+test('narrow desktop framing leaves room to the right of the sprout leaf', async ({ page }) => {
+    await page.goto('/');
+    const art = page.locator('.portfolio-hero__image');
+    for (const [width, height] of [[1024, 675], [1105, 679], [1105, 1010]]) {
+        await page.setViewportSize({ width, height });
+        await art.evaluate(img => img.decode());
+        const clearance = await art.evaluate(img => {
+            const box = img.getBoundingClientRect();
+            const scale = Math.max(box.width / img.naturalWidth, box.height / img.naturalHeight);
+            const x = parseFloat(window.getComputedStyle(img).objectPosition) / 100;
+            // The rightmost tip is at ~85.6% of the desktop artwork's intrinsic width.
+            return box.width - ((box.width - img.naturalWidth * scale) * x + .856 * img.naturalWidth * scale);
+        });
+        expect(clearance).toBeGreaterThanOrEqual(20);
+    }
+});
