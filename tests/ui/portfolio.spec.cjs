@@ -114,18 +114,31 @@ test('outline action hover, press, keyboard focus and reduced motion', async ({ 
     const play = page.locator('.hero-action--outline');
     await expect(play).toHaveCSS('color', 'rgb(52, 211, 153)');
     await play.hover();
-    await expect(play).toHaveCSS('color', 'rgb(24, 24, 27)');
     await expect.poll(() => play.evaluate(a => getComputedStyle(a, '::before').transform)).toBe('matrix(1, 0, 0, 1, 0, 0)');
+    const filledLabel = play.locator('.hero-action__filled-label');
+    await expect(filledLabel).toHaveCSS('color', 'rgb(24, 24, 27)');
+    await expect(filledLabel).toHaveCSS('clip-path', /inset\(0px(?: 0px){0,3}\)/);
+    const gradient = await play.evaluate(a => getComputedStyle(a, '::before').backgroundImage);
+    expect(gradient).toContain('rgb(52, 211, 153)');
+    expect(gradient).toContain('rgb(14, 165, 233)');
+    expect(await play.evaluate(a => getComputedStyle(a, '::after').animationName)).toBe('hero-action-shine');
     await page.mouse.down();
-    await expect(play).toHaveCSS('background-color', 'rgb(16, 185, 129)');
+    await expect(play).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 1)');
     await page.mouse.move(0, 0);
     await page.mouse.up();
     await page.keyboard.press('Tab');
     await play.focus();
     await expect(play).toBeFocused();
     expect(await play.evaluate(a => getComputedStyle(a).outlineStyle)).toBe('solid');
+    await expect.poll(() => play.evaluate(a => getComputedStyle(a, '::before').transform)).toBe('matrix(1, 0, 0, 1, 0, 0)');
+    await expect(filledLabel).toHaveCSS('clip-path', /inset\(0px(?: 0px){0,3}\)/);
+    // Scrolling fades only the decorative background, keeping both labels legible.
+    await page.mouse.wheel(0, 300);
+    await expect.poll(() => page.evaluate(() => document.documentElement.scrollTop)).toBeGreaterThan(100);
+    await expect(play.locator('xpath=ancestor::section')).toHaveCSS('opacity', '1');
     await page.emulateMedia({ reducedMotion: 'reduce' });
     expect(await play.evaluate(a => getComputedStyle(a, '::before').transitionDuration)).toBe('0s');
+    expect(await play.evaluate(a => getComputedStyle(a, '::after').animationName)).toBe('none');
 });
 
 test('chat success, sources, loading and recoverable failure', async ({ page }) => {

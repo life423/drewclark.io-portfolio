@@ -1,5 +1,5 @@
 import React from 'react'
-import { LuPlay, LuGithub } from 'react-icons/lu'
+import { LuPlay, LuGithub, LuGlobe } from 'react-icons/lu'
 import { platformIcon, downloadTitle, downloadAriaLabel } from './platforms'
 
 /**
@@ -12,7 +12,7 @@ import { platformIcon, downloadTitle, downloadAriaLabel } from './platforms'
  */
 const base =
     'inline-flex flex-1 sm:flex-none items-center justify-center gap-2 whitespace-nowrap ' +
-    'rounded-full px-3 sm:px-4 min-h-[2.75rem] sm:min-h-[2.5rem] text-sm font-semibold ' +
+    'rounded-full px-3 sm:px-4 min-h-11 text-sm font-semibold ' +
     'transition-colors duration-200 motion-reduce:transition-none touch-manipulation ' +
     'focus:outline-none focus-visible:ring-2 focus-visible:ring-brandGreen-300 ' +
     'focus-visible:ring-offset-2 focus-visible:ring-offset-brandGray-800'
@@ -48,13 +48,16 @@ export default function ProjectLinks({ title, liveUrl, liveLabel = 'Try it live'
                     aria-label={`${liveLabel}: ${title} (opens in a new tab)`}
                     className={`${base} ${primary}`}
                 >
-                    <LuPlay className='h-4 w-4 shrink-0' aria-hidden='true' />
+                    {liveLabel.startsWith('Play')
+                        ? <LuPlay className='h-4 w-4 shrink-0' aria-hidden='true' />
+                        : <LuGlobe className='h-4 w-4 shrink-0' aria-hidden='true' />}
                     <span>{liveLabel}</span>
                 </a>
             )}
             {files.length > 0 && (
                 <div className='flex items-center gap-2 sm:gap-3'>
-                    <span className='text-sm text-brandGray-400'>Download</span>
+                    {!files.some(file => /^download\b/i.test(file.label || '')) &&
+                        <span className='text-sm text-brandGray-400'>Download</span>}
                     {files.map(file => {
                         const Icon = platformIcon(file.platform)
                         return (

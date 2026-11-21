@@ -1,6 +1,8 @@
 name: Portfolio browser checks
 
 on:
+  push:
+    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -24,8 +26,8 @@ jobs:
       - run: npm install --ignore-scripts --no-audit --no-fund
       - run: npm install --prefix app --legacy-peer-deps --no-audit --no-fund
       # Chrome, Edge and Firefox's system libraries are already on the runner.
-      # Fetch only Playwright's Firefox binary. WebKit is verified locally;
-      # installing its extra font/media packages stalled on the Ubuntu mirror.
+      # Fetch only Firefox here; the macOS job covers WebKit and Safari without
+      # Ubuntu's extra font/media packages, whose mirror previously timed out.
       - run: npx playwright install firefox
         timeout-minutes: 3
       - run: npm run build
@@ -34,5 +36,31 @@ jobs:
         if: always()
         with:
           name: browser-test-results
+          path: test-results/
+          retention-days: 7
+
+  safari:
+    name: WebKit and Safari (macOS)
+    runs-on: macos-15
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - run: npm install --prefix app --legacy-peer-deps --no-audit --no-fund
+      # macOS needs no Linux apt dependencies. Use the pinned Playwright build.
+      - run: npx playwright install webkit
+        timeout-minutes: 3
+      - run: npm run build
+      - run: npm run test:ui -- --project=webkit --workers=1
+      # Safari and its matching driver are bundled on the macOS runner.
+      - run: sudo safaridriver --enable
+      - run: node scripts/check-safari.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: safari-test-results
           path: test-results/
           retention-days: 7

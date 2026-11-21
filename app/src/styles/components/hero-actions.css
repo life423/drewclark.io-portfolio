@@ -35,18 +35,55 @@
 }
 
 .hero-action--outline {
+    --fill-duration: 420ms;
+    --fill-easing: cubic-bezier(0.22, 1, 0.36, 1);
     /* Keep the outlined text readable even over the bright leaves. */
     background-color: theme('colors.brandGray.900 / 90%');
     color: var(--action-green);
+    transition: border-color var(--fill-duration) ease-out, transform 120ms ease-out;
 }
 
 .hero-action--outline::before {
     content: '';
     position: absolute;
     inset: 0;
-    background-color: var(--action-green);
+    background: linear-gradient(180deg, var(--action-green) 0%, theme('colors.brandBlue.400') 42%, theme('colors.brandBlue.500') 100%);
     transform: translateY(101%);
-    transition: transform 180ms ease-out;
+    transition: transform var(--fill-duration) var(--fill-easing);
+    pointer-events: none;
+}
+
+/* Reveal dark lettering with the fill, so the unfilled portion stays readable. */
+.hero-action--outline .hero-action__filled-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: inherit;
+    color: var(--action-ink);
+    clip-path: inset(100% 0 0);
+    transition: clip-path var(--fill-duration) var(--fill-easing);
+    pointer-events: none;
+}
+
+.hero-action--outline::after {
+    content: '';
+    position: absolute;
+    top: -35%;
+    bottom: -35%;
+    left: -60%;
+    width: 45%;
+    background: linear-gradient(100deg, transparent, rgb(255 255 255 / 25%), transparent);
+    transform: skewX(-18deg);
+    opacity: 0;
+    pointer-events: none;
+}
+
+@keyframes hero-action-shine {
+    0% { opacity: 0; transform: translateX(0) skewX(-18deg); }
+    20%, 80% { opacity: 0.7; }
+    100% { opacity: 0; transform: translateX(390%) skewX(-18deg); }
 }
 
 @media (hover: hover) {
@@ -55,11 +92,19 @@
     }
 
     .hero-action--outline:hover {
-        color: var(--action-ink);
+        border-color: theme('colors.brandBlue.400');
     }
 
     .hero-action--outline:hover::before {
         transform: translateY(0);
+    }
+
+    .hero-action--outline:hover .hero-action__filled-label {
+        clip-path: inset(0);
+    }
+
+    .hero-action--outline:hover::after {
+        animation: hero-action-shine 500ms ease-out var(--fill-duration);
     }
 }
 
@@ -70,7 +115,7 @@
 
 .hero-action--outline:focus-visible,
 .hero-action--outline:active {
-    color: var(--action-ink);
+    border-color: theme('colors.brandBlue.400');
 }
 
 .hero-action--outline:focus-visible::before,
@@ -78,13 +123,23 @@
     transform: translateY(0);
 }
 
+.hero-action--outline:focus-visible .hero-action__filled-label,
+.hero-action--outline:active .hero-action__filled-label {
+    clip-path: inset(0);
+}
+
+.hero-action--outline:focus-visible::after,
+.hero-action--outline:active::after {
+    animation: hero-action-shine 500ms ease-out var(--fill-duration);
+}
+
 .hero-action:active {
     background-color: theme('colors.brandGreen.500');
     transform: translateY(1px);
 }
 
-.hero-action--outline:active::before {
-    background-color: theme('colors.brandGreen.500');
+.hero-action--outline:active {
+    background-color: theme('colors.brandGray.900 / 90%');
 }
 
 @media (max-width: 479px) {
@@ -95,8 +150,13 @@
 
 @media (prefers-reduced-motion: reduce) {
     .hero-action,
-    .hero-action--outline::before {
+    .hero-action--outline::before,
+    .hero-action--outline .hero-action__filled-label {
         transition: none;
+    }
+
+    .hero-action--outline::after {
+        animation: none !important;
     }
 
     .hero-action:active {
