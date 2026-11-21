@@ -686,11 +686,11 @@ test('emerald band stays exactly halfway between Explorer and footer', async ({ 
                 const mid = e.getBoundingClientRect().top + parseFloat(band.top);
                 const chat = document.querySelector('#project-chat').getBoundingClientRect().bottom;
                 const footer = document.querySelector('footer').getBoundingClientRect().top;
-                return { diff: Math.abs(mid - (chat + footer) / 2), fill: band.backgroundColor,
+                return { diff: Math.abs(mid - (chat + footer) / 2), fill: band.backgroundImage,
                     pointer: band.pointerEvents, width: parseFloat(band.width), shape: band.clipPath };
             });
             expect(geometry.diff).toBeLessThan(1);
-            expect(geometry.fill).toBe('rgb(16, 185, 129)');
+            expect(geometry.fill).toBe('linear-gradient(90deg, rgb(4, 120, 87), rgb(16, 185, 129))');
             expect(geometry.pointer).toBe('none');
             expect(geometry.width).toBe(width);
             expect(geometry.shape).toContain('polygon');

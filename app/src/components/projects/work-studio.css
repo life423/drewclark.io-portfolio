@@ -276,7 +276,7 @@
     left: 50%;
     width: 100vw;
     height: var(--work-band-height);
-    background: theme('colors.brandGreen.500');
+    background: linear-gradient(90deg, theme('colors.brandGreen.700'), theme('colors.brandGreen.500'));
     clip-path: polygon(0 var(--work-entry-rise), 100% 0, 100% var(--work-band-thickness), 0 100%);
     pointer-events: none;
     transform: translate(-50%, -50%);
