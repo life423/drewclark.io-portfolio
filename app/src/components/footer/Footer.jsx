@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react'
 import { LuTwitter, LuGithub } from 'react-icons/lu'
 import useIntersection from '../../hooks/useIntersection'
 import clsx from 'clsx'
+import './footer.css'
 
 export default function Footer() {
     const containerRef = useRef(null)
@@ -39,8 +40,8 @@ export default function Footer() {
     }
 
     return (
-        <footer ref={containerRef} className='bg-brandGray-900 text-white'>
-            <div className='py-8 px-6'>
+        <footer ref={containerRef} className='portfolio-footer text-white'>
+            <div className='portfolio-footer__inner'>
                 {/* Single row layout on all screen sizes */}
                 <div className='flex flex-row justify-between items-center'>
                     {/* Left side: icons with reduced spacing */}

@@ -38,7 +38,7 @@ const MainContent = React.memo(() => {
                 </Suspense>
             </ErrorBoundary>
             
-            <div id="projects" className='relative z-[1] bg-[#262d35]'>
+            <div id="projects" className='portfolio-work-entry relative z-[1]'>
                 <ErrorBoundary 
                     onError={logError}
                     fallback={

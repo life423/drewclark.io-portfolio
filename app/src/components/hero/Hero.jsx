@@ -95,7 +95,7 @@ export default function Hero() {
                             <img
                                 src={sproutMobile}
                                 alt='Portfolio background image'
-                                className='w-full h-full object-cover object-center lg:object-[center_40%]'
+                                className='portfolio-hero__image w-full h-full object-cover object-center'
                                 width="900"
                                 height="1601"
                                 loading="eager"
@@ -234,15 +234,6 @@ export default function Hero() {
                         </a>
                     </div>
                 </ProgressiveElement>
-            </div>
-
-            {/* Diagonal slice indicator */}
-            <div className="absolute bottom-0 left-0 right-0 w-full overflow-hidden z-10">
-                <div
-                    className="absolute w-[120%] h-20 bg-gradient-to-r
-                    from-brandGray-900 to-brandGray-800
-                    transform -rotate-3 translate-y-1/2 origin-bottom-left"
-                />
             </div>
         </section>
     )

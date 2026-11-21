@@ -105,3 +105,46 @@ for (const [width, height] of [[1280, 800], [1810, 1031], [390, 844]]) {
         expect(geometry.overflows).toBe(false);
     });
 }
+
+test('desktop hero leaves the top sprout leaf beneath the fixed navigation', async ({ page }) => {
+    await page.goto('/');
+    const art = page.locator('.portfolio-hero__image');
+    for (const [width, height] of [[1280, 800], [2048, 675], [2540, 844]]) {
+        await page.setViewportSize({ width, height });
+        await art.evaluate(img => img.decode());
+        const clearance = await art.evaluate(img => {
+            const box = img.getBoundingClientRect();
+            const scale = Math.max(box.width / img.naturalWidth, box.height / img.naturalHeight);
+            const y = Number.parseFloat(window.getComputedStyle(img).objectPosition.split(' ')[1]) / 100;
+            // The earliest visible pixel of the top leaf is at ~15% asset height.
+            const leafTop = box.top + (box.height - img.naturalHeight * scale) * y + 0.15 * img.naturalHeight * scale;
+            return leafTop - document.querySelector('header nav').getBoundingClientRect().bottom;
+        });
+        expect(clearance).toBeGreaterThan(3);
+    }
+});
+
+test('section slope is decorative and the aligned footer keeps its working controls', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('/');
+    const entry = page.locator('.portfolio-work-entry');
+    const seam = await entry.evaluate(element => {
+        const edge = window.getComputedStyle(element, '::before');
+        return { pointers: edge.pointerEvents, clip: edge.clipPath, height: parseFloat(edge.height) };
+    });
+    expect(seam.pointers).toBe('none');
+    expect(seam.clip).toContain('polygon(');
+    expect(seam.height).toBeLessThanOrEqual(44);
+    await page.getByRole('link', { name: 'Featured Projects' }).click();
+    await expect(page.getByRole('heading', { name: 'My Portfolio Projects' })).toBeInViewport();
+
+    const footer = page.getByRole('contentinfo');
+    await expect(footer.getByRole('link', { name: 'Drew Clark on GitHub' })).toHaveAttribute('href', 'https://github.com/life423');
+    await expect(footer.getByRole('link', { name: 'Drew Clark on Twitter' })).toHaveAttribute('href', 'https://twitter.com/andrewgenai');
+    await expect(footer.getByRole('button', { name: /drew@/ })).toBeEnabled();
+    const leftGap = await page.evaluate(() => Math.abs(
+        document.querySelector('.portfolio-footer__inner').getBoundingClientRect().left -
+        document.querySelector('.work-studio-shell').getBoundingClientRect().left
+    ));
+    expect(leftGap).toBeLessThan(1);
+});

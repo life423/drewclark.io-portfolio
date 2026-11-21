@@ -1,6 +1,6 @@
 /* Independent work and chat surfaces share only a responsive grid, never a panel wrapper. */
 .work-studio-section {
-    background: linear-gradient(180deg, #262d35 0, #141b24 8rem, #111821 68%, #151e29);
+    background: linear-gradient(180deg, var(--work-entry-slate, #262d35) 0, #141b24 8rem, #111821 68%, #151e29);
     padding: 3rem 1rem 4rem;
 }
 .work-studio-shell {

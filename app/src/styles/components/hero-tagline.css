@@ -50,7 +50,10 @@
         padding-inline: 2rem;
     }
 }
+/* The desktop asset's top leaf sits about 15% down. Keep it above the
+   center-crop bias in a short, wide hero and clear of the fixed navbar. */
 @media (min-width: 1024px) {
+    .portfolio-hero__image { object-position: center 16%; }
     .portfolio-hero {
         min-height: 73vh;
         min-height: clamp(35rem, 73svh, 46rem);
@@ -62,4 +65,20 @@
 }
 @media (min-width: 1440px) {
     .portfolio-hero__content { max-width: clamp(84rem, calc(74vw + 278.4px), 101rem); }
+}
+
+/* A single gentle slope changes the section boundary, not layout or hit targets. */
+.portfolio-work-entry {
+    --work-entry-slate: #262d35;
+    --work-entry-rise: clamp(12px, 2.7vw, 44px);
+    background-color: var(--work-entry-slate);
+}
+.portfolio-work-entry::before {
+    content: '';
+    position: absolute;
+    inset: auto 0 calc(100% - 1px);
+    height: var(--work-entry-rise);
+    background: var(--work-entry-slate);
+    clip-path: polygon(0 100%, 100% 0, 100% 100%);
+    pointer-events: none;
 }
