@@ -48,7 +48,7 @@ export default function Hero() {
         <section
             ref={heroRef}
             onMouseMove={handleMouseMove}
-            className='relative min-h-[70vh] md:min-h-[85vh] lg:min-h-[95vh] flex items-center justify-center px-4 pb-16 pt-[calc(var(--site-nav-rest-height)+var(--hero-nav-clearance))] text-white overflow-hidden'
+            className='portfolio-hero relative flex items-center justify-center pt-[calc(var(--site-nav-rest-height)+var(--hero-nav-clearance))] text-white overflow-hidden'
             style={heroTransform}
         >
             {/* Spotlight overlay - follows cursor */}
@@ -145,13 +145,13 @@ export default function Hero() {
             </div>
 
             {/* Content container */}
-            <div className='container mx-auto z-10 relative'>
+            <div className='portfolio-hero__content z-10 relative'>
                 {/* Progressive name element - Stage 1 */}
                 <ProgressiveElement
                     id='hero-name'
                     appearDelay={0}
                     focusStage={1}
-                    className='relative mb-8' /* Increased spacing from mb-2 to mb-8 (32px) */
+                    className='relative mb-3 sm:mb-4'
                 >
                     {/* Removed the gray background span element that was causing the horizontal bar */}
                     <h1 className='relative text-4xl md:text-6xl font-bold'>
@@ -170,7 +170,7 @@ export default function Hero() {
                     id='hero-role'
                     appearDelay={300}
                     focusStage={2}
-                    className='block mt-4' /* Added mt-4 (16px) for additional separation */
+                    className='block'
                 >
                     <h2 className='text-2xl md:text-3xl mb-2 font-light text-white'>
                         Software Engineer
@@ -195,14 +195,14 @@ export default function Hero() {
                     id='hero-description'
                     appearDelay={HERO_TAGLINE_DELAY}
                     focusStage={3}
-                    className='block mt-8 mb-10' /* Added mt-8 and increased mb-8 to mb-10 for clearer section breaks */
+                    className='block my-5 sm:my-6'
                 >
-                    <div className='relative max-w-2xl'>
+                    <div className='portfolio-hero__tagline relative'>
                         {/* Background layer - removed backdrop blur */}
                         <div className='absolute inset-0 bg-brandGray-900/40 rounded-lg border-l-2 border-brandGreen-500/40 pointer-events-none'></div>
 
                         {/* One entrance; CSS adapts the copy without resetting progress. */}
-                        <p className='relative flex min-h-24 items-center px-3 py-2 text-lg text-white font-medium leading-relaxed'>
+                        <p className='relative flex min-h-[3.25rem] items-center px-3 py-2 text-lg text-white font-medium leading-relaxed'>
                             <TypedTextEffect
                                 text='Building elegant solutions to complex problems.'
                                 compactText='Software that solves real problems.'

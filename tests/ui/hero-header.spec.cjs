@@ -82,3 +82,26 @@ test('hero follows natural header growth without a viewport change', async ({ pa
     await expect.poll(async () => (await titleClearance(page)).navHeight).toBeGreaterThan(original.navHeight);
     await expect.poll(async () => (await titleClearance(page)).gap).toBeGreaterThanOrEqual(16);
 });
+
+for (const [width, height] of [[1280, 800], [1810, 1031], [390, 844]]) {
+    test('hero keeps the work heading near the first fold at ' + width + 'x' + height, async ({ page }) => {
+        await page.setViewportSize({ width, height });
+        await page.emulateMedia({ reducedMotion: 'reduce' });
+        await page.goto('/');
+        await expect(page.getByRole('heading', { name: 'My Portfolio Projects', exact: true })).toBeInViewport();
+        const geometry = await page.evaluate(() => {
+            const r = select => document.querySelector(select).getBoundingClientRect().toJSON();
+            const hero = r('.portfolio-hero'), heroContent = r('.portfolio-hero__content');
+            const work = r('.work-studio-shell'), box = r('.portfolio-hero__tagline');
+            return {
+                edgeDifference: Math.abs(work.left - heroContent.left), taglineWidth: box.width, taglineHeight: box.height,
+                controlsEnd: r('#hero-cta').bottom, heroEnd: hero.bottom, overflows: document.documentElement.scrollWidth > innerWidth,
+            };
+        });
+        expect(geometry.edgeDifference).toBeLessThan(1);
+        expect(geometry.taglineWidth).toBeLessThanOrEqual(width < 640 ? width - 25 : 570);
+        expect(geometry.taglineHeight).toBeLessThanOrEqual(75);
+        expect(geometry.controlsEnd).toBeLessThan(geometry.heroEnd);
+        expect(geometry.overflows).toBe(false);
+    });
+}
