@@ -695,3 +695,17 @@ test('divider fits between the desktop card rows and leaves card hover and focus
     await page.getByRole('button', { name: 'Read case study: ' + projects[0].title }).focus();
     await expect(gallery.locator('article').first()).toHaveCSS('box-shadow', 'rgb(117, 211, 174) 0px 0px 0px 2px');
 });
+
+test('all four case studies cycle green, blue and orange technology tags', async ({ page }) => {
+    await page.setViewportSize({ width: 1126, height: 900 });
+    await ready(page);
+    await page.getByRole('button', { name: 'Read case study: ' + projects[0].title }).click();
+    const tones = ['rgb(167, 243, 208)', 'rgb(167, 216, 240)', 'rgb(255, 193, 153)'];
+    for (const [index, project] of projects.entries()) {
+        const items = page.getByRole('list', { name: 'Technology stack' }).getByRole('listitem');
+        await expect(items).toHaveText(project.stack);
+        expect(await items.evaluateAll(tags => tags.map(tag => getComputedStyle(tag).color)))
+            .toEqual(project.stack.map((_, j) => tones[j % tones.length]));
+        if (index < projects.length - 1) await page.getByRole('button', { name: /^Next project:/ }).click();
+    }
+});

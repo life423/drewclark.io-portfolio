@@ -6,6 +6,12 @@ import ProjectLinks from './ProjectLinks'
 import ProjectNextButton from './ProjectNextButton'
 import UnifiedProjectChat from './UnifiedProjectChat'
 
+const STACK_TONES = [
+    'border-brandGreen-700/60 bg-brandGreen-900/25 text-brandGreen-200',
+    'border-brandBlue-700/60 bg-brandBlue-900/25 text-brandBlue-200',
+    'border-brandOrange-700/60 bg-brandOrange-900/25 text-brandOrange-200',
+]
+
 export default function ProjectCaseStudy({ project, projectNumber, totalProjects, nextTitle, onNext, onOverview }) {
     const { title, summary, image, imageAlt, imageWidth, imageHeight, liveUrl, liveLabel, repo, downloads,
         stack, initialDescription, detailedDescription, challenges, technicalDetails, highlights } = project
@@ -37,7 +43,7 @@ export default function ProjectCaseStudy({ project, projectNumber, totalProjects
             <section aria-labelledby='case-study-details' className='work-studio-depth'>
                 <h3 id='case-study-details' className='text-xl font-semibold text-brandBlue-200'>Project details</h3>
                 <ul aria-label='Technology stack' className='mt-3 flex flex-wrap gap-2 text-xs text-brandGray-200'>
-                    {stack.map(tech => <li key={tech} className='rounded-full border border-brandBlue-700/50 bg-brandBlue-900/20 px-2.5 py-1 text-brandBlue-200'>{tech}</li>)}
+                    {stack.map((tech, index) => <li key={tech} className={'rounded-full border px-2.5 py-1 ' + STACK_TONES[index % STACK_TONES.length]}>{tech}</li>)}
                 </ul>
                 <div className='prose prose-sm prose-invert mt-4 max-w-none prose-headings:text-brandBlue-200'>
                     {initialDescription && <p>{initialDescription}</p>}
