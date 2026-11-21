@@ -291,7 +291,7 @@ test('overview chat comes before project browsing; late answers stay scoped', as
     }
 });
 
-test('balanced four-card gallery and independent chat rail at 1440px', async ({ page }) => {
+test('balanced four-card gallery beneath a full-width top Explorer at 1440px', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 940 });
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await ready(page);
@@ -311,10 +311,12 @@ test('balanced four-card gallery and independent chat rail at 1440px', async ({ 
     expect(cards[2].y).toBeGreaterThan(cards[0].bottom);
     expect(cards[0].x).toBe(cards[2].x);
     expect(cards[1].x).toBe(cards[3].x);
-    expect(rail.x - cards[1].right).toBeGreaterThanOrEqual(40);
-    expect(rail.x - cards[1].right).toBeLessThanOrEqual(56);
+    expect(Math.abs(rail.x - cards[0].x)).toBeLessThan(1);
+    expect(Math.abs(rail.right - cards[1].right)).toBeLessThan(1);
     expect(Math.abs(intro.x - (viewport - rail.right))).toBeLessThan(1);
-    expect(Math.abs(cards[0].y - rail.y)).toBeLessThan(1);
+    expect(rail.y).toBeGreaterThan(intro.bottom);
+    expect(cards[0].y).toBeGreaterThan(rail.bottom);
+    expect(rail.height).toBeLessThan(300);
     expect(composer.y - rail.y).toBeLessThan(160);
 
     await page.locator('#projects').evaluate(region => window.scrollTo(0, region.getBoundingClientRect().top + window.scrollY - 160));
@@ -325,16 +327,16 @@ test('balanced four-card gallery and independent chat rail at 1440px', async ({ 
     expect(ownsBoundary).toBe(true);
 });
 
-test('chat stays reachable on tall desktops but returns to normal flow on shorter screens', async ({ page }) => {
+test('case-study chat stays at its original entry without sticking to the viewport', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 940 });
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await ready(page);
     await page.getByRole('button', { name: 'Read case study: ' + projects[0].title, exact: true }).click();
     const chat = page.locator('#project-chat');
-    await expect(chat).toHaveCSS('position', 'sticky');
+    await expect(chat).toHaveCSS('position', 'static');
     await page.getByRole('heading', { name: 'Project details' }).evaluate(heading =>
         heading.scrollIntoView({ block: 'start' }));
-    await expect(chat.getByRole('textbox')).toBeInViewport();
+    await expect(chat.getByRole('textbox')).not.toBeInViewport();
     await page.setViewportSize({ width: 1440, height: 700 });
     await expect(chat).toHaveCSS('position', 'static');
     await page.setViewportSize({ width: 930, height: 940 });
@@ -519,30 +521,25 @@ test('composer supports multiline questions and reflects the real limit', async 
     await noOverflow(page);
 });
 
-test('overview studio widens into its rail on large monitors without squeezing cards', async ({ page }) => {
-    await page.setViewportSize({ width: 1810, height: 1031 });
+test('wide and medium desktop Explorer and gallery share one centered shell', async ({ page }) => {
     await ready(page);
-    const layout = await page.evaluate(() => {
-        const rect = select => document.querySelector(select).getBoundingClientRect().toJSON();
-        const studio = rect('#project-chat'), gallery = rect('.work-studio-gallery'), shell = rect('.work-studio-shell');
-        const field = rect('#project-chat textarea'), first = rect('.work-gallery-card');
-        return {
-            studioWidth: studio.width, firstCardWidth: first.width, fieldWidth: field.width,
-            gap: studio.left - gallery.right, right: innerWidth - studio.right, left: shell.left,
-            fieldLeft: field.left - studio.left, fieldRight: studio.right - field.right,
-            alignedY: studio.top - gallery.top,
-        };
-    });
-    expect(layout.studioWidth).toBeGreaterThanOrEqual(560);
-    expect(layout.studioWidth).toBeLessThanOrEqual(600);
-    expect(layout.firstCardWidth).toBeGreaterThanOrEqual(430);
-    expect(layout.fieldWidth).toBeGreaterThanOrEqual(520);
-    expect(layout.gap).toBeGreaterThanOrEqual(50);
-    expect(layout.gap).toBeLessThanOrEqual(56);
-    expect(Math.abs(layout.right - layout.left)).toBeLessThan(1);
-    expect(Math.abs(layout.fieldLeft - layout.fieldRight)).toBeLessThan(1);
-    expect(Math.abs(layout.alignedY)).toBeLessThan(1);
-    await noOverflow(page);
+    for (const width of [1095, 1126, 1810]) {
+        await page.setViewportSize({ width, height: 1031 });
+        const layout = await page.evaluate(() => {
+            const r = select => document.querySelector(select).getBoundingClientRect();
+            const gallery = r('.work-studio-gallery'), studio = r('#project-chat');
+            const field = r('#project-chat textarea'), card = r('.work-gallery-card');
+            return { sides: Math.abs(studio.left - (innerWidth - studio.right)),
+                edge: Math.abs(studio.left - gallery.left) + Math.abs(studio.right - gallery.right),
+                gap: gallery.top - studio.bottom, field: field.width, card: card.width };
+        });
+        expect(layout.sides).toBeLessThan(1);
+        expect(layout.edge).toBeLessThan(1);
+        expect(layout.gap).toBeGreaterThan(10);
+        expect(layout.field).toBeGreaterThan(500);
+        expect(layout.card).toBeGreaterThan(475);
+        await noOverflow(page);
+    }
 });
 
 test('overview title uses the orange arc without repeating it on project card headings', async ({ page }) => {
@@ -566,22 +563,25 @@ test('overview title uses the orange arc without repeating it on project card he
     }
 });
 
-test('gallery images keep their full card width through mobile and tablet transitions', async ({ page }) => {
+test('gallery artwork stays clipped to smaller full-card-width frames through responsive transitions', async ({ page }) => {
     await ready(page);
     for (const width of [390, 639, 640, 719, 720, 768, 930, 1099, 1100, 1126]) {
         await page.setViewportSize({ width, height: 900 });
         const boxes = await page.locator('.work-gallery-card').evaluateAll(cards => cards.map(card => {
             const rect = node => node.getBoundingClientRect().toJSON();
             return { card: rect(card), frame: rect(card.querySelector('.work-gallery-art')),
-                image: rect(card.querySelector('img')) };
+                image: { width: card.querySelector('img').clientWidth, height: card.querySelector('img').clientHeight }, fit: getComputedStyle(card.querySelector('img')).objectFit, corner: getComputedStyle(card.querySelector('.work-gallery-art')).borderTopLeftRadius };
         }));
         expect(boxes).toHaveLength(4);
-        for (const { card, frame, image } of boxes) {
+        for (const { card, frame, image, corner } of boxes) {
             expect(Math.abs(frame.width - card.width)).toBeLessThan(1);
             expect(Math.abs(image.width - frame.width)).toBeLessThan(1);
             expect(Math.abs(image.height - frame.height)).toBeLessThan(1);
-            expect(frame.width / frame.height).toBeCloseTo(16 / 9, 2);
+            expect(frame.height).toBeGreaterThanOrEqual(145);
+            expect(frame.height).toBeLessThanOrEqual(224);
+            expect(corner).toBe('16px');
         }
+        expect(boxes[1].fit).toBe('contain');
         if (width >= 720) {
             expect(Math.abs(boxes[0].card.y - boxes[1].card.y)).toBeLessThan(1);
             expect(boxes[1].card.x).toBeGreaterThan(boxes[0].card.x);
@@ -593,14 +593,12 @@ test('gallery images keep their full card width through mobile and tablet transi
     }
 });
 
-test('work headings reuse the hero colors and the explorer has an explicit purpose', async ({ page }) => {
+test('overview heading is near-white, case-study gradient stays, and Explorer has an explicit purpose', async ({ page }) => {
     await page.setViewportSize({ width: 1126, height: 900 });
     await ready(page);
     const overview = page.getByRole('heading', { name: 'My Portfolio Projects' });
-    const gradient = await overview.locator('span').evaluate(span => getComputedStyle(span).backgroundImage);
-    expect(gradient).toContain('rgb(110, 231, 183)');
-    expect(gradient).toContain('rgb(167, 243, 208)');
-    expect(gradient).toContain('rgb(56, 189, 248)');
+    await expect(overview).toHaveCSS('color', 'rgb(250, 250, 250)');
+    await expect(overview).toHaveCSS('background-image', 'none');
     await expect(overview.locator('xpath=..').getByText('Portfolio', { exact: true })).toHaveCount(0);
     const chat = page.locator('#project-chat');
     await expect(chat.getByRole('heading', { name: 'Project Code Explorer' })).toBeVisible();
@@ -608,26 +606,31 @@ test('work headings reuse the hero colors and the explorer has an explicit purpo
     await expect(chat.getByRole('textbox')).toHaveAccessibleDescription(/actual GitHub code.*exact files and lines/);
     await page.getByRole('button', { name: 'Read case study: ' + projects[0].title, exact: true }).click();
     const detail = page.getByRole('heading', { name: projects[0].title, level: 2, exact: true });
-    await expect(detail.locator('span')).toHaveCSS('background-image', gradient);
+    const gradient = await detail.locator('span').evaluate(span => getComputedStyle(span).backgroundImage);
+    expect(gradient).toContain('rgb(110, 231, 183)');
+    expect(gradient).toContain('rgb(56, 189, 248)');
     await page.emulateMedia({ forcedColors: 'active' });
     await expect(detail.locator('span')).toHaveCSS('background-image', 'none');
     await expect(detail.locator('span')).not.toHaveCSS('color', 'rgba(0, 0, 0, 0)');
 });
 
-test('tall desktop overview keeps the studio alongside the second row but before the footer', async ({ page }) => {
-    await page.setViewportSize({ width: 1126, height: 1243 });
-    await ready(page);
-    const rail = page.locator('.work-studio-overview .code-studio');
-    await expect(rail).toHaveCSS('position', 'sticky');
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await expect.poll(() => rail.evaluate(element => {
-        const cardStart = document.querySelector('.work-gallery-card:nth-child(3)').getBoundingClientRect().top;
-        const end = document.querySelector('.work-studio-gallery').getBoundingClientRect().bottom;
-        const chat = element.getBoundingClientRect();
-        return chat.top > 50 && chat.bottom > cardStart + 180 && chat.bottom <= end;
-    })).toBe(true);
-    await page.setViewportSize({ width: 1126, height: 800 });
-    await expect(rail).toHaveCSS('position', 'static');
+test('the in-flow bottom shortcut returns keyboard focus to the only Explorer', async ({ page }) => {
+    for (const width of [1126, 390]) {
+        await page.setViewportSize({ width, height: 844 });
+        await page.emulateMedia({ reducedMotion: 'reduce' });
+        await ready(page);
+        const studio = page.locator('#project-chat');
+        await expect(studio).toHaveCount(1);
+        await expect(studio).toHaveCSS('position', 'static');
+        const shortcut = page.getByRole('button', { name: 'Back to Code Explorer' });
+        await shortcut.scrollIntoViewIfNeeded();
+        await shortcut.press('Enter');
+        await expect(studio.getByRole('textbox')).toBeFocused();
+        await expect(studio.getByRole('textbox')).toBeInViewport();
+        await expect.poll(() => studio.evaluate(e => e.getBoundingClientRect().top -
+            document.querySelector('header nav').getBoundingClientRect().bottom)).toBeGreaterThanOrEqual(8);
+        await expect(page.getByRole('contentinfo').getByText(new RegExp('© '+new Date().getFullYear()+' Drew Clark'))).toHaveCount(1);
+    }
 });
 
 test('mobile hero jump clears the fixed header and keeps chat compact until expanded', async ({ page }) => {
@@ -668,4 +671,27 @@ test('each card has one visible case-study button and its artwork remains a mous
     const r = await art.boundingBox();
     await page.mouse.click(r.x + r.width / 2, r.y + r.height / 2);
     await expect(page.getByRole('heading', { name: projects[0].title, level: 2 })).toBeVisible();
+});
+
+test('divider fits between the desktop card rows and leaves card hover and focus independent', async ({ page }) => {
+    await page.setViewportSize({ width: 1095, height: 1040 });
+    await ready(page);
+    const gallery = page.locator('.work-studio-gallery');
+    const geometry = await gallery.evaluate(e => {
+        const divider = getComputedStyle(e, '::before');
+        const cards = e.children;
+        const upper = cards[0].getBoundingClientRect().bottom;
+        const lower = cards[2].getBoundingClientRect().top;
+        const bounds = e.getBoundingClientRect();
+        const rise = Math.tan(Math.PI / 60) * bounds.width;
+        const shadow = getComputedStyle(cards[0]).boxShadow;
+        return { gap: lower - upper, rise, decoration: divider.backgroundImage,
+            pointerEvents: divider.pointerEvents, thickness: parseFloat(divider.height), shadow };
+    });
+    expect(geometry.gap).toBeGreaterThan(geometry.rise + geometry.thickness);
+    expect(geometry.decoration).toContain('linear-gradient');
+    expect(geometry.pointerEvents).toBe('none');
+    expect(geometry.shadow).not.toContain('inset');
+    await page.getByRole('button', { name: 'Read case study: ' + projects[0].title }).focus();
+    await expect(gallery.locator('article').first()).toHaveCSS('box-shadow', 'rgb(117, 211, 174) 0px 0px 0px 2px');
 });

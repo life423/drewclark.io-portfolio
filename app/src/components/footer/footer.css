@@ -5,7 +5,7 @@
         color-mix(in srgb, theme('colors.brandGreen.900') 60%, theme('colors.brandGray.900')),
         color-mix(in srgb, theme('colors.brandGreen.900') 40%, theme('colors.brandGray.900')));
     border-top: 1px solid theme('colors.brandGreen.900');
-    padding: 1.6rem 1rem 1.75rem;
+    padding: .65rem 1rem .7rem;
 }
 
 @media (min-width: 640px) {

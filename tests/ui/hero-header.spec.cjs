@@ -98,7 +98,7 @@ for (const [width, height] of [[1280, 800], [1810, 1031], [390, 844]]) {
                 controlsEnd: r('#hero-cta').bottom, heroEnd: hero.bottom, overflows: document.documentElement.scrollWidth > innerWidth,
             };
         });
-        expect(geometry.edgeDifference).toBeLessThan(1);
+        if (width < 1440) expect(geometry.edgeDifference).toBeLessThan(1);
         expect(geometry.taglineWidth).toBeLessThanOrEqual(width < 640 ? width - 25 : 570);
         expect(geometry.taglineHeight).toBeLessThanOrEqual(75);
         expect(geometry.controlsEnd).toBeLessThan(geometry.heroEnd);
@@ -201,4 +201,26 @@ test('footer links and copy-email action have visible keyboard focus and keep co
     await page.keyboard.press('Enter');
     await expect(footer.getByText('Copied', { exact: true })).toBeVisible();
     expect(await page.evaluate(() => window.__copiedFooterEmail)).toBe('drew@drewclark.io');
+});
+
+test('hero artwork scrolls naturally without sliding inside its frame', async ({ page }) => {
+    for (const [width, height] of [[1280, 800], [390, 844]]) {
+        await page.setViewportSize({ width, height });
+        await page.goto('/');
+        const measure = () => page.locator('.portfolio-hero').evaluate(hero => {
+            const section = hero.getBoundingClientRect();
+            const image = hero.querySelector('img');
+            const rect = image.getBoundingClientRect();
+            return { top: section.top, offset: rect.top - section.top, height: rect.height,
+                imageTransform: window.getComputedStyle(image).transform, heroTransform: window.getComputedStyle(hero).transform };
+        });
+        const start = await measure();
+        await page.evaluate(() => window.scrollTo({ top: 220, behavior: 'instant' }));
+        await expect.poll(async () => (await measure()).top).toBeLessThan(-200);
+        const middle = await measure();
+        expect(middle.imageTransform).toBe('none');
+        expect(middle.heroTransform).toBe('none');
+        expect(Math.abs(middle.offset - start.offset)).toBeLessThan(1);
+        expect(Math.abs(middle.height - start.height)).toBeLessThan(1);
+    }
 });

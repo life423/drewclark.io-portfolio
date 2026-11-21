@@ -62,7 +62,7 @@
     background: #292f2c;
     border-radius: 1rem;
     overflow: hidden;
-    box-shadow: 0 0 0 1px rgba(161, 161, 170, .26);
+    box-shadow: 0 .35rem 1rem rgb(0 0 0 / .16);
     transition: transform .18s ease-out, box-shadow .18s ease-out, background-color .18s ease-out;
 }
 .work-gallery-card:focus-within {
@@ -72,7 +72,7 @@
 @media (hover: hover) and (pointer: fine) {
     .work-gallery-card:hover {
         background: #303733;
-        box-shadow: 0 .65rem 1.65rem rgba(0, 0, 0, .45), 0 0 0 1px rgba(161, 161, 170, .48);
+        box-shadow: 0 .65rem 1.65rem rgb(0 0 0 / .42);
     }
     .work-gallery-card:focus-within {
         box-shadow: 0 0 0 2px #75d3ae;
@@ -82,7 +82,9 @@
     .work-gallery-card:hover { transform: translateY(-3px); }
 }
 .work-gallery-art {
-    aspect-ratio: 16 / 9;
+    --work-thumb-height: clamp(9.5rem, 17vw, 14rem);
+    height: var(--work-thumb-height);
+    border-radius: 1rem 1rem 0 0;
     min-width: 0;
     overflow: hidden;
     background: theme('colors.brandGray.900');
@@ -100,21 +102,16 @@
 }
 @media (min-width: 1100px) {
     .work-studio-section { padding: 4.5rem clamp(2rem, 3.3vw, 3rem) 6rem; }
-    .work-studio-grid {
+    .work-studio-case {
         grid-template-columns: minmax(0, 1fr) clamp(22.5rem, 27vw, 25rem);
         column-gap: clamp(2.5rem, 3.6vw, 3.5rem);
         grid-template-rows: auto 1fr;
     }
-    .work-studio-intro { grid-column: 1; grid-row: 1; }
-    .work-studio-gallery, .work-studio-media { grid-column: 1; grid-row: 2; }
-    .work-studio-rail { grid-column: 2; grid-row: 1 / span 2; }
-    .work-studio-overview .work-studio-intro { grid-column: 1 / -1; }
-    .work-studio-overview .work-studio-rail { grid-row: 2; }
     .work-studio-case { grid-template-rows: auto auto auto auto; }
     .work-studio-case .work-studio-nav { grid-column: 1; grid-row: 1; }
-    .work-studio-case .work-studio-intro { grid-row: 2; }
-    .work-studio-case .work-studio-rail { grid-row: 2 / -1; align-self: stretch; }
-    .work-studio-case .work-studio-media { grid-row: 3; }
+    .work-studio-case .work-studio-intro { grid-column: 1; grid-row: 2; }
+    .work-studio-case .work-studio-rail { grid-column: 2; grid-row: 2 / -1; }
+    .work-studio-case .work-studio-media { grid-column: 1; grid-row: 3; }
     .work-studio-depth { grid-column: 1; grid-row: 4; }
 }
 @media (min-width: 720px) {
@@ -128,7 +125,7 @@
         grid-template-rows: auto 1fr;
         height: 100%;
     }
-    .work-gallery-art { aspect-ratio: 16 / 9; }
+
     .work-gallery-art img { min-height: 0; }
     .work-gallery-copy { display: flex; flex-direction: column; padding: clamp(1rem, 1.6vw, 1.5rem); }
     .work-gallery-ctas { margin-top: auto; }
@@ -148,15 +145,6 @@
 
 .work-gallery-ctas { padding-top: .75rem; }
 .work-gallery-actions { padding-top: .25rem; }
-
-/* Keep all controls above the fold if there is enough height to read the conversation. */
-@media (min-width: 1100px) and (min-height: 800px) {
-    body:has(.work-studio-case), .site-rails:has(.work-studio-case) { overflow-x: clip; }
-    .work-studio-case .code-studio {
-        position: sticky;
-        top: calc(var(--site-nav-rest-height, 4rem) + 1rem);
-    }
-}
 
 /* Give case studies, not the gallery, a wider reading and conversation surface. */
 @media (min-width: 1510px) {
@@ -189,15 +177,6 @@
     outline-offset: 2px;
 }
 
-/* Widen the overview conversation gradually on large monitors, without pinching the cards. */
-@media (min-width: 1440px) {
-    .work-studio-overview {
-        max-width: clamp(84rem, calc(74vw + 278.4px), 101rem);
-        grid-template-columns: minmax(0, 1fr) clamp(24.3rem, calc(56vw - 417.6px), 37.5rem);
-    }
-}
-
-
 /* The exact hero palette at work-heading scale; keep the arc separate from the text clip. */
 .work-studio-title-color { display: inline-block; max-width: 100%; color: #a7f3d0; }
 @supports (background-clip: text) or (-webkit-background-clip: text) {
@@ -212,13 +191,57 @@
     .work-studio-title-color { background: none; color: CanvasText; }
 }
 
-/* On tall desktop layouts, keep the studio beside both rows without filler.
-   The rail ends with the gallery, so it can never follow visitors into the footer. */
-@media (min-width: 1100px) and (min-height: 1000px) {
-    body:has(.work-studio-overview), .site-rails:has(.work-studio-overview) { overflow-x: clip; }
-    .work-studio-overview .work-studio-rail { align-self: stretch; }
-    .work-studio-overview .code-studio {
-        position: sticky;
-        top: max(calc(var(--site-nav-rest-height, 4rem) + 1rem), calc((100svh - 47rem) / 2));
+/* The Explorer is one in-flow panel, followed by a full two-column gallery. */
+.work-studio-overview { grid-template-columns: minmax(0, 1fr); }
+.work-studio-shortcut { display: flex; justify-content: flex-end; }
+.work-studio-inline .code-studio {
+    scroll-margin-top: max(5rem, calc(var(--site-nav-rest-height, 4rem) + .75rem));
+}
+.work-gallery-art--wheel {
+    background: radial-gradient(ellipse at center, #09281e, #061c15 65%, #071c16);
+}
+.work-gallery-art--wheel img {
+    object-fit: contain;
+    transform: scale(1.23);
+    /* Blend the portrait edges into the matte without cutting the wheel's rim. */
+    mask-image: linear-gradient(to right,
+        transparent calc(50% - var(--work-thumb-height) * .4),
+        black calc(50% - var(--work-thumb-height) * .36),
+        black calc(50% + var(--work-thumb-height) * .36),
+        transparent calc(50% + var(--work-thumb-height) * .4));
+}
+.work-gallery-art--dashboard { background: #0d2827; }
+.work-gallery-art--dashboard img { object-fit: contain; }
+
+@media (min-width: 900px) {
+    .work-studio-inline #project-chat-content:not([hidden]) {
+        display: grid;
+        grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+        gap: .4rem clamp(1.25rem, 2.4vw, 2.5rem);
+        align-items: start;
+    }
+    .work-studio-inline #project-chat-description { grid-column: 1 / -1; max-width: none; margin-bottom: .4rem; }
+    .work-studio-inline .code-studio-followup { margin-top: 0; padding-top: 0; border-top: 0; }
+    .work-studio-inline .code-studio-starters {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+/* Mirror the hero's ~3-degree slope between paired project rows, not over them. */
+@media (min-width: 720px) {
+    .work-studio-overview .work-studio-gallery {
+        position: relative;
+        row-gap: clamp(3.25rem, 6vw, 5.5rem);
+    }
+    .work-studio-overview .work-studio-gallery::before {
+        content: '';
+        position: absolute;
+        inset: 50% 0 auto;
+        height: 4px;
+        background: linear-gradient(90deg,
+            theme('colors.brandGreen.900'), theme('colors.brandGreen.600') 52%, theme('colors.brandGreen.900'));
+        border-radius: 999px;
+        pointer-events: none;
+        transform: translateY(-50%) rotate(-3deg);
     }
 }

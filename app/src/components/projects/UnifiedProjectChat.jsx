@@ -56,7 +56,7 @@ function AnswerSources({ sources }) {
  * - Message timestamps and improved styling
  * - Support for asking about any project in one conversation
  */
-export default function UnifiedProjectChat({ project, embedded = false }) {
+export default function UnifiedProjectChat({ project, embedded = false, focusRequest = 0, collapseBelow = 1100 }) {
     const [allProjects, setAllProjects] = useState(false)
     const scope = !allProjects ? project?.id ?? 'all' : 'all'
     const [pendingScopes, setPendingScopes] = useState([])
@@ -78,7 +78,7 @@ export default function UnifiedProjectChat({ project, embedded = false }) {
     // Track if we've initialized from localStorage
     const [chatInitialized, setChatInitialized] = useState(false)
     // Track if the chat is minimized/collapsed - default based on screen size
-    const [isCollapsed, setIsCollapsed] = useState(() => window.innerWidth < 1100)
+    const [isCollapsed, setIsCollapsed] = useState(() => window.innerWidth < collapseBelow)
     // Track if user has manually toggled the chat state
     const [userHasInteracted, setUserHasInteracted] = useState(false)
     // Track if clear confirmation is showing
@@ -133,13 +133,13 @@ export default function UnifiedProjectChat({ project, embedded = false }) {
     useEffect(() => {
         const handleResize = () => {
             if (!userHasInteracted) {
-                setIsCollapsed(window.innerWidth < 1100);
+                setIsCollapsed(window.innerWidth < collapseBelow);
             }
         };
         
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
-    }, [userHasInteracted]);
+    }, [userHasInteracted, collapseBelow]);
 
     // Load chat history from localStorage on initial render
     useEffect(() => {
@@ -171,6 +171,19 @@ export default function UnifiedProjectChat({ project, embedded = false }) {
             if (messages.length) localStorage.setItem(storageKey, JSON.stringify(messages)); else localStorage.removeItem(storageKey)
         }
     }, [messages, chatInitialized])
+
+    const seenFocusRequest = useRef(0)
+    useEffect(() => {
+        if (!focusRequest || seenFocusRequest.current === focusRequest) return
+        if (isCollapsed) {
+            setIsCollapsed(false)
+            setUserHasInteracted(true)
+            return
+        }
+        seenFocusRequest.current = focusRequest
+        chatInputRef.current?.focus({ preventScroll: true })
+        chatInputRef.current?.closest('#project-chat')?.scrollIntoView({ block: 'start', behavior: 'instant' })
+    }, [focusRequest, isCollapsed])
 
     // Toggle chat collapse state
     const toggleCollapse = () => {
@@ -485,7 +498,7 @@ export default function UnifiedProjectChat({ project, embedded = false }) {
                         {visibleMessages.length > 0 ? (
                             <div
                                 ref={chatContainerRef}
-                                className='code-studio-transcript overflow-y-auto mt-3 mb-3 pr-2 scrollbar-thin scrollbar-thumb-brandGray-700 scrollbar-track-transparent'
+                                className='code-studio-followup code-studio-transcript overflow-y-auto mt-3 mb-3 pr-2 scrollbar-thin scrollbar-thumb-brandGray-700 scrollbar-track-transparent'
                             >
                                 {visibleMessages.map((msg, index) => {
                                     // Add timestamp if not already present
@@ -593,11 +606,11 @@ export default function UnifiedProjectChat({ project, embedded = false }) {
                                 )}
                             </div>
                         ) : (
-                            <div className='mt-4 border-t border-brandBlue-300/20 pt-3'>
+                            <div className='code-studio-followup mt-4 border-t border-brandBlue-300/20 pt-3'>
                                 <p className='mb-2 text-xs font-semibold uppercase tracking-wider text-brandOrange-300'>
                                     Ask me a question
                                 </p>
-                                <div className='flex flex-wrap gap-2'>
+                                <div className='code-studio-starters flex flex-wrap gap-2'>
                                     {starterQuestions.map(question => (
                                         <button
                                             key={question}

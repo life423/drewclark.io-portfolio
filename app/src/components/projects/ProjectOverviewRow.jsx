@@ -76,7 +76,7 @@ export default function ProjectOverviewRow({ project, index, onOpen }) {
             className='work-gallery-card group relative'
         >
             {/* Thumbnail */}
-            <div className='work-gallery-art'>
+            <div className={'work-gallery-art' + (String(project.id) === '2' ? ' work-gallery-art--wheel' : String(project.id) === '1' ? ' work-gallery-art--dashboard' : '')}>
                 <Thumbnail project={project} />
             </div>
 

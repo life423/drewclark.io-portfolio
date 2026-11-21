@@ -10,6 +10,7 @@ import PROJECTS from '../../data/projects.json'
 
 export default function ProjectsContainer() {
     const [started, setStarted] = useState(false)
+    const [chatFocusRequest, setChatFocusRequest] = useState(0)
     const [activeProjectIndex, setActiveProjectIndex] = useState(0)
 
     // Picking a project swaps the overview for the project view, so the card the visitor
@@ -46,11 +47,11 @@ export default function ProjectsContainer() {
             <section className='work-studio-section'>
                 <div ref={projectsTopRef} className='work-studio-shell work-studio-grid work-studio-overview'>
                     <header className='work-studio-intro' data-testid='work-gallery-intro'>
-                        <h2 className='work-studio-title'><span className='work-studio-title-color'>My Portfolio Projects</span></h2>
+                        <h2 className='work-studio-title'>My Portfolio Projects</h2>
                         <p className='work-studio-summary'>Try an app, explore the code, or open a project to see how it works.</p>
                     </header>
-                    <aside className='work-studio-rail' aria-label='Ask about the portfolio code'>
-                        <UnifiedProjectChat embedded />
+                    <aside className='work-studio-inline' aria-label='Ask about the portfolio code'>
+                        <UnifiedProjectChat embedded collapseBelow={900} focusRequest={chatFocusRequest} />
                     </aside>
                     <div className='work-studio-gallery' aria-label='Project gallery'>
                         {PROJECTS.map((project, index) => (
@@ -61,6 +62,15 @@ export default function ProjectsContainer() {
                                 onOpen={() => showProject(index)}
                             />
                         ))}
+                    </div>
+                    <div className='work-studio-shortcut'>
+                        <button
+                            type='button'
+                            className='inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-brandGreen-200 underline-offset-4 hover:text-brandGreen-100 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brandGreen-300'
+                            onClick={() => setChatFocusRequest(previous => previous + 1)}
+                        >
+                            Back to Code Explorer <span aria-hidden='true'>↑</span>
+                        </button>
                     </div>
                 </div>
             </section>

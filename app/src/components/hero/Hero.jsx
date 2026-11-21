@@ -40,16 +40,12 @@ export default function Hero() {
     // Keep foreground text and actions at full contrast as the background fades.
     const maxScroll = window.innerHeight * 0.7
     const scrollRatio = Math.min(scrollY / maxScroll, 1)
-    const heroTransform = {
-        transform: `perspective(1000px) rotateX(${scrollRatio * 8}deg)`,
-    }
 
     return (
         <section
             ref={heroRef}
             onMouseMove={handleMouseMove}
             className='portfolio-hero relative flex items-center justify-center pt-[calc(var(--site-nav-rest-height)+var(--hero-nav-clearance))] text-white overflow-hidden'
-            style={heroTransform}
         >
             {/* Spotlight overlay - follows cursor */}
             <div
@@ -60,10 +56,10 @@ export default function Hero() {
             {/* Neural Network Visualization - desktop only */}
             <NeuralNetworkCanvas scrollPosition={scrollY} />
 
-            {/* Enhanced background with parallax and improved effects */}
+            {/* Layered static hero artwork */}
             <div className='absolute inset-0 z-0 bg-brandGray-800 transition-all duration-300 ease-in-out lg:p-[3%_8%]' 
                  style={{ contain: 'strict', contentVisibility: 'auto', opacity: 1 - scrollRatio * 0.4 }}>
-                {/* Base image with parallax scrolling using picture element for responsive images */}
+                {/* Responsive hero raster variants */}
                 <div className='absolute inset-0'>
                         <picture>
                             {/* WebP format for modern browsers - with optimized sizes and explicit dimensions */}
@@ -103,8 +99,6 @@ export default function Hero() {
                                 fetchpriority="high"
                                 style={{
                                     filter: 'brightness(0.75)',
-                                    transform: `translateY(${scrollY * 0.15}px)`,
-                                    transition: 'transform 0.2s ease-out',
                                     aspectRatio: 'auto',
                                     contentVisibility: 'auto',
                                 }}
@@ -132,16 +126,6 @@ export default function Hero() {
                     <div className='absolute -inset-x-full top-0 h-screen rotate-12 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-light-sweep'></div>
                 </div>
 
-                {/* Animated plant silhouette with parallax */}
-                <div
-                    className='absolute right-0 bottom-0 w-1/3 md:w-1/4 h-3/4 pointer-events-none opacity-20 mix-blend-soft-light'
-                    style={{
-                        transform: `translateY(${scrollY * -0.05}px)`,
-                        transition: 'transform 0.1s ease-out',
-                    }}
-                >
-                    {/* This would be an SVG silhouette of a plant - omitted for brevity */}
-                </div>
             </div>
 
             {/* Content container */}

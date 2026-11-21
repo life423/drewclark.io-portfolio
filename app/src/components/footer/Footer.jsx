@@ -45,14 +45,14 @@ export default function Footer() {
                 {/* Single row layout on all screen sizes */}
                 <div className='flex flex-row justify-between items-center'>
                     {/* Left side: icons with reduced spacing */}
-                    <div className='flex space-x-6'>
+                    <div className='flex gap-2'>
                         {/* Twitter Icon - same color/animation */}
                         <a
                             href='https://twitter.com/andrewgenai'
                             target='_blank'
                             rel='noopener noreferrer'
                             aria-label='Drew Clark on Twitter'
-                            className='relative inline-block'
+                            className='relative grid min-h-11 min-w-11 place-items-center'
                         >
                             <LuTwitter
                                 aria-hidden='true'
@@ -70,7 +70,7 @@ export default function Footer() {
                             target='_blank'
                             rel='noopener noreferrer'
                             aria-label='Drew Clark on GitHub'
-                            className='relative inline-block'
+                            className='relative grid min-h-11 min-w-11 place-items-center'
                         >
                             <LuGithub
                                 aria-hidden='true'
@@ -83,7 +83,7 @@ export default function Footer() {
                     </div>
 
                     {/* Right side with consistent text sizing */}
-                    <div className='flex flex-col items-end text-right space-y-1'>
+                    <div className='flex flex-col items-end text-right'>
                         {/* 1) Clickable 'Copy Email' text */}
                         <button
                             onClick={handleCopyEmail}
@@ -101,7 +101,7 @@ export default function Footer() {
 
                         {/* 3) Copyright */}
                         <div className='text-sm text-brandGray-200'>
-                            Clark Company Limited &copy; {currentYear}
+                            &copy; {currentYear} Drew Clark
                         </div>
                     </div>
                 </div>
