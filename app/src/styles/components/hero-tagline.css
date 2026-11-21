@@ -27,44 +27,56 @@
 }
 
 
-/* Keep the original art and text composition, but make room for the work at the next fold. */
+/* Use one content shell for the hero and portfolio entry. */
+:root {
+    --portfolio-content-gutter: 1rem;
+    --portfolio-content-max: 84rem;
+}
+@media (min-width: 40rem) {
+    :root { --portfolio-content-gutter: 2rem; }
+}
+@media (min-width: 68.75rem) {
+    :root { --portfolio-content-gutter: clamp(2rem, 3.3vw, 3rem); }
+}
+
 .portfolio-hero {
     min-height: 68vh;
     min-height: clamp(30rem, 68svh, 38rem);
-    padding-inline: 1rem;
+    padding-inline: var(--portfolio-content-gutter);
     padding-bottom: 2.5rem;
 }
 .portfolio-hero__content {
     width: 100%;
-    max-width: 84rem;
+    max-width: var(--portfolio-content-max);
     margin-inline: auto;
 }
 .portfolio-hero__tagline {
     width: fit-content;
     max-width: min(100%, 37rem);
 }
-@media (min-width: 640px) {
+@media (min-width: 40rem) {
     .portfolio-hero {
         min-height: 71vh;
         min-height: clamp(31rem, 71svh, 41rem);
-        padding-inline: 2rem;
     }
 }
-/* The desktop asset's top leaf sits about 23% down. Keep it above the
-   center-crop bias in a short, wide hero and clear of the fixed navbar. */
-@media (min-width: 1024px) {
-    .portfolio-hero__image { object-position: 56% 36%; }
+/* Keep the entire sprout above the diagonal, even on short, ultrawide screens. */
+@media (min-width: 64rem) {
+    .portfolio-hero__art {
+        container-type: size;
+        background: #0b1519;
+    }
+    .portfolio-hero__frame {
+        inset-inline-start: auto;
+        width: min(100%, 260cqh);
+        mask-image: linear-gradient(to right, transparent, black 24%);
+    }
+    .portfolio-hero__image { object-position: 56% 45%; }
     .portfolio-hero {
-        min-height: 73vh;
-        min-height: clamp(35rem, 73svh, 46rem);
+        min-height: clamp(27rem, calc(73vh - 7rem), 39rem);
+        min-height: clamp(27rem, calc(73svh - 7rem), 39rem);
         padding-bottom: 3rem;
     }
-}
-@media (min-width: 1100px) {
-    .portfolio-hero { padding-inline: clamp(2rem, 3.3vw, 3rem); }
-}
-@media (min-width: 1440px) {
-    .portfolio-hero__content { max-width: clamp(84rem, calc(74vw + 278.4px), 101rem); }
 }
 
 /* A single gentle slope changes the section boundary, not layout or hit targets. */
@@ -91,6 +103,6 @@
 }
 
 /* Bring right-hand leaf tips into narrower desktop frames without swapping art. */
-@media (min-width: 1024px) and (max-width: 1180px) {
-    .portfolio-hero__image { object-position: 72% 36%; }
+@media (min-width: 64rem) and (max-width: 73.75rem) {
+    .portfolio-hero__image { object-position: 72% 45%; }
 }

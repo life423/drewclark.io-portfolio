@@ -57,10 +57,10 @@ export default function Hero() {
             <NeuralNetworkCanvas scrollPosition={scrollY} />
 
             {/* Layered static hero artwork */}
-            <div className='absolute inset-0 z-0 bg-brandGray-800 transition-all duration-300 ease-in-out lg:p-[3%_8%]' 
+            <div className='portfolio-hero__art absolute inset-0 z-0 bg-brandGray-800 transition-all duration-300 ease-in-out'
                  style={{ contain: 'strict', contentVisibility: 'auto', opacity: 1 - scrollRatio * 0.4 }}>
                 {/* Responsive hero raster variants */}
-                <div className='absolute inset-0'>
+                <div className='portfolio-hero__frame absolute inset-0'>
                         <picture>
                             {/* WebP format for modern browsers - with optimized sizes and explicit dimensions */}
                             <source
@@ -186,10 +186,9 @@ export default function Hero() {
                         <div className='absolute inset-0 bg-brandGray-900/40 rounded-lg border-l-2 border-brandGreen-500/40 pointer-events-none'></div>
 
                         {/* One entrance; CSS adapts the copy without resetting progress. */}
-                        <p className='relative flex min-h-[3.25rem] items-center px-3 py-2 text-lg text-white font-medium leading-relaxed'>
+                        <p className='relative flex min-h-[3.25rem] items-center px-3 py-2 text-lg text-white font-medium leading-normal md:leading-relaxed'>
                             <TypedTextEffect
-                                text='Building elegant solutions to complex problems.'
-                                compactText='Software that solves real problems.'
+                                text='I build web apps, real-time games, and GPU systems.'
                                 startDelay={HERO_TAGLINE_DELAY}
                             />
                         </p>

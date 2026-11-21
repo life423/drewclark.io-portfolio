@@ -2,8 +2,8 @@
 const { test, expect } = require('@playwright/test');
 const { setTimeout: delay } = require('node:timers/promises');
 
-const COMPACT = 'Software that solves real problems.';
-const FULL = 'Building elegant solutions to complex problems.';
+const FULL = 'I build web apps, real-time games, and GPU systems.';
+const COMPACT = FULL;
 
 function copy(page, compact = true) {
     return page.getByTestId('hero-tagline').locator(`[data-typed-copy="${compact ? 'compact' : 'full'}"]`);

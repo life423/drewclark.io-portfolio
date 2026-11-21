@@ -98,7 +98,7 @@ for (const [width, height] of [[1280, 800], [1810, 1031], [390, 844]]) {
                 controlsEnd: r('#hero-cta').bottom, heroEnd: hero.bottom, overflows: document.documentElement.scrollWidth > innerWidth,
             };
         });
-        if (width < 1440) expect(geometry.edgeDifference).toBeLessThan(1);
+        expect(geometry.edgeDifference).toBeLessThan(1);
         expect(geometry.taglineWidth).toBeLessThanOrEqual(width < 640 ? width - 25 : 570);
         expect(geometry.taglineHeight).toBeLessThanOrEqual(75);
         expect(geometry.controlsEnd).toBeLessThan(geometry.heroEnd);
@@ -106,21 +106,32 @@ for (const [width, height] of [[1280, 800], [1810, 1031], [390, 844]]) {
     });
 }
 
-test('desktop hero leaves the top sprout leaf beneath the fixed navigation', async ({ page }) => {
+test('desktop hero fits the sprout between the navigation and the diagonal', async ({ page }) => {
     await page.goto('/');
     const art = page.locator('.portfolio-hero__image');
-    for (const [width, height] of [[1280, 800], [2048, 675], [2540, 844]]) {
+    for (const [width, height] of [[1024, 675], [1105, 679], [1280, 480], [1280, 800], [1810, 1031], [2048, 675], [2540, 844]]) {
         await page.setViewportSize({ width, height });
         await art.evaluate(img => img.decode());
         const clearance = await art.evaluate(img => {
             const box = img.getBoundingClientRect();
             const scale = Math.max(box.width / img.naturalWidth, box.height / img.naturalHeight);
-            const y = Number.parseFloat(window.getComputedStyle(img).objectPosition.split(' ')[1]) / 100;
-            // The earliest visible pixel of the top leaf is at ~23% asset height.
-            const leafTop = box.top + (box.height - img.naturalHeight * scale) * y + 0.23 * img.naturalHeight * scale;
-            return leafTop - document.querySelector('header nav').getBoundingClientRect().bottom;
+            const [x, y] = getComputedStyle(img).objectPosition.split(' ').map(value => parseFloat(value) / 100);
+            const originX = box.left + (box.width - img.naturalWidth * scale) * x;
+            const originY = box.top + (box.height - img.naturalHeight * scale) * y;
+            const hero = img.closest('.portfolio-hero').getBoundingClientRect();
+            const slope = parseFloat(getComputedStyle(document.querySelector('.portfolio-work-entry'), '::before').height);
+            // Approximate landmarks from the original desktop illustration, including the rock under the stem.
+            const upperLeaf = originY + 0.23 * img.naturalHeight * scale;
+            const stemX = originX + 0.75 * img.naturalWidth * scale;
+            const stemY = originY + 0.79 * img.naturalHeight * scale;
+            const diagonalY = hero.bottom - slope * (stemX - hero.left) / hero.width;
+            return {
+                stemClearance: diagonalY - stemY,
+                belowNav: upperLeaf - document.querySelector('header nav').getBoundingClientRect().bottom,
+            };
         });
-        expect(clearance).toBeGreaterThan(3);
+        expect(clearance.belowNav).toBeGreaterThan(3);
+        expect(clearance.stemClearance).toBeGreaterThan(8);
     }
 });
 
