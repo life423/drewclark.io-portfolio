@@ -1,11 +1,11 @@
-/* global document, innerWidth, getComputedStyle, localStorage, sessionStorage */
+/* global window, document, innerWidth, getComputedStyle, localStorage, sessionStorage */
 const { test, expect } = require('@playwright/test');
 const { setTimeout: delay } = require('node:timers/promises');
 const projects = require('../../app/src/data/projects.json');
 
 const sizes = [
     [320, 568], [390, 844], [844, 390], [768, 1024],
-    [1023, 768], [1024, 768], [1280, 800], [1440, 900], [1920, 1080],
+    [930, 820], [1099, 768], [1100, 768], [1126, 900], [1280, 800], [1440, 900], [1920, 1080],
 ];
 
 async function ready(page) {
@@ -52,12 +52,13 @@ for (const [width, height] of sizes) {
         for (let index = 0; index < projects.length; index++) {
             const project = projects[index];
             await expect(page.getByRole('heading', { name: project.title, level: 2, exact: true })).toBeVisible();
-            const full = page.getByRole('link', { name: `View the full ${project.title} image (opens in a new tab)`, exact: true });
-            await expect(full).toHaveAttribute('href', project.image);
-            await imageLoaded(full.locator('img'));
-            const sizing = await full.locator('img').evaluate(i => {
-                const r = i.getBoundingClientRect(), p = i.parentElement.getBoundingClientRect();
-                return Math.abs(r.width - p.width) < 1 && Math.abs(r.width / r.height - i.naturalWidth / i.naturalHeight) < 0.01;
+            const art = page.locator('.work-studio-media img');
+            await expect(art).toHaveAttribute('src', project.image);
+            await imageLoaded(art);
+            await expect(page.getByRole('link', { name: /View the full .* image/ })).toHaveCount(0);
+            const sizing = await art.evaluate(i => {
+                const r = i.getBoundingClientRect(), parentWidth = i.parentElement.clientWidth;
+                return Math.abs(r.width - parentWidth) < 1 && Math.abs(r.width / r.height - i.naturalWidth / i.naturalHeight) < 0.01;
             });
             expect(sizing).toBe(true);
             await noOverflow(page);
@@ -75,10 +76,10 @@ for (const [width, height] of sizes) {
             await expect(chat.getByRole('textbox', { name: 'Question for Project Chat' })).toBeVisible();
             // A single read avoids mismatched y coordinates while the page scrolls.
             const [summary, panel, media, details, related] = await page.evaluate(() => [
-                '[data-testid="case-study-summary"]', '#project-chat', '[aria-labelledby="case-study-title"] figure a',
+                '[data-testid="case-study-summary"]', '#project-chat', '[aria-labelledby="case-study-title"] figure img',
                 '#case-study-details', '#related-projects-title',
             ].map(selector => document.querySelector(selector).getBoundingClientRect().toJSON()));
-            if (width >= 1024) {
+            if (width >= 1100) {
                 expect(panel.x).toBeGreaterThanOrEqual(summary.x + summary.width);
                 expect(Math.abs(panel.y - summary.y)).toBeLessThan(2);
                 expect(panel.x).toBeGreaterThanOrEqual(media.x + media.width);
@@ -165,7 +166,7 @@ test('chat success, sources, loading and recoverable failure', async ({ page }) 
     await expect(page.getByText('PPO trains on the GPU.', { exact: true })).toBeVisible();
     await expect(page.getByRole('link', { name: 'ppo.cpp', exact: true })).toBeVisible();
     failed = true;
-    await page.locator('#project-chat input').fill('Another question');
+    await page.locator('#project-chat textarea').fill('Another question');
     await page.getByRole('button', { name: 'Ask', exact: true }).click();
     await expect(page.getByText('Sorry, something went wrong on my end. Please try again in a moment.', { exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Ask', exact: true })).toBeEnabled();
@@ -248,6 +249,10 @@ test('overview chat comes before project browsing; late answers stay scoped', as
         await expect.poll(() => calls.length).toBe(1);
         expect(calls[0]).toEqual({ question: 'Question for A', projectId: projects[0].id });
         await chat.getByRole('textbox').fill('Draft for A');
+        await page.setViewportSize({ width: 1280, height: 900 });
+        await expect(chat).toHaveCount(1);
+        await expect(chat.locator('button[type=submit]')).toBeDisabled();
+        await page.setViewportSize({ width: 390, height: 844 });
         await page.getByRole('button', { name: /^Next project:/ }).click();
         await expect(chat.getByRole('option', { name: projects[1].title })).toHaveCount(1);
         await expect(chat.getByText('Question for A', { exact: true })).toHaveCount(0);
@@ -283,4 +288,240 @@ test('overview chat comes before project browsing; late answers stay scoped', as
     } finally {
         releaseFirst();
     }
+});
+
+test('balanced four-card gallery and independent chat rail at 1440px', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 940 });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await ready(page);
+    const getLayout = () => page.evaluate(() => {
+        const rect = selector => document.querySelector(selector).getBoundingClientRect().toJSON();
+        return {
+            intro: rect('[data-testid="work-gallery-intro"]'), rail: rect('#project-chat'),
+            composer: rect('#project-chat textarea'), cards: [...document.querySelectorAll('.work-gallery-card')]
+                .map(card => card.getBoundingClientRect().toJSON()), viewport: innerWidth,
+        };
+    });
+    const { intro, rail, composer, cards, viewport } = await getLayout();
+    expect(cards).toHaveLength(4);
+    expect(cards.every(card => Math.abs(card.width - cards[0].width) < 1 && Math.abs(card.height - cards[0].height) < 1)).toBe(true);
+    expect(Math.abs(cards[0].y - cards[1].y)).toBeLessThan(1);
+    expect(Math.abs(cards[2].y - cards[3].y)).toBeLessThan(1);
+    expect(cards[2].y).toBeGreaterThan(cards[0].bottom);
+    expect(cards[0].x).toBe(cards[2].x);
+    expect(cards[1].x).toBe(cards[3].x);
+    expect(rail.x - cards[1].right).toBeGreaterThanOrEqual(40);
+    expect(rail.x - cards[1].right).toBeLessThanOrEqual(56);
+    expect(Math.abs(intro.x - (viewport - rail.right))).toBeLessThan(1);
+    expect(Math.abs(cards[0].y - rail.y)).toBeLessThan(1);
+    expect(composer.y - rail.y).toBeLessThan(160);
+
+    await page.locator('#projects').evaluate(region => window.scrollTo(0, region.getBoundingClientRect().top + window.scrollY - 160));
+    const ownsBoundary = await page.locator('#projects').evaluate(region => {
+        const seam = region.getBoundingClientRect().top;
+        return region.contains(document.elementFromPoint(innerWidth / 2, seam + 4));
+    });
+    expect(ownsBoundary).toBe(true);
+});
+
+test('chat stays reachable on tall desktops but returns to normal flow on shorter screens', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 940 });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await ready(page);
+    await page.getByRole('button', { name: projects[0].title, exact: true }).click();
+    const chat = page.locator('#project-chat');
+    await expect(chat).toHaveCSS('position', 'sticky');
+    await page.getByRole('heading', { name: 'Project details' }).evaluate(heading =>
+        heading.scrollIntoView({ block: 'start' }));
+    await expect(chat.getByRole('textbox')).toBeInViewport();
+    await page.setViewportSize({ width: 1440, height: 700 });
+    await expect(chat).toHaveCSS('position', 'static');
+    await page.setViewportSize({ width: 930, height: 940 });
+    await expect(chat).toHaveCSS('position', 'static');
+    await expect(chat.getByRole('button', { name: 'Expand chat' })).toBeVisible();
+});
+
+test('wide cryptography case study uses the extra space for its chat', async ({ page }) => {
+    await page.setViewportSize({ width: 1656, height: 940 });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await ready(page);
+    await page.getByRole('button', { name: projects[1].title, exact: true }).click();
+    const { left, right, chat, art, input, heading } = await page.evaluate(() => {
+        const rect = select => document.querySelector(select).getBoundingClientRect().toJSON();
+        const shell = rect('.work-studio-shell');
+        return {
+            left: shell.left, right: innerWidth - shell.right, chat: rect('#project-chat'),
+            art: rect('.work-studio-media'), input: rect('#project-chat textarea'), heading: rect('.work-studio-intro'),
+        };
+    });
+    expect(left).toBeGreaterThanOrEqual(40);
+    expect(right).toBeLessThanOrEqual(64);
+    expect(Math.abs(left - right)).toBeLessThan(1);
+    expect(chat.width).toBeGreaterThanOrEqual(520);
+    expect(chat.width).toBeLessThanOrEqual(580);
+    expect(chat.left - art.right).toBeGreaterThanOrEqual(40);
+    expect(chat.left - art.right).toBeLessThanOrEqual(56);
+    expect(Math.abs(heading.y - chat.y)).toBeLessThan(1);
+    expect(input.width).toBeGreaterThan(400);
+    await expect(page.getByRole('navigation', { name: 'Case study navigation' }).getByRole('button')).toHaveCount(2);
+    await expect(page.getByRole('link', { name: 'View the ' + projects[1].title + ' source code on GitHub (opens in a new tab)' }))
+        .toHaveAttribute('href', 'https://github.com/' + projects[1].repo);
+});
+
+test('wrapped case-study title keeps its curved underline clear of the summary', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await ready(page);
+    await page.getByRole('button', { name: projects[1].title, exact: true }).click();
+    const title = page.getByRole('heading', { name: projects[1].title, level: 2, exact: true });
+    const mark = await title.evaluate(node => {
+        const pseudo = getComputedStyle(node, '::after');
+        const style = getComputedStyle(node);
+        return {
+            lines: node.getBoundingClientRect().height / parseFloat(style.lineHeight),
+            margin: parseFloat(pseudo.marginTop), markHeight: parseFloat(pseudo.height),
+            image: pseudo.backgroundImage, widthRatio: parseFloat(pseudo.width) / node.getBoundingClientRect().width, summaryTop: node.nextElementSibling.getBoundingClientRect().top,
+            headingBottom: node.getBoundingClientRect().bottom,
+        };
+    });
+    expect(mark.lines).toBeGreaterThan(2);
+    expect(mark.margin).toBeGreaterThan(0);
+    expect(mark.markHeight).toBeGreaterThan(0);
+    expect(mark.image).toContain('image/svg+xml');
+    expect(mark.image).toContain('FF6B00');
+    expect(mark.widthRatio).toBeCloseTo(0.93, 2);
+    expect(mark.summaryTop).toBeGreaterThan(mark.headingBottom);
+    await noOverflow(page);
+});
+
+test('gallery lift respects input mode, keyboard focus, and reduced motion', async ({ page, browser }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await ready(page);
+    const card = page.locator('.work-gallery-card').first();
+    const baseShadow = await card.evaluate(element => getComputedStyle(element).boxShadow);
+    await card.hover();
+    await expect(card).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, -3)');
+    await expect.poll(() => card.evaluate(element => getComputedStyle(element).boxShadow)).not.toBe(baseShadow);
+    const action = card.getByRole('link', { name: /Visit the site/ });
+    const baseAction = await action.evaluate(element => getComputedStyle(element).backgroundColor);
+    await action.hover();
+    await expect.poll(() => action.evaluate(element => getComputedStyle(element).backgroundColor)).not.toBe(baseAction);
+
+    await page.mouse.move(0, 0);
+    const open = card.getByRole('button', { name: projects[0].title, exact: true });
+    await open.focus();
+    await expect(open).toBeFocused();
+    await expect(card).toHaveCSS('box-shadow', 'rgb(117, 211, 174) 0px 0px 0px 2px');
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await card.hover();
+    await expect(card).toHaveCSS('transform', 'none');
+    await expect(card).toHaveCSS('transition-duration', '0s');
+
+    const touch = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+    try {
+        const phone = await touch.newPage();
+        await ready(phone);
+        const touchCard = phone.locator('.work-gallery-card').first();
+        await expect(touchCard).toHaveCSS('transform', 'none');
+        expect(await phone.evaluate(() => window.matchMedia('(pointer: fine)').matches)).toBe(false);
+    } finally {
+        await touch.close();
+    }
+});
+
+test('the studio explains source grounding and Cryptography actions fit on 1126px', async ({ page }) => {
+    await page.setViewportSize({ width: 1126, height: 900 });
+    await ready(page);
+    const chat = page.locator('#project-chat');
+    await expect(chat.getByRole('textbox')).toHaveAccessibleDescription(/GitHub code.*exact files and lines/);
+    const crypto = page.getByRole('button', { name: projects[1].title, exact: true }).locator('xpath=ancestor::article');
+    const cuda = page.getByRole('button', { name: projects[0].title, exact: true }).locator('xpath=ancestor::article');
+    await expect(crypto.getByText('Download', { exact: true })).toHaveCount(0);
+    const actions = await crypto.locator('.work-gallery-actions a').evaluateAll(links => links.map(link => {
+        const rect = link.getBoundingClientRect();
+        return { y: rect.y, bottom: rect.bottom, href: link.getAttribute('href') };
+    }));
+    expect(actions).toHaveLength(3);
+    expect(actions.map(link => link.href)).toEqual([
+        ...projects[1].downloads.map(item => item.url), 'https://github.com/' + projects[1].repo,
+    ]);
+    expect(actions.every(link => Math.abs(link.y - actions[0].y) < 1)).toBe(true);
+    const margins = await Promise.all([crypto, cuda].map(card => card.evaluate(el => {
+        const cardRect = el.getBoundingClientRect(), actionRect = el.querySelector('.work-gallery-actions').getBoundingClientRect();
+        return cardRect.bottom - actionRect.bottom;
+    })));
+    expect(Math.abs(margins[0] - margins[1])).toBeLessThan(1);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await noOverflow(page);
+    await expect(crypto.locator('.work-gallery-actions a')).toHaveCount(3);
+});
+
+test('composer supports multiline questions and reflects the real limit', async ({ page }) => {
+    await page.setViewportSize({ width: 1126, height: 900 });
+    let payload;
+    await page.route('**/api/askGPT', route => {
+        payload = route.request().postDataJSON();
+        return route.fulfill({ json: { answer: 'Test response', sources: [] } });
+    });
+    await ready(page);
+    const chat = page.locator('#project-chat');
+    const composer = chat.getByRole('textbox', { name: 'Question for Project Chat' });
+    const send = chat.getByRole('button', { name: 'Ask', exact: true });
+    await expect(composer).toHaveJSProperty('tagName', 'TEXTAREA');
+    await expect(composer).toHaveAttribute('maxlength', '500');
+    await expect(composer).toHaveAccessibleDescription(/500 characters/);
+    const geometry = await composer.evaluate(input => {
+        const r = input.getBoundingClientRect(), form = input.form.getBoundingClientRect();
+        const button = input.form.querySelector('button').getBoundingClientRect();
+        return { width: r.width, height: r.height, formWidth: form.width, inputBottom: r.bottom, buttonTop: button.top, buttonRight: button.right, inputRight: r.right };
+    });
+    expect(geometry.height).toBeGreaterThanOrEqual(90);
+    expect(Math.abs(geometry.width - geometry.formWidth)).toBeLessThan(1);
+    expect(geometry.buttonTop).toBeGreaterThan(geometry.inputBottom);
+    expect(Math.abs(geometry.buttonRight - geometry.inputRight)).toBeLessThan(1);
+
+    await composer.fill('How is the game state synchronized?');
+    await composer.press('End');
+    await composer.press('Enter');
+    await composer.pressSequentially('Which code handles reconnects?');
+    const question = 'How is the game state synchronized?\nWhich code handles reconnects?';
+    await expect(composer).toHaveValue(question);
+    expect(payload).toBeUndefined();
+    await send.click();
+    await expect(chat.getByText('Test response', { exact: true })).toBeVisible();
+    expect(payload).toEqual({ question });
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.getByRole('button', { name: projects[2].title, exact: true }).click();
+    await expect(composer).toBeVisible();
+    await expect(composer).toHaveValue('');
+    await expect(chat.getByRole('option', { name: projects[2].title })).toHaveCount(1);
+    await noOverflow(page);
+});
+
+test('overview studio widens into its rail on large monitors without squeezing cards', async ({ page }) => {
+    await page.setViewportSize({ width: 1810, height: 1031 });
+    await ready(page);
+    const layout = await page.evaluate(() => {
+        const rect = select => document.querySelector(select).getBoundingClientRect().toJSON();
+        const studio = rect('#project-chat'), gallery = rect('.work-studio-gallery'), shell = rect('.work-studio-shell');
+        const field = rect('#project-chat textarea'), first = rect('.work-gallery-card');
+        return {
+            studioWidth: studio.width, firstCardWidth: first.width, fieldWidth: field.width,
+            gap: studio.left - gallery.right, right: innerWidth - studio.right, left: shell.left,
+            fieldLeft: field.left - studio.left, fieldRight: studio.right - field.right,
+            alignedY: studio.top - gallery.top,
+        };
+    });
+    expect(layout.studioWidth).toBeGreaterThanOrEqual(560);
+    expect(layout.studioWidth).toBeLessThanOrEqual(600);
+    expect(layout.firstCardWidth).toBeGreaterThanOrEqual(430);
+    expect(layout.fieldWidth).toBeGreaterThanOrEqual(520);
+    expect(layout.gap).toBeGreaterThanOrEqual(50);
+    expect(layout.gap).toBeLessThanOrEqual(56);
+    expect(Math.abs(layout.right - layout.left)).toBeLessThan(1);
+    expect(Math.abs(layout.fieldLeft - layout.fieldRight)).toBeLessThan(1);
+    expect(Math.abs(layout.alignedY)).toBeLessThan(1);
+    await noOverflow(page);
 });

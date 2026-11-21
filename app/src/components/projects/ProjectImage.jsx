@@ -1,6 +1,6 @@
 // Reuse the overview artwork without cropping it in either detail layout.
 // A native image link also gives keyboard and touch users a full-size view.
-export default function ProjectImage({ image, imageAlt, imageWidth, imageHeight, title, preview = false }) {
+export default function ProjectImage({ image, imageAlt, imageWidth, imageHeight, title, preview = false, plain = false }) {
     if (!image) return null
 
     const artwork = (
@@ -17,7 +17,7 @@ export default function ProjectImage({ image, imageAlt, imageWidth, imageHeight,
 
     return (
         <figure className={`${preview ? '' : 'mb-5 '}overflow-hidden rounded-lg border border-brandGray-700 bg-brandGray-900`}>
-            {preview ? artwork : <a
+            {preview || plain ? artwork : <a
                 href={image}
                 target='_blank'
                 rel='noopener noreferrer'

@@ -5,6 +5,8 @@ import clsx from 'clsx'
 import { askProjectsChat } from '../../services/chatService'
 
 // First questions for someone evaluating the work. Each is answered from the code.
+// Keep this in sync with the request limit in api/config.js.
+const MAX_QUESTION_CHARS = 500
 const STARTER_QUESTIONS = [
     'How does CudaRL-Arena train agents directly on the GPU?',
     'How does multiplayer work in Ascend-Avoid?',
@@ -26,7 +28,7 @@ function AnswerSources({ sources }) {
 
     return (
         <div className='mt-2 flex flex-wrap items-center gap-1.5 text-xs'>
-            <span className='text-brandGray-400'>Relevant code</span>
+            <span className='text-brandBlue-200'>Relevant code</span>
             {links.map(source => (
                 <a
                     key={`${source.project}|${source.file}`}
@@ -76,7 +78,7 @@ export default function UnifiedProjectChat({ project, embedded = false }) {
     // Track if we've initialized from localStorage
     const [chatInitialized, setChatInitialized] = useState(false)
     // Track if the chat is minimized/collapsed - default based on screen size
-    const [isCollapsed, setIsCollapsed] = useState(() => !embedded && window.innerWidth < 1024)
+    const [isCollapsed, setIsCollapsed] = useState(() => window.innerWidth < 1100)
     // Track if user has manually toggled the chat state
     const [userHasInteracted, setUserHasInteracted] = useState(false)
     // Track if clear confirmation is showing
@@ -131,13 +133,13 @@ export default function UnifiedProjectChat({ project, embedded = false }) {
     useEffect(() => {
         const handleResize = () => {
             if (!userHasInteracted) {
-                setIsCollapsed(!embedded && window.innerWidth < 1024);
+                setIsCollapsed(window.innerWidth < 1100);
             }
         };
         
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
-    }, [embedded, userHasInteracted]);
+    }, [userHasInteracted]);
 
     // Load chat history from localStorage on initial render
     useEffect(() => {
@@ -236,7 +238,7 @@ export default function UnifiedProjectChat({ project, embedded = false }) {
 
     const askQuestion = async (question, requestedScope = scope) => {
         const trimmed = question.trim()
-        if (!trimmed || activeRequests.current.has(requestedScope)) return
+        if (!trimmed || trimmed.length > MAX_QUESTION_CHARS || activeRequests.current.has(requestedScope)) return
 
         const projectId = requestedScope === 'all' ? undefined : requestedScope
         const controller = new AbortController()
@@ -286,11 +288,11 @@ export default function UnifiedProjectChat({ project, embedded = false }) {
     }
 
     return (
-        <div id='project-chat' className={clsx('w-full scroll-mt-20', !embedded && 'mt-8')}>
+        <div id='project-chat' className={clsx('w-full scroll-mt-20', embedded ? 'code-studio' : 'mt-8')}>
             <div
                 className={clsx(
-                    'bg-brandGray-900 rounded-lg shadow-lg border border-brandGray-700 transition-all duration-300',
-                    isCollapsed ? 'p-3' : 'p-4'
+                    'code-studio-surface rounded-xl',
+                    isCollapsed ? 'p-3 sm:px-4' : 'p-4 lg:p-5'
                 )}
                 style={{
                     backfaceVisibility: 'hidden',
@@ -300,15 +302,15 @@ export default function UnifiedProjectChat({ project, embedded = false }) {
             >
                 {/* Make header clickable to toggle collapse */}
                 <div 
-                    className='flex justify-between items-center mb-4 cursor-pointer'
+                    className='flex justify-between items-center gap-2 mb-3 cursor-pointer'
                     onClick={() => {
                         toggleCollapse();
                     }}
                 >
-                    <h3 className='text-lg font-semibold text-brandGreen-400 tracking-wide flex items-center'>
+                    <h3 className='text-lg font-semibold text-brandGreen-300 flex items-center'>
                         <svg
                             xmlns='http://www.w3.org/2000/svg'
-                            className='h-5 w-5 mr-2 text-brandGreen-500'
+                            className='h-5 w-5 mr-2 text-brandOrange-500'
                             viewBox='0 0 20 20'
                             fill='currentColor'
                         >
@@ -398,8 +400,11 @@ export default function UnifiedProjectChat({ project, embedded = false }) {
                     </div>
                 </div>
 
+                <p id='project-chat-description' className='mb-3 max-w-[52ch] text-sm leading-relaxed text-brandGray-200'>
+                    Search the projects&apos; GitHub code for architecture and implementation details. When matching code is found, answers link to the exact files and lines.
+                </p>
                 {project && (
-                    <div className='mb-3 flex flex-wrap items-center gap-2'>
+                    <div className='mb-2 flex flex-wrap items-center gap-2'>
                         <label htmlFor='project-chat-scope' className='text-xs font-medium text-brandGray-300'>Chat scope</label>
                         <select
                             id='project-chat-scope'
@@ -413,25 +418,27 @@ export default function UnifiedProjectChat({ project, embedded = false }) {
                     </div>
                 )}
                 <form onSubmit={handleQuestionSubmit} className='mb-1'>
-                    <div className='flex gap-2'>
-                        <input
-                            ref={chatInputRef}
-                            type='text'
-                            value={userQuestion}
-                            onChange={e => setUserQuestion(e.target.value)}
-                            aria-label='Question for Project Chat' placeholder={embedded ? 'Ask about the code' : 'Ask how something in these projects works'}
-                            className='min-h-11 min-w-0 flex-1 px-3 py-2 bg-brandGray-800 border border-brandGray-700 rounded-lg text-sm text-white focus:ring-2 focus:ring-brandGreen-500/40 focus:border-brandGreen-500 outline-none transition-all duration-200'
-                            style={{
-                                backfaceVisibility: 'hidden',
-                                WebkitBackfaceVisibility: 'hidden',
-                                transform: 'translateZ(0)',
-                            }}
-                        />
+                    <textarea
+                        ref={chatInputRef}
+                        rows={3}
+                        maxLength={MAX_QUESTION_CHARS}
+                        value={userQuestion}
+                        onChange={event => setUserQuestion(event.target.value)}
+                        aria-label='Question for Project Chat'
+                        aria-describedby='project-chat-description project-chat-limit'
+                        placeholder='Ask a detailed question about the code'
+                        className='block min-h-24 max-h-48 w-full resize-y rounded-lg border border-brandGray-700 bg-brandGray-800 px-3 py-2.5 text-sm leading-relaxed text-white outline-none focus:ring-2 focus:ring-brandGreen-500/50'
+                    />
+                    <div className='mt-2 flex flex-wrap items-center justify-between gap-2'>
+                        <span id='project-chat-limit' className='text-xs tabular-nums text-brandGray-300'>
+                            {userQuestion.length} / {MAX_QUESTION_CHARS} characters
+                        </span>
                         <button
                             type='submit'
                             disabled={isGenerating}
+                            aria-label={isGenerating ? 'Generating answer' : 'Ask'}
                             className={clsx(
-                                'px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300',
+                                'ml-auto min-h-11 px-4 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 motion-reduce:transition-none',
                                 'relative overflow-hidden border',
                                 isGenerating
                                     ? 'bg-brandGray-700 text-brandGray-500 border-transparent cursor-wait'
@@ -442,7 +449,7 @@ export default function UnifiedProjectChat({ project, embedded = false }) {
                         >
                             {isGenerating ? (
                                 <svg
-                                    className='animate-spin h-5 w-5 text-white'
+                                    className='animate-spin h-5 w-5 text-white motion-reduce:animate-none' aria-hidden='true'
                                     xmlns='http://www.w3.org/2000/svg'
                                     fill='none'
                                     viewBox='0 0 24 24'
@@ -468,13 +475,24 @@ export default function UnifiedProjectChat({ project, embedded = false }) {
                     </div>
                 </form>
 
+                {isCollapsed && project && scope !== 'all' && visibleMessages.length === 0 && (
+                    <button
+                        type='button'
+                        onClick={() => askQuestion(starterQuestions[0])}
+                        disabled={isGenerating}
+                        className='mt-2 min-h-10 w-full rounded-md border border-brandBlue-700/60 px-2.5 text-left text-xs leading-snug text-brandBlue-200 hover:border-brandBlue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brandOrange-300 disabled:opacity-50'
+                    >
+                        {starterQuestions[0]}
+                    </button>
+                )}
+
                 {!isCollapsed && (
                     <>
                         {/* Fixed height scrollable message area */}
                         {visibleMessages.length > 0 ? (
                             <div
                                 ref={chatContainerRef}
-                                className='h-[300px] overflow-y-auto mb-4 pr-2 scrollbar-thin scrollbar-thumb-brandGray-700 scrollbar-track-transparent'
+                                className='code-studio-transcript overflow-y-auto mt-3 mb-3 pr-2 scrollbar-thin scrollbar-thumb-brandGray-700 scrollbar-track-transparent'
                             >
                                 {visibleMessages.map((msg, index) => {
                                     // Add timestamp if not already present
@@ -582,32 +600,18 @@ export default function UnifiedProjectChat({ project, embedded = false }) {
                                 )}
                             </div>
                         ) : (
-                            <div className='text-center py-8 px-6 bg-brandGray-850 rounded-lg mb-4'>
-                                <svg
-                                    xmlns='http://www.w3.org/2000/svg'
-                                    className='h-10 w-10 mx-auto mb-3 text-brandGreen-500/70'
-                                    fill='none'
-                                    viewBox='0 0 24 24'
-                                    stroke='currentColor'
-                                >
-                                    <path
-                                        strokeLinecap='round'
-                                        strokeLinejoin='round'
-                                        strokeWidth={1.5}
-                                        d='M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z'
-                                    />
-                                </svg>
-                                <p className='text-brandGray-300 mb-4'>
-                                    Ask how the code behind {scope === 'all' ? 'these projects' : project.title} works.
+                            <div className='mt-4 border-t border-emerald-400/15 pt-3'>
+                                <p className='mb-2 text-xs font-semibold uppercase tracking-wider text-brandOrange-300'>
+                                    Try a question
                                 </p>
-                                <div className='flex flex-wrap justify-center gap-2'>
+                                <div className='flex flex-wrap gap-2'>
                                     {starterQuestions.map(question => (
                                         <button
                                             key={question}
                                             type='button'
                                             onClick={() => askQuestion(question)}
                                             disabled={isGenerating}
-                                            className='text-xs px-3 py-1.5 rounded-full border border-brandGreen-600/40 text-brandGreen-300 hover:bg-brandGreen-500/10 hover:border-brandGreen-500 transition-colors disabled:opacity-50'
+                                            className='min-h-9 max-w-full rounded-md px-2.5 py-1.5 text-left text-xs leading-snug border border-brandGreen-600/40 text-brandGreen-300 hover:bg-brandGreen-500/10 hover:border-brandGreen-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brandGreen-300 transition-colors disabled:opacity-50'
                                         >
                                             {question}
                                         </button>
@@ -619,9 +623,6 @@ export default function UnifiedProjectChat({ project, embedded = false }) {
                 )}
 
 
-                <div className='text-xs text-brandGray-400 text-center'>
-                    Answers come from the current code of each project on GitHub, with links to the exact lines
-                </div>
             </div>
         </div>
     )

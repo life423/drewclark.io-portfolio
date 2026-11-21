@@ -112,7 +112,7 @@ test('typing pauses offscreen and resumes the current sentence on return', async
     expect(initial.length).toBeGreaterThan(0);
     expect(initial.length).toBeLessThan(COMPACT.length);
 
-    await page.getByRole('button', { name: 'View Projects', exact: true }).scrollIntoViewIfNeeded();
+    await page.locator('.work-gallery-card').first().scrollIntoViewIfNeeded();
     await expect(page.getByTestId('hero-tagline')).not.toBeInViewport();
     await advance(page, 200);
     const paused = await copy(page).textContent();

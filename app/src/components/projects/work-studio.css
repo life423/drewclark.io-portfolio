@@ -1,0 +1,200 @@
+/* Independent work and chat surfaces share only a responsive grid, never a panel wrapper. */
+.work-studio-section {
+    background: linear-gradient(180deg, #253032 0, #082d25 8rem, #061e19 68%, #08271e);
+    padding: 3rem 1rem 4rem;
+}
+.work-studio-shell {
+    width: 100%;
+    max-width: 84rem;
+    margin-inline: auto;
+    scroll-margin-top: 5rem;
+}
+.work-studio-grid {
+    display: grid;
+    align-items: start;
+    gap: 1.25rem;
+    min-width: 0;
+}
+.work-studio-intro, .work-studio-gallery, .work-studio-media, .work-studio-depth, .work-studio-rail {
+    min-width: 0;
+}
+.work-studio-kicker, .work-gallery-number {
+    margin: 0 0 .45rem;
+    color: #8ed9bd;
+    font-size: .75rem;
+    font-weight: 650;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+.work-studio-title {
+    color: #f3fbf7;
+    font-size: clamp(1.85rem, 3.2vw, 3.2rem);
+    font-weight: 650;
+    letter-spacing: -.035em;
+    line-height: 1.05;
+}
+.work-studio-summary {
+    color: #bfd9cf;
+    margin-top: .75rem;
+    max-width: 61ch;
+    line-height: 1.6;
+}
+.work-studio-rail {
+    width: 100%;
+}
+.work-studio-nav { border-bottom: 1px solid #275247; padding-bottom: .75rem; }
+.work-studio-depth {
+    border-top: 1px solid #275247;
+    padding-top: 1.5rem;
+}
+.work-studio-depth .prose {
+    max-width: 72ch;
+}
+.work-studio-gallery {
+    display: grid;
+    gap: 1.25rem;
+}
+.work-gallery-card {
+    min-width: 0;
+    display: grid;
+    align-content: start;
+    gap: 0;
+    background: #0a2b23;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 0 0 1px rgba(135, 213, 180, .13);
+    transition: transform .18s ease-out, box-shadow .18s ease-out, background-color .18s ease-out;
+}
+.work-gallery-card:focus-within {
+    background: #0f352a;
+    box-shadow: 0 0 0 2px #75d3ae;
+}
+@media (hover: hover) and (pointer: fine) {
+    .work-gallery-card:hover {
+        background: #0f352a;
+        box-shadow: 0 .65rem 1.65rem rgba(0, 13, 9, .34), 0 0 0 1px rgba(135, 213, 180, .38);
+    }
+    .work-gallery-card:focus-within {
+        box-shadow: 0 0 0 2px #75d3ae;
+    }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .work-gallery-card:hover { transform: translateY(-3px); }
+}
+.work-gallery-art {
+    aspect-ratio: 16 / 9;
+    min-width: 0;
+    overflow: hidden;
+    background: #081b17;
+}
+.work-gallery-copy {
+    min-width: 0;
+    padding: 1rem;
+}
+.work-gallery-number {
+    letter-spacing: .09em;
+}
+@media (min-width: 640px) {
+    .work-studio-section { padding-inline: 2rem; }
+    .work-studio-grid { gap: 1.5rem; }
+    .work-gallery-card { grid-template-columns: minmax(0, .85fr) minmax(0, 1fr); }
+    .work-gallery-art { aspect-ratio: auto; }
+    .work-gallery-art img { height: 100%; min-height: 12rem; }
+}
+@media (min-width: 1100px) {
+    .work-studio-section { padding: 4.5rem clamp(2rem, 3.3vw, 3rem) 6rem; }
+    .work-studio-grid {
+        grid-template-columns: minmax(0, 1fr) clamp(22.5rem, 27vw, 25rem);
+        column-gap: clamp(2.5rem, 3.6vw, 3.5rem);
+        grid-template-rows: auto 1fr;
+    }
+    .work-studio-intro { grid-column: 1; grid-row: 1; }
+    .work-studio-gallery, .work-studio-media { grid-column: 1; grid-row: 2; }
+    .work-studio-rail { grid-column: 2; grid-row: 1 / span 2; }
+    .work-studio-overview .work-studio-intro { grid-column: 1 / -1; }
+    .work-studio-overview .work-studio-rail { grid-row: 2; }
+    .work-studio-case { grid-template-rows: auto auto auto auto; }
+    .work-studio-case .work-studio-nav { grid-column: 1; grid-row: 1; }
+    .work-studio-case .work-studio-intro { grid-row: 2; }
+    .work-studio-case .work-studio-rail { grid-row: 2 / -1; align-self: stretch; }
+    .work-studio-case .work-studio-media { grid-row: 3; }
+    .work-studio-depth { grid-column: 1; grid-row: 4; }
+}
+@media (min-width: 1100px) {
+    .work-studio-gallery {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-auto-rows: 1fr;
+        gap: 1.5rem;
+    }
+    .work-gallery-card {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: auto 1fr;
+        height: 100%;
+    }
+    .work-gallery-art { aspect-ratio: 16 / 9; }
+    .work-gallery-art img { min-height: 0; }
+    .work-gallery-copy { display: flex; flex-direction: column; padding: clamp(1rem, 1.6vw, 1.5rem); }
+    .work-gallery-actions { margin-top: auto; }
+}
+@media (prefers-reduced-motion: reduce) { .work-gallery-card { transition: none; } }
+
+.code-studio-surface {
+    background: #071c17;
+    border: 1px solid #2b5e4e;
+    box-shadow: 0 .75rem 2.5rem rgba(0, 13, 9, .28);
+}
+.code-studio #project-chat-scope,
+.code-studio textarea {
+    background: #0e2b23;
+    border-color: #376357;
+}
+
+.work-gallery-actions { padding-top: 1rem; }
+
+/* Keep all controls above the fold if there is enough height to read the conversation. */
+@media (min-width: 1100px) and (min-height: 800px) {
+    body:has(.work-studio-case), .site-rails:has(.work-studio-case) { overflow-x: clip; }
+    .work-studio-case .code-studio {
+        position: sticky;
+        top: calc(var(--site-nav-rest-height, 4rem) + 1rem);
+    }
+}
+
+/* Give case studies, not the gallery, a wider reading and conversation surface. */
+@media (min-width: 1510px) {
+    .work-studio-shell:has(.work-studio-case) { max-width: 95.5rem; }
+    .work-studio-case {
+        grid-template-columns: minmax(0, 1fr) clamp(28rem, 35vw, 36.25rem);
+    }
+}
+
+/* Decorative mark after the whole title, including when the text wraps. */
+.work-studio-case .work-studio-title {
+    width: fit-content;
+    max-width: 100%;
+    font-weight: 700;
+}
+.work-studio-case .work-studio-title::after {
+    content: '';
+    display: block;
+    width: 93%;
+    height: .75rem;
+    margin-top: .4rem;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 12' preserveAspectRatio='none'%3E%3Cpath vector-effect='non-scaling-stroke' d='M1 9C22 3 43 1 79 4' fill='none' stroke='%23FF6B00' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") left center / 100% 100% no-repeat;
+}
+
+.code-studio-transcript {
+    height: clamp(16rem, 39dvh, 22.5rem);
+}
+.code-studio button[type='submit']:focus-visible {
+    outline: 2px solid #FF6B00;
+    outline-offset: 2px;
+}
+
+/* Widen the overview conversation gradually on large monitors, without pinching the cards. */
+@media (min-width: 1440px) {
+    .work-studio-overview {
+        max-width: clamp(84rem, calc(74vw + 278.4px), 101rem);
+        grid-template-columns: minmax(0, 1fr) clamp(24.3rem, calc(56vw - 417.6px), 37.5rem);
+    }
+}

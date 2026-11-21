@@ -1,5 +1,7 @@
+/* eslint react/jsx-uses-react: "error", react/jsx-uses-vars: "error" */
 import React from 'react'
-import { LuPlay, LuGithub, LuGlobe } from 'react-icons/lu'
+import { LuPlay, LuGlobe } from 'react-icons/lu'
+import { FaGithub } from 'react-icons/fa'
 import { platformIcon, downloadTitle, downloadAriaLabel } from './platforms'
 
 /**
@@ -11,7 +13,7 @@ import { platformIcon, downloadTitle, downloadAriaLabel } from './platforms'
  * queries, because @tailwindcss/container-queries isn't installed.
  */
 const base =
-    'inline-flex flex-1 sm:flex-none items-center justify-center gap-2 whitespace-nowrap ' +
+    'relative z-10 inline-flex flex-1 sm:flex-none items-center justify-center gap-2 whitespace-nowrap ' +
     'rounded-full px-3 sm:px-4 min-h-11 text-sm font-semibold ' +
     'transition-colors duration-200 motion-reduce:transition-none touch-manipulation ' +
     'focus:outline-none focus-visible:ring-2 focus-visible:ring-brandGreen-300 ' +
@@ -25,6 +27,7 @@ const primary =
 
 // Secondary: outlined and low-chroma so it reads as the quieter option.
 // brandGray-500 is the lightest border that still clears 3:1 against the card.
+const compactSource = base.replace('flex-1 sm:flex-none', 'shrink-0').replace('px-3 sm:px-4', 'w-11')
 const secondary =
     'border border-brandGray-500 text-brandGray-200 bg-transparent ' +
     'hover:border-brandGreen-400/70 hover:text-brandGreen-300 hover:bg-brandGreen-900/20 ' +
@@ -33,12 +36,12 @@ const secondary =
 // The card can be clickable; following a link should not also count as a card click
 const stopCardClick = event => event.stopPropagation()
 
-export default function ProjectLinks({ title, liveUrl, liveLabel = 'Try it live', repo, downloads = [] }) {
+export default function ProjectLinks({ title, liveUrl, liveLabel = 'Try it live', repo, downloads = [], compact = false }) {
     const files = Array.isArray(downloads) ? downloads : []
     if (!liveUrl && !repo && files.length === 0) return null
 
     return (
-        <div className='flex flex-wrap items-center gap-2 sm:gap-3 mt-3 sm:mt-4'>
+        <div className={'flex flex-wrap items-center gap-2 sm:gap-3 ' + (compact ? 'work-gallery-actions' : 'mt-3 sm:mt-4')}>
             {liveUrl && (
                 <a
                     href={liveUrl}
@@ -55,9 +58,7 @@ export default function ProjectLinks({ title, liveUrl, liveLabel = 'Try it live'
                 </a>
             )}
             {files.length > 0 && (
-                <div className='flex items-center gap-2 sm:gap-3'>
-                    {!files.some(file => /^download\b/i.test(file.label || '')) &&
-                        <span className='text-sm text-brandGray-400'>Download</span>}
+                <div className='flex flex-wrap items-center gap-2 sm:gap-3'>
                     {files.map(file => {
                         const Icon = platformIcon(file.platform)
                         return (
@@ -83,10 +84,10 @@ export default function ProjectLinks({ title, liveUrl, liveLabel = 'Try it live'
                     rel='noopener noreferrer'
                     onClick={stopCardClick}
                     aria-label={`View the ${title} source code on GitHub (opens in a new tab)`}
-                    className={`${base} ${secondary}`}
+                    className={(compact ? compactSource : base) + ' ' + secondary}
                 >
-                    <LuGithub className='h-4 w-4 shrink-0' aria-hidden='true' />
-                    <span>View code</span>
+                    <FaGithub className='h-[18px] w-[18px] shrink-0' aria-hidden='true' focusable='false' />
+                    {!compact && <span>View code</span>}
                 </a>
             )}
         </div>
