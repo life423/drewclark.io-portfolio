@@ -675,12 +675,13 @@ test('each card has one visible case-study button and its artwork remains a mous
     await expect(page.getByRole('heading', { name: projects[0].title, level: 2 })).toBeVisible();
 });
 
-test('divider fits between the desktop card rows and leaves card hover and focus independent', async ({ page }) => {
+test('broad emerald section supports the second row without covering project controls', async ({ page }) => {
     await page.setViewportSize({ width: 1095, height: 1040 });
     await ready(page);
     const gallery = page.locator('.work-studio-gallery');
     const geometry = await gallery.evaluate(e => {
-        const divider = getComputedStyle(e.querySelector('.work-gallery-divider'), '::before');
+        const band = e.querySelector('.work-gallery-divider');
+        const divider = getComputedStyle(band, '::before');
         const cards = e.querySelectorAll('article');
         const upper = cards[0].getBoundingClientRect().bottom;
         const lower = cards[2].getBoundingClientRect().top;
@@ -688,13 +689,16 @@ test('divider fits between the desktop card rows and leaves card hover and focus
 
         const shadow = getComputedStyle(cards[0]).boxShadow;
         return { gap: lower - upper, fill: divider.backgroundColor, shape: divider.clipPath,
+            overlap: band.getBoundingClientRect().top + parseFloat(divider.top) + parseFloat(divider.height) - lower,
             pointerEvents: divider.pointerEvents, width: parseFloat(divider.width), segment: parseFloat(divider.height), shadow };
     });
-    expect(geometry.gap).toBeGreaterThan(geometry.segment);
-    expect(geometry.segment).toBeGreaterThanOrEqual(105);
+    expect(geometry.gap).toBeLessThan(85);
+    expect(geometry.overlap).toBeGreaterThan(170);
+    expect(geometry.segment).toBeGreaterThanOrEqual(240);
     expect(geometry.fill).toBe('rgb(16, 185, 129)');
     expect(geometry.shape).toContain('polygon');
     expect(geometry.width).toBe(1095);
+    await expect(page.locator('.code-studio-surface')).toHaveCSS('background-color', 'rgb(39, 39, 42)');
     expect(geometry.pointerEvents).toBe('none');
     expect(geometry.shadow).not.toContain('inset');
     await page.getByRole('button', { name: 'Read case study: ' + projects[0].title }).focus();

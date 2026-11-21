@@ -133,7 +133,7 @@
 @media (prefers-reduced-motion: reduce) { .work-gallery-card { transition: none; } }
 
 .code-studio-surface {
-    background: #202927;
+    background: theme('colors.brandGray.800');
     border: 1px solid rgba(161, 161, 170, .36);
     box-shadow: 0 .75rem 2.5rem rgba(0, 0, 0, .35);
 }
@@ -251,24 +251,25 @@
 .work-gallery-art--lesson::before { opacity: .38; }
 .work-gallery-art--lesson img { transform: scale(1.57); }
 
-/* Mirror the hero's slope with a solid, full-bleed emerald section break. */
+/* The hero's slope reappears as a full-width ground behind the second row. */
 .work-studio-overview .work-studio-gallery {
-    --work-band-thickness: clamp(1.65rem, 5.4vw, 4.25rem);
+    --work-band-thickness: clamp(7.5rem, 20vw, 17rem);
     --work-band-height: calc(var(--work-entry-rise) + var(--work-band-thickness));
     position: relative;
 }
-.work-gallery-divider { position: relative; height: var(--work-band-height); }
+.work-studio-overview .work-gallery-card { z-index: 1; }
+.work-gallery-divider { position: relative; height: clamp(.6rem, 1.4vw, 1.3rem); }
 .work-gallery-divider::before {
     content: '';
     position: absolute;
-    top: 50%;
+    top: -.5rem;
     left: 50%;
     width: 100vw;
     height: var(--work-band-height);
     background: theme('colors.brandGreen.500');
     clip-path: polygon(0 var(--work-entry-rise), 100% 0, 100% var(--work-band-thickness), 0 100%);
     pointer-events: none;
-    transform: translate(-50%, -50%);
+    transform: translateX(-50%);
 }
 @media (min-width: 720px) {
     .work-gallery-divider { grid-column: 1 / -1; }
