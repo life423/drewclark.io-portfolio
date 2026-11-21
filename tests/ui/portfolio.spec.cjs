@@ -1,4 +1,4 @@
-/* global document, innerWidth, getComputedStyle */
+/* global document, innerWidth, getComputedStyle, localStorage, sessionStorage */
 const { test, expect } = require('@playwright/test');
 const { setTimeout: delay } = require('node:timers/promises');
 const projects = require('../../app/src/data/projects.json');
@@ -67,23 +67,32 @@ for (const [width, height] of sizes) {
                 const r = await next.boundingBox();
                 return r?.height || 0;
             }).toBeGreaterThanOrEqual(44);
+            const navigation = page.getByRole('navigation', { name: 'Case study navigation' });
+            await expect(navigation).toHaveCount(1);
+            await expect(next).toHaveCount(1);
+            const chat = page.locator('#project-chat');
+            await expect(chat).toHaveCount(1);
+            await expect(chat.getByRole('textbox', { name: 'Question for Project Chat' })).toBeVisible();
+            // A single read avoids mismatched y coordinates while the page scrolls.
+            const [summary, panel, media, details, related] = await page.evaluate(() => [
+                '[data-testid="case-study-summary"]', '#project-chat', '[aria-labelledby="case-study-title"] figure a',
+                '#case-study-details', '#related-projects-title',
+            ].map(selector => document.querySelector(selector).getBoundingClientRect().toJSON()));
             if (width >= 1024) {
-                const alternatives = page.getByRole('button', { name: /^View .+ details$/ });
-                await expect(alternatives).toHaveCount(projects.length - 1);
-                const gaps = await alternatives.first().evaluate(a => {
-                    const row = a.parentElement, detail = row.previousElementSibling.firstElementChild;
-                    return { after: row.getBoundingClientRect().top - detail.getBoundingClientRect().bottom,
-                        chat: document.querySelector('#project-chat').getBoundingClientRect().top - row.parentElement.parentElement.nextElementSibling.getBoundingClientRect().bottom };
-                });
-                expect(gaps.after).toBeGreaterThanOrEqual(16);
-                expect(gaps.after).toBeLessThanOrEqual(32);
-                expect(gaps.chat).toBeGreaterThanOrEqual(16);
-                expect(gaps.chat).toBeLessThanOrEqual(48);
+                expect(panel.x).toBeGreaterThanOrEqual(summary.x + summary.width);
+                expect(Math.abs(panel.y - summary.y)).toBeLessThan(2);
+                expect(panel.x).toBeGreaterThanOrEqual(media.x + media.width);
+            } else {
+                expect(panel.y).toBeGreaterThanOrEqual(summary.y + summary.height);
+                expect(media.y).toBeGreaterThanOrEqual(panel.y + panel.height);
             }
+            expect(details.y).toBeGreaterThanOrEqual(media.y + media.height);
+            expect(related.y).toBeGreaterThan(details.y);
+            await expect(page.getByRole('button', { name: /^View .+ details$/ })).toHaveCount(projects.length - 1);
             await next.click();
         }
         await expect(page.getByRole('heading', { name: projects[0].title, level: 2, exact: true })).toBeVisible();
-        await expect(page.getByRole('button', { name: 'Next Project', exact: true })).toBeVisible();
+        await expect(page.getByRole('button', { name: 'Next Project', exact: true })).toHaveCount(0);
         if (width === 390 || width === 768 || width === 1280) {
             await page.getByRole('button', { name: /^Next project:/ }).scrollIntoViewIfNeeded();
             await page.screenshot({ path: info.outputPath('detail.png') });
@@ -192,7 +201,7 @@ test('touch navigation survives rotation and desktop resizing', async ({ browser
         await noOverflow(page);
         await page.setViewportSize({ width: 1280, height: 800 });
         await expect(page.getByRole('heading', { name: projects[2].title, level: 2, exact: true })).toBeVisible();
-        await page.getByRole('button', { name: 'Next Project', exact: true }).tap();
+        await next.tap();
         await expect(page.getByRole('heading', { name: projects[3].title, level: 2, exact: true })).toBeVisible();
         await page.setViewportSize({ width: 390, height: 844 });
         await expect(page.getByRole('heading', { name: projects[3].title, level: 2, exact: true })).toBeVisible();
@@ -201,5 +210,77 @@ test('touch navigation survives rotation and desktop resizing', async ({ browser
         await noOverflow(page);
     } finally {
         await context.close();
+    }
+});
+
+test('overview chat comes before project browsing; late answers stay scoped', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.addInitScript(() => {
+        localStorage.setItem('unified_project_chat', JSON.stringify([{ role: 'assistant', content: 'Legacy global history' }]));
+    });
+    const calls = [];
+    let releaseFirst;
+    const firstGate = new Promise(resolve => { releaseFirst = resolve; });
+    const codeLink = 'https://github.com/life423/CudaRL-Arena/blob/0123456789012345678901234567890123456789/src/rl/ppo.cpp#L1-L10';
+    await page.route('**/api/askGPT', async route => {
+        const call = route.request().postDataJSON();
+        calls.push(call);
+        if (call.question === 'Question for A') {
+            await firstGate;
+            return route.fulfill({ json: { answer: 'Delayed first case-study answer', sources: [
+                { project: projects[0].title, file: 'src/rl/ppo.cpp', lines: '1-10', url: codeLink }
+            ] } });
+        }
+        return route.fulfill({ json: { answer: 'Description-based answer', sources: [] } });
+    });
+    try {
+        await ready(page);
+        const chat = page.locator('#project-chat');
+        await expect(chat.getByRole('textbox', { name: 'Question for Project Chat' })).toBeVisible();
+        const introChat = await chat.boundingBox();
+        const firstProject = await page.getByRole('button', { name: projects[0].title, exact: true }).boundingBox();
+        expect(introChat.y + introChat.height).toBeLessThan(firstProject.y);
+        await page.getByRole('button', { name: projects[0].title, exact: true }).click();
+        await expect(chat.getByRole('combobox', { name: 'Chat scope' })).toHaveValue('project');
+        await expect(chat.getByRole('option', { name: projects[0].title })).toHaveCount(1);
+        await chat.getByRole('textbox').fill('Question for A');
+        await chat.getByRole('button', { name: 'Ask', exact: true }).click();
+        await expect.poll(() => calls.length).toBe(1);
+        expect(calls[0]).toEqual({ question: 'Question for A', projectId: projects[0].id });
+        await chat.getByRole('textbox').fill('Draft for A');
+        await page.getByRole('button', { name: /^Next project:/ }).click();
+        await expect(chat.getByRole('option', { name: projects[1].title })).toHaveCount(1);
+        await expect(chat.getByText('Question for A', { exact: true })).toHaveCount(0);
+        await expect(chat.getByRole('textbox')).toHaveValue('');
+        await chat.getByRole('textbox').fill('Question for B');
+        await chat.getByRole('button', { name: 'Ask', exact: true }).click();
+        await expect(chat.getByText('No matching code excerpts were returned for this answer.')).toBeVisible();
+        expect(calls[1]).toEqual({ question: 'Question for B', projectId: projects[1].id });
+        releaseFirst();
+        await expect.poll(() => page.evaluate(() => localStorage.getItem('unified_project_chat'))).toContain('Delayed first case-study answer');
+        await expect(chat.getByText('Delayed first case-study answer')).toHaveCount(0);
+        await page.getByRole('button', { name: 'View ' + projects[0].title + ' details', exact: true }).click();
+        await expect(chat.getByText('Delayed first case-study answer')).toBeVisible();
+        await expect(chat.getByRole('link', { name: 'ppo.cpp' })).toHaveAttribute('href', codeLink);
+        await expect(chat.getByRole('textbox')).toHaveValue('Draft for A');
+        await chat.getByRole('combobox').selectOption('all');
+        await expect(chat.getByText('Legacy global history')).toBeVisible();
+        await chat.getByRole('textbox').fill('Across all projects');
+        await chat.getByRole('button', { name: 'Ask', exact: true }).click();
+        await expect.poll(() => calls.length).toBe(3);
+        expect(calls[2]).toEqual({ question: 'Across all projects' });
+        await expect(chat.getByRole('button', { name: 'Ask', exact: true })).toBeEnabled();
+        await chat.getByRole('combobox').selectOption('project');
+        await page.evaluate(() => {
+            sessionStorage.setItem('drawer_question', 'Question from global drawer');
+            sessionStorage.setItem('drawer_question_timestamp', String(Date.now()));
+        });
+        await expect.poll(() => calls.length).toBe(4);
+        expect(calls[3]).toEqual({ question: 'Question from global drawer' });
+        await expect(chat.getByRole('combobox')).toHaveValue('all');
+        await page.getByRole('button', { name: 'All projects', exact: false }).click();
+        await expect(page.getByRole('heading', { name: 'My Portfolio Projects' })).toBeVisible();
+    } finally {
+        releaseFirst();
     }
 });

@@ -1,3 +1,4 @@
+/* global AbortController */
 /**
  * Chat API client
  *
@@ -14,15 +15,18 @@ const SERVER_TROUBLE = 'Sorry, something went wrong on my end. Please try again 
  * @param {string} question
  * @returns {Promise<{answer: string, sources: Array<{project: string, file: string, lines: string, url: string}>}>}
  */
-export async function askProjectsChat(question) {
+export async function askProjectsChat(question, projectId, signal) {
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), TIMEOUT_MS)
+    const cancel = () => controller.abort()
+    if (signal?.aborted) cancel()
+    signal?.addEventListener('abort', cancel, { once: true })
 
     try {
         const response = await fetch(ENDPOINT, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ question }),
+            body: JSON.stringify({ question, projectId }),
             signal: controller.signal,
         })
         const data = await response.json().catch(() => ({}))
@@ -34,6 +38,7 @@ export async function askProjectsChat(question) {
         return {
             answer: data.answer || SERVER_TROUBLE,
             sources: Array.isArray(data.sources) ? data.sources : [],
+            noCode: Boolean(data.answer && (!Array.isArray(data.sources) || data.sources.length === 0)),
         }
     } catch (error) {
         return {
@@ -44,6 +49,6 @@ export async function askProjectsChat(question) {
             sources: [],
         }
     } finally {
-        clearTimeout(timer)
+        clearTimeout(timer); signal?.removeEventListener('abort', cancel)
     }
 }

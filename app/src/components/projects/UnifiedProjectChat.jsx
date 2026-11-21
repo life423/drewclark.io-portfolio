@@ -1,4 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react'
+/* eslint react/jsx-uses-react: "error", react/jsx-uses-vars: "error" */
+/* global AbortController */
+import React, { useState, useRef, useEffect, useMemo } from 'react'
 import clsx from 'clsx'
 import { askProjectsChat } from '../../services/chatService'
 
@@ -24,7 +26,7 @@ function AnswerSources({ sources }) {
 
     return (
         <div className='mt-2 flex flex-wrap items-center gap-1.5 text-xs'>
-            <span className='text-brandGray-400'>Sources</span>
+            <span className='text-brandGray-400'>Relevant code</span>
             {links.map(source => (
                 <a
                     key={`${source.project}|${source.file}`}
@@ -52,24 +54,49 @@ function AnswerSources({ sources }) {
  * - Message timestamps and improved styling
  * - Support for asking about any project in one conversation
  */
-export default function UnifiedProjectChat() {
-    const [userQuestion, setUserQuestion] = useState('')
-    const [isGenerating, setIsGenerating] = useState(false)
+export default function UnifiedProjectChat({ project, embedded = false }) {
+    const [allProjects, setAllProjects] = useState(false)
+    const scope = !allProjects ? project?.id ?? 'all' : 'all'
+    const [pendingScopes, setPendingScopes] = useState([])
+    const isGenerating = pendingScopes.includes(scope)
+    const activeRequests = useRef(new Map())
+    const askQuestionRef = useRef(null)
+    const [drafts, setDrafts] = useState({})
+    const userQuestion = drafts[scope] ?? ''
+    const setUserQuestion = question => setDrafts(previous => ({ ...previous, [scope]: question }))
+
     const [messages, setMessages] = useState([])
+    const visibleMessages = useMemo(() => messages.filter(message => (message.projectId ?? 'all') === scope), [messages, scope])
+    const starterQuestions = scope === 'all' ? STARTER_QUESTIONS : [
+        project.repo?.includes('CudaRL') ? STARTER_QUESTIONS[0] :
+            project.repo?.includes('ascend-avoid') ? STARTER_QUESTIONS[1] :
+            project.repo?.includes('cipher') ? STARTER_QUESTIONS[2] :
+            'How does this project keep the shared whiteboard in sync?'
+    ]
     // Track if we've initialized from localStorage
     const [chatInitialized, setChatInitialized] = useState(false)
     // Track if the chat is minimized/collapsed - default based on screen size
-    const [isCollapsed, setIsCollapsed] = useState(() => window.innerWidth < 1024)
+    const [isCollapsed, setIsCollapsed] = useState(() => !embedded && window.innerWidth < 1024)
     // Track if user has manually toggled the chat state
     const [userHasInteracted, setUserHasInteracted] = useState(false)
     // Track if clear confirmation is showing
-    const [showClearConfirm, setShowClearConfirm] = useState(false)
+    const [clearScope, setClearScope] = useState(null)
+    const showClearConfirm = clearScope === scope
 
     const chatInputRef = useRef(null)
     const chatContainerRef = useRef(null)
     
+    useEffect(() => {
+        const requests = activeRequests.current
+        return () => {
+            requests.forEach(controller => controller.abort())
+            requests.clear()
+        }
+    }, [])
+
     // Check for questions coming from the drawer - using interval for reliability
     useEffect(() => {
+        if (!chatInitialized) return
         const checkDrawerQuestion = () => {
             const drawerQuestion = sessionStorage.getItem('drawer_question')
             const timestamp = sessionStorage.getItem('drawer_question_timestamp')
@@ -80,24 +107,11 @@ export default function UnifiedProjectChat() {
                 const questionTime = parseInt(timestamp, 10)
                 
                 if (now - questionTime < 5000) {
-                    console.log('Processing drawer question:', drawerQuestion)
-                    
-                    // Clear from session storage
+                    // Drawer prompts are global, even when a case study is open.
                     sessionStorage.removeItem('drawer_question')
                     sessionStorage.removeItem('drawer_question_timestamp')
-                    
-                    // Set the question and expand the chat
-                    setUserQuestion(drawerQuestion)
-                    setIsCollapsed(false)
-                    setUserHasInteracted(true)
-                    
-                    // Submit the question after a short delay to allow UI to update
-                    setTimeout(() => {
-                        if (chatInputRef.current && chatInputRef.current.form) {
-                            const submitEvent = new Event('submit', { cancelable: true, bubbles: true })
-                            chatInputRef.current.form.dispatchEvent(submitEvent)
-                        }
-                    }, 300)
+                    setAllProjects(true)
+                    askQuestionRef.current?.(drawerQuestion, 'all')
                 }
             }
         }
@@ -111,19 +125,19 @@ export default function UnifiedProjectChat() {
         return () => {
             clearInterval(intervalId)
         }
-    }, [])
+    }, [chatInitialized])
     
     // Update collapse state on resize if user hasn't interacted
     useEffect(() => {
         const handleResize = () => {
             if (!userHasInteracted) {
-                setIsCollapsed(window.innerWidth < 1024);
+                setIsCollapsed(!embedded && window.innerWidth < 1024);
             }
         };
         
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
-    }, [userHasInteracted]);
+    }, [embedded, userHasInteracted]);
 
     // Load chat history from localStorage on initial render
     useEffect(() => {
@@ -133,7 +147,7 @@ export default function UnifiedProjectChat() {
 
             if (savedMessages) {
                 try {
-                    setMessages(JSON.parse(savedMessages))
+                    const stored = JSON.parse(savedMessages); setMessages(Array.isArray(stored) ? stored : [])
                     setChatInitialized(true)
                 } catch (e) {
                     console.error(
@@ -150,9 +164,9 @@ export default function UnifiedProjectChat() {
 
     // Save chat history to localStorage when messages change
     useEffect(() => {
-        if (chatInitialized && messages.length > 0) {
+        if (chatInitialized) {
             const storageKey = 'unified_project_chat'
-            localStorage.setItem(storageKey, JSON.stringify(messages))
+            if (messages.length) localStorage.setItem(storageKey, JSON.stringify(messages)); else localStorage.removeItem(storageKey)
         }
     }, [messages, chatInitialized])
 
@@ -165,11 +179,14 @@ export default function UnifiedProjectChat() {
     // Function to clear chat history
     const clearChatHistory = () => {
         // Remove from localStorage
-        localStorage.removeItem('unified_project_chat')
-        // Clear messages state
-        setMessages([])
+
+        activeRequests.current.get(scope)?.abort()
+        activeRequests.current.delete(scope)
+        setPendingScopes(previous => previous.filter(item => item !== scope))
+        // Clear messages only in this scope.
+        setMessages(previous => previous.filter(message => (message.projectId ?? 'all') !== scope))
         // Reset confirmation
-        setShowClearConfirm(false)
+        setClearScope(null)
         // Focus the input after clearing
         setTimeout(() => {
             chatInputRef.current?.focus()
@@ -182,13 +199,13 @@ export default function UnifiedProjectChat() {
     
     // Improved scrolling behavior to ensure user sees the beginning of new messages
     useEffect(() => {
-        if (chatContainerRef.current && messages.length > 0) {
+        if (chatContainerRef.current && visibleMessages.length > 0) {
             const container = chatContainerRef.current;
             
             // Check if a new message was added
-            if (messages.length > prevMessageCountRef.current) {
-                const newMessageIndex = messages.length - 1;
-                const newMessage = messages[newMessageIndex];
+            if (visibleMessages.length > prevMessageCountRef.current) {
+                const newMessageIndex = visibleMessages.length - 1;
+                const newMessage = visibleMessages[newMessageIndex];
                 
                 // Find the new message element
                 const messageElements = container.querySelectorAll('.message-item');
@@ -213,32 +230,38 @@ export default function UnifiedProjectChat() {
             }
             
             // Update the reference for next check
-            prevMessageCountRef.current = messages.length;
+            prevMessageCountRef.current = visibleMessages.length;
         }
-    }, [messages])
+    }, [visibleMessages])
 
-    const askQuestion = async question => {
+    const askQuestion = async (question, requestedScope = scope) => {
         const trimmed = question.trim()
-        if (!trimmed || isGenerating) return
+        if (!trimmed || activeRequests.current.has(requestedScope)) return
 
-        // Make sure the conversation is visible
+        const projectId = requestedScope === 'all' ? undefined : requestedScope
+        const controller = new AbortController()
+        activeRequests.current.set(requestedScope, controller)
+        setPendingScopes(previous => [...previous, requestedScope])
         setIsCollapsed(false)
         setUserHasInteracted(true)
-
-        setMessages(prev => [...prev, { role: 'user', content: trimmed, timestamp: Date.now() }])
-        setUserQuestion('')
-        setIsGenerating(true)
+        setDrafts(previous => ({ ...previous, [requestedScope]: '' }))
+        setMessages(previous => [...previous, { role: 'user', content: trimmed, projectId, timestamp: Date.now() }])
 
         try {
-            const { answer, sources } = await askProjectsChat(trimmed)
-            setMessages(prev => [
-                ...prev,
-                { role: 'assistant', content: answer, sources, timestamp: Date.now() },
-            ])
+            const { answer, sources, noCode } = await askProjectsChat(trimmed, projectId, controller.signal)
+            if (!controller.signal.aborted) {
+                setMessages(previous => [...previous, { role: 'assistant', content: answer, sources, noCode,
+                    projectId, timestamp: Date.now() }])
+            }
         } finally {
-            setIsGenerating(false)
+            if (activeRequests.current.get(requestedScope) === controller) {
+                activeRequests.current.delete(requestedScope)
+                setPendingScopes(previous => previous.filter(item => item !== requestedScope))
+            }
         }
     }
+
+    useEffect(() => { askQuestionRef.current = askQuestion })
 
     const handleQuestionSubmit = e => {
         e.preventDefault()
@@ -263,7 +286,7 @@ export default function UnifiedProjectChat() {
     }
 
     return (
-        <div id='project-chat' className='mt-8 w-full scroll-mt-20'>
+        <div id='project-chat' className={clsx('w-full scroll-mt-20', !embedded && 'mt-8')}>
             <div
                 className={clsx(
                     'bg-brandGray-900 rounded-lg shadow-lg border border-brandGray-700 transition-all duration-300',
@@ -296,11 +319,11 @@ export default function UnifiedProjectChat() {
                     </h3>
                     <div className='flex items-center space-x-2'>
                         {/* Clear button */}
-                        {messages.length > 0 && !showClearConfirm && (
+                        {visibleMessages.length > 0 && !showClearConfirm && (
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation(); // Prevent toggling collapse
-                                    setShowClearConfirm(true);
+                                    setClearScope(scope);
                                 }}
                                 className='text-brandGray-400 hover:text-brandOrange-400 transition-colors duration-200'
                                 aria-label='Clear chat history'
@@ -334,7 +357,7 @@ export default function UnifiedProjectChat() {
                                     Yes
                                 </button>
                                 <button
-                                    onClick={() => setShowClearConfirm(false)}
+                                    onClick={() => setClearScope(null)}
                                     className='text-brandOrange-400 hover:text-brandOrange-300 px-1.5 py-0.5 rounded'
                                 >
                                     No
@@ -375,15 +398,85 @@ export default function UnifiedProjectChat() {
                     </div>
                 </div>
 
+                {project && (
+                    <div className='mb-3 flex flex-wrap items-center gap-2'>
+                        <label htmlFor='project-chat-scope' className='text-xs font-medium text-brandGray-300'>Chat scope</label>
+                        <select
+                            id='project-chat-scope'
+                            value={allProjects ? 'all' : 'project'}
+                            onChange={event => { setAllProjects(event.target.value === 'all'); setClearScope(null) }}
+                            className='min-h-11 min-w-0 max-w-full rounded-md border border-brandGray-600 bg-brandGray-800 px-2 text-sm text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-brandGreen-300'
+                        >
+                            <option value='project'>{project.title}</option>
+                            <option value='all'>All projects</option>
+                        </select>
+                    </div>
+                )}
+                <form onSubmit={handleQuestionSubmit} className='mb-1'>
+                    <div className='flex gap-2'>
+                        <input
+                            ref={chatInputRef}
+                            type='text'
+                            value={userQuestion}
+                            onChange={e => setUserQuestion(e.target.value)}
+                            aria-label='Question for Project Chat' placeholder={embedded ? 'Ask about the code' : 'Ask how something in these projects works'}
+                            className='min-h-11 min-w-0 flex-1 px-3 py-2 bg-brandGray-800 border border-brandGray-700 rounded-lg text-sm text-white focus:ring-2 focus:ring-brandGreen-500/40 focus:border-brandGreen-500 outline-none transition-all duration-200'
+                            style={{
+                                backfaceVisibility: 'hidden',
+                                WebkitBackfaceVisibility: 'hidden',
+                                transform: 'translateZ(0)',
+                            }}
+                        />
+                        <button
+                            type='submit'
+                            disabled={isGenerating}
+                            className={clsx(
+                                'px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300',
+                                'relative overflow-hidden border',
+                                isGenerating
+                                    ? 'bg-brandGray-700 text-brandGray-500 border-transparent cursor-wait'
+                                    : !userQuestion.trim()
+                                    ? 'bg-transparent text-brandGreen-400 border-brandGreen-500/50 hover:bg-brandGreen-500/10'
+                                    : 'bg-gradient-to-r from-brandGreen-600 to-brandGreen-500 text-white hover:shadow-lg hover:shadow-brandGreen-500/20 border-transparent'
+                            )}
+                        >
+                            {isGenerating ? (
+                                <svg
+                                    className='animate-spin h-5 w-5 text-white'
+                                    xmlns='http://www.w3.org/2000/svg'
+                                    fill='none'
+                                    viewBox='0 0 24 24'
+                                >
+                                    <circle
+                                        className='opacity-25'
+                                        cx='12'
+                                        cy='12'
+                                        r='10'
+                                        stroke='currentColor'
+                                        strokeWidth='4'
+                                    ></circle>
+                                    <path
+                                        className='opacity-75'
+                                        fill='currentColor'
+                                        d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
+                                    ></path>
+                                </svg>
+                            ) : (
+                                'Ask'
+                            )}
+                        </button>
+                    </div>
+                </form>
+
                 {!isCollapsed && (
                     <>
                         {/* Fixed height scrollable message area */}
-                        {messages.length > 0 ? (
+                        {visibleMessages.length > 0 ? (
                             <div
                                 ref={chatContainerRef}
                                 className='h-[300px] overflow-y-auto mb-4 pr-2 scrollbar-thin scrollbar-thumb-brandGray-700 scrollbar-track-transparent'
                             >
-                                {messages.map((msg, index) => {
+                                {visibleMessages.map((msg, index) => {
                                     // Add timestamp if not already present
                                     const msgWithTime = msg.timestamp
                                         ? msg
@@ -391,7 +484,7 @@ export default function UnifiedProjectChat() {
                                               ...msg,
                                               timestamp:
                                                   Date.now() -
-                                                  (messages.length - index) *
+                                                  (visibleMessages.length - index) *
                                                       60000,
                                           }
 
@@ -456,7 +549,10 @@ export default function UnifiedProjectChat() {
                                                         {msg.content}
                                                     </div>
                                                     {msg.role === 'assistant' && (
-                                                        <AnswerSources sources={msg.sources} />
+                                                        <>
+                                                            <AnswerSources sources={msg.sources} />
+                                                            {msg.noCode && <p className='mt-2 text-xs text-brandGray-300'>No matching code excerpts were returned for this answer.</p>}
+                                                        </>
                                                     )}
                                                 </div>
                                             )}
@@ -502,10 +598,10 @@ export default function UnifiedProjectChat() {
                                     />
                                 </svg>
                                 <p className='text-brandGray-300 mb-4'>
-                                    Ask about the code behind these projects
+                                    Ask how the code behind {scope === 'all' ? 'these projects' : project.title} works.
                                 </p>
                                 <div className='flex flex-wrap justify-center gap-2'>
-                                    {STARTER_QUESTIONS.map(question => (
+                                    {starterQuestions.map(question => (
                                         <button
                                             key={question}
                                             type='button'
@@ -522,61 +618,7 @@ export default function UnifiedProjectChat() {
                     </>
                 )}
 
-                <form onSubmit={handleQuestionSubmit} className='mb-1'>
-                    <div className='flex gap-2'>
-                        <input
-                            ref={chatInputRef}
-                            type='text'
-                            value={userQuestion}
-                            onChange={e => setUserQuestion(e.target.value)}
-                            placeholder='Ask how something in these projects works'
-                            className='flex-1 px-3 py-2 bg-brandGray-800 border border-brandGray-700 rounded-lg text-sm text-white focus:ring-2 focus:ring-brandGreen-500/40 focus:border-brandGreen-500 outline-none transition-all duration-200'
-                            style={{
-                                backfaceVisibility: 'hidden',
-                                WebkitBackfaceVisibility: 'hidden',
-                                transform: 'translateZ(0)',
-                            }}
-                        />
-                        <button
-                            type='submit'
-                            disabled={isGenerating}
-                            className={clsx(
-                                'px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300',
-                                'relative overflow-hidden border',
-                                isGenerating
-                                    ? 'bg-brandGray-700 text-brandGray-500 border-transparent cursor-wait'
-                                    : !userQuestion.trim()
-                                    ? 'bg-transparent text-brandGreen-400 border-brandGreen-500/50 hover:bg-brandGreen-500/10'
-                                    : 'bg-gradient-to-r from-brandGreen-600 to-brandGreen-500 text-white hover:shadow-lg hover:shadow-brandGreen-500/20 border-transparent'
-                            )}
-                        >
-                            {isGenerating ? (
-                                <svg
-                                    className='animate-spin h-5 w-5 text-white'
-                                    xmlns='http://www.w3.org/2000/svg'
-                                    fill='none'
-                                    viewBox='0 0 24 24'
-                                >
-                                    <circle
-                                        className='opacity-25'
-                                        cx='12'
-                                        cy='12'
-                                        r='10'
-                                        stroke='currentColor'
-                                        strokeWidth='4'
-                                    ></circle>
-                                    <path
-                                        className='opacity-75'
-                                        fill='currentColor'
-                                        d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
-                                    ></path>
-                                </svg>
-                            ) : (
-                                'Ask'
-                            )}
-                        </button>
-                    </div>
-                </form>
+
                 <div className='text-xs text-brandGray-400 text-center'>
                     Answers come from the current code of each project on GitHub, with links to the exact lines
                 </div>
