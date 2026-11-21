@@ -379,26 +379,28 @@ test('case-study Explorer drawer preserves reading position, focus, and draft on
     await noOverflow(page);
 });
 
-test('wide cryptography case study uses the extra space for its chat', async ({ page }) => {
+test('wide case studies keep the reading column close to their roomy Explorer', async ({ page }) => {
     await page.setViewportSize({ width: 1656, height: 940 });
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await ready(page);
     await page.getByRole('button', { name: 'Read case study: ' + projects[1].title, exact: true }).click();
-    const { left, right, chat, art, input, heading } = await page.evaluate(() => {
+    const { left, right, chat, art, input, heading, reading } = await page.evaluate(() => {
         const rect = select => document.querySelector(select).getBoundingClientRect().toJSON();
         const shell = rect('.work-studio-shell');
         return {
             left: shell.left, right: innerWidth - shell.right, chat: rect('#project-chat'),
             art: rect('.work-studio-media'), input: rect('#project-chat textarea'), heading: rect('.work-studio-intro'),
+            reading: rect('.work-studio-depth .prose'),
         };
     });
     expect(left).toBeGreaterThanOrEqual(40);
-    expect(right).toBeLessThanOrEqual(64);
     expect(Math.abs(left - right)).toBeLessThan(1);
     expect(chat.width).toBeGreaterThanOrEqual(520);
-    expect(chat.width).toBeLessThanOrEqual(580);
-    expect(chat.left - art.right).toBeGreaterThanOrEqual(40);
-    expect(chat.left - art.right).toBeLessThanOrEqual(56);
+    expect(chat.width).toBeLessThanOrEqual(545);
+    expect(reading.width).toBeGreaterThan(550);
+    expect(reading.width).toBeLessThanOrEqual(608);
+    expect(chat.left - reading.right).toBeCloseTo(32, 0);
+    expect(art.right).toBeCloseTo(reading.right, 0);
     expect(Math.abs(heading.y - chat.y)).toBeLessThan(1);
     expect(input.width).toBeGreaterThan(400);
     await expect(page.getByRole('navigation', { name: 'Case study navigation' }).getByRole('button')).toHaveCount(2);

@@ -30,7 +30,7 @@ const FACT_ICONS = {
 }
 
 const MAX_PILLS = 3
-const ART_TREATMENTS = { 1: 'dashboard', 2: 'wheel', 3: 'arena', 4: 'lesson' }
+const ART_TREATMENTS = { 1: 'dashboard', 2: 'cipher', 3: 'arena', 4: 'lesson' }
 
 // The row is one big target: this button's hit area stretches over the whole card (the card is
 // position: relative), so the project opens from mouse, touch and keyboard. The links in the

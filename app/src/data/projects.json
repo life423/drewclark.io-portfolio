@@ -83,10 +83,11 @@
                 "label": "Desktop, Python and PyQt"
             }
         ],
-        "image": "/projects/cryptography-toolkit-emerald.webp",
-        "imageWidth": 880,
-        "imageHeight": 1100,
-        "imageAlt": "An emerald cipher wheel with two alphabet rings and a gold pointer aligning A with D",
+        "image": "/projects/ciphercraft-app.png",
+        "imageWidth": 2048,
+        "imageHeight": 972,
+        "imageAlt": "CipherCraft with Caesar cipher selected, Encrypt and Decrypt controls, and side-by-side Message and Result panels",
+        "imageFraming": "cipher",
         "downloads": [
             {
                 "platform": "macos",

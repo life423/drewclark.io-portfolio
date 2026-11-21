@@ -105,12 +105,23 @@
 }
 @media (min-width: 1100px) {
     .work-studio-section { --work-studio-bottom: 6rem; padding: 4.5rem var(--portfolio-content-gutter, clamp(2rem, 3.3vw, 3rem)) var(--work-studio-bottom); }
-    .work-studio-case {
-        grid-template-columns: minmax(0, 1fr) clamp(22.5rem, 27vw, 25rem);
-        column-gap: clamp(2.5rem, 3.6vw, 3.5rem);
-        grid-template-rows: auto 1fr;
+    /* Let the prose, not the viewport, set the edge next to the Explorer. */
+    .work-studio-shell:has(.work-studio-case) {
+        --case-reading-width: 38rem;
+        --case-column-gap: 2rem;
+        --case-explorer-width: clamp(22.5rem, 27vw, 25rem);
+        max-width: calc(var(--case-reading-width) + var(--case-column-gap) + var(--case-explorer-width));
     }
-    .work-studio-case { grid-template-rows: auto auto auto auto; }
+    .work-studio-case {
+        grid-template-columns: minmax(0, 1fr) var(--case-explorer-width);
+        column-gap: var(--case-column-gap);
+        grid-template-rows: auto auto auto auto;
+    }
+    .work-studio-depth .prose {
+        max-width: none;
+        font-size: 1rem;
+        line-height: 1.7;
+    }
     .work-studio-case .work-studio-nav { grid-column: 1; grid-row: 1; }
     .work-studio-case .work-studio-intro { grid-column: 1; grid-row: 2; }
     .work-studio-case .work-studio-rail { grid-column: 2; grid-row: 2 / -1; }
@@ -149,11 +160,10 @@
 .work-gallery-ctas { padding-top: .75rem; }
 .work-gallery-actions { padding-top: .25rem; }
 
-/* Give case studies, not the gallery, a wider reading and conversation surface. */
+/* Give the Explorer more room on wide screens without lengthening the article lines. */
 @media (min-width: 1510px) {
-    .work-studio-shell:has(.work-studio-case) { max-width: 95.5rem; }
-    .work-studio-case {
-        grid-template-columns: minmax(0, 1fr) clamp(28rem, 35vw, 36.25rem);
+    .work-studio-shell:has(.work-studio-case) {
+        --case-explorer-width: clamp(28rem, 33vw, 34rem);
     }
 }
 
@@ -233,18 +243,28 @@
 .work-studio-inline .code-studio {
     scroll-margin-top: max(5rem, calc(var(--site-nav-rest-height, 4rem) + .75rem));
 }
-.work-gallery-art--wheel {
-    background: radial-gradient(ellipse at center, #09281e, #061c15 65%, #071c16);
+/* Frame the real CipherCraft UI without stretching the screenshot or baking in a crop. */
+.work-gallery-art--cipher, .work-studio-media--cipher figure { background: #f2f5f8; }
+.work-gallery-art--cipher { position: relative; }
+.work-gallery-art--cipher img {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: min(243.8%, calc(var(--work-thumb-height) * 4.7));
+    max-width: none;
+    height: auto;
+    transform: translateX(-50%);
 }
-.work-gallery-art--wheel img {
-    object-fit: contain;
-    transform: scale(1.23);
-    /* Blend the portrait edges into the matte without cutting the wheel's rim. */
-    mask-image: linear-gradient(to right,
-        transparent calc(50% - var(--work-thumb-height) * .4),
-        black calc(50% - var(--work-thumb-height) * .36),
-        black calc(50% + var(--work-thumb-height) * .36),
-        transparent calc(50% + var(--work-thumb-height) * .4));
+.work-studio-media--cipher figure {
+    max-width: 46rem;
+    aspect-ratio: 42 / 41;
+}
+.work-studio-media--cipher img {
+    position: relative;
+    left: 50%;
+    width: 243.8%;
+    max-width: none;
+    transform: translateX(-50%);
 }
 .work-gallery-art--dashboard { background: #0d2827; }
 .work-gallery-art--dashboard img { object-fit: contain; }

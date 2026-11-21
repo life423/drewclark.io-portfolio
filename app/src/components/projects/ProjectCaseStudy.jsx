@@ -13,7 +13,7 @@ const STACK_TONES = [
 ]
 
 export default function ProjectCaseStudy({ project, projectNumber, totalProjects, nextTitle, onNext, onOverview }) {
-    const { title, summary, image, imageAlt, imageWidth, imageHeight, liveUrl, liveLabel, repo, downloads,
+    const { title, summary, image, imageAlt, imageWidth, imageHeight, imageFraming, liveUrl, liveLabel, repo, downloads,
         stack, initialDescription, detailedDescription, challenges, technicalDetails, highlights } = project
     return (
         <article aria-labelledby='case-study-title' className='work-studio-grid work-studio-case'>
@@ -35,7 +35,7 @@ export default function ProjectCaseStudy({ project, projectNumber, totalProjects
                 <ProjectLinks title={title} liveUrl={liveUrl} liveLabel={liveLabel} repo={repo} downloads={downloads} />
             </header>
             <CaseStudyExplorer project={project} />
-            <div className='work-studio-media'>
+            <div className={`work-studio-media${imageFraming === 'cipher' ? ' work-studio-media--cipher' : ''}`}>
                 <ProjectImage image={image} imageAlt={imageAlt} imageWidth={imageWidth} imageHeight={imageHeight} title={title} plain />
             </div>
             <section aria-labelledby='case-study-details' className='work-studio-depth'>
