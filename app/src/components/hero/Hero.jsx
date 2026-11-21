@@ -223,7 +223,7 @@ export default function Hero() {
                             <span>Featured Projects</span>
                         </a>
                         <a
-                            href='https://ascend.drewclark.io'
+                            href='https://ascendavoid.com'
                             target='_blank'
                             rel='noopener noreferrer'
                             aria-label='Play Ascend-Avoid (opens in a new tab)'
