@@ -3,6 +3,8 @@
         "id": 1,
         "title": "CudaRL-Arena",
         "repo": "life423/CudaRL-Arena",
+        "liveUrl": "https://cudarl.drewclark.io",
+        "liveLabel": "Visit the site",
         "summary": "Reinforcement learning built from scratch in C++ and CUDA, with live Godot demos of balancing carts, racing cars and swimming tadpoles.",
         "stack": [
             "C++",
@@ -15,7 +17,7 @@
         "detailedDescription": "Three Godot demonstrations make the learning visible: CartPole balances a pole on a moving cart, eight-car racing combines steering and throttle with nearby-car sensing, and a 3D tadpole pond trains swimmers to find food. CartPole and racing offer trained-policy playback or fresh training. The shallow pond learns live across 1,024 swimmers; the deep pond plays a validated food-selection policy paired with a retained swimming network. Native headless training can save and resume the optimizer and world state.",
         "technicalDetails": "A C++ core holds the environments, CUDA kernels, neural-network forward and backward passes, Adam optimizer and Proximal Policy Optimization (PPO). Rollouts, advantage estimates and policy updates run on the GPU. A Godot 4.4 GDExtension connects that core to GDScript, while the core also builds independently for tests and benchmarks. Separate bf16 tensor-core matrix kernels use mma.sync, ldmatrix, asynchronous copies and swizzled shared memory. On the project's RTX 5070 benchmarks, those kernels reach 91–96% of cuBLAS throughput on large matrices; the small PPO networks still train in fp32.",
         "challenges": "The main challenge is making GPU speedups measurable without losing correctness. I check gradients with fp64 finite differences, compare kernels against CPU references and cuBLAS, and retain reference execution paths when optimizing the racing pipeline. Small networks are often limited by memory traffic and kernel-launch overhead, so the work includes CUDA Graphs and end-to-end timing rather than relying on large matrix benchmarks alone. The Godot extension also reports missing GPU or driver support without crashing the editor. Windows CI checks the build and CPU tests; GPU validation runs locally on an RTX 5070.",
-        "readme": "Source and measured results are at github.com/life423/CudaRL-Arena. The current Godot application targets Windows with an NVIDIA GPU. Build with CMake and the CUDA Toolkit; Godot 4.4 supplies the live viewer. The repository includes PPO write-ups, GPU optimization studies, swimmer evaluation results and their limitations. Broader racing evaluation, Linux support and a self-hosted GPU CI runner remain future work.",
+        "readme": "Source and measured results are at github.com/life423/CudaRL-Arena. The downloadable Tadpole Pond preview targets 64-bit Windows 10/11. CPU learning is included, with optional NVIDIA GPU acceleration. The installer includes Godot and the native runtime, so no CUDA Toolkit or Godot editor is required. Developer builds use CMake and the CUDA Toolkit; Godot 4.4 supplies the live viewer. The repository includes PPO write-ups, GPU optimization studies, swimmer evaluation results and their limitations. Broader racing evaluation, Linux support and a self-hosted GPU CI runner remain future work.",
         "highlights": [
             "Environments, neural networks and PPO written from scratch in C++ and CUDA",
             "Godot calls the GPU code directly through an in-process GDExtension",
@@ -34,13 +36,21 @@
             },
             {
                 "icon": "monitor",
-                "label": "Windows and NVIDIA GPU"
+                "label": "Windows · optional NVIDIA GPU"
             }
         ],
         "image": "/projects/cudarl-arena.png",
         "imageWidth": 1280,
         "imageHeight": 720,
-        "imageAlt": "CudaRL-Arena's Godot tadpole pond, with a swimming agent, CUDA training statistics and a food-collection learning curve"
+        "imageAlt": "CudaRL-Arena's Godot tadpole pond, with a swimming agent, CUDA training statistics and a food-collection learning curve",
+        "downloads": [
+            {
+                "platform": "windows",
+                "label": "Download preview",
+                "version": "v0.1.0-preview.2",
+                "url": "https://github.com/life423/CudaRL-Arena/releases/download/v0.1.0-preview.2/TadpolePondSetup.exe"
+            }
+        ]
     },
     {
         "id": 2,

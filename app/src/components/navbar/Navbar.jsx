@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useLayoutEffect, useState, useCallback, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import clsx from 'clsx'
 import { LuMenu } from 'react-icons/lu'
@@ -14,6 +14,22 @@ export default function Navbar({ drawerOpen, toggleDrawer, progressBarVisible = 
 
   const { y: scrollY, percent: scrollPercent, forceRecalculation } = useScrollPosition()
   const isScrolled = scrollY > 50
+  const navbarRef = useRef(null)
+
+  // Reserve the natural expanded header height before paint. Observe width,
+  // font and safe-area changes; keep the reservation stable as the bar compacts
+  // on scroll so changing its height cannot move the content underneath it.
+  useLayoutEffect(() => {
+    if (isScrolled || !navbarRef.current) return
+    const navbar = navbarRef.current
+    const updateHeight = () => {
+      document.documentElement.style.setProperty('--site-nav-rest-height', `${navbar.offsetHeight}px`)
+    }
+    updateHeight()
+    const observer = new window.ResizeObserver(updateHeight)
+    observer.observe(navbar)
+    return () => observer.disconnect()
+  }, [isScrolled])
 
   function handleMenuClick() {
     toggleDrawer()
@@ -37,19 +53,21 @@ export default function Navbar({ drawerOpen, toggleDrawer, progressBarVisible = 
 
   return (
     <nav
+      ref={navbarRef}
       className={clsx(
         'fixed top-0 w-full z-50',
         'transition-all duration-300 ease-in-out',
         isScrolled
           ? 'backdrop-blur-md bg-brandGray-800/90 shadow-nav'
           : 'backdrop-blur-sm bg-gradient-to-b from-brandGray-900/70 to-transparent',
-        drawerOpen ? '-translate-y-[64px]' : 'translate-y-0'
+        drawerOpen ? '-translate-y-full' : 'translate-y-0'
       )}
+      style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
     >
       <div
         className={clsx(
           'flex items-center justify-between w-full',
-          isScrolled ? 'h-14 px-4 py-2' : 'h-18 px-6 py-5'
+          isScrolled ? 'px-4 py-2' : 'px-6 py-5'
         )}
       >
         <div
@@ -80,7 +98,7 @@ export default function Navbar({ drawerOpen, toggleDrawer, progressBarVisible = 
         </div>
         <button
           className={clsx(
-            'md:hidden relative flex items-center justify-center',
+            'md:hidden relative flex min-h-11 min-w-11 items-center justify-center',
             'rounded-full group',
             'border hover:shadow-md',
             'active:shadow-inner',
@@ -88,11 +106,10 @@ export default function Navbar({ drawerOpen, toggleDrawer, progressBarVisible = 
             'z-[100]',
             'pointer-events-auto',
             isScrolled
-              ? 'min-w-[40px] min-h-[40px] px-2 py-1.5 bg-gradient-to-b from-brandGray-700/90 to-brandGray-800 border-brandGray-600/40'
-              : 'min-w-[44px] min-h-[44px] px-3 py-2 bg-gradient-to-b from-brandGray-700/60 to-brandGray-800/60 border-brandGray-600/20'
+              ? 'px-2 py-1.5 bg-gradient-to-b from-brandGray-700/90 to-brandGray-800 border-brandGray-600/40'
+              : 'px-3 py-2 bg-gradient-to-b from-brandGray-700/60 to-brandGray-800/60 border-brandGray-600/20'
           )}
           style={{
-            transform: `scale(${isScrolled ? '0.95' : '1'})`,
             boxShadow: isScrolled
               ? '0 1px 3px rgba(0, 0, 0, 0.12)'
               : '0 2px 5px rgba(0, 0, 0, 0.08)',

@@ -85,6 +85,13 @@ same text styling and hover treatment as Home and GitHub. On phones it appears
 in the existing navigation drawer with a 44px touch target and closes the drawer
 when selected. Keep it a plain navigation link, without a separate button style.
 
+The navbar's height comes from its content. It measures its expanded height before
+paint and observes resizing/text enlargement; the hero reserves that height plus
+the shared `--hero-nav-clearance` spacing. Keep the expanded reservation stable
+while the bar compacts on scroll, so content does not jump. Do not restore an
+assumed header height or a smaller independent top padding on the hero.
+See `docs/ios-header-validation.md` for the iPhone clipping regression and checks.
+
 Project detail views show each project's main image at full content width,
 using its natural aspect ratio rather than a fixed-height frame. Explicit source
 dimensions reserve space before loading. Images link to the original in a new tab.
@@ -105,10 +112,18 @@ possible future detail-view switch. Preserve the natural proportions. Generation
 prompt and provenance are in `docs/ascend-avoid-emerald-art.md`.
 
 The hero offers Featured Projects and a direct Play Ascend-Avoid link. The latter
-starts with a green outline, then fills on hover, keyboard focus or press. The
-buttons share the brand green with dark text when filled, stack on small phones,
-and disable their transitions when reduced motion is requested. Keep the overview
-introduction short so visitors reach the apps quickly.
+starts with a green outline, then a green-to-blue gradient rises into it over
+420ms on hover, keyboard focus or press. One subtle shine follows the fill.
+Dark lettering is revealed with the fill to preserve contrast throughout the
+transition. Buttons stack on small phones; reduced motion removes the transitions
+and shine. Keep the overview introduction short so visitors reach the apps quickly.
+
+CudaRL-Arena has a Visit the site link to `https://cudarl.drewclark.io` and a
+Download preview action in both the overview and detail views. The download
+targets the verified Windows installer for `v0.1.0-preview.2`; it is a prerelease,
+so do not replace it with GitHub's `/releases/latest` URL. The downloaded preview
+includes CPU learning; an NVIDIA GPU is optional. Project actions retain at least
+44px touch targets and wrap within the available card width.
 
 Each detail header has a keyboard-accessible Next control that cycles through
 all four projects and wraps to the first. Keep the bottom Previous/Next controls
@@ -126,12 +141,18 @@ database is required. To test an existing server, set `UI_TEST_URL` first.
 The suite covers nine phone, landscape, tablet and desktop dimensions, artwork
 selection/proportions, overflow, project cycling/wrapping, bottom navigation,
 keyboard focus, touch/rotation, reduced motion, hero interaction states, chat
-loading/source links/recovery and contact dialog opening/closing. Pull requests
-run the same suite on Linux in Chrome, Edge and Firefox. WebKit remains in the
-local suite: its CI font/media dependency downloads repeatedly stalled on the
-Ubuntu package mirror, so that install step was removed at the user's request.
-WebKit is an engine compatibility check; it does not replace testing real Safari on macOS/iOS.
-See `docs/portfolio-ui-validation.md` for the release evidence and remaining limits.
+loading/source links/recovery and contact dialog opening/closing. Header regression
+checks also cover short viewports, both sides of the tablet breakpoint, return to
+top, rotation, natural header growth and 200% root text size.
+
+Pull requests and pushes to main run Chrome, Edge and Firefox on Linux. A separate
+macOS job runs the full WebKit suite and a focused smoke check in actual desktop
+Safari through SafariDriver, with screenshots, versions and logs as artifacts.
+The macOS job avoids the Ubuntu font/media downloads that previously timed out.
+WebKit supplies exact phone viewports, but physical iPhone Safari and embedded
+browser testing remain necessary. See `docs/safari-ci.md` for the setup,
+`docs/ios-header-validation.md` for this header regression, and
+`docs/portfolio-ui-validation.md` for earlier release evidence.
 
 ## Admin inbox
 

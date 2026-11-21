@@ -101,22 +101,19 @@ export default function Hero() {
 
     const heroText = HERO_TEXTS[mousePosition.zone] || HERO_TEXTS.default
     
-    // Calculate transform based on scroll position for parallax effect
-    const calculateTransform = () => {
-        const maxScroll = window.innerHeight * 0.7
-        const scrollRatio = Math.min(scrollY / maxScroll, 1)
-        return {
-            transform: `perspective(1000px) rotateX(${scrollRatio * 8}deg)`,
-            opacity: 1 - scrollRatio * 0.4,
-        }
+    // Keep foreground text and actions at full contrast as the background fades.
+    const maxScroll = window.innerHeight * 0.7
+    const scrollRatio = Math.min(scrollY / maxScroll, 1)
+    const heroTransform = {
+        transform: `perspective(1000px) rotateX(${scrollRatio * 8}deg)`,
     }
 
     return (
         <section
             ref={heroRef}
             onMouseMove={handleMouseMove}
-            className='relative min-h-[70vh] md:min-h-[85vh] lg:min-h-[95vh] flex items-center justify-center px-4 py-16 text-white overflow-hidden'
-            style={calculateTransform()}
+            className='relative min-h-[70vh] md:min-h-[85vh] lg:min-h-[95vh] flex items-center justify-center px-4 pb-16 pt-[calc(var(--site-nav-rest-height)+var(--hero-nav-clearance))] text-white overflow-hidden'
+            style={heroTransform}
         >
             {/* Spotlight overlay - follows cursor */}
             <div
@@ -129,7 +126,7 @@ export default function Hero() {
 
             {/* Enhanced background with parallax and improved effects */}
             <div className='absolute inset-0 z-0 bg-brandGray-800 transition-all duration-300 ease-in-out lg:p-[3%_8%]' 
-                 style={{ contain: 'strict', contentVisibility: 'auto' }}>
+                 style={{ contain: 'strict', contentVisibility: 'auto', opacity: 1 - scrollRatio * 0.4 }}>
                 {/* Base image with parallax scrolling using picture element for responsive images */}
                 <div className='absolute inset-0'>
                         <picture>
@@ -305,6 +302,7 @@ export default function Hero() {
                             className='hero-action hero-action--outline'
                         >
                             <span>Play Ascend-Avoid</span>
+                            <span className='hero-action__filled-label' aria-hidden='true'>Play Ascend-Avoid</span>
                         </a>
                     </div>
                 </ProgressiveElement>

@@ -13,6 +13,11 @@
   --line-height-tight: 1.25;
   --line-height-normal: 1.5;
   --line-height-relaxed: 1.75;
+
+  /* Navbar measures its natural expanded height before paint and observes
+     resizing/text enlargement. The hero reserves that actual height. */
+  --site-nav-rest-height: 0px;
+  --hero-nav-clearance: 1.5rem;
 }
 
 /* 

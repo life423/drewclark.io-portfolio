@@ -37,7 +37,7 @@ const MAX_PILLS = 3
 const ROW_BUTTON = "block w-full text-left focus:outline-none after:absolute after:inset-0 after:rounded-xl after:content-['']"
 
 const ACTION =
-    'relative z-10 inline-flex h-9 shrink-0 items-center justify-center rounded-full ' +
+    'relative z-10 inline-flex min-h-11 shrink-0 items-center justify-center rounded-full ' +
     'text-sm font-semibold transition-colors duration-200 motion-reduce:transition-none ' +
     'focus:outline-none focus-visible:ring-2 focus-visible:ring-brandGreen-300 ' +
     'focus-visible:ring-offset-2 focus-visible:ring-offset-brandGray-800'
@@ -49,7 +49,7 @@ const PLAY =
 
 // Secondary action: outlined, in the gray that clears 3:1 against the card
 const CODE =
-    ACTION + ' w-9 border border-brandGray-500 text-brandGray-200 ' +
+    ACTION + ' w-11 border border-brandGray-500 text-brandGray-200 ' +
     'hover:border-brandGreen-400/70 hover:bg-brandGreen-900/20 hover:text-brandGreen-300'
 
 function Thumbnail({ project }) {
