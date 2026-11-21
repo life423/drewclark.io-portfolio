@@ -1,6 +1,5 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react'
+import { useRef, useCallback } from 'react'
 import useScrollPosition from '../../hooks/useScrollPosition'
-import useIsInViewport from '../../hooks/useIsInViewport'
 
 // Import both WebP and JPG versions
 import sproutMobile from '../../assets/sprout-mobile.jpg'
@@ -14,81 +13,20 @@ import ProgressiveElement from '../utils/ProgressiveElement'
 import NeuralNetworkCanvas from './NeuralNetworkCanvas'
 import TypedTextEffect from './TypedTextEffect'
 
-// Tagline for each cursor zone (3x3 grid over the hero). Static copy, no API calls.
-const HERO_TEXTS = {
-    'left-top': "Architecting scalable solutions with clean, maintainable code",
-    'center-top': "Transforming complex ideas into elegant implementations",
-    'right-top': "Pushing the boundaries of what's possible with modern tech",
-    'left-middle': "Building software that solves real-world challenges",
-    'center-middle': "Creating innovative solutions through thoughtful engineering",
-    'right-middle': "Engineering systems that scale with precision and reliability",
-    'left-bottom': "Turning ideas into production-ready applications",
-    'center-bottom': "Crafting digital experiences that make a difference",
-    'right-bottom': "Bringing technical vision to life through code and creativity",
-    'default': "Building elegant solutions to complex problems"
-}
+const HERO_TAGLINE_DELAY = 600
 
 export default function Hero() {
     const heroRef = useRef(null)
     const spotlightRef = useRef(null)
     const { y: scrollY } = useScrollPosition()
-    const [isLoaded, setIsLoaded] = useState(false)
-    
-    // Track if hero is visible in viewport
-    const [heroIsInView, setHeroIsInView] = useState(true)
-    
-    // Track mouse position and zone (3x3 grid)
-    const [mousePosition, setMousePosition] = useState({ 
-        x: 0, 
-        y: 0, 
-        zone: 'default' // until the cursor enters the hero
-    })
-    
-    // Using useIsInViewport hook to detect when hero is visible
-    const [viewportRef, isInViewport] = useIsInViewport({ threshold: 0.3 })
-    
-    // Set refs
-    useEffect(() => {
-        if (heroRef.current) {
-            viewportRef.current = heroRef.current
-        }
-    }, [viewportRef])
-    
-    // Update heroIsInView when isInViewport changes
-    useEffect(() => {
-        setHeroIsInView(isInViewport)
-    }, [isInViewport])
 
-    // Set loaded state after initial animations
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setIsLoaded(true)
-        }, 1500)
-        return () => clearTimeout(timer)
-    }, [])
-
-    // Mouse-follow spotlight effect with zone tracking
+    // The decorative spotlight follows the pointer independently of the copy.
     const handleMouseMove = useCallback(e => {
         if (!heroRef.current || !spotlightRef.current) return
 
         const rect = heroRef.current.getBoundingClientRect()
         const x = e.clientX - rect.left
         const y = e.clientY - rect.top
-
-        // Calculate position as percentage of hero area
-        const xPercent = (x / rect.width) * 100
-        const yPercent = (y / rect.height) * 100
-        
-        // Determine zone (3x3 grid)
-        const horizontalZone = xPercent < 33 ? 'left' : xPercent < 66 ? 'center' : 'right'
-        const verticalZone = yPercent < 33 ? 'top' : yPercent < 66 ? 'middle' : 'bottom'
-        const zone = `${horizontalZone}-${verticalZone}`
-        
-        // Update mouse position state, but only if zone changed
-        // This prevents unnecessary re-renders and AI calls
-        setMousePosition(prev => 
-            prev.zone !== zone ? { x, y, zone } : prev
-        )
 
         // Update spotlight position
         spotlightRef.current.style.background = `radial-gradient(
@@ -99,8 +37,6 @@ export default function Hero() {
         )`
     }, [])
 
-    const heroText = HERO_TEXTS[mousePosition.zone] || HERO_TEXTS.default
-    
     // Keep foreground text and actions at full contrast as the background fades.
     const maxScroll = window.innerHeight * 0.7
     const scrollRatio = Math.min(scrollY / maxScroll, 1)
@@ -257,7 +193,7 @@ export default function Hero() {
                 {/* Progressive description - Stage 3 */}
                 <ProgressiveElement
                     id='hero-description'
-                    appearDelay={600}
+                    appearDelay={HERO_TAGLINE_DELAY}
                     focusStage={3}
                     className='block mt-8 mb-10' /* Added mt-8 and increased mb-8 to mb-10 for clearer section breaks */
                 >
@@ -265,21 +201,13 @@ export default function Hero() {
                         {/* Background layer - removed backdrop blur */}
                         <div className='absolute inset-0 bg-brandGray-900/40 rounded-lg border-l-2 border-brandGreen-500/40 pointer-events-none'></div>
 
-                        {/* Tagline with typing effect; text follows the cursor zone */}
-                        <p className='relative px-3 py-2 text-lg text-white font-medium leading-relaxed'
-                           style={{ minHeight: '80px', display: 'flex', alignItems: 'center' }}>
-                            <span className="min-h-[80px] flex items-center w-full">
-                                <TypedTextEffect 
-                                    phrases={[heroText]}
-                                    typingSpeed={40}
-                                    deletingSpeed={30}
-                                    pauseTime={5000}
-                                    active={heroIsInView}
-                                    className="transition-opacity duration-300"
-                                    stableViewingPeriod={10000} // 10 seconds of stable viewing before changing
-                                    scrollIdlePeriod={3000} // 3 seconds of scroll inactivity before change
-                                />
-                            </span>
+                        {/* One entrance; CSS adapts the copy without resetting progress. */}
+                        <p className='relative flex min-h-24 items-center px-3 py-2 text-lg text-white font-medium leading-relaxed'>
+                            <TypedTextEffect
+                                text='Building elegant solutions to complex problems.'
+                                compactText='Software that solves real problems.'
+                                startDelay={HERO_TAGLINE_DELAY}
+                            />
                         </p>
                     </div>
                 </ProgressiveElement>

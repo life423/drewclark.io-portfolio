@@ -112,11 +112,23 @@ possible future detail-view switch. Preserve the natural proportions. Generation
 prompt and provenance are in `docs/ascend-avoid-emerald-art.md`.
 
 The hero offers Featured Projects and a direct Play Ascend-Avoid link. The latter
-starts with a green outline, then a green-to-blue gradient rises into it over
+starts with a green outline, then a green-to-teal-to-blue gradient rises into it over
 420ms on hover, keyboard focus or press. One subtle shine follows the fill.
 Dark lettering is revealed with the fill to preserve contrast throughout the
 transition. Buttons stack on small phones; reduced motion removes the transitions
-and shine. Keep the overview introduction short so visitors reach the apps quickly.
+and shine. The Play button has no orange accent or play icon.
+Keep the overview introduction short so visitors reach the apps quickly.
+
+The hero tagline types once and stays visible. Below the existing 768px breakpoint
+it reads “Software that solves real problems.”; wider layouts read “Building
+elegant solutions to complex problems.” Both copies share one typing progression,
+so resizing, rotation and browser-toolbar changes do not restart the entrance.
+Mouse movement affects only the decorative spotlight. The animation pauses when
+offscreen or when the document is hidden, and reduced motion shows the complete
+sentence. Full text is reserved in the layout before typing to keep the actions
+steady; assistive technology receives the complete sentence without character
+announcements. The caret disappears on completion. Preserve this behavior instead
+of restoring rotating copy or mouse-zone-triggered sentences.
 
 CudaRL-Arena has a Visit the site link to `https://cudarl.drewclark.io` and a
 Download preview action in both the overview and detail views. The download
