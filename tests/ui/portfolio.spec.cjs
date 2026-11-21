@@ -457,6 +457,22 @@ test('the studio explains source grounding and Cryptography actions fit on 1126p
     await expect(crypto.locator('.work-gallery-actions a')).toHaveCount(3);
 });
 
+test('CUDA preview and source stay together as the card actions wrap', async ({ page }) => {
+    await ready(page);
+    const actions = page.getByRole('button', { name: projects[0].title, exact: true })
+        .locator('xpath=ancestor::article').locator('.work-gallery-actions a');
+    for (const width of [320, 390, 768, 1126, 1280, 1440, 1810]) {
+        await page.setViewportSize({ width, height: 900 });
+        const links = await actions.evaluateAll(links => links.map(link => ({
+            href: link.getAttribute('href'), y: link.getBoundingClientRect().y,
+        })));
+        expect(links).toHaveLength(3);
+        expect(links[1].href).toBe(projects[0].downloads[0].url);
+        expect(links[2].href).toBe('https://github.com/' + projects[0].repo);
+        expect(Math.abs(links[1].y - links[2].y)).toBeLessThan(1);
+    }
+});
+
 test('composer supports multiline questions and reflects the real limit', async ({ page }) => {
     await page.setViewportSize({ width: 1126, height: 900 });
     let payload;

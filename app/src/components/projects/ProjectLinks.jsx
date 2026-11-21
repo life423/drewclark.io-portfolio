@@ -40,6 +40,21 @@ export default function ProjectLinks({ title, liveUrl, liveLabel = 'Try it live'
     const files = Array.isArray(downloads) ? downloads : []
     if (!liveUrl && !repo && files.length === 0) return null
 
+    const pairSourceWithDownloads = compact && Boolean(liveUrl && repo) && files.length === 1
+    const source = repo && (
+        <a
+            href={`https://github.com/${repo}`}
+            target='_blank'
+            rel='noopener noreferrer'
+            onClick={stopCardClick}
+            aria-label={`View the ${title} source code on GitHub (opens in a new tab)`}
+            className={(compact ? compactSource : base) + ' ' + secondary}
+        >
+            <FaGithub className='h-[18px] w-[18px] shrink-0' aria-hidden='true' focusable='false' />
+            {!compact && <span>View code</span>}
+        </a>
+    )
+
     return (
         <div className={'flex flex-wrap items-center gap-2 sm:gap-3 ' + (compact ? 'work-gallery-actions' : 'mt-3 sm:mt-4')}>
             {liveUrl && (
@@ -58,7 +73,7 @@ export default function ProjectLinks({ title, liveUrl, liveLabel = 'Try it live'
                 </a>
             )}
             {files.length > 0 && (
-                <div className='flex flex-wrap items-center gap-2 sm:gap-3'>
+                <div className={'flex items-center gap-2 sm:gap-3 ' + (pairSourceWithDownloads ? 'shrink-0' : 'flex-wrap')}>
                     {files.map(file => {
                         const Icon = platformIcon(file.platform)
                         return (
@@ -75,21 +90,10 @@ export default function ProjectLinks({ title, liveUrl, liveLabel = 'Try it live'
                             </a>
                         )
                     })}
+                    {pairSourceWithDownloads && source}
                 </div>
             )}
-            {repo && (
-                <a
-                    href={`https://github.com/${repo}`}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    onClick={stopCardClick}
-                    aria-label={`View the ${title} source code on GitHub (opens in a new tab)`}
-                    className={(compact ? compactSource : base) + ' ' + secondary}
-                >
-                    <FaGithub className='h-[18px] w-[18px] shrink-0' aria-hidden='true' focusable='false' />
-                    {!compact && <span>View code</span>}
-                </a>
-            )}
+            {!pairSourceWithDownloads && source}
         </div>
     )
 }
