@@ -20,3 +20,10 @@
     max-width: clamp(84rem, calc(74vw + 278.4px), 101rem);
     margin-inline: auto;
 }
+
+/* The existing copy action suppresses the browser outline; restore it for keyboard users. */
+.portfolio-footer :is(a, button):focus-visible {
+    outline: 2px solid theme('colors.brandGray.50');
+    outline-offset: 4px;
+    border-radius: 2px;
+}

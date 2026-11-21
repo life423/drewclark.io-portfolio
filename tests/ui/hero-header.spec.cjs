@@ -178,3 +178,27 @@ test('narrow desktop framing leaves room to the right of the sprout leaf', async
         expect(clearance).toBeGreaterThanOrEqual(20);
     }
 });
+
+test('footer links and copy-email action have visible keyboard focus and keep copy feedback', async ({ page }) => {
+    await page.addInitScript(() => {
+        Object.defineProperty(window.navigator, 'clipboard', {
+            configurable: true,
+            value: { writeText: async text => { window.__copiedFooterEmail = text; } },
+        });
+    });
+    await page.goto('/');
+    const footer = page.getByRole('contentinfo');
+    const twitter = footer.getByRole('link', { name: 'Drew Clark on Twitter' });
+    const github = footer.getByRole('link', { name: 'Drew Clark on GitHub' });
+    const email = footer.getByRole('button', { name: 'drew@drewclark.io' });
+    await twitter.focus();
+    for (const control of [twitter, github, email]) {
+        await expect(control).toBeFocused();
+        await expect(control).toHaveCSS('outline-color', 'rgb(250, 250, 250)');
+        await expect(control).toHaveCSS('outline-width', '2px');
+        if (control !== email) await page.keyboard.press('Tab');
+    }
+    await page.keyboard.press('Enter');
+    await expect(footer.getByText('Copied', { exact: true })).toBeVisible();
+    expect(await page.evaluate(() => window.__copiedFooterEmail)).toBe('drew@drewclark.io');
+});
