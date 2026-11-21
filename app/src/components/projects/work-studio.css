@@ -2,11 +2,11 @@
 .work-studio-section {
     background: linear-gradient(180deg, var(--work-entry-neutral, theme('colors.brandGray.800')) 0, theme('colors.brandGray.900') 8rem);
     --work-studio-bottom: 4rem;
-    padding: 3rem 1rem var(--work-studio-bottom);
+    padding: 3rem var(--portfolio-content-gutter, 1rem) var(--work-studio-bottom);
 }
 .work-studio-shell {
     width: 100%;
-    max-width: 84rem;
+    max-width: var(--portfolio-content-max, 84rem);
     margin-inline: auto;
     scroll-margin-top: 5rem;
 }
@@ -100,11 +100,11 @@
     letter-spacing: .09em;
 }
 @media (min-width: 640px) {
-    .work-studio-section { padding-inline: 2rem; }
+    .work-studio-section { padding-inline: var(--portfolio-content-gutter, 2rem); }
     .work-studio-grid { --work-studio-gap: 1.5rem; }
 }
 @media (min-width: 1100px) {
-    .work-studio-section { --work-studio-bottom: 6rem; padding: 4.5rem clamp(2rem, 3.3vw, 3rem) var(--work-studio-bottom); }
+    .work-studio-section { --work-studio-bottom: 6rem; padding: 4.5rem var(--portfolio-content-gutter, clamp(2rem, 3.3vw, 3rem)) var(--work-studio-bottom); }
     .work-studio-case {
         grid-template-columns: minmax(0, 1fr) clamp(22.5rem, 27vw, 25rem);
         column-gap: clamp(2.5rem, 3.6vw, 3.5rem);
@@ -310,4 +310,55 @@
 @media (min-width: 720px) {
     .work-gallery-divider { grid-column: 1 / -1; height: 1.75rem; }
     .work-studio-overview .work-studio-gallery { grid-template-rows: 1fr auto 1fr; grid-auto-rows: auto; }
+}
+
+/* The case-study Explorer stays mounted when it switches from rail to drawer. */
+.case-chat-launcher {
+    position: fixed;
+    z-index: 40;
+    right: max(1rem, env(safe-area-inset-right));
+    bottom: max(1rem, env(safe-area-inset-bottom));
+    min-height: 2.75rem;
+}
+.case-chat-dialog {
+    position: fixed;
+    inset: auto 0 0;
+    margin: 0 auto;
+    width: min(100%, 42rem);
+    max-width: 100%;
+    max-height: 92dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: .75rem max(.75rem, env(safe-area-inset-right)) max(.75rem, env(safe-area-inset-bottom)) max(.75rem, env(safe-area-inset-left));
+    border: 1px solid theme('colors.brandGray.700');
+    border-radius: 1rem 1rem 0 0;
+    background: theme('colors.brandGray.900');
+    color: inherit;
+}
+.case-chat-dialog::backdrop { background: rgb(0 0 0 / .65); }
+.case-chat-close {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: block;
+    margin: 0 0 .375rem auto;
+    min-height: 2.75rem;
+    background: theme('colors.brandGray.900');
+}
+body:has(.case-chat-dialog:modal) { overflow: hidden; }
+
+@media (min-width: 1100px) and (min-height: 850px) {
+    body:has(.work-studio-case), .site-rails:has(.work-studio-case) { overflow-x: clip; }
+    .work-studio-case .work-studio-rail { align-self: stretch; }
+    .case-chat-launcher, .case-chat-close { display: none; }
+    .case-chat-dialog {
+        position: sticky;
+        inset: calc(var(--site-nav-rest-height, 4rem) + .75rem) auto auto;
+        width: 100%;
+        max-height: calc(100dvh - var(--site-nav-rest-height, 4rem) - 1.5rem);
+        padding: 0;
+        border: 0;
+        border-radius: 1rem;
+        background: transparent;
+    }
 }

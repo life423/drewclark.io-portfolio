@@ -4,7 +4,7 @@ import { LuChevronLeft } from 'react-icons/lu'
 import ProjectImage from './ProjectImage'
 import ProjectLinks from './ProjectLinks'
 import ProjectNextButton from './ProjectNextButton'
-import UnifiedProjectChat from './UnifiedProjectChat'
+import CaseStudyExplorer from './CaseStudyExplorer'
 
 const STACK_TONES = [
     'border-brandGreen-700/60 bg-brandGreen-900/25 text-brandGreen-200',
@@ -21,7 +21,7 @@ export default function ProjectCaseStudy({ project, projectNumber, totalProjects
                 <button
                     type='button'
                     onClick={onOverview}
-                    className='inline-flex min-h-12 shrink-0 items-center gap-1 rounded-full border border-brandGreen-700/70 px-3 text-sm font-semibold text-brandGreen-200 hover:border-brandGreen-400 hover:bg-brandGreen-900/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brandGreen-300'
+                    className='inline-flex min-h-12 shrink-0 items-center gap-1 rounded-full border border-current px-3 text-sm font-semibold text-brandGreen-200 hover:bg-brandGreen-900/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brandGreen-300'
                 >
                     <LuChevronLeft className='h-5 w-5' aria-hidden='true' />
                     All projects
@@ -34,9 +34,7 @@ export default function ProjectCaseStudy({ project, projectNumber, totalProjects
                 <p className='work-studio-summary'>{summary}</p>
                 <ProjectLinks title={title} liveUrl={liveUrl} liveLabel={liveLabel} repo={repo} downloads={downloads} />
             </header>
-            <aside aria-label='Ask about this case study' className='work-studio-rail'>
-                <UnifiedProjectChat project={project} embedded />
-            </aside>
+            <CaseStudyExplorer project={project} />
             <div className='work-studio-media'>
                 <ProjectImage image={image} imageAlt={imageAlt} imageWidth={imageWidth} imageHeight={imageHeight} title={title} plain />
             </div>
