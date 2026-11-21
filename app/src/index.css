@@ -3,6 +3,7 @@
 
 /* Font variables - centralizes font-related properties for easier maintenance */
 :root {
+  --portfolio-emerald-gradient: linear-gradient(85deg, #064E3B 0%, #10B981 70%, #34D399 100%);
   --font-lato: 'Lato', sans-serif;
   --font-weight-light: 300;
   --font-weight-regular: 400;
@@ -48,6 +49,7 @@
 
   /* Large-screen rails variables */
   :root {
+  --portfolio-emerald-gradient: linear-gradient(85deg, #064E3B 0%, #10B981 70%, #34D399 100%);
     --content-max: 1440px;
     --rail: clamp(24px, 5vw, 128px);
     /* Subtle brand-blue rail; tweak as desired */
@@ -86,6 +88,7 @@
 
   /* On ultra-wide, allow a slightly wider content cap */
   @media (min-width: 2560px) {
-    :root { --content-max: 1600px; }
+    :root {
+  --portfolio-emerald-gradient: linear-gradient(85deg, #064E3B 0%, #10B981 70%, #34D399 100%); --content-max: 1600px; }
   }
 }

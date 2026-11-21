@@ -302,7 +302,7 @@
     left: 50%;
     width: 100vw;
     height: var(--work-band-height);
-    background: linear-gradient(85deg, #064E3B 0%, #10B981 70%, #34D399 100%);
+    background: var(--portfolio-emerald-gradient);
     clip-path: polygon(0 var(--work-entry-rise), 100% 0, 100% var(--work-band-thickness), 0 100%);
     pointer-events: none;
     transform: translate(-50%, -50%);
