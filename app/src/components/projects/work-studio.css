@@ -1,6 +1,6 @@
 /* Independent work and chat surfaces share only a responsive grid, never a panel wrapper. */
 .work-studio-section {
-    background: linear-gradient(180deg, var(--work-entry-slate, #262d35) 0, #141b24 8rem, #111821 68%, #151e29);
+    background: linear-gradient(180deg, var(--work-entry-neutral, theme('colors.brandGray.800')) 0, theme('colors.brandGray.900') 8rem);
     padding: 3rem 1rem 4rem;
 }
 .work-studio-shell {
@@ -27,14 +27,14 @@
     text-transform: uppercase;
 }
 .work-studio-title {
-    color: #f3fbf7;
+    color: theme('colors.brandGray.50');
     font-size: clamp(1.85rem, 3.2vw, 3.2rem);
     font-weight: 650;
     letter-spacing: -.035em;
     line-height: 1.05;
 }
 .work-studio-summary {
-    color: #ced7e1;
+    color: theme('colors.brandGray.300');
     margin-top: .75rem;
     max-width: 61ch;
     line-height: 1.6;
@@ -42,9 +42,9 @@
 .work-studio-rail {
     width: 100%;
 }
-.work-studio-nav { border-bottom: 1px solid #404f60; padding-bottom: .75rem; }
+.work-studio-nav { border-bottom: 1px solid theme('colors.brandGray.700'); padding-bottom: .75rem; }
 .work-studio-depth {
-    border-top: 1px solid #404f60;
+    border-top: 1px solid theme('colors.brandGray.700');
     padding-top: 1.5rem;
 }
 .work-studio-depth .prose {
@@ -59,20 +59,20 @@
     display: grid;
     align-content: start;
     gap: 0;
-    background: #222d39;
+    background: #292f2c;
     border-radius: 1rem;
     overflow: hidden;
-    box-shadow: 0 0 0 1px rgba(162, 181, 205, .26);
+    box-shadow: 0 0 0 1px rgba(161, 161, 170, .26);
     transition: transform .18s ease-out, box-shadow .18s ease-out, background-color .18s ease-out;
 }
 .work-gallery-card:focus-within {
-    background: #283644;
+    background: #303733;
     box-shadow: 0 0 0 2px #75d3ae;
 }
 @media (hover: hover) and (pointer: fine) {
     .work-gallery-card:hover {
-        background: #283644;
-        box-shadow: 0 .65rem 1.65rem rgba(3, 8, 15, .45), 0 0 0 1px rgba(162, 181, 205, .48);
+        background: #303733;
+        box-shadow: 0 .65rem 1.65rem rgba(0, 0, 0, .45), 0 0 0 1px rgba(161, 161, 170, .48);
     }
     .work-gallery-card:focus-within {
         box-shadow: 0 0 0 2px #75d3ae;
@@ -85,7 +85,7 @@
     aspect-ratio: 16 / 9;
     min-width: 0;
     overflow: hidden;
-    background: #111922;
+    background: theme('colors.brandGray.900');
 }
 .work-gallery-copy {
     min-width: 0;
@@ -136,14 +136,14 @@
 @media (prefers-reduced-motion: reduce) { .work-gallery-card { transition: none; } }
 
 .code-studio-surface {
-    background: #222d39;
-    border: 1px solid rgba(162, 181, 205, .36);
-    box-shadow: 0 .75rem 2.5rem rgba(3, 8, 15, .35);
+    background: #202927;
+    border: 1px solid rgba(161, 161, 170, .36);
+    box-shadow: 0 .75rem 2.5rem rgba(0, 0, 0, .35);
 }
 .code-studio #project-chat-scope,
 .code-studio textarea {
-    background: #17212d;
-    border-color: #53677a;
+    background: theme('colors.brandGray.900');
+    border-color: theme('colors.brandGray.500');
 }
 
 .work-gallery-actions { padding-top: 1rem; }
@@ -209,4 +209,15 @@
 }
 @media (forced-colors: active) {
     .work-studio-title-color { background: none; color: CanvasText; }
+}
+
+/* On tall desktop layouts, keep the studio beside both rows without filler.
+   The rail ends with the gallery, so it can never follow visitors into the footer. */
+@media (min-width: 1100px) and (min-height: 1000px) {
+    body:has(.work-studio-overview), .site-rails:has(.work-studio-overview) { overflow-x: clip; }
+    .work-studio-overview .work-studio-rail { align-self: stretch; }
+    .work-studio-overview .code-studio {
+        position: sticky;
+        top: max(calc(var(--site-nav-rest-height, 4rem) + 1rem), calc((100svh - 47rem) / 2));
+    }
 }

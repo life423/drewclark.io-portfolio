@@ -3,11 +3,11 @@ import useScrollPosition from '../../hooks/useScrollPosition'
 
 // Import both WebP and JPG versions
 import sproutMobile from '../../assets/sprout-mobile.jpg'
-import largeSprout from '../../assets/large-sprout.jpg'
+import desktopSprout from '../../assets/portfolio-sprout-wide.jpg'
 // The WebP versions are served from app/public under fixed names, so index.html can
 // preload the exact URL the browser will request (an import would get a hashed name)
 const sproutMobileWebp = '/assets/sprout-mobile.webp'
-const largeSproutWebp = '/assets/large-sprout.webp'
+const desktopSproutWebp = '/assets/portfolio-sprout-wide.webp'
 import '../../styles/components/hero-actions.css'
 import ProgressiveElement from '../utils/ProgressiveElement'
 import NeuralNetworkCanvas from './NeuralNetworkCanvas'
@@ -70,10 +70,10 @@ export default function Hero() {
                             <source
                                 media='(min-width: 1024px)'
                                 type="image/webp"
-                                srcSet={largeSproutWebp}
+                                srcSet={desktopSproutWebp}
                                 sizes="100vw"
-                                width="1600"
-                                height="1069"
+                                width="2027"
+                                height="776"
                             />
                             <source
                                 media='(max-width: 1023px)'
@@ -87,10 +87,10 @@ export default function Hero() {
                             <source
                                 media='(min-width: 1024px)'
                                 type="image/jpeg"
-                                srcSet={largeSprout}
+                                srcSet={desktopSprout}
                                 sizes="100vw"
-                                width="1600"
-                                height="1069"
+                                width="2027"
+                                height="776"
                             />
                             <img
                                 src={sproutMobile}

@@ -610,3 +610,19 @@ test('work headings reuse the hero colors and the explorer has an explicit purpo
     await expect(detail.locator('span')).toHaveCSS('background-image', 'none');
     await expect(detail.locator('span')).not.toHaveCSS('color', 'rgba(0, 0, 0, 0)');
 });
+
+test('tall desktop overview keeps the studio alongside the second row but before the footer', async ({ page }) => {
+    await page.setViewportSize({ width: 1126, height: 1243 });
+    await ready(page);
+    const rail = page.locator('.work-studio-overview .code-studio');
+    await expect(rail).toHaveCSS('position', 'sticky');
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await expect.poll(() => rail.evaluate(element => {
+        const cardStart = document.querySelector('.work-gallery-card:nth-child(3)').getBoundingClientRect().top;
+        const end = document.querySelector('.work-studio-gallery').getBoundingClientRect().bottom;
+        const chat = element.getBoundingClientRect();
+        return chat.top > 50 && chat.bottom > cardStart + 180 && chat.bottom <= end;
+    })).toBe(true);
+    await page.setViewportSize({ width: 1126, height: 800 });
+    await expect(rail).toHaveCSS('position', 'static');
+});

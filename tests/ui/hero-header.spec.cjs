@@ -116,8 +116,8 @@ test('desktop hero leaves the top sprout leaf beneath the fixed navigation', asy
             const box = img.getBoundingClientRect();
             const scale = Math.max(box.width / img.naturalWidth, box.height / img.naturalHeight);
             const y = Number.parseFloat(window.getComputedStyle(img).objectPosition.split(' ')[1]) / 100;
-            // The earliest visible pixel of the top leaf is at ~15% asset height.
-            const leafTop = box.top + (box.height - img.naturalHeight * scale) * y + 0.15 * img.naturalHeight * scale;
+            // The earliest visible pixel of the top leaf is at ~23% asset height.
+            const leafTop = box.top + (box.height - img.naturalHeight * scale) * y + 0.23 * img.naturalHeight * scale;
             return leafTop - document.querySelector('header nav').getBoundingClientRect().bottom;
         });
         expect(clearance).toBeGreaterThan(3);
@@ -134,7 +134,8 @@ test('section slope is decorative and the aligned footer keeps its working contr
     });
     expect(seam.pointers).toBe('none');
     expect(seam.clip).toContain('polygon(');
-    expect(seam.height).toBeLessThanOrEqual(44);
+    expect(seam.height).toBeGreaterThanOrEqual(60);
+    expect(seam.height).toBeLessThanOrEqual(92);
     await page.getByRole('link', { name: 'Featured Projects' }).click();
     await expect(page.getByRole('heading', { name: 'My Portfolio Projects' })).toBeInViewport();
 
@@ -147,4 +148,16 @@ test('section slope is decorative and the aligned footer keeps its working contr
         document.querySelector('.work-studio-shell').getBoundingClientRect().left
     ));
     expect(leftGap).toBeLessThan(1);
+});
+
+test('wide art is paired with the active preload; tablets and social previews stay original', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('/');
+    const art = page.locator('.portfolio-hero__image');
+    await expect.poll(() => art.evaluate(img => new window.URL(img.currentSrc).pathname)).toBe('/assets/portfolio-sprout-wide.webp');
+    await expect(page.locator('link[rel=preload][href="/assets/portfolio-sprout-wide.webp"]')).toHaveAttribute('media', '(min-width: 1024px)');
+    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', 'https://drewclark.io/og-image.jpg');
+    await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute('content', 'https://drewclark.io/og-image.jpg');
+    await page.setViewportSize({ width: 768, height: 1024 });
+    await expect.poll(() => art.evaluate(img => new window.URL(img.currentSrc).pathname)).toBe('/assets/sprout-mobile.webp');
 });

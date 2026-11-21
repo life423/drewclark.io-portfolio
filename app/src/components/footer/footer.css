@@ -1,7 +1,7 @@
-/* Extend the work section's final slate into a quiet, separate footer. */
+/* Extend the work section's charcoal into a quiet, separate footer. */
 .portfolio-footer {
-    background: linear-gradient(180deg, #151e29, #111821);
-    border-top: 1px solid #273342;
+    background: linear-gradient(180deg, theme('colors.brandGray.900'), #121214);
+    border-top: 1px solid theme('colors.brandGray.800');
     padding: 1.6rem 1rem 1.75rem;
 }
 
