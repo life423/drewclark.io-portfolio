@@ -194,6 +194,32 @@
     .work-studio-title-color { background: none; color: CanvasText; }
 }
 
+/* The overview entrance shares its color with the hero's slanted cut. */
+.portfolio-work-entry:has(.work-studio-overview) {
+    --work-entry-neutral: color-mix(in srgb, theme('colors.brandGreen.900') 55%, theme('colors.brandGray.900'));
+}
+.work-studio-section:has(.work-studio-overview) {
+    background: linear-gradient(180deg, var(--work-entry-neutral) 0, theme('colors.brandGray.900') 12rem);
+}
+.work-studio-overview .work-studio-intro {
+    position: relative;
+    isolation: isolate;
+    width: fit-content;
+    max-width: 100%;
+}
+.work-studio-overview .work-studio-intro::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: -.5rem -.75rem -.5rem -.75rem;
+    background: color-mix(in srgb, theme('colors.brandGreen.900') 25%, theme('colors.brandGray.900'));
+    clip-path: polygon(0 0, 100% 0, calc(100% - .75rem) 100%, 0 100%);
+    pointer-events: none;
+}
+@media (forced-colors: active) {
+    .work-studio-overview .work-studio-intro::before { display: none; }
+}
+
 /* The Explorer is one in-flow panel, followed by a full two-column gallery. */
 .work-studio-overview { grid-template-columns: minmax(0, 1fr); }
 .work-studio-overview .work-studio-title { color: theme('colors.brandGreen.200'); }
@@ -276,7 +302,7 @@
     left: 50%;
     width: 100vw;
     height: var(--work-band-height);
-    background: linear-gradient(90deg, theme('colors.brandGreen.700'), theme('colors.brandGreen.500'));
+    background: linear-gradient(85deg, #064E3B 0%, #10B981 70%, #34D399 100%);
     clip-path: polygon(0 var(--work-entry-rise), 100% 0, 100% var(--work-band-thickness), 0 100%);
     pointer-events: none;
     transform: translate(-50%, -50%);

@@ -69,10 +69,16 @@ export default function ProjectsContainer() {
                         <div className='work-studio-shortcut'>
                             <button
                                 type='button'
-                                className='inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-brandGreen-200 underline-offset-4 hover:text-brandGreen-100 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brandGreen-300'
+                                className='work-studio-return inline-flex min-h-11 items-center gap-3 rounded-full border border-brandGreen-700/70 bg-brandGreen-900/25 py-1.5 pl-4 pr-2 text-sm font-semibold text-brandGreen-200 transition-colors hover:border-brandGreen-400 hover:bg-brandGreen-900/55 hover:text-brandGreen-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brandGreen-300 motion-reduce:transition-none'
+                                aria-controls='project-chat'
                                 onClick={() => setChatFocusRequest(previous => previous + 1)}
                             >
-                                Back to Code Explorer <span aria-hidden='true'>↑</span>
+                                Back to Code Explorer
+                                <span aria-hidden='true' className='grid h-7 w-7 place-items-center rounded-full bg-brandGreen-400/15'>
+                                    <svg viewBox='0 0 16 16' width='16' height='16' fill='none' focusable='false'>
+                                        <path d='M8 13V3m0 0L4 7m4-4 4 4' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' />
+                                    </svg>
+                                </span>
                             </button>
                         </div>
                     </div>

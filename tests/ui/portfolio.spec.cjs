@@ -625,7 +625,9 @@ test('the in-flow bottom shortcut returns keyboard focus to the only Explorer', 
         await expect(studio).toHaveCount(1);
         await expect(studio).toHaveCSS('position', 'static');
         const shortcut = page.getByRole('button', { name: 'Back to Code Explorer' });
+        await expect(shortcut).toHaveAttribute('aria-controls', 'project-chat');
         await shortcut.scrollIntoViewIfNeeded();
+        expect((await shortcut.boundingBox()).height).toBeGreaterThanOrEqual(44);
         await shortcut.press('Enter');
         await expect(studio.getByRole('textbox')).toBeFocused();
         await expect(studio.getByRole('textbox')).toBeInViewport();
@@ -676,7 +678,7 @@ test('each card has one visible case-study button and its artwork remains a mous
 });
 
 test('emerald band stays exactly halfway between Explorer and footer', async ({ page }) => {
-    for (const width of [1095, 390]) {
+    for (const width of [320, 390, 600, 719, 720, 768, 899, 900, 1024, 1095, 1280, 1440, 1810, 2560]) {
         await page.setViewportSize({ width, height: 1000 });
         await ready(page);
         const explorer = page.locator('#project-chat');
@@ -689,8 +691,8 @@ test('emerald band stays exactly halfway between Explorer and footer', async ({ 
                 return { diff: Math.abs(mid - (chat + footer) / 2), fill: band.backgroundImage,
                     pointer: band.pointerEvents, width: parseFloat(band.width), shape: band.clipPath };
             });
-            expect(geometry.diff).toBeLessThan(1);
-            expect(geometry.fill).toBe('linear-gradient(90deg, rgb(4, 120, 87), rgb(16, 185, 129))');
+            expect(geometry.diff, 'Band midpoint error at ' + width + 'px').toBeLessThan(1);
+            expect(geometry.fill).toMatch(/linear-gradient\(85deg, rgb\(6, 78, 59\)(?: 0%)?, rgb\(16, 185, 129\) 70%, rgb\(52, 211, 153\)(?: 100%)?\)/);
             expect(geometry.pointer).toBe('none');
             expect(geometry.width).toBe(width);
             expect(geometry.shape).toContain('polygon');
