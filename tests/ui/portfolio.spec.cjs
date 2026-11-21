@@ -688,11 +688,16 @@ test('broad emerald section supports the second row without covering project con
 
 
         const shadow = getComputedStyle(cards[0]).boxShadow;
+        const highEdge = band.getBoundingClientRect().top + parseFloat(divider.top);
+        const rise = parseFloat(divider.clipPath.match(/0px ([\d.]+)px/)?.[1]);
         return { gap: lower - upper, fill: divider.backgroundColor, shape: divider.clipPath,
+            highClearance: highEdge - upper, lowDaylight: lower - highEdge - rise,
             overlap: band.getBoundingClientRect().top + parseFloat(divider.top) + parseFloat(divider.height) - lower,
             pointerEvents: divider.pointerEvents, width: parseFloat(divider.width), segment: parseFloat(divider.height), shadow };
     });
     expect(geometry.gap).toBeLessThan(85);
+    expect(geometry.highClearance).toBeCloseTo(4, 0);
+    expect(geometry.lowDaylight).toBeGreaterThanOrEqual(14);
     expect(geometry.overlap).toBeGreaterThan(170);
     expect(geometry.segment).toBeGreaterThanOrEqual(240);
     expect(geometry.fill).toBe('rgb(16, 185, 129)');
