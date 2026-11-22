@@ -72,3 +72,25 @@ accessibility 8, performance 8. Remaining recommendations, in order:
 The local HTTP WebKit issue found in this pass was caused by CSP's
 upgrade-insecure-requests directive. It is now disabled for local development;
 the production container retains it under NODE_ENV=production.
+
+## Landing-page conversation spacing — November 21, 2026
+
+The user likes the initial two-column question/starter layout. Preserve it.
+After the first question, the former narrow, fixed-height conversation left a
+large blank area below the question form. The landing Explorer now switches to
+one column when a transcript exists. Its transcript fits the content up to the
+existing responsive height limit, then scrolls. This also applies to restored
+history and pending/error replies; clearing history restores the initial layout.
+Case-study Explorer sizing is unchanged.
+
+Validation: production build and 36 existing Chrome, Edge and WebKit checks pass,
+including chat success, sources, loading, recoverable failure, scoped history,
+keyboard focus, collapse/expand, touch rotation, and the initial gallery layout.
+Rendered local answered/error states were inspected at desktop, 390x844 and
+768x1024, with no horizontal overflow. Local API credentials are absent; browser
+tests use controlled API responses. This does not validate the live AI service.
+
+Design-review heuristics: usability 9, hierarchy 9, consistency 9, responsiveness
+9, feedback 9, accessibility 8, performance 8. Prioritized follow-ups remain the
+older chat header controls' touch targets and a full accessibility audit, then
+field performance measurements; neither is established by these layout checks.
