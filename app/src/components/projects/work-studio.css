@@ -243,6 +243,11 @@
 .work-studio-inline .code-studio {
     scroll-margin-top: max(5rem, calc(var(--site-nav-rest-height, 4rem) + .75rem));
 }
+/* Keep the landing-page conversation in one flow and size it to its content. */
+.work-studio-inline .code-studio-transcript {
+    height: auto;
+    max-height: clamp(16rem, 39dvh, 22.5rem);
+}
 /* Frame the real CipherCraft UI without stretching the screenshot or baking in a crop. */
 .work-gallery-art--cipher, .work-studio-media--cipher figure { background: #f2f5f8; }
 .work-gallery-art--cipher { position: relative; }
@@ -275,6 +280,9 @@
         grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
         gap: .4rem clamp(1.25rem, 2.4vw, 2.5rem);
         align-items: start;
+    }
+    .work-studio-inline #project-chat-content:has(.code-studio-transcript) {
+        grid-template-columns: minmax(0, 1fr);
     }
     .work-studio-inline #project-chat-description { grid-column: 1 / -1; max-width: none; margin-bottom: .4rem; }
     .work-studio-inline .code-studio-followup { margin-top: 0; padding-top: 0; border-top: 0; }
