@@ -12,11 +12,12 @@ background parallax, explicitly keeping controls steady and preventing the
 outer scrollbar from returning.
 
 Their earlier direction still applies: keep the interface quiet and apply the
-design fundamentals before effects. The CipherCraft picture's possible light
-green tint is explicitly deferred; this pass does not change any project image.
+design fundamentals before effects. The CipherCraft tint was deferred during
+the Explorer work; the later approved trial is recorded below.
 
-Changes are on `codex/shared-element-project-details`, alongside the
-shared-element navigation work. This is not a deployed release.
+The Explorer and shared-element navigation were merged in PR #61 and deployed
+as `a025e0a`. The subsequent tint trial is local work on
+`codex/ciphercraft-mint-tint`.
 
 ## Resulting behavior
 
@@ -380,5 +381,17 @@ Prioritized follow-ups for the sub-9 areas:
    IntersectionObserver avoids per-scroll React updates, but local browser
    checks do not establish production performance or image-download quality.
 
-Keep the CipherCraft tint as separate future work, with visual comparison before
-changing that artwork's color treatment.
+### CipherCraft mint-tint trial
+
+The user subsequently requested a subtle light-green tint. The existing gallery
+and case-study frames use the brand's mint 300 at 6% with multiply blending.
+An isolated, clipped, pointer-inert layer colors the pale canvas without changing
+the screenshot asset, labels, crop or dimensions. Other project images are unaffected.
+
+The build passes. Actual before/after renders were compared at 393x852, 768x1024
+and 1440x1100 in Chrome, and at 1440x1100 in WebKit. Image dimensions remain
+identical, artwork activation still opens the case study, and no horizontal
+overflow or page errors occurred. Captures and measured styles are in ignored
+`data/ciphercraft-tint/`. The actual open preview was refreshed, CipherCraft
+reopened, and its `index-78WjLDns.js` bundle and 6% computed wash confirmed.
+This is a local preview trial, not another deployment.

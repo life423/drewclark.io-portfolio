@@ -120,8 +120,9 @@ The approved mint background parallax travels at most 48px inside its own paint
 clip, with no control movement. Reduced motion keeps the accent static; drawer
 layouts omit it. Keep the depth hook's layout query aligned with the grid and
 Explorer. See the
-[behavior and validation record](docs/build-explorer-validation.md). The possible
-CipherCraft light-green image tint remains deferred.
+[behavior and validation record](docs/build-explorer-validation.md). CipherCraft's
+gallery and case-study frames now trial a subtle 6% mint multiply wash; the
+original screenshot, framing and readable labels are preserved.
 
 The navbar's Blog link opens `https://blog.drewclark.io` in a new tab, using the
 same text styling and hover treatment as Home and GitHub. On phones it appears

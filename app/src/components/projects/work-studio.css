@@ -288,8 +288,21 @@ html.project-view-transition::view-transition-image-pair(project-art) {
     max-height: clamp(16rem, 39dvh, 22.5rem);
 }
 /* Frame the real CipherCraft UI without stretching the screenshot or baking in a crop. */
-.work-gallery-art--cipher, .work-studio-media--cipher figure { background: #f2f5f8; }
-.work-gallery-art--cipher { position: relative; }
+.work-gallery-art--cipher, .work-studio-media--cipher figure {
+    position: relative;
+    isolation: isolate;
+    background: #f2f5f8;
+}
+/* A quiet mint wash ties the screenshot's pale canvas into the portfolio. */
+.work-gallery-art--cipher::after, .work-studio-media--cipher figure::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: theme('colors.brandGreen.300 / 6%');
+    mix-blend-mode: multiply;
+    pointer-events: none;
+}
 .work-gallery-art--cipher img {
     position: absolute;
     top: 0;
