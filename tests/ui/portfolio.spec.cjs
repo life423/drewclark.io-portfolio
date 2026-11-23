@@ -28,6 +28,55 @@ function errorsOn(page) {
     return errors;
 }
 
+// Pixel bounds of the real UI in the approved, unmodified 2048x972 screenshot.
+// The thumbnail previews its header, cipher controls and Message/Result labels;
+// the detail frame must retain the complete form through the bottom controls.
+const CIPHER_UI = { left: 616, right: 1432, top: 20, previewBottom: 400, detailBottom: 804 };
+
+async function imageGeometry(image) {
+    return image.evaluate(node => {
+        const frame = node.parentElement, style = getComputedStyle(frame), rect = frame.getBoundingClientRect();
+        return {
+            image: node.getBoundingClientRect().toJSON(),
+            natural: { width: node.naturalWidth, height: node.naturalHeight },
+            frame: {
+                left: rect.left + parseFloat(style.borderLeftWidth), top: rect.top + parseFloat(style.borderTopWidth),
+                width: frame.clientWidth, height: frame.clientHeight,
+            },
+            clipping: { x: style.overflowX, y: style.overflowY },
+        };
+    });
+}
+
+function expectCipherFraming(geometry, detail) {
+    const { image, frame, natural } = geometry;
+    expect(natural).toEqual({ width: 2048, height: 972 });
+    expect(Math.abs(image.width / image.height - natural.width / natural.height)).toBeLessThan(0.01);
+    expect(geometry.clipping).toEqual({ x: 'hidden', y: 'hidden' });
+    expect(Math.abs(image.left + image.width / 2 - (frame.left + frame.width / 2))).toBeLessThan(1);
+    expect(Math.abs(image.top - frame.top)).toBeLessThan(1);
+
+    const ui = {
+        left: image.left + CIPHER_UI.left / natural.width * image.width,
+        right: image.left + CIPHER_UI.right / natural.width * image.width,
+        top: image.top + CIPHER_UI.top / natural.height * image.height,
+        bottom: image.top + (detail ? CIPHER_UI.detailBottom : CIPHER_UI.previewBottom) / natural.height * image.height,
+    };
+    expect(ui.left).toBeGreaterThanOrEqual(frame.left - 1);
+    expect(ui.right).toBeLessThanOrEqual(frame.left + frame.width + 1);
+    expect(ui.top).toBeGreaterThanOrEqual(frame.top - 1);
+    expect(ui.bottom).toBeLessThanOrEqual(frame.top + frame.height + 1);
+    if (detail) {
+        // The form should fill the reading-width frame, not shrink inside the
+        // screenshot's large blank side margins, and the whole form must fit.
+        expect((ui.right - ui.left) / frame.width).toBeGreaterThan(0.93);
+        expect(Math.abs(frame.width / frame.height - 42 / 41)).toBeLessThan(0.01);
+    } else {
+        // Even a wide thumbnail must keep the controls large enough to read.
+        expect(ui.right - ui.left).toBeGreaterThanOrEqual(Math.min(frame.width * 0.9, frame.height * 1.8));
+    }
+}
+
 for (const [width, height] of sizes) {
     test(`responsive navigation and artwork ${width}x${height}`, async ({ page }, info) => {
         await page.setViewportSize({ width, height });
@@ -56,11 +105,15 @@ for (const [width, height] of sizes) {
             await expect(art).toHaveAttribute('src', project.image);
             await imageLoaded(art);
             await expect(page.getByRole('link', { name: /View the full .* image/ })).toHaveCount(0);
-            const sizing = await art.evaluate(i => {
-                const r = i.getBoundingClientRect(), parentWidth = i.parentElement.clientWidth;
-                return Math.abs(r.width - parentWidth) < 1 && Math.abs(r.width / r.height - i.naturalWidth / i.naturalHeight) < 0.01;
-            });
-            expect(sizing).toBe(true);
+            const geometry = await imageGeometry(art);
+            expect(geometry.natural).toEqual({ width: project.imageWidth, height: project.imageHeight });
+            if (project.imageFraming === 'cipher') {
+                expectCipherFraming(geometry, true);
+            } else {
+                expect(Math.abs(geometry.image.width - geometry.frame.width)).toBeLessThan(1);
+                expect(Math.abs(geometry.image.width / geometry.image.height - project.imageWidth / project.imageHeight)).toBeLessThan(0.01);
+                expect(geometry.clipping).toEqual({ x: 'hidden', y: 'hidden' });
+            }
             await noOverflow(page);
             const next = page.getByRole('button', { name: /^Next project:/ });
             await expect(next).toHaveAttribute('aria-label', `Next project: ${projects[(index + 1) % projects.length].title}`);
@@ -73,13 +126,13 @@ for (const [width, height] of sizes) {
             await expect(next).toHaveCount(1);
             const chat = page.locator('#project-chat');
             await expect(chat).toHaveCount(1);
-            await expect(chat.getByRole('textbox', { name: 'Question for Project Chat' }))[width < 1100 || height < 850 ? 'toBeHidden' : 'toBeVisible']();
+            await expect(chat.getByRole('textbox', { name: 'Question for Project Chat' }))[width < 900 || height < 700 ? 'toBeHidden' : 'toBeVisible']();
             // Measure the fixed layout rail rather than the child chat that can stick during scrolling.
             const [summary, panel, media, details, related] = await page.evaluate(() => [
-                '[data-testid="case-study-summary"]', '[aria-label="Ask about this case study"]', '[aria-labelledby="case-study-title"] figure img',
+                '[data-testid="case-study-summary"]', '[aria-label="Ask about this case study"]', '.work-studio-media figure',
                 '#case-study-details', '#related-projects-title',
             ].map(selector => document.querySelector(selector).getBoundingClientRect().toJSON()));
-            if (width >= 1100) {
+            if (width >= 900 && height >= 700) {
                 expect(panel.x).toBeGreaterThanOrEqual(summary.x + summary.width);
                 expect(Math.abs(panel.y - summary.y)).toBeLessThan(2);
                 expect(panel.x).toBeGreaterThanOrEqual(media.x + media.width);
@@ -242,9 +295,9 @@ test('overview chat comes before project browsing; late answers stay scoped', as
         const firstProject = await page.getByRole('button', { name: 'Read case study: ' + projects[0].title, exact: true }).boundingBox();
         expect(introChat.y + introChat.height).toBeLessThan(firstProject.y);
         await page.getByRole('button', { name: 'Read case study: ' + projects[0].title, exact: true }).click();
-        await page.getByRole('button', { name: 'Ask about the code', exact: true }).click();
-        await expect(chat.getByRole('combobox', { name: 'Chat scope' })).toHaveValue('project');
-        await expect(chat.getByRole('option', { name: projects[0].title })).toHaveCount(1);
+        await page.getByRole('button', { name: 'Open project chat', exact: true }).click();
+        await expect(chat).toHaveAttribute('data-project-scope', String(projects[0].id));
+        await expect(chat.locator('.case-build-project')).toHaveText(projects[0].title);
         await chat.getByRole('textbox').fill('Question for A');
         await chat.getByRole('button', { name: 'Ask', exact: true }).click();
         await expect.poll(() => calls.length).toBe(1);
@@ -255,8 +308,8 @@ test('overview chat comes before project browsing; late answers stay scoped', as
         await expect(chat.locator('button[type=submit]')).toBeDisabled();
         await page.setViewportSize({ width: 390, height: 844 });
         await page.getByRole('button', { name: /^Next project:/ }).click();
-        await page.getByRole('button', { name: 'Ask about the code', exact: true }).click();
-        await expect(chat.getByRole('option', { name: projects[1].title })).toHaveCount(1);
+        await page.getByRole('button', { name: 'Open project chat', exact: true }).click();
+        await expect(chat.locator('.case-build-project')).toHaveText(projects[1].title);
         await expect(chat.getByText('Question for A', { exact: true })).toHaveCount(0);
         await expect(chat.getByRole('textbox')).toHaveValue('');
         await chat.getByRole('textbox').fill('Question for B');
@@ -266,28 +319,28 @@ test('overview chat comes before project browsing; late answers stay scoped', as
         releaseFirst();
         await expect.poll(() => page.evaluate(() => localStorage.getItem('unified_project_chat'))).toContain('Delayed first case-study answer');
         await expect(chat.getByText('Delayed first case-study answer')).toHaveCount(0);
-        await page.getByRole('button', { name: 'Close Code Explorer' }).click();
+        await page.getByRole('button', { name: 'Close build explorer' }).click();
         await page.getByRole('button', { name: 'View ' + projects[0].title + ' details', exact: true }).click();
-        await page.getByRole('button', { name: 'Ask about the code', exact: true }).click();
+        await page.getByRole('button', { name: 'Open project chat', exact: true }).click();
         await expect(chat.getByText('Delayed first case-study answer')).toBeVisible();
         await expect(chat.getByRole('link', { name: 'ppo.cpp' })).toHaveAttribute('href', codeLink);
         await expect(chat.getByRole('textbox')).toHaveValue('Draft for A');
-        await chat.getByRole('combobox').selectOption('all');
+        await chat.getByRole('button', { name: 'Ask across projects', exact: true }).click();
         await expect(chat.getByText('Legacy global history')).toBeVisible();
         await chat.getByRole('textbox').fill('Across all projects');
         await chat.getByRole('button', { name: 'Ask', exact: true }).click();
         await expect.poll(() => calls.length).toBe(3);
         expect(calls[2]).toEqual({ question: 'Across all projects' });
         await expect(chat.getByRole('button', { name: 'Ask', exact: true })).toBeEnabled();
-        await chat.getByRole('combobox').selectOption('project');
+        await chat.getByRole('button', { name: 'Return to this project', exact: true }).click();
         await page.evaluate(() => {
             sessionStorage.setItem('drawer_question', 'Question from global drawer');
             sessionStorage.setItem('drawer_question_timestamp', String(Date.now()));
         });
         await expect.poll(() => calls.length).toBe(4);
         expect(calls[3]).toEqual({ question: 'Question from global drawer' });
-        await expect(chat.getByRole('combobox')).toHaveValue('all');
-        await page.getByRole('button', { name: 'Close Code Explorer' }).click();
+        await expect(chat).toHaveAttribute('data-project-scope', 'all');
+        await page.getByRole('button', { name: 'Close build explorer' }).click();
         await page.getByRole('button', { name: 'All projects', exact: false }).click();
         await expect(page.getByRole('heading', { name: 'My Portfolio Projects' })).toBeVisible();
     } finally {
@@ -339,7 +392,7 @@ test('case-study Explorer stays alongside all four desktop articles', async ({ p
     for (const [index, project] of projects.entries()) {
         const dialog = page.locator('.case-chat-dialog');
         await expect(dialog).toHaveCSS('position', 'sticky');
-        await expect(dialog.getByRole('option', { name: project.title })).toHaveCount(1);
+        await expect(dialog.locator('.case-build-project')).toHaveText(project.title);
         await page.getByRole('heading', { name: 'Project details' }).evaluate(el => el.scrollIntoView({ block: 'start' }));
         await expect(dialog.getByRole('button', { name: 'Ask', exact: true })).toBeInViewport();
         await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
@@ -353,17 +406,17 @@ test('case-study Explorer drawer preserves reading position, focus, and draft on
     await page.setViewportSize({ width: 390, height: 844 });
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await ready(page);
-    const launcher = page.getByRole('button', { name: 'Ask about the code', exact: true });
+    const launcher = page.getByRole('button', { name: 'Open project chat', exact: true });
     await expect(launcher).toHaveCount(0);
     await page.getByRole('button', { name: 'Read case study: ' + projects[1].title }).click();
     const dialog = page.locator('.case-chat-dialog');
-    const close = dialog.getByRole('button', { name: 'Close Code Explorer' });
+    const close = dialog.getByRole('button', { name: 'Close build explorer' });
     await page.getByRole('heading', { name: 'Project details' }).evaluate(el => el.scrollIntoView({ block: 'start' }));
     const readAt = await page.evaluate(() => window.scrollY);
     await expect(launcher).toBeInViewport();
     await launcher.press('Enter');
     await expect(close).toBeFocused();
-    await expect(dialog.getByRole('option', { name: projects[1].title })).toHaveCount(1);
+    await expect(dialog.locator('.case-build-project')).toHaveText(projects[1].title);
     await dialog.getByRole('textbox').fill('draft survives the drawer');
     await page.keyboard.press('Escape');
     await expect(launcher).toBeFocused();
@@ -372,37 +425,39 @@ test('case-study Explorer drawer preserves reading position, focus, and draft on
     await expect(dialog.getByRole('textbox')).toHaveValue('draft survives the drawer');
     await close.click();
     await expect(launcher).toBeFocused();
-    await page.setViewportSize({ width: 1440, height: 700 });
+    await page.setViewportSize({ width: 1440, height: 650 });
     await expect(launcher).toBeInViewport();
     await launcher.click();
     await expect(dialog.getByRole('textbox')).toHaveValue('draft survives the drawer');
     await noOverflow(page);
 });
 
-test('wide case studies keep the reading column close to their roomy Explorer', async ({ page }) => {
+test('wide case studies keep the reading column close to their restrained Explorer', async ({ page }) => {
     await page.setViewportSize({ width: 1656, height: 940 });
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await ready(page);
     await page.getByRole('button', { name: 'Read case study: ' + projects[1].title, exact: true }).click();
-    const { left, right, chat, art, input, heading, reading } = await page.evaluate(() => {
+    const { left, right, rail, chat, art, input, heading, reading } = await page.evaluate(() => {
         const rect = select => document.querySelector(select).getBoundingClientRect().toJSON();
         const shell = rect('.work-studio-shell');
         return {
-            left: shell.left, right: innerWidth - shell.right, chat: rect('#project-chat'),
+            left: shell.left, right: innerWidth - shell.right, rail: rect('.work-studio-rail'), chat: rect('#project-chat'),
             art: rect('.work-studio-media'), input: rect('#project-chat textarea'), heading: rect('.work-studio-intro'),
             reading: rect('.work-studio-depth .prose'),
         };
     });
     expect(left).toBeGreaterThanOrEqual(40);
     expect(Math.abs(left - right)).toBeLessThan(1);
-    expect(chat.width).toBeGreaterThanOrEqual(520);
-    expect(chat.width).toBeLessThanOrEqual(545);
+    expect(chat.width).toBeGreaterThanOrEqual(350);
+    expect(chat.width).toBeLessThanOrEqual(405);
     expect(reading.width).toBeGreaterThan(550);
     expect(reading.width).toBeLessThanOrEqual(608);
-    expect(chat.left - reading.right).toBeCloseTo(32, 0);
+    // The structural divider occupies the rail's first pixel; the intended
+    // grid gap ends at the column boundary, before that border and its content.
+    expect(rail.left - reading.right).toBeCloseTo(32, 0);
     expect(art.right).toBeCloseTo(reading.right, 0);
     expect(Math.abs(heading.y - chat.y)).toBeLessThan(1);
-    expect(input.width).toBeGreaterThan(400);
+    expect(input.width).toBeGreaterThan(320);
     await expect(page.getByRole('navigation', { name: 'Case study navigation' }).getByRole('button')).toHaveCount(2);
     await expect(page.getByRole('link', { name: 'View the ' + projects[1].title + ' source code on GitHub (opens in a new tab)' }))
         .toHaveAttribute('href', 'https://github.com/' + projects[1].repo);
@@ -442,7 +497,7 @@ test('gallery lift respects input mode, keyboard focus, and reduced motion', asy
     const baseShadow = await card.evaluate(element => getComputedStyle(element).boxShadow);
     const baseColor = await card.evaluate(element => getComputedStyle(element).backgroundColor);
     await card.hover();
-    await expect(card).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, -3)');
+    await expect(card).toHaveCSS('transform', 'matrix(1.035, 0, 0, 1.035, 0, -4)');
     await expect.poll(() => card.evaluate(element => getComputedStyle(element).boxShadow)).not.toBe(baseShadow);
     const liftedShadow = await card.evaluate(element => getComputedStyle(element).boxShadow);
     await expect(card).toHaveCSS('background-color', baseColor);
@@ -459,7 +514,7 @@ test('gallery lift respects input mode, keyboard focus, and reduced motion', asy
     const focusRing = 'rgb(117, 211, 174) 0px 0px 0px 2px';
     await expect(card).toHaveCSS('box-shadow', `${focusRing}, ${baseShadow}`);
     await card.hover();
-    await expect(card).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, -3)');
+    await expect(card).toHaveCSS('transform', 'matrix(1.035, 0, 0, 1.035, 0, -4)');
     await expect(card).toHaveCSS('box-shadow', `${focusRing}, ${liftedShadow}`);
     await expect(card).toHaveCSS('background-color', baseColor);
     await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -562,10 +617,10 @@ test('composer supports multiline questions and reflects the real limit', async 
     await page.setViewportSize({ width: 390, height: 844 });
     await page.getByRole('button', { name: 'Read case study: ' + projects[2].title, exact: true }).click();
     await expect(composer).toBeHidden();
-    await page.getByRole('button', { name: 'Ask about the code', exact: true }).click();
+    await page.getByRole('button', { name: 'Open project chat', exact: true }).click();
     await expect(composer).toBeVisible();
     await expect(composer).toHaveValue('');
-    await expect(chat.getByRole('option', { name: projects[2].title })).toHaveCount(1);
+    await expect(chat.locator('.case-build-project')).toHaveText(projects[2].title);
     await noOverflow(page);
 });
 
@@ -613,23 +668,44 @@ test('overview title uses the orange arc without repeating it on project card he
 
 test('gallery artwork stays clipped to smaller full-card-width frames through responsive transitions', async ({ page }) => {
     await ready(page);
+    for (const image of await page.locator('.work-gallery-card img').all()) {
+        await image.scrollIntoViewIfNeeded();
+        await imageLoaded(image);
+    }
+    await page.mouse.move(0, 0);
     for (const width of [390, 639, 640, 719, 720, 768, 930, 1099, 1100, 1126]) {
         await page.setViewportSize({ width, height: 900 });
         const boxes = await page.locator('.work-gallery-card').evaluateAll(cards => cards.map(card => {
             const rect = node => node.getBoundingClientRect().toJSON();
             return { card: rect(card), frame: rect(card.querySelector('.work-gallery-art')),
-                image: { width: card.querySelector('img').clientWidth, height: card.querySelector('img').clientHeight }, fit: getComputedStyle(card.querySelector('img')).objectFit, corner: getComputedStyle(card.querySelector('.work-gallery-art')).borderTopLeftRadius };
+                image: { width: card.querySelector('img').clientWidth, height: card.querySelector('img').clientHeight }, fit: getComputedStyle(card.querySelector('img')).objectFit,
+                clipping: getComputedStyle(card.querySelector('.work-gallery-art')).overflow,
+                transform: getComputedStyle(card.querySelector('img')).transform,
+                corner: getComputedStyle(card.querySelector('.work-gallery-art')).borderTopLeftRadius };
         }));
         expect(boxes).toHaveLength(4);
-        for (const { card, frame, image, corner } of boxes) {
+        for (const [index, { card, frame, image, fit, clipping, transform, corner }] of boxes.entries()) {
             expect(Math.abs(frame.width - card.width)).toBeLessThan(1);
-            expect(Math.abs(image.width - frame.width)).toBeLessThan(1);
-            expect(Math.abs(image.height - frame.height)).toBeLessThan(1);
             expect(frame.height).toBeGreaterThanOrEqual(145);
             expect(frame.height).toBeLessThanOrEqual(224);
             expect(corner).toBe('16px');
+            expect(clipping).toBe('hidden');
+            const artwork = page.locator('.work-gallery-card img').nth(index), project = projects[index];
+            await expect(artwork).toHaveAttribute('src', project.cardImage?.src || project.image);
+            if (project.imageFraming === 'cipher') {
+                expectCipherFraming(await imageGeometry(artwork), false);
+            } else {
+                expect(Math.abs(image.width - frame.width)).toBeLessThan(1);
+                expect(Math.abs(image.height - frame.height)).toBeLessThan(1);
+                expect(fit).toBe('contain');
+                if (transform !== 'none') {
+                    const [scaleX, skewY, skewX, scaleY] = transform.slice(7, -1).split(',').map(Number);
+                    expect(scaleX).toBeCloseTo(scaleY, 4);
+                    expect(skewX).toBe(0);
+                    expect(skewY).toBe(0);
+                }
+            }
         }
-        expect(boxes[1].fit).toBe('contain');
         if (width >= 720) {
             expect(Math.abs(boxes[0].card.y - boxes[1].card.y)).toBeLessThan(1);
             expect(boxes[1].card.x).toBeGreaterThan(boxes[0].card.x);

@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react'
 import clsx from 'clsx'
 import { askProjectsChat } from '../../services/chatService'
+import CaseStudyChat from './CaseStudyChat'
 
 // First questions for someone evaluating the work. Each is answered from the code.
 // Keep this in sync with the request limit in api/config.js.
@@ -56,7 +57,7 @@ function AnswerSources({ sources }) {
  * - Message timestamps and improved styling
  * - Support for asking about any project in one conversation
  */
-export default function UnifiedProjectChat({ project, embedded = false, focusRequest = 0, collapseBelow = 1100 }) {
+export default function UnifiedProjectChat({ project, embedded = false, focusRequest = 0, collapseBelow = 1100, caseStudy = false }) {
     const [allProjects, setAllProjects] = useState(false)
     const scope = !allProjects ? project?.id ?? 'all' : 'all'
     const [pendingScopes, setPendingScopes] = useState([])
@@ -232,7 +233,7 @@ export default function UnifiedProjectChat({ project, embedded = false, focusReq
                         // Scroll to the top of the new message with a small offset for context
                         if (newMessageElement) {
                             const top = newMessageElement.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop;
-                            container.scrollTo({ top, behavior: 'smooth' });
+                            container.scrollTo({ top, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
                         }
                     } else {
                         // For user messages, scroll to bottom as before
@@ -298,6 +299,19 @@ export default function UnifiedProjectChat({ project, embedded = false, focusReq
             const dateOptions = { month: 'short', day: 'numeric' }
             return `${date.toLocaleDateString(undefined, dateOptions)}, ${time}`
         }
+    }
+
+    if (caseStudy) {
+        return <CaseStudyChat
+            project={project} scope={scope} messages={visibleMessages}
+            question={userQuestion} onQuestionChange={setUserQuestion} onAsk={askQuestion} onSubmit={handleQuestionSubmit}
+            isGenerating={isGenerating} isCollapsed={isCollapsed} onToggleCollapse={toggleCollapse}
+            inputRef={chatInputRef} transcriptRef={chatContainerRef}
+            showClearConfirm={showClearConfirm} onRequestClear={() => setClearScope(scope)}
+            onClear={clearChatHistory} onCancelClear={() => setClearScope(null)}
+            onToggleScope={() => { setAllProjects(previous => !previous); setClearScope(null) }}
+            globalQuestions={STARTER_QUESTIONS} limit={MAX_QUESTION_CHARS} Sources={AnswerSources}
+        />
     }
 
     return (

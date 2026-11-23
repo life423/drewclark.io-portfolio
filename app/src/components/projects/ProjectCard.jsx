@@ -45,7 +45,7 @@ export default function ProjectCard({
 
     if (isCompact) {
         return (
-            <div className='flex h-full items-start gap-3 rounded-xl border border-brandGray-700 bg-brandGray-800 p-3 transition-colors duration-200 hover:border-brandGreen-600 motion-reduce:transition-none'>
+            <div className='work-project-surface flex h-full items-start gap-3 rounded-xl border border-brandGray-700 p-3 transition-colors duration-200 hover:border-brandGreen-600 motion-reduce:transition-none'>
                 <div className='w-20 shrink-0'>
                     <ProjectImage image={image} imageAlt={imageAlt} imageWidth={imageWidth} imageHeight={imageHeight} title={title} preview />
                 </div>
@@ -63,7 +63,7 @@ export default function ProjectCard({
         <div
             ref={cardRef}
             className={clsx(
-                '@container overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] bg-brandGray-800 border border-brandGray-700 transition-all duration-300 flex flex-col',
+                'work-project-surface @container overflow-hidden rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] border border-brandGray-700 transition-all duration-300 flex flex-col',
                 // Card styles based on state
                 isActive 
                     ? 'ring-2 ring-brandGreen-500/50 shadow-xl border-brandGreen-600/30 bg-gradient-to-b from-brandGray-800 to-brandGray-850' 

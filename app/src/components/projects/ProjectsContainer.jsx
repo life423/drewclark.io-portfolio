@@ -1,9 +1,10 @@
 /* eslint react/jsx-uses-react: "error", react/jsx-uses-vars: "error" */
-import React, { Fragment, useState, useEffect, useRef, useCallback } from 'react'
+import React, { Fragment, useState, useRef } from 'react'
 import ProjectCard from './ProjectCard'
 import ProjectCaseStudy from './ProjectCaseStudy'
 import ProjectOverviewRow from './ProjectOverviewRow'
 import UnifiedProjectChat from './UnifiedProjectChat'
+import useProjectViewTransition from '../../hooks/useProjectViewTransition'
 import './work-studio.css'
 // Also read by the API to build the chat prompt (api/services/ai/promptBuilder.js)
 import PROJECTS from '../../data/projects.json'
@@ -13,33 +14,53 @@ export default function ProjectsContainer() {
     const [chatFocusRequest, setChatFocusRequest] = useState(0)
     const [activeProjectIndex, setActiveProjectIndex] = useState(0)
 
-    // Picking a project swaps the overview for the project view, so the card the visitor
-    // asked for should end up at the top of the screen, not wherever the page happened to be
     const projectsTopRef = useRef(null)
-    const scrollAfterRender = useRef(false)
+    const galleryPosition = useRef(null)
+    const changeView = useProjectViewTransition()
+    const galleryCard = index => projectsTopRef.current?.querySelector(`.work-gallery-card[data-project-id="${PROJECTS[index].id}"]`)
 
-    const scrollToProjects = useCallback(() => {
-        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-        projectsTopRef.current?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' })
-    }, [])
-
-    // The project view only exists after the next render, so the scroll waits for it
-    useEffect(() => {
-        if (!scrollAfterRender.current) return
-        scrollAfterRender.current = false
-        scrollToProjects()
-    }, [started, activeProjectIndex, scrollToProjects])
-
-    const showProject = index => {
-        scrollAfterRender.current = true
-        setStarted(true)
-        setActiveProjectIndex(index)
+    const showProject = (index, event) => {
+        const from = !started ? galleryCard(index) : null
+        if (from) galleryPosition.current = { y: window.scrollY, width: window.innerWidth, height: window.innerHeight }
+        // Keep Next focused while cycling; cards whose controls unmount move
+        // focus to the new title so keyboard readers keep their place.
+        const keepNextFocus = started && document.activeElement?.matches('[data-project-next]')
+        const keyboardFocus = event ? event.detail === 0 : document.activeElement?.matches(':focus-visible')
+        changeView({
+            from,
+            update: () => { setStarted(true); setActiveProjectIndex(index) },
+            place: () => {
+                projectsTopRef.current?.scrollIntoView({ behavior: 'instant', block: 'start' })
+                if (!keepNextFocus) {
+                    const heading = projectsTopRef.current?.querySelector('#case-study-title')
+                    heading?.setAttribute('data-navigation-focus', keyboardFocus ? 'keyboard' : 'pointer')
+                    heading?.focus({ preventScroll: true })
+                }
+            },
+            destination: () => projectsTopRef.current?.querySelector('.work-studio-case'),
+        })
     }
 
-    // Going back is the same swap in reverse: land on the overview panel, not mid-page
     const showOverview = () => {
-        scrollAfterRender.current = true
-        setStarted(false)
+        changeView({
+            from: projectsTopRef.current?.querySelector('.work-studio-case'),
+            update: () => setStarted(false),
+            place: () => {
+                const card = galleryCard(activeProjectIndex)
+                const saved = galleryPosition.current
+                if (saved && saved.width === window.innerWidth && saved.height === window.innerHeight) {
+                    window.scrollTo({ top: saved.y, behavior: 'instant' })
+                } else {
+                    card?.scrollIntoView({ behavior: 'instant', block: 'center' })
+                }
+                const button = card?.querySelector('button')
+                button?.focus({ preventScroll: true })
+                // After cycling projects or rotating, the current card may be
+                // elsewhere in the gallery. Keep its keyboard action in view.
+                button?.scrollIntoView({ behavior: 'instant', block: 'nearest' })
+            },
+            destination: () => galleryCard(activeProjectIndex),
+        })
     }
 
     if (!started) {
@@ -60,7 +81,7 @@ export default function ProjectsContainer() {
                                     <ProjectOverviewRow
                                         project={project}
                                         index={index}
-                                        onOpen={() => showProject(index)}
+                                        onOpen={event => showProject(index, event)}
                                     />
                                     {index === 1 && <div aria-hidden='true' className='work-gallery-divider' />}
                                 </Fragment>
@@ -98,7 +119,7 @@ export default function ProjectsContainer() {
                     projectNumber={activeProjectIndex + 1}
                     totalProjects={PROJECTS.length}
                     onOverview={showOverview}
-                    onNext={() => showProject(nextIndex)}
+                    onNext={event => showProject(nextIndex, event)}
                     nextTitle={PROJECTS[nextIndex].title}
                 />
                 <section aria-labelledby='related-projects-title' className='mt-10 border-t border-emerald-400/15 pt-7 sm:mt-14'>
@@ -110,7 +131,7 @@ export default function ProjectsContainer() {
                                 type='button'
                                 aria-label={'View ' + project.title + ' details'}
                                 className='h-full rounded-xl text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brandGreen-300'
-                                onClick={() => showProject(index)}
+                                onClick={event => showProject(index, event)}
                             >
                                 <ProjectCard
                                     projectNumber={index + 1}

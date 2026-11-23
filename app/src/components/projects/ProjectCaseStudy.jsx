@@ -16,26 +16,26 @@ export default function ProjectCaseStudy({ project, projectNumber, totalProjects
     const { title, summary, image, imageAlt, imageWidth, imageHeight, imageFraming, liveUrl, liveLabel, repo, downloads,
         stack, initialDescription, detailedDescription, challenges, technicalDetails, highlights } = project
     return (
-        <article aria-labelledby='case-study-title' className='work-studio-grid work-studio-case'>
+        <article aria-labelledby='case-study-title' className='work-studio-grid work-studio-case' data-project-id={project.id}>
             <nav aria-label='Case study navigation' className='work-studio-nav flex flex-wrap items-center justify-between gap-2'>
                 <button
                     type='button'
                     onClick={onOverview}
-                    className='inline-flex min-h-12 shrink-0 items-center gap-1 rounded-full border border-current px-3 text-sm font-semibold text-brandGreen-200 hover:bg-brandGreen-900/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brandGreen-300'
+                    className='case-study-nav-action case-study-nav-action--overview'
                 >
-                    <LuChevronLeft className='h-5 w-5' aria-hidden='true' />
-                    All projects
+                    <LuChevronLeft className='case-study-nav-icon' aria-hidden='true' />
+                    <span>All projects</span>
                 </button>
                 <ProjectNextButton onClick={onNext} nextTitle={nextTitle} />
             </nav>
             <header data-testid='case-study-summary' className='work-studio-intro'>
                 <p className='work-studio-kicker'>Case study {projectNumber} of {totalProjects}</p>
-                <h2 id='case-study-title' className='work-studio-title'><span className='work-studio-title-color'>{title}</span></h2>
+                <h2 id='case-study-title' tabIndex={-1} className='work-studio-title'><span data-project-title className='work-studio-title-color inline-block'>{title}</span></h2>
                 <p className='work-studio-summary'>{summary}</p>
                 <ProjectLinks title={title} liveUrl={liveUrl} liveLabel={liveLabel} repo={repo} downloads={downloads} />
             </header>
             <CaseStudyExplorer project={project} />
-            <div className={`work-studio-media${imageFraming === 'cipher' ? ' work-studio-media--cipher' : ''}`}>
+            <div data-project-art className={`work-studio-media${imageFraming === 'cipher' ? ' work-studio-media--cipher' : ''}`}>
                 <ProjectImage image={image} imageAlt={imageAlt} imageWidth={imageWidth} imageHeight={imageHeight} title={title} plain />
             </div>
             <section aria-labelledby='case-study-details' className='work-studio-depth'>

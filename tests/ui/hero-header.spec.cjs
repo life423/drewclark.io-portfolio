@@ -1,5 +1,6 @@
 /* global document, window, innerWidth */
 const { test, expect } = require('@playwright/test');
+const process = require('node:process');
 
 const viewports = [
     [320, 480], [375, 600], [390, 550], [390, 664], [390, 844],
@@ -190,24 +191,62 @@ test('narrow desktop framing leaves room to the right of the sprout leaf', async
     }
 });
 
-test('footer links and copy-email action have visible keyboard focus and keep copy feedback', async ({ page }) => {
-    await page.addInitScript(() => {
-        Object.defineProperty(window.navigator, 'clipboard', {
-            configurable: true,
-            value: { writeText: async text => { window.__copiedFooterEmail = text; } },
-        });
-    });
+test('footer controls follow the browser platform keyboard-navigation policy', async ({ page, browserName }) => {
     await page.goto('/');
     const footer = page.getByRole('contentinfo');
     const twitter = footer.getByRole('link', { name: 'Drew Clark on Twitter' });
     const github = footer.getByRole('link', { name: 'Drew Clark on GitHub' });
     const email = footer.getByRole('button', { name: 'drew@drewclark.io' });
     await twitter.focus();
+    await expect(twitter).toBeFocused();
+
+    if (browserName === 'webkit' && process.platform === 'win32') {
+        // Windows Playwright WebKit skips native links with both Tab and Alt+Tab.
+        // Keep a real traversal assertion for that port; the separate test below
+        // verifies every control's focus ring and keyboard activation. macOS CI
+        // covers all three controls with Safari's documented Option+Tab gesture.
+        await page.keyboard.press('Tab');
+        await expect(email).toBeFocused();
+        return;
+    }
+
+    const nextControl = browserName === 'webkit' && process.platform === 'darwin' ? 'Alt+Tab' : 'Tab';
+    await page.keyboard.press(nextControl);
+    await expect(github).toBeFocused();
+    await page.keyboard.press(nextControl);
+    await expect(email).toBeFocused();
+});
+
+test('footer links and copy-email action have visible keyboard focus and keep copy feedback', async ({ page, context }) => {
+    await page.addInitScript(() => {
+        Object.defineProperty(window.navigator, 'clipboard', {
+            configurable: true,
+            value: { writeText: async text => { window.__copiedFooterEmail = text; } },
+        });
+    });
+    // Intercept the popup's first request at context level, so keyboard link
+    // activation is tested without visiting external accounts or using clicks.
+    for (const url of ['https://twitter.com/andrewgenai', 'https://github.com/life423']) {
+        await context.route(url, route => route.fulfill({ contentType: 'text/html', body: '<title>Footer link destination</title>' }));
+    }
+    await page.goto('/');
+    const footer = page.getByRole('contentinfo');
+    const twitter = footer.getByRole('link', { name: 'Drew Clark on Twitter' });
+    const github = footer.getByRole('link', { name: 'Drew Clark on GitHub' });
+    const email = footer.getByRole('button', { name: 'drew@drewclark.io' });
     for (const control of [twitter, github, email]) {
+        await control.focus();
         await expect(control).toBeFocused();
         await expect(control).toHaveCSS('outline-color', 'rgb(250, 250, 250)');
         await expect(control).toHaveCSS('outline-width', '2px');
-        if (control !== email) await page.keyboard.press('Tab');
+        if (control !== email) {
+            const destination = await control.getAttribute('href');
+            const opened = page.waitForEvent('popup');
+            await page.keyboard.press('Enter');
+            const popup = await opened;
+            await expect(popup).toHaveURL(destination);
+            await popup.close();
+        }
     }
     await page.keyboard.press('Enter');
     await expect(footer.getByText('Copied', { exact: true })).toBeVisible();

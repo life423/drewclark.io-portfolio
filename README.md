@@ -80,19 +80,48 @@ jobs:
 
 ## Portfolio presentation
 
+Start UI work with the [design-basics checklist](docs/design-basics.md), distilled
+from the user's reference PDFs. [AGENTS.md](AGENTS.md) records the working rules:
+clear fundamentals and the user's quiet visual direction come before effects.
+
 The portfolio introduction sits directly on the continuous section background;
 the user rejected the separate dark rectangle behind the heading and summary.
 Keep 32px of space before the Explorer on phones and 40px from 640px upward,
 with 16px between the orange-underlined heading and its summary. This spacing
 belongs to the overview introduction; preserve the Explorer-to-gallery spacing.
 
-Project gallery cards pair their 3px pointer-hover lift with a soft, two-layer
-shadow. Keep that elevation visible alongside the keyboard focus ring when a
-control inside the card is focused. Use the site's neutral brandGray.800 charcoal
-on rest, hover and focus; the user rejected both the #292f2c card fill and #303733
-interaction fill. Keep green for accents rather than tinting the card surface.
-Touch layouts stay still; reduced motion keeps the shadow feedback without
-movement or transitions.
+Project gallery cards expand 3.5% and rise 4px over 220ms on pointer hover, with
+a soft, two-layer shadow. The grid stays in place, and the active card paints
+above its neighbors. Clicking the artwork or card body still opens its case
+study; visit, download and source links remain independent native links. Keep
+the keyboard focus ring visible alongside the shadow. Touch opens a case study
+in one tap; reduced motion keeps shadow feedback without movement or transitions.
+
+All overview and related project cards share a neutral charcoal gradient from
+top left to bottom right, with the deepest shading at the top right. This is the
+user's requested gradient treatment, replacing the earlier flat charcoal fill.
+The user rejected both #292f2c and #303733; keep green for accents rather than
+tinting the card surface.
+
+The case-study build Explorer sits beside the reading column from 900px wide and
+700px high. Its neutral charcoal, mint exploration accents, orange Send action
+and three project-specific questions follow the user's selected sidebar reference.
+Keep the CSS grid and CaseStudyExplorer media queries synchronized. Below 900px,
+the **Open project chat** launcher opens a right-hand drawer distinct from the
+left-hand site Menu. A circular X closes it; short
+desktop windows retain a centered dialog. In single-column layouts, title,
+image and prose share a centered 38rem reading width. The same Explorer stays
+mounted across layout changes: drafts survive, passive resizing preserves
+article focus, and closing returns focus to its launcher. A short green rail
+segment and brief reduced-motion-aware header emphasis mark desktop docking, 24px
+below navigation. The divider stays attached to the column; the outer desktop
+scrollbar stays hidden while wheel and keyboard scrolling remain available.
+The approved mint background parallax travels at most 48px inside its own paint
+clip, with no control movement. Reduced motion keeps the accent static; drawer
+layouts omit it. Keep the depth hook's layout query aligned with the grid and
+Explorer. See the
+[behavior and validation record](docs/build-explorer-validation.md). The possible
+CipherCraft light-green image tint remains deferred.
 
 The navbar's Blog link opens `https://blog.drewclark.io` in a new tab, using the
 same text styling and hover treatment as Home and GitHub. On phones it appears
@@ -155,6 +184,9 @@ Each detail header has a keyboard-accessible Next control that cycles through
 all four projects and wraps to the first. Keep the bottom Previous/Next controls
 available too. Selecting a project scrolls its header below the fixed site nav,
 and the selection survives phone/tablet/desktop breakpoint changes.
+All projects and Next share the same 48px outlined navigation treatment, with
+stable targets, pointer press feedback, visible keyboard focus and reduced-motion
+support. See [navigation validation](docs/case-study-navigation-validation.md).
 
 ## Browser verification
 
@@ -170,6 +202,12 @@ keyboard focus, touch/rotation, reduced motion, hero interaction states, chat
 loading/source links/recovery and contact dialog opening/closing. Header regression
 checks also cover short viewports, both sides of the tablet breakpoint, return to
 top, rotation, natural header growth and 200% root text size.
+
+Artwork checks measure the visible image frame. CipherCraft intentionally trims
+the screenshot's blank margins; its checks also require the actual application
+controls to remain visible, centered and proportional. They reject incorrect
+zoom, offsets and stretching rather than requiring an oversized source image to
+have the same bounds as its clipping frame.
 
 Pull requests and pushes to main run Chrome, Edge and Firefox on Linux. A separate
 macOS job runs the full WebKit suite and a focused smoke check in actual desktop
