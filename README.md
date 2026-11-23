@@ -80,11 +80,19 @@ jobs:
 
 ## Portfolio presentation
 
+The portfolio introduction sits directly on the continuous section background;
+the user rejected the separate dark rectangle behind the heading and summary.
+Keep 32px of space before the Explorer on phones and 40px from 640px upward,
+with 16px between the orange-underlined heading and its summary. This spacing
+belongs to the overview introduction; preserve the Explorer-to-gallery spacing.
+
 Project gallery cards pair their 3px pointer-hover lift with a soft, two-layer
 shadow. Keep that elevation visible alongside the keyboard focus ring when a
-control inside the card is focused. Preserve the resting card color on hover
-and focus; the user rejected the #303733 interaction fill. Touch layouts stay
-still; reduced motion keeps the shadow feedback without movement or transitions.
+control inside the card is focused. Use the site's neutral brandGray.800 charcoal
+on rest, hover and focus; the user rejected both the #292f2c card fill and #303733
+interaction fill. Keep green for accents rather than tinting the card surface.
+Touch layouts stay still; reduced motion keeps the shadow feedback without
+movement or transitions.
 
 The navbar's Blog link opens `https://blog.drewclark.io` in a new tab, using the
 same text styling and hover treatment as Home and GitHub. On phones it appears

@@ -63,7 +63,7 @@
     display: grid;
     align-content: start;
     gap: 0;
-    background: #292f2c;
+    background: theme('colors.brandGray.800');
     border-radius: 1rem;
     overflow: hidden;
     box-shadow: var(--work-card-shadow);
@@ -208,22 +208,11 @@
     background: linear-gradient(180deg, var(--work-entry-neutral) 0, theme('colors.brandGray.900') 12rem);
 }
 .work-studio-overview .work-studio-intro {
-    position: relative;
-    isolation: isolate;
-    width: fit-content;
-    max-width: 100%;
+    margin-bottom: .75rem;
 }
-.work-studio-overview .work-studio-intro::before {
-    content: '';
-    position: absolute;
-    z-index: -1;
-    inset: -.5rem -.75rem -.5rem -.75rem;
-    background: color-mix(in srgb, theme('colors.brandGreen.900') 25%, theme('colors.brandGray.900'));
-    clip-path: polygon(0 0, 100% 0, calc(100% - .75rem) 100%, 0 100%);
-    pointer-events: none;
-}
-@media (forced-colors: active) {
-    .work-studio-overview .work-studio-intro::before { display: none; }
+.work-studio-overview .work-studio-summary { margin-top: 1rem; }
+@media (min-width: 640px) {
+    .work-studio-overview .work-studio-intro { margin-bottom: 1rem; }
 }
 
 /* The Explorer is one in-flow panel, followed by a full two-column gallery. */
