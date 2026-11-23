@@ -54,6 +54,10 @@ jobs:
       - run: npx playwright install webkit
         timeout-minutes: 3
       - run: npm run build
+      # Option+Tab includes links; enable buttons too for the full keyboard
+      # traversal assertions. Scope this preference to the test WebKit app.
+      - name: Enable WebKit keyboard navigation
+        run: defaults write org.webkit.Playwright AppleKeyboardUIMode -int 2
       - run: npm run test:ui -- --project=webkit --workers=1
       # Safari and its matching driver are bundled on the macOS runner.
       - run: sudo safaridriver --enable

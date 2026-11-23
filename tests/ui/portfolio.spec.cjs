@@ -28,6 +28,55 @@ function errorsOn(page) {
     return errors;
 }
 
+// Pixel bounds of the real UI in the approved, unmodified 2048x972 screenshot.
+// The thumbnail previews its header, cipher controls and Message/Result labels;
+// the detail frame must retain the complete form through the bottom controls.
+const CIPHER_UI = { left: 616, right: 1432, top: 20, previewBottom: 400, detailBottom: 804 };
+
+async function imageGeometry(image) {
+    return image.evaluate(node => {
+        const frame = node.parentElement, style = getComputedStyle(frame), rect = frame.getBoundingClientRect();
+        return {
+            image: node.getBoundingClientRect().toJSON(),
+            natural: { width: node.naturalWidth, height: node.naturalHeight },
+            frame: {
+                left: rect.left + parseFloat(style.borderLeftWidth), top: rect.top + parseFloat(style.borderTopWidth),
+                width: frame.clientWidth, height: frame.clientHeight,
+            },
+            clipping: { x: style.overflowX, y: style.overflowY },
+        };
+    });
+}
+
+function expectCipherFraming(geometry, detail) {
+    const { image, frame, natural } = geometry;
+    expect(natural).toEqual({ width: 2048, height: 972 });
+    expect(Math.abs(image.width / image.height - natural.width / natural.height)).toBeLessThan(0.01);
+    expect(geometry.clipping).toEqual({ x: 'hidden', y: 'hidden' });
+    expect(Math.abs(image.left + image.width / 2 - (frame.left + frame.width / 2))).toBeLessThan(1);
+    expect(Math.abs(image.top - frame.top)).toBeLessThan(1);
+
+    const ui = {
+        left: image.left + CIPHER_UI.left / natural.width * image.width,
+        right: image.left + CIPHER_UI.right / natural.width * image.width,
+        top: image.top + CIPHER_UI.top / natural.height * image.height,
+        bottom: image.top + (detail ? CIPHER_UI.detailBottom : CIPHER_UI.previewBottom) / natural.height * image.height,
+    };
+    expect(ui.left).toBeGreaterThanOrEqual(frame.left - 1);
+    expect(ui.right).toBeLessThanOrEqual(frame.left + frame.width + 1);
+    expect(ui.top).toBeGreaterThanOrEqual(frame.top - 1);
+    expect(ui.bottom).toBeLessThanOrEqual(frame.top + frame.height + 1);
+    if (detail) {
+        // The form should fill the reading-width frame, not shrink inside the
+        // screenshot's large blank side margins, and the whole form must fit.
+        expect((ui.right - ui.left) / frame.width).toBeGreaterThan(0.93);
+        expect(Math.abs(frame.width / frame.height - 42 / 41)).toBeLessThan(0.01);
+    } else {
+        // Even a wide thumbnail must keep the controls large enough to read.
+        expect(ui.right - ui.left).toBeGreaterThanOrEqual(Math.min(frame.width * 0.9, frame.height * 1.8));
+    }
+}
+
 for (const [width, height] of sizes) {
     test(`responsive navigation and artwork ${width}x${height}`, async ({ page }, info) => {
         await page.setViewportSize({ width, height });
@@ -56,11 +105,15 @@ for (const [width, height] of sizes) {
             await expect(art).toHaveAttribute('src', project.image);
             await imageLoaded(art);
             await expect(page.getByRole('link', { name: /View the full .* image/ })).toHaveCount(0);
-            const sizing = await art.evaluate(i => {
-                const r = i.getBoundingClientRect(), parentWidth = i.parentElement.clientWidth;
-                return Math.abs(r.width - parentWidth) < 1 && Math.abs(r.width / r.height - i.naturalWidth / i.naturalHeight) < 0.01;
-            });
-            expect(sizing).toBe(true);
+            const geometry = await imageGeometry(art);
+            expect(geometry.natural).toEqual({ width: project.imageWidth, height: project.imageHeight });
+            if (project.imageFraming === 'cipher') {
+                expectCipherFraming(geometry, true);
+            } else {
+                expect(Math.abs(geometry.image.width - geometry.frame.width)).toBeLessThan(1);
+                expect(Math.abs(geometry.image.width / geometry.image.height - project.imageWidth / project.imageHeight)).toBeLessThan(0.01);
+                expect(geometry.clipping).toEqual({ x: 'hidden', y: 'hidden' });
+            }
             await noOverflow(page);
             const next = page.getByRole('button', { name: /^Next project:/ });
             await expect(next).toHaveAttribute('aria-label', `Next project: ${projects[(index + 1) % projects.length].title}`);
@@ -76,7 +129,7 @@ for (const [width, height] of sizes) {
             await expect(chat.getByRole('textbox', { name: 'Question for Project Chat' }))[width < 900 || height < 700 ? 'toBeHidden' : 'toBeVisible']();
             // Measure the fixed layout rail rather than the child chat that can stick during scrolling.
             const [summary, panel, media, details, related] = await page.evaluate(() => [
-                '[data-testid="case-study-summary"]', '[aria-label="Ask about this case study"]', '[aria-labelledby="case-study-title"] figure img',
+                '[data-testid="case-study-summary"]', '[aria-label="Ask about this case study"]', '.work-studio-media figure',
                 '#case-study-details', '#related-projects-title',
             ].map(selector => document.querySelector(selector).getBoundingClientRect().toJSON()));
             if (width >= 900 && height >= 700) {
@@ -613,23 +666,44 @@ test('overview title uses the orange arc without repeating it on project card he
 
 test('gallery artwork stays clipped to smaller full-card-width frames through responsive transitions', async ({ page }) => {
     await ready(page);
+    for (const image of await page.locator('.work-gallery-card img').all()) {
+        await image.scrollIntoViewIfNeeded();
+        await imageLoaded(image);
+    }
+    await page.mouse.move(0, 0);
     for (const width of [390, 639, 640, 719, 720, 768, 930, 1099, 1100, 1126]) {
         await page.setViewportSize({ width, height: 900 });
         const boxes = await page.locator('.work-gallery-card').evaluateAll(cards => cards.map(card => {
             const rect = node => node.getBoundingClientRect().toJSON();
             return { card: rect(card), frame: rect(card.querySelector('.work-gallery-art')),
-                image: { width: card.querySelector('img').clientWidth, height: card.querySelector('img').clientHeight }, fit: getComputedStyle(card.querySelector('img')).objectFit, corner: getComputedStyle(card.querySelector('.work-gallery-art')).borderTopLeftRadius };
+                image: { width: card.querySelector('img').clientWidth, height: card.querySelector('img').clientHeight }, fit: getComputedStyle(card.querySelector('img')).objectFit,
+                clipping: getComputedStyle(card.querySelector('.work-gallery-art')).overflow,
+                transform: getComputedStyle(card.querySelector('img')).transform,
+                corner: getComputedStyle(card.querySelector('.work-gallery-art')).borderTopLeftRadius };
         }));
         expect(boxes).toHaveLength(4);
-        for (const { card, frame, image, corner } of boxes) {
+        for (const [index, { card, frame, image, fit, clipping, transform, corner }] of boxes.entries()) {
             expect(Math.abs(frame.width - card.width)).toBeLessThan(1);
-            expect(Math.abs(image.width - frame.width)).toBeLessThan(1);
-            expect(Math.abs(image.height - frame.height)).toBeLessThan(1);
             expect(frame.height).toBeGreaterThanOrEqual(145);
             expect(frame.height).toBeLessThanOrEqual(224);
             expect(corner).toBe('16px');
+            expect(clipping).toBe('hidden');
+            const artwork = page.locator('.work-gallery-card img').nth(index), project = projects[index];
+            await expect(artwork).toHaveAttribute('src', project.cardImage?.src || project.image);
+            if (project.imageFraming === 'cipher') {
+                expectCipherFraming(await imageGeometry(artwork), false);
+            } else {
+                expect(Math.abs(image.width - frame.width)).toBeLessThan(1);
+                expect(Math.abs(image.height - frame.height)).toBeLessThan(1);
+                expect(fit).toBe('contain');
+                if (transform !== 'none') {
+                    const [scaleX, skewY, skewX, scaleY] = transform.slice(7, -1).split(',').map(Number);
+                    expect(scaleX).toBeCloseTo(scaleY, 4);
+                    expect(skewX).toBe(0);
+                    expect(skewY).toBe(0);
+                }
+            }
         }
-        expect(boxes[1].fit).toBe('contain');
         if (width >= 720) {
             expect(Math.abs(boxes[0].card.y - boxes[1].card.y)).toBeLessThan(1);
             expect(boxes[1].card.x).toBeGreaterThan(boxes[0].card.x);

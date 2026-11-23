@@ -185,6 +185,12 @@ loading/source links/recovery and contact dialog opening/closing. Header regress
 checks also cover short viewports, both sides of the tablet breakpoint, return to
 top, rotation, natural header growth and 200% root text size.
 
+Artwork checks measure the visible image frame. CipherCraft intentionally trims
+the screenshot's blank margins; its checks also require the actual application
+controls to remain visible, centered and proportional. They reject incorrect
+zoom, offsets and stretching rather than requiring an oversized source image to
+have the same bounds as its clipping frame.
+
 Pull requests and pushes to main run Chrome, Edge and Firefox on Linux. A separate
 macOS job runs the full WebKit suite and a focused smoke check in actual desktop
 Safari through SafariDriver, with screenshots, versions and logs as artifacts.
