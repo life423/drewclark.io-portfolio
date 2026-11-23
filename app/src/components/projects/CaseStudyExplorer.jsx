@@ -48,14 +48,18 @@ export default function CaseStudyExplorer({ project }) {
             restoreLauncherRef.current = false
 
             if (roomy.matches) {
-                if (dialog.matches(':modal')) dialog.close()
+                // CSS may hide Close and clear focus before this callback.
+                // An open modal still establishes the Explorer's focus ownership.
+                const wasModal = dialog.matches(':modal')
+                if (wasModal) dialog.close()
                 // A sidebar is ordinary page content. Setting open avoids the
                 // focus-taking steps of show(), including on passive resize.
                 dialog.open = true
-                if (focusWasInside) {
+                if (focusWasInside || wasModal) {
                     // The drawer's Close control disappears in sidebar mode.
                     // Keep keyboard focus on a visible Explorer control.
-                    const target = focusedElement.getClientRects().length ? focusedElement : dialog.querySelector('.case-build-collapse')
+                    const keepFocusedControl = focusWasInside && focusedElement !== dialog && focusedElement.getClientRects().length
+                    const target = keepFocusedControl ? focusedElement : dialog.querySelector('.case-build-collapse')
                     target?.focus({ preventScroll: true })
                 }
             } else {

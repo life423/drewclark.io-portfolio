@@ -335,17 +335,35 @@ warnings remain; the file-local JSX annotations recognize imports used in JSX.
 
 The first PR #61 run exercised all four engines. It caught a spacing assertion
 that measured the chat inside the new 1px divider instead of the column edge;
-the test now checks the same strict 32px gap at the rail's border box. Firefox
-also reported `scrollbar-width: none` on the inner transcript. The transcript
-now explicitly uses `thin`, retaining its own scroll affordance while the outer
-desktop panel keeps its hidden scrollbar and wheel/keyboard access.
+the test now checks the same strict 32px gap at the rail's border box. The inner
+transcript explicitly uses `thin`, retaining its own scroll affordance while the
+outer desktop panel keeps its hidden scrollbar and wheel/keyboard access.
 
 The production build and **9/9** focused spacing, scrollbar and long-source
 checks pass in Chrome, Edge and WebKit. Their rendered long-answer states were
-inspected. The open responsive preview was refreshed to `index-DhqZB4oX.js` and
+inspected. At that correction, the preview was refreshed to `index-DhqZB4oX.js` and
 its selected CudaRL case study restored after confirming its drafts were empty.
 The full Linux/macOS matrix, including Firefox and native Safari, is tracked in
 [PR #61](https://github.com/life423/drewclark.io-portfolio/pull/61).
+
+The rerun passed all WebKit tests (99 passed, one background-visibility skip)
+and the native Safari smoke check. Linux exposed a focus-order race: CSS can
+hide Close before the layout callback samples focus. Conversion from an open
+modal now preserves its prior focus ownership, moving to the visible Collapse
+control if needed; ordinary article resizing still leaves reading focus alone.
+A deterministic regression clears Close focus before resizing. It fails against
+the previous code and passes after the fix, alongside rotation and scrolling
+checks: **9/9** focused Chrome, Edge and WebKit cases.
+
+Firefox's computed scrollbar failure was traced to its **test harness**, not an
+application cover or CSS inheritance. The pinned Playwright Firefox's
+`omni.ja` contains a headless-only UA rule, `* { scrollbar-width: none !important; }`,
+which overrides even explicit author styling. The fetched CI app CSS already
+contained the intended transcript declaration. This matches
+[Playwright issue #44228](https://github.com/microsoft/playwright/issues/44228).
+Only the scrollbar regression now uses headed Firefox under the Ubuntu runner's
+existing Xvfb. Its computed-style, wheel, keyboard and overflow assertions remain
+unchanged; other cases and engines retain their usual browser mode.
 
 ## Review and limits
 

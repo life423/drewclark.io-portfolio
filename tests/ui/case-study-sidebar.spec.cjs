@@ -2,6 +2,16 @@
 const { test, expect } = require('@playwright/test');
 const projects = require('../../app/src/data/projects.json');
 
+// Headless Firefox's Juggler UA stylesheet forces every scrollbar-width to
+// none !important. Exercise the actual scrollbar affordance in headed Firefox
+// instead of weakening its computed-style and wheel assertions.
+// https://github.com/microsoft/playwright/issues/44228
+const scrollbarTest = test.extend({
+    headless: [async ({ browserName, headless }, use) => {
+        await use(browserName === 'firefox' ? false : headless);
+    }, { scope: 'worker' }],
+});
+
 async function ready(page, index = 0) {
     await page.goto('/');
     const open = page.getByRole('button', { name: 'Read case study: ' + projects[index].title, exact: true });
@@ -413,7 +423,10 @@ test('drawer motion and resize or clear actions keep keyboard focus on visible c
     await rightHandDrawer(page);
 
     await page.evaluate(() => { window.__captureBuildMotion = false; });
-    // Close is focused when the layout changes, then disappears in the rail.
+    // Browsers can clear focus as CSS hides Close before the media-query
+    // callback runs. Exercise that ordering while the modal still owns input.
+    await close.evaluate(node => node.blur());
+    expect(await dialog.evaluate(node => node.matches(':modal'))).toBe(true);
     // The visible collapse control becomes the keyboard continuation point.
     await page.setViewportSize({ width: 1440, height: 900 });
     const collapse = chat.locator('.case-build-collapse');
@@ -542,7 +555,7 @@ test('desktop explorer docks once at the reading inset without replaying on conv
     await noOverflow(page);
 });
 
-test('docking cannot flash an outer scrollbar and short explorers retain wheel and keyboard scrolling', async ({ page }) => {
+scrollbarTest('docking cannot flash an outer scrollbar and short explorers retain wheel and keyboard scrolling', async ({ page }) => {
     await page.addInitScript(() => {
         window.__pausedBuildHeader = false;
         document.addEventListener('animationstart', event => {

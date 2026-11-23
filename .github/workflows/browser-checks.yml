@@ -31,7 +31,10 @@ jobs:
       - run: npx playwright install firefox
         timeout-minutes: 3
       - run: npm run build
-      - run: npm run test:ui -- --project=chrome --project=edge --project=firefox
+      # The scrollbar regression uses headed Firefox: its headless harness
+      # overrides every element's scrollbar-width with a UA !important rule.
+      # Xvfb is already installed on the Ubuntu 24.04 runner image.
+      - run: xvfb-run -a npm run test:ui -- --project=chrome --project=edge --project=firefox
       - uses: actions/upload-artifact@v4
         if: always()
         with:
