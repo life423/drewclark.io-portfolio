@@ -10,6 +10,10 @@
     margin-inline: auto;
     scroll-margin-top: 5rem;
 }
+/* In one column, align the title, artwork and prose to the same reading width. */
+.work-studio-shell:has(.work-studio-case) {
+    max-width: 38rem;
+}
 .work-studio-grid {
     display: grid;
     align-items: start;
@@ -50,12 +54,21 @@
     padding-top: 1.5rem;
 }
 .work-studio-depth .prose {
-    max-width: 72ch;
+    max-width: none;
+    font-size: 1rem;
+    line-height: 1.7;
 }
 .work-studio-gallery {
     display: grid;
     --work-gallery-gap: 1.25rem;
     gap: var(--work-gallery-gap);
+}
+/* A shared charcoal surface: diagonal light, with the deepest shade at top right. */
+.work-project-surface {
+    --work-card-surface: radial-gradient(ellipse at top right, rgb(24 24 27 / .85), transparent 70%),
+        linear-gradient(135deg, color-mix(in srgb, theme('colors.brandGray.700') 50%, theme('colors.brandGray.800')), theme('colors.brandGray.800'));
+    background-color: theme('colors.brandGray.800');
+    background-image: var(--work-card-surface);
 }
 .work-gallery-card {
     --work-card-shadow: 0 .35rem 1rem rgb(0 0 0 / .16);
@@ -63,11 +76,10 @@
     display: grid;
     align-content: start;
     gap: 0;
-    background: theme('colors.brandGray.800');
     border-radius: 1rem;
     overflow: hidden;
     box-shadow: var(--work-card-shadow);
-    transition: transform .18s ease-out, box-shadow .18s ease-out;
+    transition: transform .22s cubic-bezier(.2, .7, .2, 1), box-shadow .22s ease-out;
 }
 .work-gallery-card:focus-within {
     box-shadow: 0 0 0 2px #75d3ae, var(--work-card-shadow);
@@ -78,7 +90,8 @@
     }
 }
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-    .work-gallery-card:hover { transform: translateY(-3px); }
+    .work-gallery-card:hover { transform: translateY(-4px) scale(1.035); }
+    .work-studio-overview .work-gallery-card:hover { z-index: 2; }
 }
 .work-gallery-art {
     --work-thumb-height: clamp(9.5rem, 17vw, 14rem);
@@ -91,6 +104,8 @@
 .work-gallery-copy {
     min-width: 0;
     padding: 1rem;
+    background-color: inherit;
+    background-image: inherit;
 }
 .work-gallery-number {
     letter-spacing: .09em;
@@ -101,11 +116,13 @@
 }
 @media (min-width: 1100px) {
     .work-studio-section { --work-studio-bottom: 6rem; padding: 4.5rem var(--portfolio-content-gutter, clamp(2rem, 3.3vw, 3rem)) var(--work-studio-bottom); }
-    /* Let the prose, not the viewport, set the edge next to the Explorer. */
+}
+/* Match the inline Explorer's media query in CaseStudyExplorer.jsx. */
+@media (min-width: 900px) and (min-height: 700px) {
     .work-studio-shell:has(.work-studio-case) {
         --case-reading-width: 38rem;
-        --case-column-gap: 2rem;
-        --case-explorer-width: clamp(22.5rem, 27vw, 25rem);
+        --case-column-gap: 1.5rem;
+        --case-explorer-width: 20rem;
         max-width: calc(var(--case-reading-width) + var(--case-column-gap) + var(--case-explorer-width));
     }
     .work-studio-case {
@@ -113,16 +130,17 @@
         column-gap: var(--case-column-gap);
         grid-template-rows: auto auto auto auto;
     }
-    .work-studio-depth .prose {
-        max-width: none;
-        font-size: 1rem;
-        line-height: 1.7;
-    }
     .work-studio-case .work-studio-nav { grid-column: 1; grid-row: 1; }
     .work-studio-case .work-studio-intro { grid-column: 1; grid-row: 2; }
     .work-studio-case .work-studio-rail { grid-column: 2; grid-row: 2 / -1; }
     .work-studio-case .work-studio-media { grid-column: 1; grid-row: 3; }
     .work-studio-depth { grid-column: 1; grid-row: 4; }
+}
+@media (min-width: 1100px) and (min-height: 700px) {
+    .work-studio-shell:has(.work-studio-case) {
+        --case-column-gap: 2rem;
+        --case-explorer-width: clamp(22.5rem, 27vw, 25rem);
+    }
 }
 @media (min-width: 720px) {
     .work-studio-gallery {
@@ -157,7 +175,7 @@
 .work-gallery-actions { padding-top: .25rem; }
 
 /* Give the Explorer more room on wide screens without lengthening the article lines. */
-@media (min-width: 1510px) {
+@media (min-width: 1510px) and (min-height: 700px) {
     .work-studio-shell:has(.work-studio-case) {
         --case-explorer-width: clamp(28rem, 33vw, 34rem);
     }
@@ -360,13 +378,26 @@
 }
 body:has(.case-chat-dialog:modal) { overflow: hidden; }
 
-@media (min-width: 1100px) and (min-height: 850px) {
+/* Keep the sheet within thumb reach on phones; larger compact windows get a dialog. */
+@media (min-width: 640px) {
+    .case-chat-dialog {
+        inset: 0;
+        margin: auto;
+        width: min(42rem, calc(100% - 3rem));
+        height: fit-content;
+        max-height: calc(100dvh - 3rem);
+        border-radius: 1rem;
+    }
+}
+
+@media (min-width: 900px) and (min-height: 700px) {
     body:has(.work-studio-case), .site-rails:has(.work-studio-case) { overflow-x: clip; }
     .work-studio-case .work-studio-rail { align-self: stretch; }
     .case-chat-launcher, .case-chat-close { display: none; }
     .case-chat-dialog {
         position: sticky;
         inset: calc(var(--site-nav-rest-height, 4rem) + .75rem) auto auto;
+        margin: 0;
         width: 100%;
         max-height: calc(100dvh - var(--site-nav-rest-height, 4rem) - 1.5rem);
         padding: 0;

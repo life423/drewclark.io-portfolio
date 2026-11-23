@@ -77,7 +77,7 @@ export default function ProjectOverviewRow({ project, index, onOpen }) {
     const artSource = project.cardImage?.src || project.image
     return (
         <article
-            className='work-gallery-card group relative'
+            className='work-gallery-card work-project-surface group relative'
         >
             {/* Thumbnail */}
             <div

@@ -73,13 +73,13 @@ for (const [width, height] of sizes) {
             await expect(next).toHaveCount(1);
             const chat = page.locator('#project-chat');
             await expect(chat).toHaveCount(1);
-            await expect(chat.getByRole('textbox', { name: 'Question for Project Chat' }))[width < 1100 || height < 850 ? 'toBeHidden' : 'toBeVisible']();
+            await expect(chat.getByRole('textbox', { name: 'Question for Project Chat' }))[width < 900 || height < 700 ? 'toBeHidden' : 'toBeVisible']();
             // Measure the fixed layout rail rather than the child chat that can stick during scrolling.
             const [summary, panel, media, details, related] = await page.evaluate(() => [
                 '[data-testid="case-study-summary"]', '[aria-label="Ask about this case study"]', '[aria-labelledby="case-study-title"] figure img',
                 '#case-study-details', '#related-projects-title',
             ].map(selector => document.querySelector(selector).getBoundingClientRect().toJSON()));
-            if (width >= 1100) {
+            if (width >= 900 && height >= 700) {
                 expect(panel.x).toBeGreaterThanOrEqual(summary.x + summary.width);
                 expect(Math.abs(panel.y - summary.y)).toBeLessThan(2);
                 expect(panel.x).toBeGreaterThanOrEqual(media.x + media.width);
@@ -372,7 +372,7 @@ test('case-study Explorer drawer preserves reading position, focus, and draft on
     await expect(dialog.getByRole('textbox')).toHaveValue('draft survives the drawer');
     await close.click();
     await expect(launcher).toBeFocused();
-    await page.setViewportSize({ width: 1440, height: 700 });
+    await page.setViewportSize({ width: 1440, height: 650 });
     await expect(launcher).toBeInViewport();
     await launcher.click();
     await expect(dialog.getByRole('textbox')).toHaveValue('draft survives the drawer');
@@ -442,7 +442,7 @@ test('gallery lift respects input mode, keyboard focus, and reduced motion', asy
     const baseShadow = await card.evaluate(element => getComputedStyle(element).boxShadow);
     const baseColor = await card.evaluate(element => getComputedStyle(element).backgroundColor);
     await card.hover();
-    await expect(card).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, -3)');
+    await expect(card).toHaveCSS('transform', 'matrix(1.035, 0, 0, 1.035, 0, -4)');
     await expect.poll(() => card.evaluate(element => getComputedStyle(element).boxShadow)).not.toBe(baseShadow);
     const liftedShadow = await card.evaluate(element => getComputedStyle(element).boxShadow);
     await expect(card).toHaveCSS('background-color', baseColor);
@@ -459,7 +459,7 @@ test('gallery lift respects input mode, keyboard focus, and reduced motion', asy
     const focusRing = 'rgb(117, 211, 174) 0px 0px 0px 2px';
     await expect(card).toHaveCSS('box-shadow', `${focusRing}, ${baseShadow}`);
     await card.hover();
-    await expect(card).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, -3)');
+    await expect(card).toHaveCSS('transform', 'matrix(1.035, 0, 0, 1.035, 0, -4)');
     await expect(card).toHaveCSS('box-shadow', `${focusRing}, ${liftedShadow}`);
     await expect(card).toHaveCSS('background-color', baseColor);
     await page.emulateMedia({ reducedMotion: 'reduce' });

@@ -86,13 +86,27 @@ Keep 32px of space before the Explorer on phones and 40px from 640px upward,
 with 16px between the orange-underlined heading and its summary. This spacing
 belongs to the overview introduction; preserve the Explorer-to-gallery spacing.
 
-Project gallery cards pair their 3px pointer-hover lift with a soft, two-layer
-shadow. Keep that elevation visible alongside the keyboard focus ring when a
-control inside the card is focused. Use the site's neutral brandGray.800 charcoal
-on rest, hover and focus; the user rejected both the #292f2c card fill and #303733
-interaction fill. Keep green for accents rather than tinting the card surface.
-Touch layouts stay still; reduced motion keeps the shadow feedback without
-movement or transitions.
+Project gallery cards expand 3.5% and rise 4px over 220ms on pointer hover, with
+a soft, two-layer shadow. The grid stays in place, and the active card paints
+above its neighbors. Clicking the artwork or card body still opens its case
+study; visit, download and source links remain independent native links. Keep
+the keyboard focus ring visible alongside the shadow. Touch opens a case study
+in one tap; reduced motion keeps shadow feedback without movement or transitions.
+
+All overview and related project cards share a neutral charcoal gradient from
+top left to bottom right, with the deepest shading at the top right. This is the
+user's requested gradient treatment, replacing the earlier flat charcoal fill.
+The user rejected both #292f2c and #303733; keep green for accents rather than
+tinting the card surface.
+
+The case-study Explorer sits beside the reading column from 900px wide and
+700px high, including the formerly empty right-hand space at a 988px window.
+Keep the CSS grid and CaseStudyExplorer media queries synchronized. A shorter
+or narrower window uses a centered dialog from 640px wide and a bottom sheet on
+phones. In those single-column layouts, title, image and prose share a centered
+38rem reading width. The same Explorer stays mounted across layout changes:
+drafts survive, passive resizing preserves article focus, and closing a dialog
+returns focus to its launcher.
 
 The navbar's Blog link opens `https://blog.drewclark.io` in a new tab, using the
 same text styling and hover treatment as Home and GitHub. On phones it appears
