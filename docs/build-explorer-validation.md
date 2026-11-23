@@ -331,6 +331,22 @@ the updated drawer was visually inspected. Evidence is in
 `data/case-chat-raised-close/`. Existing structural and prop-validation lint
 warnings remain; the file-local JSX annotations recognize imports used in JSX.
 
+### Pull-request browser corrections
+
+The first PR #61 run exercised all four engines. It caught a spacing assertion
+that measured the chat inside the new 1px divider instead of the column edge;
+the test now checks the same strict 32px gap at the rail's border box. Firefox
+also reported `scrollbar-width: none` on the inner transcript. The transcript
+now explicitly uses `thin`, retaining its own scroll affordance while the outer
+desktop panel keeps its hidden scrollbar and wheel/keyboard access.
+
+The production build and **9/9** focused spacing, scrollbar and long-source
+checks pass in Chrome, Edge and WebKit. Their rendered long-answer states were
+inspected. The open responsive preview was refreshed to `index-DhqZB4oX.js` and
+its selected CudaRL case study restored after confirming its drafts were empty.
+The full Linux/macOS matrix, including Firefox and native Safari, is tracked in
+[PR #61](https://github.com/life423/drewclark.io-portfolio/pull/61).
+
 ## Review and limits
 
 Conservative internal heuristics for this bounded interface: usability 9,

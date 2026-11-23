@@ -437,11 +437,11 @@ test('wide case studies keep the reading column close to their restrained Explor
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await ready(page);
     await page.getByRole('button', { name: 'Read case study: ' + projects[1].title, exact: true }).click();
-    const { left, right, chat, art, input, heading, reading } = await page.evaluate(() => {
+    const { left, right, rail, chat, art, input, heading, reading } = await page.evaluate(() => {
         const rect = select => document.querySelector(select).getBoundingClientRect().toJSON();
         const shell = rect('.work-studio-shell');
         return {
-            left: shell.left, right: innerWidth - shell.right, chat: rect('#project-chat'),
+            left: shell.left, right: innerWidth - shell.right, rail: rect('.work-studio-rail'), chat: rect('#project-chat'),
             art: rect('.work-studio-media'), input: rect('#project-chat textarea'), heading: rect('.work-studio-intro'),
             reading: rect('.work-studio-depth .prose'),
         };
@@ -452,7 +452,9 @@ test('wide case studies keep the reading column close to their restrained Explor
     expect(chat.width).toBeLessThanOrEqual(405);
     expect(reading.width).toBeGreaterThan(550);
     expect(reading.width).toBeLessThanOrEqual(608);
-    expect(chat.left - reading.right).toBeCloseTo(32, 0);
+    // The structural divider occupies the rail's first pixel; the intended
+    // grid gap ends at the column boundary, before that border and its content.
+    expect(rail.left - reading.right).toBeCloseTo(32, 0);
     expect(art.right).toBeCloseTo(reading.right, 0);
     expect(Math.abs(heading.y - chat.y)).toBeLessThan(1);
     expect(input.width).toBeGreaterThan(320);

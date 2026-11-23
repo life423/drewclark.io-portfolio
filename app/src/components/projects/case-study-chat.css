@@ -98,6 +98,9 @@
 .case-build-transcript {
     margin-top: 1.5rem; max-height: clamp(13rem, 38dvh, 24rem);
     overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; padding-right: .5rem;
+    /* Answers keep their own visible scroll affordance inside the hidden-edge
+       dialog. Firefox CI computed none when this width was unspecified. */
+    scrollbar-width: thin;
 }
 .case-build-message + .case-build-message { margin-top: 1.25rem; }
 .case-build-speaker { font-size: .8125rem; font-weight: 600; color: var(--build-muted); margin-bottom: .375rem; }
