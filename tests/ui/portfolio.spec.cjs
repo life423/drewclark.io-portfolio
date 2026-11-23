@@ -434,15 +434,19 @@ test('wrapped case-study title keeps its curved underline clear of the summary',
     await noOverflow(page);
 });
 
-test('gallery lift respects input mode, keyboard focus, and reduced motion', async ({ page, browser }) => {
+test('gallery lift respects input mode, keyboard focus, and reduced motion', async ({ page, browser }, info) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     await ready(page);
     const card = page.locator('.work-gallery-card').first();
     const baseShadow = await card.evaluate(element => getComputedStyle(element).boxShadow);
+    const baseColor = await card.evaluate(element => getComputedStyle(element).backgroundColor);
     await card.hover();
     await expect(card).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, -3)');
     await expect.poll(() => card.evaluate(element => getComputedStyle(element).boxShadow)).not.toBe(baseShadow);
+    const liftedShadow = await card.evaluate(element => getComputedStyle(element).boxShadow);
+    await expect(card).toHaveCSS('background-color', baseColor);
+    await page.screenshot({ path: info.outputPath('gallery-hover.png') });
     const action = card.getByRole('link', { name: /Visit the site/ });
     const baseAction = await action.evaluate(element => getComputedStyle(element).backgroundColor);
     await action.hover();
@@ -452,7 +456,12 @@ test('gallery lift respects input mode, keyboard focus, and reduced motion', asy
     const open = card.getByRole('button', { name: 'Read case study: ' + projects[0].title, exact: true });
     await open.focus();
     await expect(open).toBeFocused();
-    await expect(card).toHaveCSS('box-shadow', 'rgb(117, 211, 174) 0px 0px 0px 2px');
+    const focusRing = 'rgb(117, 211, 174) 0px 0px 0px 2px';
+    await expect(card).toHaveCSS('box-shadow', `${focusRing}, ${baseShadow}`);
+    await card.hover();
+    await expect(card).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, -3)');
+    await expect(card).toHaveCSS('box-shadow', `${focusRing}, ${liftedShadow}`);
+    await expect(card).toHaveCSS('background-color', baseColor);
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await card.hover();
     await expect(card).toHaveCSS('transform', 'none');
