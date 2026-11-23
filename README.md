@@ -80,6 +80,10 @@ jobs:
 
 ## Portfolio presentation
 
+Start UI work with the [design-basics checklist](docs/design-basics.md), distilled
+from the user's reference PDFs. [AGENTS.md](AGENTS.md) records the working rules:
+clear fundamentals and the user's quiet visual direction come before effects.
+
 The portfolio introduction sits directly on the continuous section background;
 the user rejected the separate dark rectangle behind the heading and summary.
 Keep 32px of space before the Explorer on phones and 40px from 640px upward,
@@ -99,14 +103,25 @@ user's requested gradient treatment, replacing the earlier flat charcoal fill.
 The user rejected both #292f2c and #303733; keep green for accents rather than
 tinting the card surface.
 
-The case-study Explorer sits beside the reading column from 900px wide and
-700px high, including the formerly empty right-hand space at a 988px window.
-Keep the CSS grid and CaseStudyExplorer media queries synchronized. A shorter
-or narrower window uses a centered dialog from 640px wide and a bottom sheet on
-phones. In those single-column layouts, title, image and prose share a centered
-38rem reading width. The same Explorer stays mounted across layout changes:
-drafts survive, passive resizing preserves article focus, and closing a dialog
-returns focus to its launcher.
+The case-study build Explorer sits beside the reading column from 900px wide and
+700px high. Its neutral charcoal, mint exploration accents, orange Send action
+and three project-specific questions follow the user's selected sidebar reference.
+Keep the CSS grid and CaseStudyExplorer media queries synchronized. Below 900px,
+the **Open project chat** launcher opens a right-hand drawer distinct from the
+left-hand site Menu. A circular X closes it; short
+desktop windows retain a centered dialog. In single-column layouts, title,
+image and prose share a centered 38rem reading width. The same Explorer stays
+mounted across layout changes: drafts survive, passive resizing preserves
+article focus, and closing returns focus to its launcher. A short green rail
+segment and brief reduced-motion-aware header emphasis mark desktop docking, 24px
+below navigation. The divider stays attached to the column; the outer desktop
+scrollbar stays hidden while wheel and keyboard scrolling remain available.
+The approved mint background parallax travels at most 48px inside its own paint
+clip, with no control movement. Reduced motion keeps the accent static; drawer
+layouts omit it. Keep the depth hook's layout query aligned with the grid and
+Explorer. See the
+[behavior and validation record](docs/build-explorer-validation.md). The possible
+CipherCraft light-green image tint remains deferred.
 
 The navbar's Blog link opens `https://blog.drewclark.io` in a new tab, using the
 same text styling and hover treatment as Home and GitHub. On phones it appears
@@ -169,6 +184,9 @@ Each detail header has a keyboard-accessible Next control that cycles through
 all four projects and wraps to the first. Keep the bottom Previous/Next controls
 available too. Selecting a project scrolls its header below the fixed site nav,
 and the selection survives phone/tablet/desktop breakpoint changes.
+All projects and Next share the same 48px outlined navigation treatment, with
+stable targets, pointer press feedback, visible keyboard focus and reduced-motion
+support. See [navigation validation](docs/case-study-navigation-validation.md).
 
 ## Browser verification
 

@@ -78,10 +78,12 @@ export default function ProjectOverviewRow({ project, index, onOpen }) {
     return (
         <article
             className='work-gallery-card work-project-surface group relative'
+            data-project-id={project.id}
         >
             {/* Thumbnail */}
             <div
                 className={'work-gallery-art' + (treatment ? ' work-gallery-art--' + treatment : '')}
+                data-project-art
                 style={artSource ? { '--work-thumb-source': 'url("' + artSource + '")' } : undefined}
             >
                 <Thumbnail project={project} />
@@ -93,7 +95,7 @@ export default function ProjectOverviewRow({ project, index, onOpen }) {
                     {'Project ' + String(index + 1).padStart(2, '0')}
                 </span>
                 <h3 className='mt-2 text-lg font-semibold leading-snug text-white sm:text-xl'>
-                    {project.title}
+                    <span data-project-title className='inline-block'>{project.title}</span>
                 </h3>
                 {project.tagline && <p className='mt-1 text-base leading-6 text-brandGray-300'>{project.tagline}</p>}
 

@@ -295,9 +295,9 @@ test('overview chat comes before project browsing; late answers stay scoped', as
         const firstProject = await page.getByRole('button', { name: 'Read case study: ' + projects[0].title, exact: true }).boundingBox();
         expect(introChat.y + introChat.height).toBeLessThan(firstProject.y);
         await page.getByRole('button', { name: 'Read case study: ' + projects[0].title, exact: true }).click();
-        await page.getByRole('button', { name: 'Ask about the code', exact: true }).click();
-        await expect(chat.getByRole('combobox', { name: 'Chat scope' })).toHaveValue('project');
-        await expect(chat.getByRole('option', { name: projects[0].title })).toHaveCount(1);
+        await page.getByRole('button', { name: 'Open project chat', exact: true }).click();
+        await expect(chat).toHaveAttribute('data-project-scope', String(projects[0].id));
+        await expect(chat.locator('.case-build-project')).toHaveText(projects[0].title);
         await chat.getByRole('textbox').fill('Question for A');
         await chat.getByRole('button', { name: 'Ask', exact: true }).click();
         await expect.poll(() => calls.length).toBe(1);
@@ -308,8 +308,8 @@ test('overview chat comes before project browsing; late answers stay scoped', as
         await expect(chat.locator('button[type=submit]')).toBeDisabled();
         await page.setViewportSize({ width: 390, height: 844 });
         await page.getByRole('button', { name: /^Next project:/ }).click();
-        await page.getByRole('button', { name: 'Ask about the code', exact: true }).click();
-        await expect(chat.getByRole('option', { name: projects[1].title })).toHaveCount(1);
+        await page.getByRole('button', { name: 'Open project chat', exact: true }).click();
+        await expect(chat.locator('.case-build-project')).toHaveText(projects[1].title);
         await expect(chat.getByText('Question for A', { exact: true })).toHaveCount(0);
         await expect(chat.getByRole('textbox')).toHaveValue('');
         await chat.getByRole('textbox').fill('Question for B');
@@ -319,28 +319,28 @@ test('overview chat comes before project browsing; late answers stay scoped', as
         releaseFirst();
         await expect.poll(() => page.evaluate(() => localStorage.getItem('unified_project_chat'))).toContain('Delayed first case-study answer');
         await expect(chat.getByText('Delayed first case-study answer')).toHaveCount(0);
-        await page.getByRole('button', { name: 'Close Code Explorer' }).click();
+        await page.getByRole('button', { name: 'Close build explorer' }).click();
         await page.getByRole('button', { name: 'View ' + projects[0].title + ' details', exact: true }).click();
-        await page.getByRole('button', { name: 'Ask about the code', exact: true }).click();
+        await page.getByRole('button', { name: 'Open project chat', exact: true }).click();
         await expect(chat.getByText('Delayed first case-study answer')).toBeVisible();
         await expect(chat.getByRole('link', { name: 'ppo.cpp' })).toHaveAttribute('href', codeLink);
         await expect(chat.getByRole('textbox')).toHaveValue('Draft for A');
-        await chat.getByRole('combobox').selectOption('all');
+        await chat.getByRole('button', { name: 'Ask across projects', exact: true }).click();
         await expect(chat.getByText('Legacy global history')).toBeVisible();
         await chat.getByRole('textbox').fill('Across all projects');
         await chat.getByRole('button', { name: 'Ask', exact: true }).click();
         await expect.poll(() => calls.length).toBe(3);
         expect(calls[2]).toEqual({ question: 'Across all projects' });
         await expect(chat.getByRole('button', { name: 'Ask', exact: true })).toBeEnabled();
-        await chat.getByRole('combobox').selectOption('project');
+        await chat.getByRole('button', { name: 'Return to this project', exact: true }).click();
         await page.evaluate(() => {
             sessionStorage.setItem('drawer_question', 'Question from global drawer');
             sessionStorage.setItem('drawer_question_timestamp', String(Date.now()));
         });
         await expect.poll(() => calls.length).toBe(4);
         expect(calls[3]).toEqual({ question: 'Question from global drawer' });
-        await expect(chat.getByRole('combobox')).toHaveValue('all');
-        await page.getByRole('button', { name: 'Close Code Explorer' }).click();
+        await expect(chat).toHaveAttribute('data-project-scope', 'all');
+        await page.getByRole('button', { name: 'Close build explorer' }).click();
         await page.getByRole('button', { name: 'All projects', exact: false }).click();
         await expect(page.getByRole('heading', { name: 'My Portfolio Projects' })).toBeVisible();
     } finally {
@@ -392,7 +392,7 @@ test('case-study Explorer stays alongside all four desktop articles', async ({ p
     for (const [index, project] of projects.entries()) {
         const dialog = page.locator('.case-chat-dialog');
         await expect(dialog).toHaveCSS('position', 'sticky');
-        await expect(dialog.getByRole('option', { name: project.title })).toHaveCount(1);
+        await expect(dialog.locator('.case-build-project')).toHaveText(project.title);
         await page.getByRole('heading', { name: 'Project details' }).evaluate(el => el.scrollIntoView({ block: 'start' }));
         await expect(dialog.getByRole('button', { name: 'Ask', exact: true })).toBeInViewport();
         await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
@@ -406,17 +406,17 @@ test('case-study Explorer drawer preserves reading position, focus, and draft on
     await page.setViewportSize({ width: 390, height: 844 });
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await ready(page);
-    const launcher = page.getByRole('button', { name: 'Ask about the code', exact: true });
+    const launcher = page.getByRole('button', { name: 'Open project chat', exact: true });
     await expect(launcher).toHaveCount(0);
     await page.getByRole('button', { name: 'Read case study: ' + projects[1].title }).click();
     const dialog = page.locator('.case-chat-dialog');
-    const close = dialog.getByRole('button', { name: 'Close Code Explorer' });
+    const close = dialog.getByRole('button', { name: 'Close build explorer' });
     await page.getByRole('heading', { name: 'Project details' }).evaluate(el => el.scrollIntoView({ block: 'start' }));
     const readAt = await page.evaluate(() => window.scrollY);
     await expect(launcher).toBeInViewport();
     await launcher.press('Enter');
     await expect(close).toBeFocused();
-    await expect(dialog.getByRole('option', { name: projects[1].title })).toHaveCount(1);
+    await expect(dialog.locator('.case-build-project')).toHaveText(projects[1].title);
     await dialog.getByRole('textbox').fill('draft survives the drawer');
     await page.keyboard.press('Escape');
     await expect(launcher).toBeFocused();
@@ -432,7 +432,7 @@ test('case-study Explorer drawer preserves reading position, focus, and draft on
     await noOverflow(page);
 });
 
-test('wide case studies keep the reading column close to their roomy Explorer', async ({ page }) => {
+test('wide case studies keep the reading column close to their restrained Explorer', async ({ page }) => {
     await page.setViewportSize({ width: 1656, height: 940 });
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await ready(page);
@@ -448,14 +448,14 @@ test('wide case studies keep the reading column close to their roomy Explorer', 
     });
     expect(left).toBeGreaterThanOrEqual(40);
     expect(Math.abs(left - right)).toBeLessThan(1);
-    expect(chat.width).toBeGreaterThanOrEqual(520);
-    expect(chat.width).toBeLessThanOrEqual(545);
+    expect(chat.width).toBeGreaterThanOrEqual(350);
+    expect(chat.width).toBeLessThanOrEqual(405);
     expect(reading.width).toBeGreaterThan(550);
     expect(reading.width).toBeLessThanOrEqual(608);
     expect(chat.left - reading.right).toBeCloseTo(32, 0);
     expect(art.right).toBeCloseTo(reading.right, 0);
     expect(Math.abs(heading.y - chat.y)).toBeLessThan(1);
-    expect(input.width).toBeGreaterThan(400);
+    expect(input.width).toBeGreaterThan(320);
     await expect(page.getByRole('navigation', { name: 'Case study navigation' }).getByRole('button')).toHaveCount(2);
     await expect(page.getByRole('link', { name: 'View the ' + projects[1].title + ' source code on GitHub (opens in a new tab)' }))
         .toHaveAttribute('href', 'https://github.com/' + projects[1].repo);
@@ -615,10 +615,10 @@ test('composer supports multiline questions and reflects the real limit', async 
     await page.setViewportSize({ width: 390, height: 844 });
     await page.getByRole('button', { name: 'Read case study: ' + projects[2].title, exact: true }).click();
     await expect(composer).toBeHidden();
-    await page.getByRole('button', { name: 'Ask about the code', exact: true }).click();
+    await page.getByRole('button', { name: 'Open project chat', exact: true }).click();
     await expect(composer).toBeVisible();
     await expect(composer).toHaveValue('');
-    await expect(chat.getByRole('option', { name: projects[2].title })).toHaveCount(1);
+    await expect(chat.locator('.case-build-project')).toHaveText(projects[2].title);
     await noOverflow(page);
 });
 

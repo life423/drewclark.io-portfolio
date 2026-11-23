@@ -139,7 +139,7 @@
 @media (min-width: 1100px) and (min-height: 700px) {
     .work-studio-shell:has(.work-studio-case) {
         --case-column-gap: 2rem;
-        --case-explorer-width: clamp(22.5rem, 27vw, 25rem);
+        --case-explorer-width: clamp(20rem, 24vw, 23rem);
     }
 }
 @media (min-width: 720px) {
@@ -160,6 +160,42 @@
 }
 @media (prefers-reduced-motion: reduce) { .work-gallery-card { transition: none; } }
 
+/* Preserve orientation only at the gallery/detail boundary. The rest of the
+   page switches directly; no page-wide fade, new chrome or animation library. */
+html.project-view-transition::view-transition-old(root) { display: none; }
+html.project-view-transition::view-transition-new(root) { animation: none; }
+/* Keep a newly opened native dialog above any residual page snapshot. WebKit
+   can retain its default root fade briefly after a skipped transition settles. */
+html:has(.case-chat-dialog:modal)::view-transition-old(root) { display: none; }
+html:has(.case-chat-dialog:modal)::view-transition-new(root) { animation: none; }
+html.project-view-transition::view-transition-group(project-title),
+html.project-view-transition::view-transition-group(project-art) {
+    animation-duration: 240ms;
+    animation-timing-function: cubic-bezier(.2, .7, .2, 1);
+}
+html.project-view-transition::view-transition-old(project-title),
+html.project-view-transition::view-transition-new(project-title),
+html.project-view-transition::view-transition-old(project-art),
+html.project-view-transition::view-transition-new(project-art) {
+    animation-duration: 180ms;
+    mix-blend-mode: normal;
+}
+html.project-view-transition::view-transition-image-pair(project-art) {
+    overflow: hidden;
+    border-radius: .75rem;
+}
+#case-study-title:focus { outline: none; }
+#case-study-title[data-navigation-focus='keyboard']:focus-visible {
+    outline: 2px solid #75d3ae;
+    outline-offset: .35rem;
+    border-radius: .125rem;
+}
+@media (prefers-reduced-motion: reduce) {
+    html.project-view-transition::view-transition-group(*),
+    html.project-view-transition::view-transition-old(*),
+    html.project-view-transition::view-transition-new(*) { animation: none; }
+}
+
 .code-studio-surface {
     background: theme('colors.brandGray.800');
     border: 1px solid rgba(161, 161, 170, .36);
@@ -177,7 +213,7 @@
 /* Give the Explorer more room on wide screens without lengthening the article lines. */
 @media (min-width: 1510px) and (min-height: 700px) {
     .work-studio-shell:has(.work-studio-case) {
-        --case-explorer-width: clamp(28rem, 33vw, 34rem);
+        --case-explorer-width: clamp(22rem, 24vw, 25rem);
     }
 }
 
@@ -344,42 +380,92 @@
 }
 
 /* The case-study Explorer stays mounted when it switches from rail to drawer. */
+.case-chat-anchor { display: block; height: 1px; margin-bottom: -1px; pointer-events: none; }
 .case-chat-launcher {
     position: fixed;
     z-index: 40;
     right: max(1rem, env(safe-area-inset-right));
     bottom: max(1rem, env(safe-area-inset-bottom));
     min-height: 2.75rem;
+    transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
 }
 .case-chat-dialog {
+    isolation: isolate;
     position: fixed;
-    inset: auto 0 0;
-    margin: 0 auto;
-    width: min(100%, 42rem);
+    inset: 0 0 0 auto;
+    margin: 0;
+    width: min(calc(100% - 1rem), 26rem);
     max-width: 100%;
-    max-height: 92dvh;
+    height: 100dvh;
+    max-height: 100dvh;
     overflow-y: auto;
+    overflow-x: clip;
     overscroll-behavior: contain;
-    padding: .75rem max(.75rem, env(safe-area-inset-right)) max(.75rem, env(safe-area-inset-bottom)) max(.75rem, env(safe-area-inset-left));
+    scrollbar-width: thin;
+    padding: max(.75rem, env(safe-area-inset-top)) max(.75rem, env(safe-area-inset-right)) max(.75rem, env(safe-area-inset-bottom)) max(.75rem, env(safe-area-inset-left));
     border: 1px solid theme('colors.brandGray.700');
-    border-radius: 1rem 1rem 0 0;
+    border-radius: 1rem 0 0 1rem;
     background: theme('colors.brandGray.900');
     color: inherit;
+    transform: translateX(100%);
+    transition: transform 200ms cubic-bezier(.2, .7, .2, 1), display 200ms allow-discrete, overlay 200ms allow-discrete;
+}
+.case-chat-depth { display: none; }
+.case-chat-dialog[open] { transform: translateX(0); }
+@starting-style {
+    .case-chat-dialog[open]:modal { transform: translateX(100%); }
 }
 .case-chat-dialog::backdrop { background: rgb(0 0 0 / .65); }
 .case-chat-close {
     position: sticky;
-    top: 0;
+    top: max(.375rem, env(safe-area-inset-top));
     z-index: 2;
-    display: block;
+    display: grid;
+    place-items: center;
     margin: 0 0 .375rem auto;
+    width: 2.75rem;
+    height: 2.75rem;
+    min-width: 2.75rem;
     min-height: 2.75rem;
-    background: theme('colors.brandGray.900');
+    padding: 0;
+    border: 1px solid theme('colors.brandGray.600 / 40%');
+    border-radius: 999px;
+    /* Match the compact Menu's raised charcoal surface, without moving its target. */
+    background: linear-gradient(180deg, theme('colors.brandGray.700 / 90%'), theme('colors.brandGray.800'));
+    color: theme('colors.brandGreen.400');
+    box-shadow: 0 1px 3px rgb(0 0 0 / .12), inset 0 1px 0 rgb(255 255 255 / .065);
+    transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, box-shadow 120ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+    .case-chat-close:hover {
+        color: theme('colors.brandGreen.300');
+        box-shadow: 0 2px 5px rgb(0 0 0 / .16), inset 0 1px 0 rgb(255 255 255 / .08);
+    }
+    .case-chat-launcher:hover {
+        background: theme('colors.brandGray.700');
+        border-color: theme('colors.brandGreen.400');
+        color: theme('colors.brandGreen.100');
+    }
+}
+.case-chat-close:active {
+    background: linear-gradient(180deg, theme('colors.brandGray.800'), theme('colors.brandGray.700 / 90%'));
+    color: theme('colors.brandGreen.300');
+    box-shadow: inset 0 2px 4px rgb(0 0 0 / .25);
+}
+.case-chat-launcher:active {
+    background: theme('colors.brandGray.700');
+    border-color: theme('colors.brandGreen.400');
+    box-shadow: inset 0 1px 2px rgb(0 0 0 / .22);
+}
+.case-chat-close:focus-visible {
+    outline: 2px solid theme('colors.brandGreen.300');
+    outline-offset: 3px;
 }
 body:has(.case-chat-dialog:modal) { overflow: hidden; }
 
-/* Keep the sheet within thumb reach on phones; larger compact windows get a dialog. */
-@media (min-width: 640px) {
+/* A project drawer enters from the right, separate from the left-hand site
+   menu. Short desktop windows keep the existing centered reading companion. */
+@media (min-width: 900px) {
     .case-chat-dialog {
         inset: 0;
         margin: auto;
@@ -387,22 +473,62 @@ body:has(.case-chat-dialog:modal) { overflow: hidden; }
         height: fit-content;
         max-height: calc(100dvh - 3rem);
         border-radius: 1rem;
+        transform: translateY(.5rem);
     }
+    .case-chat-dialog[open] { transform: translateY(0); }
+    @starting-style { .case-chat-dialog[open]:modal { transform: translateY(.5rem); } }
 }
 
 @media (min-width: 900px) and (min-height: 700px) {
     body:has(.work-studio-case), .site-rails:has(.work-studio-case) { overflow-x: clip; }
-    .work-studio-case .work-studio-rail { align-self: stretch; }
+    .work-studio-case .work-studio-rail {
+        align-self: stretch;
+        border-left: 1px solid theme('colors.brandGray.700');
+    }
     .case-chat-launcher, .case-chat-close { display: none; }
     .case-chat-dialog {
         position: sticky;
-        inset: calc(var(--site-nav-rest-height, 4rem) + .75rem) auto auto;
+        inset: calc(var(--case-nav-height, var(--site-nav-rest-height, 4rem)) + 1.5rem) auto auto;
         margin: 0;
         width: 100%;
-        max-height: calc(100dvh - var(--site-nav-rest-height, 4rem) - 1.5rem);
+        max-height: calc(100dvh - var(--case-nav-height, var(--site-nav-rest-height, 4rem)) - 2.25rem);
+        /* Short laptop windows and enlarged text can still need scrolling.
+           Keep wheel, touch and keyboard access without an outer edge strip. */
+        scrollbar-width: none;
         padding: 0;
         border: 0;
         border-radius: 1rem;
         background: transparent;
+        height: auto;
+        opacity: 1;
+        transform: none;
+        transition: none;
     }
+    .case-chat-dialog::-webkit-scrollbar { display: none; }
+    /* A stationary paint clip contains the translated wash. Neither layer
+       contributes size or scrollable overflow, and controls remain above it. */
+    .case-chat-depth {
+        display: block;
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        overflow: clip;
+        contain: paint;
+        border-radius: inherit;
+        pointer-events: none;
+    }
+    .case-chat-depth-wash {
+        position: absolute;
+        inset: 2.125rem -1.875rem auto 0;
+        height: 18.75rem;
+        /* A clearer soft contour makes movement readable without adding
+           another shape, a moving border or tinting the controls themselves. */
+        background: radial-gradient(ellipse 100% 36% at 95% 48%, #6ee7b7 0%, #6ee7b7 18%, transparent 72%);
+        opacity: .14;
+        transform: translateY(var(--case-depth-offset, 0px));
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .case-chat-dialog, .case-chat-launcher, .case-chat-close { transition: none; }
+    .case-chat-depth-wash { transform: none; }
 }

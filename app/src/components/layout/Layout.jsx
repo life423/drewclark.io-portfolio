@@ -1,3 +1,4 @@
+/* eslint react/jsx-uses-react: "error", react/jsx-uses-vars: "error" */
 // FILE: app/src/components/layout/Layout.jsx
 import React, { lazy, Suspense, useEffect, useState } from 'react'
 import Navbar from '../navbar/Navbar'
@@ -55,6 +56,7 @@ export default function Layout({
 
             <main
                 id='content'
+                inert={drawerOpen ? '' : undefined}
                 className='flex-grow transition-transform duration-300'
             >
                 {children}

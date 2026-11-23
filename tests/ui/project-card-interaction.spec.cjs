@@ -126,9 +126,9 @@ test('a roomy window uses the reading-side Explorer and resizing preserves its d
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await ready(page);
     await page.getByRole('button', { name: 'Read case study: ' + projects[2].title, exact: true }).click();
-    const dialog = page.getByRole('dialog', { name: 'Case study Code Explorer' });
+    const dialog = page.getByRole('dialog', { name: 'Build explorer' });
     const input = dialog.getByRole('textbox', { name: 'Question for Project Chat' });
-    const launcher = page.getByRole('button', { name: 'Ask about the code', exact: true });
+    const launcher = page.getByRole('button', { name: 'Open project chat', exact: true });
     await expect(dialog).toHaveCSS('position', 'sticky');
     await expect(launcher).toBeHidden();
     const [reading, panel] = await page.evaluate(() => ['.work-studio-depth .prose', '.case-chat-dialog']
