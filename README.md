@@ -80,6 +80,12 @@ jobs:
 
 ## Portfolio presentation
 
+Project gallery cards pair their 3px pointer-hover lift with a soft, two-layer
+shadow. Keep that elevation visible alongside the keyboard focus ring when a
+control inside the card is focused. Preserve the resting card color on hover
+and focus; the user rejected the #303733 interaction fill. Touch layouts stay
+still; reduced motion keeps the shadow feedback without movement or transitions.
+
 The navbar's Blog link opens `https://blog.drewclark.io` in a new tab, using the
 same text styling and hover treatment as Home and GitHub. On phones it appears
 in the existing navigation drawer with a 44px touch target and closes the drawer

@@ -58,6 +58,7 @@
     gap: var(--work-gallery-gap);
 }
 .work-gallery-card {
+    --work-card-shadow: 0 .35rem 1rem rgb(0 0 0 / .16);
     min-width: 0;
     display: grid;
     align-content: start;
@@ -65,20 +66,15 @@
     background: #292f2c;
     border-radius: 1rem;
     overflow: hidden;
-    box-shadow: 0 .35rem 1rem rgb(0 0 0 / .16);
-    transition: transform .18s ease-out, box-shadow .18s ease-out, background-color .18s ease-out;
+    box-shadow: var(--work-card-shadow);
+    transition: transform .18s ease-out, box-shadow .18s ease-out;
 }
 .work-gallery-card:focus-within {
-    background: #303733;
-    box-shadow: 0 0 0 2px #75d3ae;
+    box-shadow: 0 0 0 2px #75d3ae, var(--work-card-shadow);
 }
 @media (hover: hover) and (pointer: fine) {
     .work-gallery-card:hover {
-        background: #303733;
-        box-shadow: 0 .65rem 1.65rem rgb(0 0 0 / .42);
-    }
-    .work-gallery-card:focus-within {
-        box-shadow: 0 0 0 2px #75d3ae;
+        --work-card-shadow: 0 1rem 2rem -.5rem rgb(0 0 0 / .6), 0 .35rem .75rem -.2rem rgb(0 0 0 / .45);
     }
 }
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
