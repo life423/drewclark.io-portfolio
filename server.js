@@ -112,7 +112,14 @@ app.use(
     express.static(distDir, {
         setHeaders(res, filePath) {
             const name = path.basename(filePath)
-            if (name === 'index.html' || name === 'serviceWorker.js') {
+            if (name === 'ebay-return.html') {
+                // This page handles eBay consent codes. Allow only its inline relay.
+                res.setHeader('Cache-Control', 'no-store')
+                res.setHeader('Referrer-Policy', 'no-referrer')
+                res.setHeader('X-Robots-Tag', 'noindex, nofollow')
+                res.setHeader('Content-Security-Policy',
+                    "default-src 'none'; script-src 'sha256-g4UVUraSI0hdkVV82SeARyHPNjP1RWDmThCrh7nZsxU='; base-uri 'none'; form-action 'none'; frame-ancestors 'none'")
+            } else if (name === 'index.html' || name === 'serviceWorker.js') {
                 res.setHeader('Cache-Control', 'no-cache')
             } else if (HASHED_ASSET.test(name)) {
                 res.setHeader('Cache-Control', 'public, max-age=31536000, immutable')
