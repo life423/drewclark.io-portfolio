@@ -12,7 +12,7 @@ import { platformIcon, downloadTitle, downloadAriaLabel } from './platforms'
  * These use viewport breakpoints (sm:) rather than the card's @sm: container
  * queries, because @tailwindcss/container-queries isn't installed.
  */
-const base =
+const action =
     'relative z-10 inline-flex flex-1 sm:flex-none items-center justify-center gap-2 whitespace-nowrap ' +
     'rounded-full px-3 sm:px-4 min-h-11 text-sm font-semibold ' +
     'transition-colors duration-200 motion-reduce:transition-none touch-manipulation ' +
@@ -27,7 +27,6 @@ const primary =
 
 // Secondary: outlined and low-chroma so it reads as the quieter option.
 // brandGray-500 is the lightest border that still clears 3:1 against the card.
-const compactSource = base.replace('flex-1 sm:flex-none', 'shrink-0').replace('px-3 sm:px-4', 'w-11')
 const secondary =
     'border border-brandGray-500 text-brandGray-200 bg-transparent ' +
     'hover:border-brandGreen-400/70 hover:text-brandGreen-300 hover:bg-brandGreen-900/20 ' +
@@ -36,25 +35,27 @@ const secondary =
 // The card can be clickable; following a link should not also count as a card click
 const stopCardClick = event => event.stopPropagation()
 
-export default function ProjectLinks({ title, liveUrl, liveLabel = 'Try it live', repo, downloads = [], compact = false, emphasizeDownloads = false }) {
-    const files = Array.isArray(downloads) ? downloads : []
-    if (!liveUrl && !repo && files.length === 0) return null
-
-    const pairSourceWithDownloads = compact && Boolean(liveUrl && repo) && files.length === 1
-    const source = repo && (
+export function ProjectSourceLink({ title, repo, corner = false }) {
+    if (!repo) return null
+    return (
         <a
             href={`https://github.com/${repo}`}
             target='_blank'
             rel='noopener noreferrer'
             onClick={stopCardClick}
-            aria-label={`View the ${title} source code on GitHub (opens in a new tab)`}
-            className={(compact ? compactSource : base) + ' ' + secondary}
+            aria-label={`View code for ${title} on GitHub (opens in a new tab)`}
+            title={corner ? 'View code on GitHub' : undefined}
+            className={corner ? 'project-source-corner' : action + ' project-source-link'}
         >
-            <FaGithub className='h-[18px] w-[18px] shrink-0' aria-hidden='true' focusable='false' />
-            {!compact && <span>View code</span>}
+            <FaGithub size={corner ? 22 : 18} className='shrink-0' aria-hidden='true' focusable='false' />
+            {!corner && <span>View code</span>}
         </a>
     )
+}
 
+export default function ProjectLinks({ title, liveUrl, liveLabel = 'Try it live', repo, downloads = [], compact = false, emphasizeDownloads = false }) {
+    const files = Array.isArray(downloads) ? downloads : []
+    if (!liveUrl && !repo && files.length === 0) return null
     return (
         <div className={'flex flex-wrap items-center gap-2 sm:gap-3 ' + (compact ? 'work-gallery-actions' : 'mt-3 sm:mt-4')}>
             {liveUrl && (
@@ -64,7 +65,7 @@ export default function ProjectLinks({ title, liveUrl, liveLabel = 'Try it live'
                     rel='noopener noreferrer'
                     onClick={stopCardClick}
                     aria-label={`${liveLabel}: ${title} (opens in a new tab)`}
-                    className={`${base} ${primary}`}
+                    className={`${action} ${primary}`}
                 >
                     {liveLabel.startsWith('Play')
                         ? <LuPlay className='h-4 w-4 shrink-0' aria-hidden='true' />
@@ -73,7 +74,7 @@ export default function ProjectLinks({ title, liveUrl, liveLabel = 'Try it live'
                 </a>
             )}
             {files.length > 0 && (
-                <div className={'flex items-center gap-2 sm:gap-3 ' + (pairSourceWithDownloads ? 'shrink-0' : 'flex-wrap')}>
+                <div className='flex max-w-full flex-wrap items-center gap-2 sm:gap-3'>
                     {files.map(file => {
                         const Icon = platformIcon(file.platform)
                         return (
@@ -83,17 +84,16 @@ export default function ProjectLinks({ title, liveUrl, liveLabel = 'Try it live'
                                 onClick={stopCardClick}
                                 title={downloadTitle(file)}
                                 aria-label={downloadAriaLabel(title, file)}
-                                className={base + ' ' + (liveUrl && !emphasizeDownloads ? secondary : primary)}
+                                className={action + ' ' + (liveUrl && !emphasizeDownloads ? secondary : primary)}
                             >
                                 <Icon className='h-4 w-4 shrink-0' aria-hidden='true' />
                                 <span>{file.label}</span>
                             </a>
                         )
                     })}
-                    {pairSourceWithDownloads && source}
                 </div>
             )}
-            {!pairSourceWithDownloads && source}
+            <ProjectSourceLink title={title} repo={repo} />
         </div>
     )
 }

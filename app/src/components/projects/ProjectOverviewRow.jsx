@@ -13,7 +13,7 @@ import {
     LuSmartphone,
     LuUsers,
 } from 'react-icons/lu'
-import ProjectLinks from './ProjectLinks'
+import ProjectLinks, { ProjectSourceLink } from './ProjectLinks'
 
 // Icons a project's facts can name in projects.json
 const FACT_ICONS = {
@@ -137,15 +137,17 @@ export default function ProjectOverviewRow({ project, index, onOpen }) {
                     >
                         Read case study <LuArrowRight className='h-4 w-4' aria-hidden='true' />
                     </button>
-                    <ProjectLinks
-                        title={project.title}
-                        liveUrl={project.liveUrl}
-                        liveLabel={project.liveLabel || 'Play'}
-                        repo={project.repo}
-                        downloads={isCuda ? project.downloads.map(file => ({ ...file, label: 'Windows' })) : project.downloads}
-                        emphasizeDownloads={isCuda}
-                        compact
-                    />
+                    <div className='work-gallery-footer'>
+                        <ProjectLinks
+                            title={project.title}
+                            liveUrl={project.liveUrl}
+                            liveLabel={project.liveLabel || 'Play'}
+                            downloads={isCuda ? project.downloads.map(file => ({ ...file, label: 'Windows' })) : project.downloads}
+                            emphasizeDownloads={isCuda}
+                            compact
+                        />
+                        <ProjectSourceLink title={project.title} repo={project.repo} corner />
+                    </div>
                 </div>
             </div>
 

@@ -13,47 +13,78 @@
     align-items: center;
     justify-content: center;
     min-height: 52px;
-    padding: 12px 20px;
-    overflow: hidden;
-    border: 1px solid var(--action-green);
     border-radius: 9999px;
     font-weight: 700;
     line-height: 1.5;
     text-align: center;
     touch-action: manipulation;
-    transition: color 180ms ease-out, background-color 180ms ease-out, transform 120ms ease-out;
-}
-
-.hero-action > span {
-    position: relative;
-    z-index: 1;
 }
 
 .hero-action--primary {
-    background-color: var(--action-green);
+    --face-color: var(--action-green);
     color: var(--action-ink);
+}
+
+/* Move the visible face and keep the anchor's hit area in place. */
+.hero-action__face {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    align-self: stretch;
+    overflow: hidden;
+    padding: 12px 20px;
+    border: 1px solid var(--face-edge, var(--action-green));
+    border-radius: inherit;
+    background-color: var(--face-color);
+    box-shadow: 0 2px 4px rgb(0 0 0 / .24);
+    pointer-events: none;
+    transition: translate var(--press-duration, 160ms) ease-out,
+        box-shadow var(--press-duration, 160ms) ease-out,
+        background-color var(--press-duration, 160ms) ease-out,
+        border-color var(--fill-duration, 160ms) ease-out;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .hero-action:hover .hero-action__face {
+        translate: 0 -3px;
+        box-shadow: 0 7px 14px rgb(0 0 0 / .32);
+    }
+    .hero-action--primary:hover { --face-color: theme('colors.brandGreen.300'); }
+}
+
+.hero-action:is(:active, [data-touch-down]) .hero-action__face {
+    translate: 0 1px;
+    box-shadow: 0 1px 2px rgb(0 0 0 / .24);
+    --press-duration: 65ms;
+}
+.hero-action--primary:is(:active, [data-touch-down]) {
+    --face-color: theme('colors.brandGreen.500');
 }
 
 .hero-action--outline {
     --fill-duration: 420ms;
     --fill-easing: cubic-bezier(0.22, 1, 0.36, 1);
     /* Keep the outlined text readable even over the bright leaves. */
-    background-color: theme('colors.brandGray.900 / 90%');
+    --face-color: theme('colors.brandGray.900 / 90%');
     color: var(--action-green);
-    transition: border-color var(--fill-duration) ease-out, transform 120ms ease-out;
 }
 
-.hero-action--outline::before {
+.hero-action--outline .hero-action__face::before {
     content: '';
     position: absolute;
     inset: 0;
     background: linear-gradient(180deg, var(--action-green) 0%, theme('colors.brandBlue.400') 42%, theme('colors.brandBlue.500') 100%);
-    transform: translateY(101%);
+    transform: translateY(var(--fill-offset, 101%));
     transition: transform var(--fill-duration) var(--fill-easing);
     pointer-events: none;
 }
 
 /* Reveal dark lettering with the fill, so the unfilled portion stays readable. */
+.hero-action__label, .hero-action__filled-label {
+    position: relative;
+    z-index: 1;
+}
 .hero-action--outline .hero-action__filled-label {
     position: absolute;
     inset: 0;
@@ -62,12 +93,12 @@
     justify-content: center;
     padding: inherit;
     color: var(--action-ink);
-    clip-path: inset(100% 0 0);
+    clip-path: inset(var(--fill-offset, 100%) 0 0);
     transition: clip-path var(--fill-duration) var(--fill-easing);
     pointer-events: none;
 }
 
-.hero-action--outline::after {
+.hero-action--outline .hero-action__face::after {
     content: '';
     position: absolute;
     top: -35%;
@@ -77,6 +108,7 @@
     background: linear-gradient(100deg, transparent, rgb(255 255 255 / 25%), transparent);
     transform: skewX(-18deg);
     opacity: 0;
+    animation: var(--shine-name, none) 500ms ease-out var(--fill-duration);
     pointer-events: none;
 }
 
@@ -87,24 +119,10 @@
 }
 
 @media (hover: hover) {
-    .hero-action--primary:hover {
-        background-color: theme('colors.brandGreen.300');
-    }
-
     .hero-action--outline:hover {
-        border-color: theme('colors.brandBlue.400');
-    }
-
-    .hero-action--outline:hover::before {
-        transform: translateY(0);
-    }
-
-    .hero-action--outline:hover .hero-action__filled-label {
-        clip-path: inset(0);
-    }
-
-    .hero-action--outline:hover::after {
-        animation: hero-action-shine 500ms ease-out var(--fill-duration);
+        --face-edge: theme('colors.brandBlue.400');
+        --fill-offset: 0px;
+        --shine-name: hero-action-shine;
     }
 }
 
@@ -113,33 +131,10 @@
     outline-offset: 4px;
 }
 
-.hero-action--outline:focus-visible,
-.hero-action--outline:active {
-    border-color: theme('colors.brandBlue.400');
-}
-
-.hero-action--outline:focus-visible::before,
-.hero-action--outline:active::before {
-    transform: translateY(0);
-}
-
-.hero-action--outline:focus-visible .hero-action__filled-label,
-.hero-action--outline:active .hero-action__filled-label {
-    clip-path: inset(0);
-}
-
-.hero-action--outline:focus-visible::after,
-.hero-action--outline:active::after {
-    animation: hero-action-shine 500ms ease-out var(--fill-duration);
-}
-
-.hero-action:active {
-    background-color: theme('colors.brandGreen.500');
-    transform: translateY(1px);
-}
-
-.hero-action--outline:active {
-    background-color: theme('colors.brandGray.900 / 90%');
+.hero-action--outline:is(:focus-visible, :active, [data-touch-down]) {
+    --face-edge: theme('colors.brandBlue.400');
+    --fill-offset: 0px;
+    --shine-name: hero-action-shine;
 }
 
 @media (max-width: 479px) {
@@ -149,17 +144,17 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .hero-action,
-    .hero-action--outline::before,
+    .hero-action__face,
+    .hero-action--outline .hero-action__face::before,
     .hero-action--outline .hero-action__filled-label {
         transition: none;
     }
 
-    .hero-action--outline::after {
-        animation: none !important;
+    .hero-action--outline .hero-action__face::after {
+        animation: none;
     }
 
-    .hero-action:active {
-        transform: none;
+    .hero-action:is(:hover, :active, [data-touch-down]) .hero-action__face {
+        translate: none;
     }
 }

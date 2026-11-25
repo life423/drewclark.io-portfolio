@@ -155,7 +155,14 @@ is saved at `app/public/projects/ascend-avoid-best-emerald-master.png` for a
 possible future detail-view switch. Preserve the natural proportions. Generation
 prompt and provenance are in `docs/ascend-avoid-emerald-art.md`.
 
-The hero offers Featured Projects and a direct Play Ascend-Avoid link. The latter
+The two hero links, Featured Projects and Play Ascend-Avoid, rise 3px on pointer
+hover and press down 1px on activation. Their hit areas stay fixed, and reduced
+motion keeps the feedback stationary.
+The gallery puts a GitHub mark in the bottom-right corner of each project tile,
+aligned with the footer actions and inset by the tile's content padding.
+It opens that project's repository. The artwork opens the case study, where
+the repository link has a visible View code label.
+The hero also offers a direct Play Ascend-Avoid link. It
 starts with a green outline, then a green-to-teal-to-blue gradient rises into it over
 420ms on hover, keyboard focus or press. One subtle shine follows the fill.
 Dark lettering is revealed with the fill to preserve contrast throughout the
