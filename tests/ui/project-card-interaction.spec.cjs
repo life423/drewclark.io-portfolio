@@ -1,4 +1,4 @@
-/* global document, window, innerWidth, innerHeight, getComputedStyle */
+/* global document, innerWidth, innerHeight, getComputedStyle */
 const { test, expect } = require('@playwright/test');
 const projects = require('../../app/src/data/projects.json');
 
@@ -70,7 +70,7 @@ test('card actions stay independent from case-study activation', async ({ page, 
     }));
     await ready(page);
     const card = page.locator('.work-gallery-card').first();
-    for (const name of [/Visit the site: CudaRL-Arena/, /View the CudaRL-Arena source code/]) {
+    for (const name of [/Visit the site: CudaRL-Arena/, /View code for CudaRL-Arena/]) {
         const link = card.getByRole('link', { name });
         const target = await link.getAttribute('href');
         const popupPromise = page.waitForEvent('popup');
@@ -81,6 +81,41 @@ test('card actions stay independent from case-study activation', async ({ page, 
         await expect(page.locator('.work-studio-case')).toHaveCount(0);
         await popup.close();
     }
+});
+
+test('Featured Projects lifts and presses while View code stays flat', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await ready(page);
+    const featured = page.getByRole('link', { name: 'Featured Projects', exact: true });
+    const face = featured.locator('span');
+    const offset = () => face.evaluate(el =>
+        el.getBoundingClientRect().top - el.parentElement.getBoundingClientRect().top);
+    await featured.hover();
+    await expect.poll(offset).toBeCloseTo(-3, 1);
+    await page.mouse.down();
+    await expect.poll(offset).toBeCloseTo(1, 1);
+    await page.mouse.up();
+    await expect(page).toHaveURL(/#projects$/);
+
+    const card = page.locator('.work-gallery-card').first();
+    const code = card.getByRole('link', { name: /^View code for/ });
+    await expect(code).toHaveAccessibleName(/View code for CudaRL-Arena on GitHub/);
+    await expect(code).toHaveText('');
+    await code.hover();
+    await expect(code).toHaveCSS('color', 'rgb(167, 243, 208)');
+    await expect(card).toHaveCSS('transform', 'none');
+    await page.mouse.down();
+    await expect(code).toHaveCSS('color', 'rgb(52, 211, 153)');
+    await expect(code).toHaveCSS('transform', 'none');
+    // Release away from the link. The popup destination is covered separately.
+    await page.mouse.move(0, 0);
+    await page.mouse.up();
+
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await featured.hover();
+    await expect(face).toHaveCSS('translate', 'none');
+    await expect.poll(offset).toBeCloseTo(0, 1);
+    await expect(face).toHaveCSS('transition-duration', '0s');
 });
 
 test('keyboard activation and reduced motion preserve project navigation', async ({ page }) => {

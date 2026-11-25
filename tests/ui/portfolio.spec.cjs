@@ -175,33 +175,38 @@ test('keyboard cycling, wrapping, card selection and focus feedback', async ({ p
 test('outline action hover, press, keyboard focus and reduced motion', async ({ page }) => {
     await ready(page);
     const play = page.locator('.hero-action--outline');
+    const face = play.locator('.hero-action__face');
     await expect(play).toHaveCSS('color', 'rgb(52, 211, 153)');
     await play.hover();
-    await expect.poll(() => play.evaluate(a => getComputedStyle(a, '::before').transform)).toBe('matrix(1, 0, 0, 1, 0, 0)');
+    await expect(face).toHaveCSS('translate', '0px -3px');
+    await expect.poll(() => face.evaluate(el => getComputedStyle(el, '::before').transform)).toBe('matrix(1, 0, 0, 1, 0, 0)');
     const filledLabel = play.locator('.hero-action__filled-label');
     await expect(filledLabel).toHaveCSS('color', 'rgb(24, 24, 27)');
     await expect(filledLabel).toHaveCSS('clip-path', /inset\(0px(?: 0px){0,3}\)/);
-    const gradient = await play.evaluate(a => getComputedStyle(a, '::before').backgroundImage);
+    const gradient = await face.evaluate(el => getComputedStyle(el, '::before').backgroundImage);
     expect(gradient).toContain('rgb(52, 211, 153)');
     expect(gradient).toContain('rgb(14, 165, 233)');
-    expect(await play.evaluate(a => getComputedStyle(a, '::after').animationName)).toBe('hero-action-shine');
+    expect(await face.evaluate(el => getComputedStyle(el, '::after').animationName)).toBe('hero-action-shine');
     await page.mouse.down();
-    await expect(play).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 1)');
+    await expect(face).toHaveCSS('translate', '0px 1px');
+    await expect(play).toHaveCSS('transform', 'none');
     await page.mouse.move(0, 0);
     await page.mouse.up();
     await page.keyboard.press('Tab');
     await play.focus();
     await expect(play).toBeFocused();
     expect(await play.evaluate(a => getComputedStyle(a).outlineStyle)).toBe('solid');
-    await expect.poll(() => play.evaluate(a => getComputedStyle(a, '::before').transform)).toBe('matrix(1, 0, 0, 1, 0, 0)');
+    await expect.poll(() => face.evaluate(el => getComputedStyle(el, '::before').transform)).toBe('matrix(1, 0, 0, 1, 0, 0)');
     await expect(filledLabel).toHaveCSS('clip-path', /inset\(0px(?: 0px){0,3}\)/);
     // Scrolling fades only the decorative background, keeping both labels legible.
     await page.mouse.wheel(0, 300);
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollTop)).toBeGreaterThan(100);
     await expect(play.locator('xpath=ancestor::section')).toHaveCSS('opacity', '1');
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    expect(await play.evaluate(a => getComputedStyle(a, '::before').transitionDuration)).toBe('0s');
-    expect(await play.evaluate(a => getComputedStyle(a, '::after').animationName)).toBe('none');
+    await play.hover();
+    await expect(face).toHaveCSS('translate', 'none');
+    expect(await face.evaluate(el => getComputedStyle(el, '::before').transitionDuration)).toBe('0s');
+    expect(await face.evaluate(el => getComputedStyle(el, '::after').animationName)).toBe('none');
 });
 
 test('chat success, sources, loading and recoverable failure', async ({ page }) => {
@@ -459,7 +464,7 @@ test('wide case studies keep the reading column close to their restrained Explor
     expect(Math.abs(heading.y - chat.y)).toBeLessThan(1);
     expect(input.width).toBeGreaterThan(320);
     await expect(page.getByRole('navigation', { name: 'Case study navigation' }).getByRole('button')).toHaveCount(2);
-    await expect(page.getByRole('link', { name: 'View the ' + projects[1].title + ' source code on GitHub (opens in a new tab)' }))
+    await expect(page.getByRole('link', { name: 'View code for ' + projects[1].title + ' on GitHub (opens in a new tab)' }))
         .toHaveAttribute('href', 'https://github.com/' + projects[1].repo);
 });
 
@@ -546,10 +551,7 @@ test('the studio explains source grounding and Cryptography actions fit on 1126p
         const rect = link.getBoundingClientRect();
         return { y: rect.y, bottom: rect.bottom, href: link.getAttribute('href') };
     }));
-    expect(actions).toHaveLength(3);
-    expect(actions.map(link => link.href)).toEqual([
-        ...projects[1].downloads.map(item => item.url), 'https://github.com/' + projects[1].repo,
-    ]);
+    expect(actions.map(link => link.href)).toEqual(projects[1].downloads.map(item => item.url));
     expect(actions.every(link => Math.abs(link.y - actions[0].y) < 1)).toBe(true);
     const margins = await Promise.all([crypto, cuda].map(card => card.evaluate(el => {
         const cardRect = el.getBoundingClientRect(), actionRect = el.querySelector('.work-gallery-actions').getBoundingClientRect();
@@ -558,24 +560,42 @@ test('the studio explains source grounding and Cryptography actions fit on 1126p
     expect(Math.abs(margins[0] - margins[1])).toBeLessThan(1);
     await page.setViewportSize({ width: 390, height: 844 });
     await noOverflow(page);
-    await expect(crypto.locator('.work-gallery-actions a')).toHaveCount(3);
+    await expect(crypto.locator('.work-gallery-actions a')).toHaveCount(2);
 });
 
-test('CUDA preview and source stay together as the card actions wrap', async ({ page }) => {
+test('each project keeps one repository link in its padded bottom-right corner at every gallery width', async ({ page }) => {
     await ready(page);
-    const actions = page.getByRole('button', { name: 'Read case study: ' + projects[0].title, exact: true })
-        .locator('xpath=ancestor::article').locator('.work-gallery-actions a');
-    for (const width of [320, 390, 768, 1126, 1280, 1440, 1810]) {
+    const cards = page.locator('.work-gallery-card');
+    const windows = cards.first().getByRole('link', { name: /Windows/ });
+    await expect(windows).toHaveAttribute('href', projects[0].downloads[0].url);
+    await expect(windows).toHaveText('Windows');
+    await expect(windows).toHaveCSS('background-color', 'rgb(52, 211, 153)');
+    for (const width of [320, 390, 720, 768, 1126, 1280, 1440, 1810]) {
         await page.setViewportSize({ width, height: 900 });
-        const links = await actions.evaluateAll(links => links.map(link => ({
-            href: link.getAttribute('href'), y: link.getBoundingClientRect().y,
-        })));
-        expect(links).toHaveLength(3);
-        expect(links[1].href).toBe(projects[0].downloads[0].url);
-        await expect(actions.nth(1)).toHaveText('Windows');
-        await expect(actions.nth(1)).toHaveCSS('background-color', 'rgb(52, 211, 153)');
-        expect(links[2].href).toBe('https://github.com/' + projects[0].repo);
-        expect(Math.abs(links[1].y - links[2].y)).toBeLessThan(1);
+        const links = await cards.locator('.project-source-corner').evaluateAll(nodes => nodes.map(link => {
+            const rect = link.getBoundingClientRect();
+            const tile = link.closest('article');
+            const card = tile.getBoundingClientRect();
+            const padding = getComputedStyle(tile.querySelector('.work-gallery-copy'));
+            const actions = [...tile.querySelectorAll('.work-gallery-actions a')];
+            return {
+                href: link.href, width: rect.width, height: rect.height,
+                right: card.right - rect.right, bottom: card.bottom - rect.bottom,
+                paddingRight: parseFloat(padding.paddingRight), paddingBottom: parseFloat(padding.paddingBottom),
+                gap: Math.min(...actions.map(action => rect.left - action.getBoundingClientRect().right)),
+            };
+        }));
+        expect(links.map(link => link.href)).toEqual(projects.map(project => 'https://github.com/' + project.repo));
+        for (const link of links) {
+            expect(link.width).toBeGreaterThanOrEqual(44);
+            expect(link.height).toBeGreaterThanOrEqual(44);
+            expect(link.paddingRight).toBeGreaterThanOrEqual(16);
+            expect(link.paddingBottom).toBeGreaterThanOrEqual(16);
+            expect(Math.abs(link.right - link.paddingRight)).toBeLessThan(2);
+            expect(Math.abs(link.bottom - link.paddingBottom)).toBeLessThan(2);
+            expect(link.gap).toBeGreaterThanOrEqual(11.9);
+        }
+        await expect(cards.locator('.work-gallery-actions .project-source-link')).toHaveCount(0);
     }
 });
 

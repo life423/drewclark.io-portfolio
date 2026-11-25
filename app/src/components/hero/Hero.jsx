@@ -1,4 +1,5 @@
-import { useRef, useCallback } from 'react'
+/* eslint react/jsx-uses-vars: "error" */
+import { useRef, useCallback, useState } from 'react'
 import useScrollPosition from '../../hooks/useScrollPosition'
 
 // Import both WebP and JPG versions
@@ -14,6 +15,22 @@ import NeuralNetworkCanvas from './NeuralNetworkCanvas'
 import TypedTextEffect from './TypedTextEffect'
 
 const HERO_TAGLINE_DELAY = 600
+
+function HeroAction({ className, children, ...linkProps }) {
+    const [touchDown, setTouchDown] = useState(false)
+    return (
+        <a
+            {...linkProps}
+            className={`hero-action ${className}`}
+            data-touch-down={touchDown || undefined}
+            onTouchStart={() => setTouchDown(true)}
+            onTouchEnd={() => setTouchDown(false)}
+            onTouchCancel={() => setTouchDown(false)}
+        >
+            <span className='hero-action__face'>{children}</span>
+        </a>
+    )
+}
 
 export default function Hero() {
     const heroRef = useRef(null)
@@ -202,19 +219,19 @@ export default function Hero() {
                     focusStage={4}
                 >
                     <div className='hero-actions'>
-                        <a href='#projects' className='hero-action hero-action--primary'>
-                            <span>Featured Projects</span>
-                        </a>
-                        <a
+                        <HeroAction href='#projects' className='hero-action--primary'>
+                            Featured Projects
+                        </HeroAction>
+                        <HeroAction
                             href='https://ascendavoid.com'
                             target='_blank'
                             rel='noopener noreferrer'
                             aria-label='Play Ascend-Avoid (opens in a new tab)'
-                            className='hero-action hero-action--outline'
+                            className='hero-action--outline'
                         >
-                            <span>Play Ascend-Avoid</span>
+                            <span className='hero-action__label'>Play Ascend-Avoid</span>
                             <span className='hero-action__filled-label' aria-hidden='true'>Play Ascend-Avoid</span>
-                        </a>
+                        </HeroAction>
                     </div>
                 </ProgressiveElement>
             </div>

@@ -85,12 +85,12 @@
     box-shadow: 0 0 0 2px #75d3ae, var(--work-card-shadow);
 }
 @media (hover: hover) and (pointer: fine) {
-    .work-gallery-card:hover {
+    .work-gallery-card:hover:not(:has(.project-source-corner:hover)) {
         --work-card-shadow: 0 1rem 2rem -.5rem rgb(0 0 0 / .6), 0 .35rem .75rem -.2rem rgb(0 0 0 / .45);
     }
 }
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-    .work-gallery-card:hover { transform: translateY(-4px) scale(1.035); }
+    .work-gallery-card:hover:not(:has(.project-source-corner:hover)) { transform: translateY(-4px) scale(1.035); }
     .work-studio-overview .work-gallery-card:hover { z-index: 2; }
 }
 .work-gallery-art {
@@ -208,7 +208,52 @@ html.project-view-transition::view-transition-image-pair(project-art) {
 }
 
 .work-gallery-ctas { padding-top: .75rem; }
-.work-gallery-actions { padding-top: .25rem; }
+.work-gallery-footer {
+    display: flex;
+    align-items: flex-end;
+    gap: .75rem;
+    padding-top: .25rem;
+}
+.work-gallery-actions { flex: 1; min-width: 0; align-self: center; }
+
+.project-source-corner {
+    position: relative;
+    z-index: 10;
+    flex: none;
+    margin-inline-start: auto;
+    display: grid;
+    place-items: center;
+    width: max(44px, 3rem);
+    height: max(44px, 3rem);
+    color: theme('colors.brandGray.300');
+    touch-action: manipulation;
+}
+.project-source-corner:focus-visible {
+    outline: 2px solid theme('colors.brandGreen.200');
+    outline-offset: -5px;
+    border-radius: .8rem;
+}
+@media (hover: hover) and (pointer: fine) {
+    .project-source-corner:hover { color: theme('colors.brandGreen.200'); }
+}
+.project-source-corner:active { color: theme('colors.brandGreen.400'); }
+
+.project-source-link {
+    border: 1px solid theme('colors.brandGray.500');
+    background-color: theme('colors.brandGray.800');
+    color: theme('colors.brandGray.100');
+}
+.project-source-link svg { color: theme('colors.brandGreen.200'); }
+@media (hover: hover) and (pointer: fine) {
+    .project-source-link:hover {
+        border-color: theme('colors.brandGreen.300');
+        background-color: color-mix(in srgb, theme('colors.brandGreen.900') 35%, theme('colors.brandGray.800'));
+    }
+}
+.project-source-link:active {
+    border-color: theme('colors.brandGreen.300');
+    background-color: theme('colors.brandGray.900');
+}
 
 /* Give the Explorer more room on wide screens without lengthening the article lines. */
 @media (min-width: 1510px) and (min-height: 700px) {
