@@ -31,6 +31,14 @@ const SKIPPED_NAMES = new Set([
     'package-lock.json', 'yarn.lock', 'pnpm-lock.yaml', 'poetry.lock', 'pipfile.lock',
 ]);
 
+// These archives contain experiment outputs and frozen copies of the training code.
+// Keep their Markdown reports searchable alongside the live implementation.
+function excludedPathsForRepo(repo) {
+    return repo === 'life423/cudarl-arena'
+        ? /^assets\/(?:research-evidence|ppo-four-axis-checkpoints)\/(?!.*\.[mM][dD]$)/
+        : null;
+}
+
 const LANGUAGES = {
     '.js': 'javascript', '.jsx': 'javascript', '.mjs': 'javascript', '.cjs': 'javascript',
     '.ts': 'typescript', '.tsx': 'typescript', '.py': 'python', '.html': 'html',
@@ -110,7 +118,7 @@ async function cloneRepo(repo) {
     }
 }
 
-async function listIndexableFiles(rootDir, { maxFileBytes }) {
+async function listIndexableFiles(rootDir, { maxFileBytes }, excludedPaths = null) {
     const files = [];
 
     async function walk(dir) {
@@ -126,7 +134,7 @@ async function listIndexableFiles(rootDir, { maxFileBytes }) {
             if (!entry.isFile()) continue; // skip symlinks and anything unusual
 
             const relativePath = path.relative(rootDir, fullPath).split(path.sep).join('/');
-            if (!isIndexable(relativePath)) continue;
+            if (!isIndexable(relativePath) || excludedPaths?.test(relativePath)) continue;
 
             const { size } = await fs.stat(fullPath);
             if (size === 0 || size > maxFileBytes) continue; // empty, or almost certainly generated
@@ -148,6 +156,7 @@ async function listIndexableFiles(rootDir, { maxFileBytes }) {
 }
 
 module.exports = {
+    excludedPathsForRepo,
     cloneRepo,
     latestCommit,
     listIndexableFiles,
