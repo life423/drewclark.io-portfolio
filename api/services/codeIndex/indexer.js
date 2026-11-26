@@ -8,7 +8,7 @@
  */
 const config = require('../../config');
 const { getDb, isMongoConfigured } = require('../../db');
-const { cloneRepo, latestCommit, listIndexableFiles, removeDir } = require('./repoFiles');
+const { cloneRepo, latestCommit, listIndexableFiles, removeDir, excludedPathsForRepo } = require('./repoFiles');
 const { chunkFile } = require('./chunker');
 const { embedTexts } = require('./embeddings');
 
@@ -43,7 +43,7 @@ async function getCollections() {
 }
 
 // What's already indexed. An index built with other settings or another model is rebuilt from scratch.
-async function loadPreviousState(collections, repo, full) {
+async function loadPreviousState(collections, repo, full, excludedPaths) {
     const state = collections ? await collections.state.findOne({ _id: repo }) : null;
     const compatible = Boolean(
         state && state.version === settings.version && state.embeddingModel === settings.embeddingModel
@@ -51,6 +51,7 @@ async function loadPreviousState(collections, repo, full) {
     const rebuild = full || !compatible;
     return {
         rebuild,
+        needsPrune: Boolean(excludedPaths && state?.excludedPathPattern !== excludedPaths.source),
         commit: rebuild ? null : state.commit,
         hashes: new Map(rebuild ? [] : (state.files || []).map(file => [file.path, file.hash])),
     };
@@ -129,7 +130,7 @@ function buildWriteOperations({ repo, commit, plan, vectors, rebuild }) {
     return operations;
 }
 
-async function saveIndex(collections, { repo, commit, files, operations }) {
+async function saveIndex(collections, { repo, commit, files, operations, excludedPaths }) {
     for (let i = 0; i < operations.length; i += WRITE_BATCH) {
         await collections.chunks.bulkWrite(operations.slice(i, i + WRITE_BATCH), { ordered: true });
     }
@@ -140,6 +141,7 @@ async function saveIndex(collections, { repo, commit, files, operations }) {
             commit,
             version: settings.version,
             embeddingModel: settings.embeddingModel,
+            ...(excludedPaths && { excludedPathPattern: excludedPaths.source }),
             files: files.map(file => ({ path: file.path, hash: file.hash })),
             chunkCount,
             indexedAt: new Date(),
@@ -156,10 +158,11 @@ async function saveIndex(collections, { repo, commit, files, operations }) {
  */
 async function indexRepo(repo, { dryRun = false, full = false, log = console.log } = {}) {
     const collections = isMongoConfigured() ? await getCollections() : null;
-    const previous = await loadPreviousState(collections, repo, full);
+    const excludedPaths = excludedPathsForRepo(repo);
+    const previous = await loadPreviousState(collections, repo, full, excludedPaths);
 
     // Nothing pushed since the last run: done, without cloning
-    if (!previous.rebuild) {
+    if (!previous.rebuild && !previous.needsPrune) {
         const latest = await latestCommit(repo);
         if (latest && latest === previous.commit) {
             log(`${repo}: up to date at ${latest.slice(0, 7)}`);
@@ -169,23 +172,33 @@ async function indexRepo(repo, { dryRun = false, full = false, log = console.log
 
     const { dir, commit } = await cloneRepo(repo);
     try {
-        const files = await listIndexableFiles(dir, settings);
+        const files = await listIndexableFiles(dir, settings, excludedPaths);
         const plan = planChanges(files, previous.hashes);
         const summary =
             `${repo}@${commit.slice(0, 7)}: ${files.length} files, ${plan.changedFiles.length} changed, ` +
             `${plan.removedPaths.length} removed, ${plan.chunks.length} chunks to embed`;
 
         if (dryRun) {
+            if (collections && previous.needsPrune) {
+                const count = await collections.chunks.countDocuments({ repo, path: excludedPaths });
+                log(`${repo}: would remove ${count} archived chunks from the chat index`);
+            }
             const characters = plan.chunks.reduce((total, chunk) => total + embeddingInput(repo, chunk).length, 0);
             const estimatedTokens = Math.round(characters / 4);
             log(`${summary} (about ${estimatedTokens.toLocaleString()} tokens, ${formatCost(estimatedTokens)})`);
             return { repo, commit, tokens: 0, estimatedTokens };
         }
 
-        // Embed everything before writing, so a failure part way through leaves the index as it was
+        // A failed bulk write can leave chunks absent from the last successful
+        // file list. Remove all matching archive chunks before trying to grow a full cluster.
+        if (previous.needsPrune) {
+            const { deletedCount } = await collections.chunks.deleteMany({ repo, path: excludedPaths });
+            log(`${repo}: removed ${deletedCount} archived chunks from the chat index`);
+        }
+
         const { vectors, tokens } = await embedChunks(repo, plan.chunks);
         const operations = buildWriteOperations({ repo, commit, plan, vectors, rebuild: previous.rebuild });
-        const chunkCount = await saveIndex(collections, { repo, commit, files, operations });
+        const chunkCount = await saveIndex(collections, { repo, commit, files, operations, excludedPaths });
 
         log(`${summary}; embedded ${tokens.toLocaleString()} tokens (${formatCost(tokens)}), ${chunkCount} chunks stored`);
         return { repo, commit, tokens, chunkCount };

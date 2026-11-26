@@ -51,7 +51,12 @@ share `app/src/data/projects.json`.
 
 The default chat allowlist includes this website and all four project repositories.
 The indexer includes C++, CUDA, GDScript and CMake sources as well as web and Python
-files. After deployment, the index workflow adds CudaRL-Arena automatically;
+files. Within CudaRL-Arena's `assets/research-evidence/` and
+`assets/ppo-four-axis-checkpoints/` archives, it indexes Markdown reports only.
+Training receipts, datasets and frozen source snapshots in those folders consume
+space in the index. The first incremental
+run with this filter clears matching chunks, including leftovers from partial runs.
+After deployment, the index workflow adds CudaRL-Arena automatically;
 AI Platform Trainer is excluded from searches. If `ALLOWED_REPOS` is overridden,
 update that environment setting too. Indexing requires `MONGODB_URI` and
 `OPENAI_API_KEY`; a local preview without MongoDB answers from project descriptions.
